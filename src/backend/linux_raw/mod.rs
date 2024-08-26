@@ -40,9 +40,6 @@ pub(crate) mod event;
     )
 ))]
 pub(crate) mod fs;
-#[cfg(linux_kernel)]
-#[cfg(feature = "futex")]
-pub(crate) mod futex;
 pub(crate) mod io;
 #[cfg(feature = "io_uring")]
 pub(crate) mod io_uring;

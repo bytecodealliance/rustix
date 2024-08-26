@@ -1,7 +1,7 @@
 bitflags::bitflags! {
     /// `FUTEX_*` flags for use with the functions in [`futex`].
     ///
-    /// [`futex`]: crate::futex
+    /// [`futex`]: mod@crate::thread::futex
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct Flags: u32 {
@@ -18,7 +18,7 @@ bitflags::bitflags! {
 
 /// `FUTEX_*` operations for use with the functions in [`futex`].
 ///
-/// [`futex`]: crate::futex
+/// [`futex`]: mod@crate::thread::futex
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 #[repr(u32)]
 pub enum Operation {

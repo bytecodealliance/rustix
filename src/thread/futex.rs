@@ -17,19 +17,19 @@ use core::num::NonZeroU32;
 use core::ptr;
 use core::sync::atomic::AtomicU32;
 
-use crate::backend::futex::syscalls::{futex_timeout, futex_val2};
-use crate::backend::futex::types::Operation;
+use crate::backend::thread::futex::Operation;
+use crate::backend::thread::syscalls::{futex_timeout, futex_val2};
 use crate::fd::{FromRawFd, OwnedFd, RawFd};
 use crate::{backend, io};
 
 pub use crate::timespec::Timespec;
 
-pub use backend::futex::types::Flags;
+pub use backend::thread::futex::Flags;
 
 /// `FUTEX_WAITERS`
-pub const WAITERS: u32 = backend::futex::types::WAITERS;
+pub const WAITERS: u32 = backend::thread::futex::WAITERS;
 /// `FUTEX_OWNER_DIED`
-pub const OWNER_DIED: u32 = backend::futex::types::OWNER_DIED;
+pub const OWNER_DIED: u32 = backend::thread::futex::OWNER_DIED;
 
 /// Equivalent to `syscall(SYS_futex, uaddr, FUTEX_WAIT, val, timeout, NULL, 0)`
 ///

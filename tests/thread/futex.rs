@@ -1,6 +1,6 @@
 use core::sync::atomic::{AtomicU32, Ordering};
-use rustix::futex;
 use rustix::io::Errno;
+use rustix::thread::futex;
 
 #[test]
 fn test_lock_unlock_pi() {
@@ -64,7 +64,7 @@ fn test_wait_wake() {
 #[cfg(feature = "std")]
 #[test]
 fn test_timeout() {
-    use rustix::futex::Timespec;
+    use rustix::thread::futex::Timespec;
 
     let lock = AtomicU32::new(0);
 

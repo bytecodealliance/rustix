@@ -3,6 +3,8 @@
 #[cfg(not(target_os = "redox"))]
 mod clock;
 #[cfg(linux_kernel)]
+pub mod futex;
+#[cfg(linux_kernel)]
 mod id;
 #[cfg(linux_kernel)]
 mod libcap;
@@ -11,10 +13,14 @@ mod prctl;
 #[cfg(linux_kernel)]
 mod setns;
 
+#[deprecated(
+    since = "0.38.35",
+    note = "There are now individual functions available to perform futex operations with improved type safety. See the futex module."
+)]
 #[cfg(linux_kernel)]
-pub use crate::backend::futex::types::Operation as FutexOperation;
+pub use crate::backend::thread::futex::Operation as FutexOperation;
 #[cfg(linux_kernel)]
-pub use crate::futex::{
+pub use crate::thread::futex::{
     Flags as FutexFlags, OWNER_DIED as FUTEX_OWNER_DIED, WAITERS as FUTEX_WAITERS,
 };
 #[cfg(not(target_os = "redox"))]
@@ -48,10 +54,6 @@ pub use setns::*;
 /// [Linux `futex` feature]: https://man7.org/linux/man-pages/man7/futex.7.html
 #[cfg(linux_kernel)]
 #[allow(unsafe_code)]
-#[deprecated(
-    since = "0.38.35",
-    note = "There are now individual functions available to perform futex operations with improved type safety. See the futex module."
-)]
 #[inline]
 pub unsafe fn futex(
     uaddr: *mut u32,
@@ -62,7 +64,7 @@ pub unsafe fn futex(
     uaddr2: *mut u32,
     val3: u32,
 ) -> crate::io::Result<usize> {
-    use crate::backend::futex::syscalls::{futex_timeout, futex_val2};
+    use crate::backend::thread::syscalls::{futex_timeout, futex_val2};
     use core::sync::atomic::AtomicU32;
     use FutexOperation::*;
 
