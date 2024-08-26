@@ -19,6 +19,13 @@ bitflags::bitflags! {
 /// `FUTEX_*` operations for use with the functions in [`futex`].
 ///
 /// [`futex`]: mod@crate::thread::futex
+#[deprecated(
+    since = "0.38.35",
+    note = "
+    The `futex` function and `FutexOperation` enum are deprecated. There are
+    individual functions available to perform futex operations with improved
+    type safety. See the `rustix::thread::futex` module."
+)]
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 #[repr(u32)]
 pub enum Operation {

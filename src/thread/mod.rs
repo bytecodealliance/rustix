@@ -13,10 +13,6 @@ mod prctl;
 #[cfg(linux_kernel)]
 mod setns;
 
-#[deprecated(
-    since = "0.38.35",
-    note = "There are now individual functions available to perform futex operations with improved type safety. See the futex module."
-)]
 #[cfg(linux_kernel)]
 pub use crate::backend::thread::futex::Operation as FutexOperation;
 #[cfg(linux_kernel)]
