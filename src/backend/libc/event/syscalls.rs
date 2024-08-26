@@ -1,27 +1,24 @@
 //! libc syscalls supporting `rustix::event`.
 
 use crate::backend::c;
-use crate::backend::conv::ret_c_int;
-#[cfg(any(apple, netbsdlike, target_os = "dragonfly", target_os = "solaris"))]
-use crate::backend::conv::ret_owned_fd;
-use crate::event::PollFd;
-#[cfg(any(linux_kernel, bsd, solarish, target_os = "espidf"))]
-use crate::fd::OwnedFd;
-use crate::io;
-#[cfg(any(all(feature = "alloc", bsd), solarish))]
-use {crate::backend::conv::borrowed_fd, crate::fd::BorrowedFd, core::mem::MaybeUninit};
+#[cfg(any(linux_kernel, target_os = "redox"))]
+use crate::backend::conv::ret_u32;
+use crate::backend::conv::{ret, ret_c_int, ret_owned_fd};
 #[cfg(solarish)]
-use {
-    crate::backend::conv::ret, crate::event::port::Event, crate::utils::as_mut_ptr,
-    core::ptr::null_mut,
-};
+use crate::event::port::Event;
 #[cfg(any(
     linux_kernel,
     target_os = "freebsd",
     target_os = "illumos",
     target_os = "espidf"
 ))]
-use {crate::backend::conv::ret_owned_fd, crate::event::EventfdFlags};
+use crate::event::EventfdFlags;
+use crate::event::PollFd;
+use crate::fd::OwnedFd;
+use crate::io;
+use crate::utils::as_mut_ptr;
+use core::ptr::null_mut;
+use {crate::backend::conv::borrowed_fd, crate::fd::BorrowedFd, core::mem::MaybeUninit};
 #[cfg(all(feature = "alloc", bsd))]
 use {crate::event::kqueue::Event, crate::utils::as_ptr, core::ptr::null};
 
@@ -188,4 +185,78 @@ pub(crate) fn pause() {
     let errno = libc_errno::errno().0;
     debug_assert_eq!(r, -1);
     debug_assert_eq!(errno, libc::EINTR);
+}
+
+#[inline]
+#[cfg(any(linux_kernel, target_os = "redox"))]
+pub(crate) fn epoll_create(flags: super::epoll::CreateFlags) -> io::Result<OwnedFd> {
+    unsafe { ret_owned_fd(c::epoll_create1(bitflags_bits!(flags))) }
+}
+
+#[inline]
+#[cfg(any(linux_kernel, target_os = "redox"))]
+pub(crate) fn epoll_add(
+    epoll: BorrowedFd<'_>,
+    source: BorrowedFd,
+    event: &mut crate::event::epoll::Event,
+) -> io::Result<()> {
+    // We use our own `Event` struct instead of libc's because
+    // ours preserves pointer provenance instead of just using a `u64`,
+    // and we have tests elsewhere for layout equivalence.
+    unsafe {
+        ret(c::epoll_ctl(
+            borrowed_fd(epoll),
+            c::EPOLL_CTL_ADD,
+            borrowed_fd(source),
+            as_mut_ptr(event).cast(),
+        ))
+    }
+}
+
+#[inline]
+#[cfg(any(linux_kernel, target_os = "redox"))]
+pub(crate) fn epoll_mod(
+    epoll: BorrowedFd<'_>,
+    source: BorrowedFd,
+    event: &mut crate::event::epoll::Event,
+) -> io::Result<()> {
+    unsafe {
+        ret(c::epoll_ctl(
+            borrowed_fd(epoll),
+            c::EPOLL_CTL_MOD,
+            borrowed_fd(source),
+            as_mut_ptr(event).cast(),
+        ))
+    }
+}
+
+#[inline]
+#[cfg(any(linux_kernel, target_os = "redox"))]
+pub(crate) fn epoll_del(epoll: BorrowedFd<'_>, source: BorrowedFd) -> io::Result<()> {
+    unsafe {
+        ret(c::epoll_ctl(
+            borrowed_fd(epoll),
+            c::EPOLL_CTL_DEL,
+            borrowed_fd(source),
+            null_mut(),
+        ))
+    }
+}
+
+#[inline]
+#[cfg(any(linux_kernel, target_os = "redox"))]
+pub(crate) fn epoll_wait(
+    epoll: BorrowedFd<'_>,
+    events: &mut [MaybeUninit<crate::event::epoll::Event>],
+    timeout: c::c_int,
+) -> io::Result<usize> {
+    unsafe {
+        ret_u32(c::epoll_wait(
+            borrowed_fd(epoll),
+            events.as_mut_ptr().cast::<c::epoll_event>(),
+            events.len().try_into().unwrap_or(i32::MAX),
+            timeout,
+        ))
+        .map(|i| i.try_into().unwrap_or(usize::MAX))
+    }
 }
