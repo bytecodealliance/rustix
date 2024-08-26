@@ -1,4 +1,55 @@
 //! POSIX shared memory
+//!
+//! # Example
+//!
+//! ```
+//! use rustix::fs::{ftruncate, Mode};
+//! use rustix::mm::{mmap, MapFlags, ProtFlags};
+//! use rustix::{io, shm};
+//! use std::mem::size_of;
+//! use std::ptr::null_mut;
+//!
+//! # fn example() -> io::Result<()> {
+//! // A type describing the data to be shared.
+//! #[repr(C)]
+//! struct MyBufferType {
+//!     // ...
+//! }
+//!
+//! // Create the shared memory object.
+//! let shm_path = "/rustix-shm-example";
+//! let fd = shm::open(
+//!     shm_path,
+//!     shm::OFlags::CREATE | shm::OFlags::EXCL | shm::OFlags::RDWR,
+//!     Mode::RUSR | Mode::WUSR,
+//! )?;
+//!
+//! // Resize the shared memory object to the size of our data.
+//! ftruncate(&fd, size_of::<MyBufferType>() as u64)?;
+//!
+//! // Map the shared memory object into our address space.
+//! //
+//! // SAFETY: We're creating a new mapping that's independent of any existing
+//! // memory allocations. There are interesting things to say about *using*
+//! // `ptr`, but that's for another safety comment.
+//! let ptr = unsafe {
+//!     mmap(
+//!         null_mut(),
+//!         size_of::<MyBufferType>(),
+//!         ProtFlags::READ | ProtFlags::WRITE,
+//!         MapFlags::SHARED,
+//!         &fd,
+//!         0,
+//!     )?
+//! };
+//!
+//! // Use `ptr`...
+//!
+//! // Remove the shared memory object name.
+//! shm::unlink(shm_path)?;
+//! # Ok(())
+//! # }
+//! ```
 
 #![allow(unused_qualifications)]
 
@@ -8,13 +59,13 @@ use crate::{backend, io, path};
 use super::shm;
 pub use crate::backend::fs::types::Mode;
 pub use crate::backend::shm::types::ShmOFlags as OFlags;
-#[deprecated(note = "Use OFlags.")]
+#[deprecated(note = "Use `shm::OFlags`.")]
 #[doc(hidden)]
 pub use crate::backend::shm::types::ShmOFlags;
-#[deprecated(note = "Use open.")]
+#[deprecated(note = "Use `shm::open`.")]
 #[doc(hidden)]
 pub use open as shm_open;
-#[deprecated(note = "Use unlink.")]
+#[deprecated(note = "Use `shm::unlink`.")]
 #[doc(hidden)]
 pub use unlink as shm_unlink;
 
