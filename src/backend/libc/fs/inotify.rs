@@ -76,3 +76,49 @@ bitflags! {
         const _ = !0;
     }
 }
+
+bitflags! {
+    /// `IN*` for use with [`InotifyReader`].
+    ///
+    /// [`InotifyReader`]: crate::fs::inotify::InotifyReader
+    #[repr(transparent)]
+    #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct ReadFlags: u32 {
+        /// `IN_ACCESS`
+        const ACCESS = c::IN_ACCESS;
+        /// `IN_ATTRIB`
+        const ATTRIB = c::IN_ATTRIB;
+        /// `IN_CLOSE_NOWRITE`
+        const CLOSE_NOWRITE = c::IN_CLOSE_NOWRITE;
+        /// `IN_CLOSE_WRITE`
+        const CLOSE_WRITE = c::IN_CLOSE_WRITE;
+        /// `IN_CREATE`
+        const CREATE = c::IN_CREATE;
+        /// `IN_DELETE`
+        const DELETE = c::IN_DELETE;
+        /// `IN_DELETE_SELF`
+        const DELETE_SELF = c::IN_DELETE_SELF;
+        /// `IN_MODIFY`
+        const MODIFY = c::IN_MODIFY;
+        /// `IN_MOVE_SELF`
+        const MOVE_SELF = c::IN_MOVE_SELF;
+        /// `IN_MOVED_FROM`
+        const MOVED_FROM = c::IN_MOVED_FROM;
+        /// `IN_MOVED_TO`
+        const MOVED_TO = c::IN_MOVED_TO;
+        /// `IN_OPEN`
+        const OPEN = c::IN_OPEN;
+
+        /// `IN_IGNORED`
+        const IGNORED = c::IN_IGNORED;
+        /// `IN_ISDIR`
+        const ISDIR = c::IN_ISDIR;
+        /// `IN_Q_OVERFLOW`
+        const QUEUE_OVERFLOW = c::IN_Q_OVERFLOW;
+        /// `IN_UNMOUNT`
+        const UNMOUNT = c::IN_UNMOUNT;
+
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
+        const _ = !0;
+    }
+}

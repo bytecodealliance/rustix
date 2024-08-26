@@ -20,6 +20,8 @@ mod file;
 #[cfg(not(target_os = "wasi"))]
 mod flock;
 mod futimens;
+#[cfg(linux_kernel)]
+mod inotify;
 mod invalid_offset;
 #[cfg(not(target_os = "redox"))]
 mod ioctl;
