@@ -86,7 +86,7 @@ use core::slice;
 
 /// `epoll_create1(flags)`—Creates a new epoll object.
 ///
-/// Use the [`CreateFlags::CLOEXEC`] flag to prevent the resulting file
+/// Use the [`epoll::CreateFlags::CLOEXEC`] flag to prevent the resulting file
 /// descriptor from being implicitly passed across `exec` boundaries.
 ///
 /// # References
@@ -207,7 +207,7 @@ pub fn wait(epoll: impl AsFd, event_list: &mut EventVec, timeout: c::c_int) -> i
     Ok(())
 }
 
-/// An iterator over the `Event`s in an `EventVec`.
+/// An iterator over the [`epoll::Event`]s in an [`epoll::EventVec`].
 pub struct Iter<'a> {
     /// Use `Copied` to copy the struct, since `Event` is `packed` on some
     /// platforms, and it's common for users to directly destructure it, which
@@ -216,7 +216,7 @@ pub struct Iter<'a> {
 }
 
 impl<'a> Iterator for Iter<'a> {
-    type Item = Event;
+    type Item = epoll::Event;
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
@@ -258,8 +258,8 @@ pub struct Event {
     _pad: u64,
 }
 
-/// Data associated with an [`Event`]. This can either be a 64-bit integer
-/// value or a pointer which preserves pointer provenance.
+/// Data associated with an [`epoll::Event`]. This can either be a 64-bit
+/// integer value or a pointer which preserves pointer provenance.
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub union EventData {
@@ -340,7 +340,7 @@ struct SixtyFourBitPointer {
     _padding: u32,
 }
 
-/// A vector of `Event`s, plus context for interpreting them.
+/// A vector of `epoll::Event`s, plus context for interpreting them.
 #[cfg(feature = "alloc")]
 pub struct EventVec {
     events: Vec<Event>,
@@ -348,7 +348,7 @@ pub struct EventVec {
 
 #[cfg(feature = "alloc")]
 impl EventVec {
-    /// Constructs an `EventVec` from raw pointer, length, and capacity.
+    /// Constructs an `epoll::EventVec` from raw pointer, length, and capacity.
     ///
     /// # Safety
     ///
@@ -362,7 +362,8 @@ impl EventVec {
         }
     }
 
-    /// Constructs an `EventVec` with memory for `capacity` `Event`s.
+    /// Constructs an `epoll::EventVec` with memory for `capacity`
+    /// `epoll::Event`s.
     #[inline]
     pub fn with_capacity(capacity: usize) -> Self {
         Self {
@@ -370,37 +371,37 @@ impl EventVec {
         }
     }
 
-    /// Returns the current `Event` capacity of this `EventVec`.
+    /// Returns the current `epoll::Event` capacity of this `epoll::EventVec`.
     #[inline]
     pub fn capacity(&self) -> usize {
         self.events.capacity()
     }
 
-    /// Reserves enough memory for at least `additional` more `Event`s.
+    /// Reserves enough memory for at least `additional` more `epoll::Event`s.
     #[inline]
     pub fn reserve(&mut self, additional: usize) {
         self.events.reserve(additional);
     }
 
-    /// Reserves enough memory for exactly `additional` more `Event`s.
+    /// Reserves enough memory for exactly `additional` more `epoll::Event`s.
     #[inline]
     pub fn reserve_exact(&mut self, additional: usize) {
         self.events.reserve_exact(additional);
     }
 
-    /// Clears all the `Events` out of this `EventVec`.
+    /// Clears all the `epoll::Events` out of this `epoll::EventVec`.
     #[inline]
     pub fn clear(&mut self) {
         self.events.clear();
     }
 
-    /// Shrinks the capacity of this `EventVec` as much as possible.
+    /// Shrinks the capacity of this `epoll::EventVec` as much as possible.
     #[inline]
     pub fn shrink_to_fit(&mut self) {
         self.events.shrink_to_fit();
     }
 
-    /// Returns an iterator over the `Event`s in this `EventVec`.
+    /// Returns an iterator over the `epoll::Event`s in this `epoll::EventVec`.
     #[inline]
     pub fn iter(&self) -> Iter<'_> {
         Iter {
@@ -408,13 +409,14 @@ impl EventVec {
         }
     }
 
-    /// Returns the number of `Event`s logically contained in this `EventVec`.
+    /// Returns the number of `epoll::Event`s logically contained in this
+    /// `epoll::EventVec`.
     #[inline]
     pub fn len(&mut self) -> usize {
         self.events.len()
     }
 
-    /// Tests whether this `EventVec` is logically empty.
+    /// Tests whether this `epoll::EventVec` is logically empty.
     #[inline]
     pub fn is_empty(&mut self) -> bool {
         self.events.is_empty()
@@ -424,7 +426,7 @@ impl EventVec {
 #[cfg(feature = "alloc")]
 impl<'a> IntoIterator for &'a EventVec {
     type IntoIter = Iter<'a>;
-    type Item = Event;
+    type Item = epoll::Event;
 
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
