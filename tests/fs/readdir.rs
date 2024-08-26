@@ -18,7 +18,7 @@ fn dir_entries() {
 
     let entries = read_entries(&mut dir);
     assert!(
-        entries.get("file1").is_some(),
+        entries.contains_key("file1"),
         "directory contains `file1`: {:?}",
         entries
     );
@@ -27,12 +27,12 @@ fn dir_entries() {
     let _f2 = File::create(tmpdir.path().join("file2")).expect("create file1");
     let entries = read_entries(&mut dir);
     assert!(
-        entries.get("file1").is_some(),
+        entries.contains_key("file1"),
         "directory contains `file1`: {:?}",
         entries
     );
     assert!(
-        entries.get("file2").is_some(),
+        entries.contains_key("file2"),
         "directory contains `file2`: {:?}",
         entries
     );
@@ -88,7 +88,7 @@ fn test_raw_dir(buf: &mut [MaybeUninit<u8>]) {
     dirfd.seek(SeekFrom::Start(0)).unwrap();
     let entries = read_raw_entries(&mut dir);
     assert!(
-        entries.get("file1").is_some(),
+        entries.contains("file1"),
         "directory contains `file1`: {:?}",
         entries
     );
@@ -98,12 +98,12 @@ fn test_raw_dir(buf: &mut [MaybeUninit<u8>]) {
     dirfd.seek(SeekFrom::Start(0)).unwrap();
     let entries = read_raw_entries(&mut dir);
     assert!(
-        entries.get("file1").is_some(),
+        entries.contains("file1"),
         "directory contains `file1`: {:?}",
         entries
     );
     assert!(
-        entries.get("file2").is_some(),
+        entries.contains("file2"),
         "directory contains `file2`: {:?}",
         entries
     );

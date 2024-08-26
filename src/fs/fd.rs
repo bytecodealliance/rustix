@@ -59,8 +59,8 @@ pub struct Timestamps {
 }
 
 impl fmt::Debug for Timestamps {
-    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
-        fmt.debug_struct("Timestamps")
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Timestamps")
             .field("last_access.tv_sec", &self.last_access.tv_sec)
             .field("last_access.tv_nsec", &self.last_access.tv_nsec)
             .field("last_modification.tv_sec", &self.last_modification.tv_sec)

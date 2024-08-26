@@ -915,9 +915,10 @@ pub(crate) fn set_tcp_congestion(fd: BorrowedFd<'_>, value: &str) -> io::Result<
 ))]
 #[inline]
 pub(crate) fn get_tcp_congestion(fd: BorrowedFd<'_>) -> io::Result<String> {
+    const OPTLEN: c::socklen_t = 16;
+
     let level = c::IPPROTO_TCP;
     let optname = c::TCP_CONGESTION;
-    const OPTLEN: c::socklen_t = 16;
     let mut value = MaybeUninit::<[MaybeUninit<u8>; OPTLEN as usize]>::uninit();
     let mut optlen = OPTLEN;
     getsockopt_raw(fd, level, optname, &mut value, &mut optlen)?;

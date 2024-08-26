@@ -114,7 +114,7 @@ impl AsRef<Path> for DecInt {
 
 #[cfg(feature = "std")]
 impl fmt::Debug for DecInt {
-    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.as_str().fmt(fmt)
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.as_str().fmt(f)
     }
 }

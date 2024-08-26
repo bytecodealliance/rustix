@@ -29,7 +29,7 @@ where
     Ok(())
 }
 
-fn register_ring<'a>(fd: BorrowedFd<'a>) -> Result<BorrowedFd<'a>> {
+fn register_ring(fd: BorrowedFd<'_>) -> Result<BorrowedFd<'_>> {
     let update = io_uring_rsrc_update {
         data: fd.as_raw_fd() as u64,
         offset: u32::MAX,
@@ -101,6 +101,6 @@ fn test_io_uring_register_with() {
 
     let ring_fd = register_ring(ring_fd.as_fd()).unwrap();
     let register_result = register_iowq_max_workers(ring_fd);
-    let _ = unregister_ring(ring_fd).unwrap();
+    unregister_ring(ring_fd).unwrap();
     register_result.unwrap();
 }

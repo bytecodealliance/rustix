@@ -54,7 +54,7 @@ pub(crate) fn pipe_with(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
 
 #[cfg(linux_kernel)]
 #[inline]
-pub fn splice(
+pub(crate) fn splice(
     fd_in: BorrowedFd<'_>,
     off_in: Option<&mut u64>,
     fd_out: BorrowedFd<'_>,
@@ -79,7 +79,7 @@ pub fn splice(
 
 #[cfg(linux_kernel)]
 #[inline]
-pub unsafe fn vmsplice(
+pub(crate) unsafe fn vmsplice(
     fd: BorrowedFd<'_>,
     bufs: &[IoSliceRaw<'_>],
     flags: SpliceFlags,
@@ -94,7 +94,7 @@ pub unsafe fn vmsplice(
 
 #[cfg(linux_kernel)]
 #[inline]
-pub fn tee(
+pub(crate) fn tee(
     fd_in: BorrowedFd<'_>,
     fd_out: BorrowedFd<'_>,
     len: usize,

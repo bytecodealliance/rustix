@@ -78,7 +78,7 @@ pub fn recv_uninit<Fd: AsFd>(
     flags: RecvFlags,
 ) -> io::Result<(&mut [u8], &mut [MaybeUninit<u8>])> {
     let length = unsafe {
-        backend::net::syscalls::recv(fd.as_fd(), buf.as_mut_ptr() as *mut u8, buf.len(), flags)
+        backend::net::syscalls::recv(fd.as_fd(), buf.as_mut_ptr().cast::<u8>(), buf.len(), flags)
     };
 
     Ok(unsafe { split_init(buf, length?) })
@@ -168,7 +168,12 @@ pub fn recvfrom_uninit<Fd: AsFd>(
     flags: RecvFlags,
 ) -> io::Result<(&mut [u8], &mut [MaybeUninit<u8>], Option<SocketAddrAny>)> {
     let (length, addr) = unsafe {
-        backend::net::syscalls::recvfrom(fd.as_fd(), buf.as_mut_ptr() as *mut u8, buf.len(), flags)?
+        backend::net::syscalls::recvfrom(
+            fd.as_fd(),
+            buf.as_mut_ptr().cast::<u8>(),
+            buf.len(),
+            flags,
+        )?
     };
     let (init, uninit) = unsafe { split_init(buf, length) };
     Ok((init, uninit, addr))

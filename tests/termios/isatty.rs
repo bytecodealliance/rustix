@@ -11,10 +11,10 @@ fn tmpdir() -> TempDir {
 fn std_file_is_not_terminal() {
     let tmpdir = tempfile::tempdir().unwrap();
     assert!(!isatty(
-        &std::fs::File::create(tmpdir.path().join("file")).unwrap()
+        std::fs::File::create(tmpdir.path().join("file")).unwrap()
     ));
     assert!(!isatty(
-        &std::fs::File::open(tmpdir.path().join("file")).unwrap()
+        std::fs::File::open(tmpdir.path().join("file")).unwrap()
     ));
 }
 
