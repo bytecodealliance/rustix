@@ -1495,7 +1495,7 @@ pub mod xdp {
     // Constant needs to be cast because bindgen does generate a u32 but the struct
     // expects a u16. https://github.com/torvalds/linux/blob/v6.6/include/uapi/linux/if_xdp.h#L15-L44
     bitflags! {
-        /// `XDP_*` constants for use in [`SockaddrXdp`].
+        /// `XDP_*` constants for use in [`SocketAddrXdp`].
         #[repr(transparent)]
         #[derive(Copy, Clone, PartialEq, PartialOrd, Eq, Ord, Hash, Debug)]
         pub struct SockaddrXdpFlags: u16 {

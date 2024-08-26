@@ -204,9 +204,9 @@ static RANDOM: AtomicPtr<[u8; 16]> = AtomicPtr::new(null_mut());
 
 const PR_GET_AUXV: c::c_int = 0x4155_5856;
 
-/// Use Linux >= 6.4's `PR_GET_AUXV` to read the aux records, into a provided
+/// Use Linux ≥ 6.4's `PR_GET_AUXV` to read the aux records, into a provided
 /// statically-sized buffer. Return:
-///  - `Ok(...)` if the buffer is big enough.
+///  - `Ok(…)` if the buffer is big enough.
 ///  - `Err(Ok(len))` if we need a buffer of length `len`.
 ///  - `Err(Err(err))` if we failed with `err`.
 #[cold]
@@ -228,10 +228,10 @@ fn pr_get_auxv_static(buffer: &mut [u8; 512]) -> Result<&mut [u8], crate::io::Re
     Err(Ok(len))
 }
 
-/// Use Linux >= 6.4's `PR_GET_AUXV` to read the aux records, using a provided
+/// Use Linux ≥ 6.4's `PR_GET_AUXV` to read the aux records, using a provided
 /// statically-sized buffer if possible, or a dynamically allocated buffer
 /// otherwise. Return:
-///  - Ok(...) on success.
+///  - Ok(…) on success.
 ///  - Err(err) on failure.
 #[cfg(feature = "alloc")]
 #[cold]

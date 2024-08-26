@@ -182,8 +182,8 @@ stdio = []
 # Enable `rustix::system::*`.
 system = ["linux-raw-sys/system"]
 
-# Enable `rustix::runtime::*`. This API is undocumented and unstable and
-# experimental and not intended for general-purpose use.
+# Enable `rustix::runtime::*`. ⚠ This API is undocumented and unstable and
+# experimental and not intended for general-purpose use. ⚠
 runtime = ["linux-raw-sys/prctl"]
 
 # Enable all API features.

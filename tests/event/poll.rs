@@ -51,7 +51,7 @@ fn test_poll() {
 
 #[test]
 fn test_poll_fd_set_fd() {
-    // Make up some file descriptors so that we can test that set_fd works.
+    // Make up some file descriptors so that we can test that `set_fd` works.
     let a = unsafe { OwnedFd::from_raw_fd(777) };
     let mut poll_fd = PollFd::new(&a, PollFlags::empty());
     assert_eq!(poll_fd.as_fd().as_raw_fd(), 777);

@@ -87,6 +87,8 @@ impl DecInt {
     }
 }
 
+/// A wrapper around `DecInt` that implements `Write` without exposing this
+/// implementation to `DecInt`'s public API.
 struct DecIntWriter(DecInt);
 
 impl core::fmt::Write for DecIntWriter {

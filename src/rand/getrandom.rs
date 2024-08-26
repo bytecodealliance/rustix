@@ -1,3 +1,5 @@
+//! Wrappers for `getrandom`.
+
 #![allow(unsafe_code)]
 
 use crate::buffer::split_init;

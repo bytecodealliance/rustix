@@ -2,7 +2,7 @@ use crate::backend::c;
 use bitflags::bitflags;
 
 bitflags! {
-    /// `MSG_*` flags for use with [`send`], [`send_to`], and related
+    /// `MSG_*` flags for use with [`send`], [`sendto`], and related
     /// functions.
     ///
     /// [`send`]: crate::net::send
@@ -29,6 +29,8 @@ bitflags! {
         #[cfg(not(windows))]
         const DONTWAIT = bitcast!(c::MSG_DONTWAIT);
         /// Deprecated alias for [`EOR`].
+        ///
+        /// [`EOR`]: Self::EOR
         #[cfg(not(windows))]
         #[deprecated(note = "`rustix::net::SendFlags::EOT` is renamed to `rustix::net::SendFlags::EOR`.")]
         const EOT = bitcast!(c::MSG_EOR);
