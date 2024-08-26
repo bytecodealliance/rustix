@@ -3,7 +3,7 @@
 use crate::backend::c;
 #[cfg(any(linux_kernel, target_os = "redox"))]
 use crate::backend::conv::ret_u32;
-use crate::backend::conv::{ret, ret_c_int, ret_owned_fd};
+use crate::backend::conv::{borrowed_fd, ret, ret_c_int, ret_owned_fd};
 #[cfg(solarish)]
 use crate::event::port::Event;
 #[cfg(any(
@@ -14,11 +14,14 @@ use crate::event::port::Event;
 ))]
 use crate::event::EventfdFlags;
 use crate::event::PollFd;
-use crate::fd::OwnedFd;
+use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io;
+#[cfg(solarish)]
 use crate::utils::as_mut_ptr;
+#[cfg(any(linux_kernel, target_os = "redox"))]
+use crate::utils::as_ptr;
+use core::mem::MaybeUninit;
 use core::ptr::null_mut;
-use {crate::backend::conv::borrowed_fd, crate::fd::BorrowedFd, core::mem::MaybeUninit};
 #[cfg(all(feature = "alloc", bsd))]
 use {crate::event::kqueue::Event, crate::utils::as_ptr, core::ptr::null};
 
@@ -181,10 +184,10 @@ pub(crate) fn port_send(
 
 #[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
 pub(crate) fn pause() {
-    let r = unsafe { libc::pause() };
+    let r = unsafe { c::pause() };
     let errno = libc_errno::errno().0;
     debug_assert_eq!(r, -1);
-    debug_assert_eq!(errno, libc::EINTR);
+    debug_assert_eq!(errno, c::EINTR);
 }
 
 #[inline]
@@ -198,7 +201,7 @@ pub(crate) fn epoll_create(flags: super::epoll::CreateFlags) -> io::Result<Owned
 pub(crate) fn epoll_add(
     epoll: BorrowedFd<'_>,
     source: BorrowedFd,
-    event: &mut crate::event::epoll::Event,
+    event: &crate::event::epoll::Event,
 ) -> io::Result<()> {
     // We use our own `Event` struct instead of libc's because
     // ours preserves pointer provenance instead of just using a `u64`,
@@ -208,7 +211,8 @@ pub(crate) fn epoll_add(
             borrowed_fd(epoll),
             c::EPOLL_CTL_ADD,
             borrowed_fd(source),
-            as_mut_ptr(event).cast(),
+            // The event is read-only even though libc has a non-const pointer.
+            as_ptr(event) as *mut c::epoll_event,
         ))
     }
 }
@@ -218,14 +222,15 @@ pub(crate) fn epoll_add(
 pub(crate) fn epoll_mod(
     epoll: BorrowedFd<'_>,
     source: BorrowedFd,
-    event: &mut crate::event::epoll::Event,
+    event: &crate::event::epoll::Event,
 ) -> io::Result<()> {
     unsafe {
         ret(c::epoll_ctl(
             borrowed_fd(epoll),
             c::EPOLL_CTL_MOD,
             borrowed_fd(source),
-            as_mut_ptr(event).cast(),
+            // The event is read-only even though libc has a non-const pointer.
+            as_ptr(event) as *mut c::epoll_event,
         ))
     }
 }
