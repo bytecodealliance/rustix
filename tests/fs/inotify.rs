@@ -1,6 +1,4 @@
-use rustix::fs::inotify::{
-    inotify_add_watch, inotify_init, CreateFlags, InotifyReader, WatchFlags,
-};
+use rustix::fs::inotify::{self, CreateFlags, WatchFlags};
 use rustix::io::Errno;
 use std::fmt::Write;
 use std::fs::{create_dir_all, remove_file, rename, File};
@@ -8,9 +6,9 @@ use std::mem::MaybeUninit;
 
 #[test]
 fn test_inotify_iter() {
-    let inotify = inotify_init(CreateFlags::NONBLOCK).unwrap();
+    let inotify = inotify::init(CreateFlags::NONBLOCK).unwrap();
     create_dir_all("/tmp/.rustix-inotify-test").unwrap();
-    inotify_add_watch(
+    inotify::add_watch(
         &inotify,
         "/tmp/.rustix-inotify-test",
         WatchFlags::ALL_EVENTS,
@@ -29,7 +27,7 @@ fn test_inotify_iter() {
     let mut cookie = 0;
 
     let mut buf = [MaybeUninit::uninit(); 512];
-    let mut iter = InotifyReader::new(inotify, &mut buf);
+    let mut iter = inotify::Reader::new(inotify, &mut buf);
     loop {
         let e = match iter.next() {
             Err(Errno::WOULDBLOCK) => break,

@@ -78,9 +78,9 @@ bitflags! {
 }
 
 bitflags! {
-    /// `IN*` for use with [`InotifyReader`].
+    /// `IN*` for use with [`inotify::Reader`].
     ///
-    /// [`InotifyReader`]: crate::fs::inotify::InotifyReader
+    /// [`inotify::Reader`]: crate::fs::inotify::Reader
     #[repr(transparent)]
     #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct ReadFlags: u32 {

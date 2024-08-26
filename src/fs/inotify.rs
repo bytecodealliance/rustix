@@ -66,14 +66,14 @@ pub fn remove_watch(inot: impl AsFd, wd: i32) -> io::Result<()> {
 /// based on it.
 ///
 /// [`RawDir`]: crate::fs::raw_dir::RawDir
-pub struct InotifyReader<'buf, Fd: AsFd> {
+pub struct Reader<'buf, Fd: AsFd> {
     fd: Fd,
     buf: &'buf mut [MaybeUninit<u8>],
     initialized: usize,
     offset: usize,
 }
 
-impl<'buf, Fd: AsFd> InotifyReader<'buf, Fd> {
+impl<'buf, Fd: AsFd> Reader<'buf, Fd> {
     /// Create a new iterator from the given file descriptor and buffer.
     pub fn new(fd: Fd, buf: &'buf mut [MaybeUninit<u8>]) -> Self {
         Self {
@@ -128,7 +128,7 @@ impl<'a> InotifyEvent<'a> {
     }
 }
 
-impl<'buf, Fd: AsFd> InotifyReader<'buf, Fd> {
+impl<'buf, Fd: AsFd> Reader<'buf, Fd> {
     /// Read the next inotify event.
     #[allow(unsafe_code)]
     pub fn next(&mut self) -> io::Result<InotifyEvent> {
