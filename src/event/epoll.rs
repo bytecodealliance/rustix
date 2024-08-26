@@ -70,7 +70,9 @@
 //! ```
 
 #![allow(unsafe_code)]
+#![allow(unused_qualifications)]
 
+use super::epoll;
 use crate::backend::c;
 pub use crate::backend::event::epoll::*;
 use crate::backend::event::syscalls;
@@ -93,7 +95,7 @@ use core::slice;
 /// [Linux]: https://man7.org/linux/man-pages/man2/epoll_create.2.html
 #[inline]
 #[doc(alias = "epoll_create1")]
-pub fn create(flags: CreateFlags) -> io::Result<OwnedFd> {
+pub fn create(flags: epoll::CreateFlags) -> io::Result<OwnedFd> {
     syscalls::epoll_create(flags)
 }
 
@@ -104,7 +106,7 @@ pub fn create(flags: CreateFlags) -> io::Result<OwnedFd> {
 /// the file descriptor associated with `data`.
 ///
 /// Note that `close`ing a file descriptor does not necessarily unregister
-/// interest which can lead to spurious events being returned from [`wait`]. If
+/// interest which can lead to spurious events being returned from [`epoll::wait`]. If
 /// a file descriptor is an `Arc<dyn SystemResource>`, then `epoll` can be
 /// thought to maintain a `Weak<dyn SystemResource>` to the file descriptor.
 /// Check the [faq] for details.
@@ -119,8 +121,8 @@ pub fn create(flags: CreateFlags) -> io::Result<OwnedFd> {
 pub fn add(
     epoll: impl AsFd,
     source: impl AsFd,
-    data: EventData,
-    event_flags: EventFlags,
+    data: epoll::EventData,
+    event_flags: epoll::EventFlags,
 ) -> io::Result<()> {
     syscalls::epoll_add(
         epoll.as_fd(),
@@ -148,8 +150,8 @@ pub fn add(
 pub fn modify(
     epoll: impl AsFd,
     source: impl AsFd,
-    data: EventData,
-    event_flags: EventFlags,
+    data: epoll::EventData,
+    event_flags: epoll::EventFlags,
 ) -> io::Result<()> {
     syscalls::epoll_mod(
         epoll.as_fd(),

@@ -2,7 +2,9 @@ use crate::backend::c;
 use bitflags::bitflags;
 
 bitflags! {
-    /// `EPOLL_*` for use with [`create`].
+    /// `EPOLL_*` for use with [`epoll::create`].
+    ///
+    /// [`epoll::create`]: crate::event::epoll::create
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct CreateFlags: c::c_uint {
@@ -15,7 +17,9 @@ bitflags! {
 }
 
 bitflags! {
-    /// `EPOLL*` for use with [`add`].
+    /// `EPOLL*` for use with [`epoll::add`].
+    ///
+    /// [`epoll::add`]: crate::event::epoll::add
     #[repr(transparent)]
     #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct EventFlags: u32 {
