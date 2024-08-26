@@ -111,7 +111,7 @@ fn has_dependency(
         .arg("tree")
         .arg("--quiet")
         .arg("--edges=normal")
-        .arg(&format!("--invert={}", dependency))
+        .arg(format!("--invert={}", dependency))
         .current_dir(dir);
 
     command.args(args);

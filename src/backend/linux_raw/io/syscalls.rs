@@ -277,7 +277,7 @@ pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
         match unsafe {
             crate::backend::net::syscalls::recv(
                 fd,
-                buf.as_mut_ptr() as *mut u8,
+                buf.as_mut_ptr().cast::<u8>(),
                 1,
                 RecvFlags::PEEK | RecvFlags::DONTWAIT,
             )

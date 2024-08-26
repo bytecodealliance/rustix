@@ -75,7 +75,7 @@ fn test_readlinkat_raw() {
     assert!(!no.is_empty());
 
     let (yes, no) = readlinkat_raw(&dir, "link", &mut short).unwrap();
-    assert_eq!(yes, &[b'f', b'i']);
+    assert_eq!(yes, b"fi");
     assert!(no.is_empty());
 
     symlinkat("link", &dir, "another").unwrap();
@@ -85,7 +85,7 @@ fn test_readlinkat_raw() {
     assert!(!no.is_empty());
 
     let (yes, no) = readlinkat_raw(&dir, "link", &mut short).unwrap();
-    assert_eq!(yes, &[b'f', b'i']);
+    assert_eq!(yes, b"fi");
     assert!(no.is_empty());
 
     let (yes, no) = readlinkat_raw(&dir, "another", &mut some).unwrap();
@@ -93,6 +93,6 @@ fn test_readlinkat_raw() {
     assert!(!no.is_empty());
 
     let (yes, no) = readlinkat_raw(&dir, "another", &mut short).unwrap();
-    assert_eq!(yes, &[b'l', b'i']);
+    assert_eq!(yes, b"li");
     assert!(no.is_empty());
 }

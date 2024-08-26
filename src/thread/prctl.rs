@@ -367,7 +367,7 @@ pub enum Capability {
     ///  - `bpf_probe_read` to read arbitrary kernel memory is allowed
     ///  - `bpf_trace_printk` to print kernel memory is allowed
     ///
-    /// [`Capability::SystemAdmin`] is required to use bpf_probe_write_user.
+    /// [`Capability::SystemAdmin`] is required to use `bpf_probe_write_user`.
     ///
     /// [`Capability::SystemAdmin`] is required to iterate system-wide loaded
     /// programs, maps, links, and BTFs, and convert their IDs to file

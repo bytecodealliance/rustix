@@ -55,8 +55,9 @@ pub fn read_uninit<Fd: AsFd>(
     buf: &mut [MaybeUninit<u8>],
 ) -> io::Result<(&mut [u8], &mut [MaybeUninit<u8>])> {
     // Get number of initialized bytes.
-    let length =
-        unsafe { backend::io::syscalls::read(fd.as_fd(), buf.as_mut_ptr() as *mut u8, buf.len()) };
+    let length = unsafe {
+        backend::io::syscalls::read(fd.as_fd(), buf.as_mut_ptr().cast::<u8>(), buf.len())
+    };
 
     // Split into the initialized and uninitialized portions.
     Ok(unsafe { split_init(buf, length?) })
@@ -129,7 +130,7 @@ pub fn pread_uninit<Fd: AsFd>(
     offset: u64,
 ) -> io::Result<(&mut [u8], &mut [MaybeUninit<u8>])> {
     let length = unsafe {
-        backend::io::syscalls::pread(fd.as_fd(), buf.as_mut_ptr() as *mut u8, buf.len(), offset)
+        backend::io::syscalls::pread(fd.as_fd(), buf.as_mut_ptr().cast::<u8>(), buf.len(), offset)
     };
     Ok(unsafe { split_init(buf, length?) })
 }

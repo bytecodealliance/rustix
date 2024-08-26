@@ -90,9 +90,9 @@ pub trait Arg {
 }
 
 /// Runs a closure on `arg` where `A` is mapped to a `&CStr`
-pub fn option_into_with_c_str<T, F, A: Arg>(arg: Option<A>, f: F) -> io::Result<T>
+pub fn option_into_with_c_str<T, F, A>(arg: Option<A>, f: F) -> io::Result<T>
 where
-    A: Sized,
+    A: Arg + Sized,
     F: FnOnce(Option<&CStr>) -> io::Result<T>,
 {
     if let Some(arg) = arg {

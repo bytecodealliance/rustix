@@ -194,16 +194,16 @@ impl Hash for SocketAddrUnix {
 
 #[cfg(unix)]
 impl fmt::Debug for SocketAddrUnix {
-    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if let Some(path) = self.path() {
-            path.fmt(fmt)
+            path.fmt(f)
         } else {
             #[cfg(linux_kernel)]
             if let Some(name) = self.abstract_name() {
-                return name.fmt(fmt);
+                return name.fmt(f);
             }
 
-            "(unnamed)".fmt(fmt)
+            "(unnamed)".fmt(f)
         }
     }
 }

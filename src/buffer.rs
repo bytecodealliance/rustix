@@ -16,6 +16,6 @@ pub(super) unsafe fn split_init(
     init: usize,
 ) -> (&mut [u8], &mut [MaybeUninit<u8>]) {
     let (init, uninit) = buf.split_at_mut(init);
-    let init = slice::from_raw_parts_mut(init.as_mut_ptr() as *mut u8, init.len());
+    let init = slice::from_raw_parts_mut(init.as_mut_ptr().cast::<u8>(), init.len());
     (init, uninit)
 }

@@ -38,7 +38,7 @@ pub fn getrandom_uninit(
 ) -> io::Result<(&mut [u8], &mut [MaybeUninit<u8>])> {
     // Get number of initialized bytes.
     let length = unsafe {
-        backend::rand::syscalls::getrandom(buf.as_mut_ptr() as *mut u8, buf.len(), flags)
+        backend::rand::syscalls::getrandom(buf.as_mut_ptr().cast::<u8>(), buf.len(), flags)
     };
 
     // Split into the initialized and uninitialized portions.

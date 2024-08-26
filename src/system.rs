@@ -109,11 +109,11 @@ impl Uname {
 }
 
 impl fmt::Debug for Uname {
-    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         #[cfg(not(linux_kernel))]
         {
             write!(
-                fmt,
+                f,
                 "{:?} {:?} {:?} {:?} {:?}",
                 self.sysname(),
                 self.nodename(),
@@ -125,7 +125,7 @@ impl fmt::Debug for Uname {
         #[cfg(linux_kernel)]
         {
             write!(
-                fmt,
+                f,
                 "{:?} {:?} {:?} {:?} {:?} {:?}",
                 self.sysname(),
                 self.nodename(),
