@@ -620,3 +620,14 @@ pub(crate) fn getgroups(buf: &mut [Gid]) -> io::Result<usize> {
         ))
     }
 }
+
+#[inline]
+pub(crate) fn _exit(status: i32) -> ! {
+    unsafe {
+        syscall_noreturn!(__NR_exit_group, c_int(status));
+    };
+    #[allow(unreachable_code)]
+    {
+        unreachable!("_exit failed to exit the process")
+    }
+}
