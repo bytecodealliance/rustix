@@ -1070,7 +1070,7 @@ pub fn get_ipv6_freebind<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
 
 /// `getsockopt(fd, IPPROTO_IP, SO_ORIGINAL_DST)`
 ///
-/// Even though this corresponnds to a `SO_*` constant, it is an `IPPROTO_IP`
+/// Even though this corresponds to a `SO_*` constant, it is an `IPPROTO_IP`
 /// option.
 ///
 /// See the [module-level documentation] for more.
@@ -1085,7 +1085,7 @@ pub fn get_ip_original_dst<Fd: AsFd>(fd: Fd) -> io::Result<SocketAddrV4> {
 
 /// `getsockopt(fd, IPPROTO_IPV6, IP6T_SO_ORIGINAL_DST)`
 ///
-/// Even though this corresponnds to a `IP6T_*` constant, it is an
+/// Even though this corresponds to a `IP6T_*` constant, it is an
 /// `IPPROTO_IPV6` option.
 ///
 /// See the [module-level documentation] for more.
@@ -1363,7 +1363,8 @@ pub fn get_tcp_cork<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
     backend::net::sockopt::get_tcp_cork(fd.as_fd())
 }
 
-/// Get credentials of Unix domain socket peer process
+/// `getsockopt(fd, SOL_SOCKET, SO_PEERCRED)`—Get credentials of Unix domain
+/// socket peer process.
 ///
 /// # References
 ///  - [Linux `unix`]

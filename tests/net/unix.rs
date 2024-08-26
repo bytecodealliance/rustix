@@ -2,7 +2,8 @@
 //!
 //! The client sends lists of integers and the server sends back sums.
 
-// This test uses `AF_UNIX` with `SOCK_SEQPACKET` which is unsupported on macOS.
+// This test uses `AF_UNIX` with `SOCK_SEQPACKET` which is unsupported on
+// macOS.
 #![cfg(not(any(apple, target_os = "espidf", target_os = "redox", target_os = "wasi")))]
 // This test uses `DecInt`.
 #![cfg(feature = "itoa")]

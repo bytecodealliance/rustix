@@ -83,7 +83,7 @@ use core::hash::{Hash, Hasher};
 use core::slice;
 
 bitflags! {
-    /// `EPOLL_*` for use with [`new`].
+    /// `EPOLL_*` for use with [`create`].
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct CreateFlags: c::c_uint {
@@ -156,7 +156,6 @@ bitflags! {
 /// descriptor from being implicitly passed across `exec` boundaries.
 ///
 /// # References
-///
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/epoll_create.2.html
@@ -179,7 +178,6 @@ pub fn create(flags: CreateFlags) -> io::Result<OwnedFd> {
 /// Check the [faq] for details.
 ///
 /// # References
-///
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/epoll_ctl.2.html
@@ -212,7 +210,6 @@ pub fn add(
 /// This sets the events of interest with `target` to `events`.
 ///
 /// # References
-///
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/epoll_ctl.2.html
@@ -243,7 +240,6 @@ pub fn modify(
 /// given epoll object.
 ///
 /// # References
-///
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/epoll_ctl.2.html
@@ -265,7 +261,6 @@ pub fn delete(epoll: impl AsFd, source: impl AsFd) -> io::Result<()> {
 /// success, this returns the number of written elements.
 ///
 /// # References
-///
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/epoll_wait.2.html

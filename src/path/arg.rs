@@ -3,7 +3,8 @@
 //! This module defines the `Arg` trait and implements it for several common
 //! string types. This allows users to pass any of these string types directly
 //! to rustix APIs with string arguments, and it allows rustix to implement
-//! NUL-termination without the need for copying where possible.
+//! NUL-termination without the need for copying or dynamic allocation where
+//! possible.
 
 use crate::ffi::CStr;
 use crate::io;
@@ -1032,7 +1033,7 @@ where
     // `openat` to open the files under it, which will avoid this, and is often
     // faster in the OS as well.
 
-    // Test with >= so that we have room for the trailing NUL.
+    // Test with `>=` so that we have room for the trailing NUL.
     if bytes.len() >= SMALL_PATH_BUFFER_SIZE {
         return with_c_str_slow_path(bytes, f);
     }

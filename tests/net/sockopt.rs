@@ -59,7 +59,8 @@ fn test_sockopts_socket(s: &OwnedFd) {
                 >= Duration::new(1, 1)
         );
     } else {
-        // On FreeBSD <= 12 and NetBSD, it appears the system rounds the timeout down.
+        // On FreeBSD ≤ 12 and NetBSD, it appears the system rounds the timeout
+        // down.
         assert!(
             sockopt::get_socket_timeout(s, sockopt::Timeout::Recv)
                 .unwrap()
@@ -141,7 +142,7 @@ fn test_sockopts_socket(s: &OwnedFd) {
     // Check that the oobinline flag is set.
     assert!(sockopt::get_socket_oobinline(s).unwrap());
 
-    // Check the initial value of SO_REUSEPORT, set it, and check it.
+    // Check the initial value of `SO_REUSEPORT`, set it, and check it.
     #[cfg(not(any(solarish, windows)))]
     {
         assert!(!sockopt::get_socket_reuseport(s).unwrap());
@@ -149,7 +150,7 @@ fn test_sockopts_socket(s: &OwnedFd) {
         assert!(sockopt::get_socket_reuseport(s).unwrap());
     }
 
-    // Check the initial value of SO_REUSEPORT_LB, set it, and check it.
+    // Check the initial value of `SO_REUSEPORT_LB`, set it, and check it.
     #[cfg(target_os = "freebsd")]
     {
         assert!(!sockopt::get_socket_reuseport_lb(s).unwrap());
@@ -167,7 +168,7 @@ fn test_sockopts_socket(s: &OwnedFd) {
         );
     }
 
-    // Check the initial value of SO_INCOMING_CPU, set it, and check it.
+    // Check the initial value of `SO_INCOMING_CPU`, set it, and check it.
     #[cfg(target_os = "linux")]
     {
         assert_eq!(sockopt::get_socket_incoming_cpu(s).unwrap(), u32::MAX);
@@ -175,7 +176,7 @@ fn test_sockopts_socket(s: &OwnedFd) {
         assert_eq!(sockopt::get_socket_incoming_cpu(s).unwrap(), 3);
     }
 
-    // Check the initial value of SO_NOSIGPIPE, set it, and check it.
+    // Check the initial value of `SO_NOSIGPIPE`, set it, and check it.
     #[cfg(any(apple, freebsdlike, target_os = "netbsd"))]
     {
         assert_eq!(sockopt::get_socket_nosigpipe(s).unwrap(), false);
@@ -242,7 +243,7 @@ fn test_sockopts_tcp(s: &OwnedFd) {
         }
     }
 
-    // Check the initial value of TCP_QUICKACK, set it, and check it.
+    // Check the initial value of `TCP_QUICKACK`, set it, and check it.
     #[cfg(any(linux_like, target_os = "fuchsia"))]
     {
         assert!(sockopt::get_tcp_quickack(s).unwrap());
@@ -250,7 +251,7 @@ fn test_sockopts_tcp(s: &OwnedFd) {
         assert!(!sockopt::get_tcp_quickack(s).unwrap());
     }
 
-    // Check the initial value of TCP_CONGESTION, set it, and check it.
+    // Check the initial value of `TCP_CONGESTION`, set it, and check it.
     //
     // Temporarily disable this test on non-x86 as qemu isn't yet aware of
     // TCP_CONGESTION.
@@ -272,7 +273,7 @@ fn test_sockopts_tcp(s: &OwnedFd) {
         }
     }
 
-    // Check the initial value of TCP_THIN_LINEAR_TIMEOUTS, set it, and check
+    // Check the initial value of `TCP_THIN_LINEAR_TIMEOUTS`, set it, and check
     // it.
     #[cfg(any(linux_like, target_os = "fuchsia"))]
     {
@@ -281,7 +282,7 @@ fn test_sockopts_tcp(s: &OwnedFd) {
         assert!(sockopt::get_tcp_thin_linear_timeouts(s).unwrap());
     }
 
-    // Check the initial value of TCP_CORK, set it, and check it.
+    // Check the initial value of `TCP_CORK`, set it, and check it.
     #[cfg(any(linux_like, solarish, target_os = "fuchsia"))]
     {
         assert!(!sockopt::get_tcp_cork(s).unwrap());
@@ -331,7 +332,7 @@ fn test_sockopts_ipv4() {
         assert!(!sockopt::get_ip_multicast_loop(&s).unwrap());
     }
 
-    // Check the initial value of IP TOS, set it, and check it.
+    // Check the initial value of `IP_TOS`, set it, and check it.
     #[cfg(any(
         bsd,
         linux_like,
@@ -351,7 +352,7 @@ fn test_sockopts_ipv4() {
         }
     }
 
-    // Check the initial value of IP RECVTOS, set it, and check it.
+    // Check the initial value of `IP_RECVTOS`, set it, and check it.
     #[cfg(any(apple, linux_like, target_os = "freebsd", target_os = "fuchsia"))]
     {
         assert!(!sockopt::get_ip_recvtos(&s).unwrap());
@@ -359,7 +360,7 @@ fn test_sockopts_ipv4() {
         assert!(sockopt::get_ip_recvtos(&s).unwrap());
     }
 
-    // Check the initial value of IP_FREEBIND, set it, and check it.
+    // Check the initial value of `IP_FREEBIND`, set it, and check it.
     #[cfg(any(linux_kernel, target_os = "fuchsia"))]
     {
         assert!(!sockopt::get_ip_freebind(&s).unwrap());
@@ -367,7 +368,7 @@ fn test_sockopts_ipv4() {
         assert!(sockopt::get_ip_freebind(&s).unwrap());
     }
 
-    // Check that we can query SO_ORIGINAL_DST.
+    // Check that we can query `SO_ORIGINAL_DST`.
     #[cfg(any(linux_kernel, target_os = "fuchsia"))]
     {
         assert!(matches!(
@@ -456,7 +457,7 @@ fn test_sockopts_ipv6() {
     // Check that the IPV6 unicast hops value is set.
     assert_eq!(sockopt::get_ipv6_unicast_hops(&s).unwrap(), 8);
 
-    // Check the initial value of IPV6 RECVTCLASS, set it, and check it.
+    // Check the initial value of `IPV6_RECVTCLASS`, set it, and check it.
     #[cfg(any(
         bsd,
         linux_like,
@@ -470,7 +471,7 @@ fn test_sockopts_ipv6() {
         assert!(sockopt::get_ipv6_recvtclass(&s).unwrap());
     }
 
-    // Check the initial value of IPV6_FREEBIND, set it, and check it.
+    // Check the initial value of `IPV6_FREEBIND`, set it, and check it.
     #[cfg(linux_kernel)]
     {
         assert!(!sockopt::get_ipv6_freebind(&s).unwrap());
@@ -478,7 +479,7 @@ fn test_sockopts_ipv6() {
         assert!(sockopt::get_ipv6_freebind(&s).unwrap());
     }
 
-    // Check the initial value of IPV6_TCLASS, set it, and check it.
+    // Check the initial value of `IPV6_TCLASS`, set it, and check it.
     #[cfg(not(any(solarish, windows, target_os = "espidf", target_os = "haiku")))]
     {
         assert_eq!(sockopt::get_ipv6_tclass(&s).unwrap(), 0);
@@ -486,7 +487,7 @@ fn test_sockopts_ipv6() {
         assert_eq!(sockopt::get_ipv6_tclass(&s).unwrap(), 12);
     }
 
-    // Check that we can query IP6T_SO_ORIGINAL_DST.
+    // Check that we can query `IP6T_SO_ORIGINAL_DST`.
     #[cfg(linux_kernel)]
     {
         assert!(matches!(

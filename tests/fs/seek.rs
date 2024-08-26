@@ -1,4 +1,4 @@
-/// Test seek positions related to file "holes".
+/// Test seek positions related to file “holes”.
 #[cfg(any(apple, freebsdlike, linux_kernel, solarish))]
 #[test]
 fn test_seek_holes() {

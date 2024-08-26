@@ -170,7 +170,7 @@ pub fn grantpt<Fd: AsFd>(fd: Fd) -> io::Result<()> {
     }
 }
 
-/// `ioctl(fd, TIOCGPTPEER)`—Open the user side of a pseduoterminal.
+/// `ioctl(fd, TIOCGPTPEER)`—Open the user side of a pseudoterminal.
 ///
 /// This function is currently only implemented on Linux.
 ///

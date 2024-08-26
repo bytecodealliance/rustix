@@ -4,8 +4,8 @@
 //!
 //! These access the file descriptors by absolute index value, and nothing
 //! prevents them from being closed and reused. They should only be used in
-//! `main` or other situations where one is in control of the process'
-//! stdio streams.
+//! `main` or other situations where one is in control of the process' stdio
+//! streams.
 #![allow(unsafe_code)]
 
 use crate::backend;

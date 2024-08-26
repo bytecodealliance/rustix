@@ -86,8 +86,9 @@ pub(crate) const XCASE: tcflag_t = linux_raw_sys::general::XCASE as _;
 #[cfg(target_os = "aix")]
 pub(crate) const MSG_DONTWAIT: c_int = libc::MSG_NONBLOCK;
 
-// It is defined as 0 in libc under 64-bit platforms, but is automatically set
-// by kernel. <https://github.com/torvalds/linux/blob/v6.7/fs/open.c#L1458-L1459>
+// `O_LARGEFILE` can be automatically set by the kernel on Linux:
+// <https://github.com/torvalds/linux/blob/v6.7/fs/open.c#L1458-L1459>
+// so libc implementations may leave it undefined or defined to zero.
 #[cfg(linux_kernel)]
 pub(crate) const O_LARGEFILE: c_int = linux_raw_sys::general::O_LARGEFILE as _;
 

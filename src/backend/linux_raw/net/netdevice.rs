@@ -1,3 +1,5 @@
+//! Wrappers for netdevice ioctls.
+
 #![allow(unsafe_code)]
 
 use crate::backend::io::syscalls::ioctl;

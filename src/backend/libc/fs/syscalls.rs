@@ -348,7 +348,7 @@ pub(crate) fn linkat(
     new_path: &CStr,
     flags: AtFlags,
 ) -> io::Result<()> {
-    // macOS <= 10.9 lacks `linkat`.
+    // macOS ≤ 10.9 lacks `linkat`.
     #[cfg(target_os = "macos")]
     unsafe {
         weak! {
@@ -405,7 +405,7 @@ pub(crate) fn unlink(path: &CStr) -> io::Result<()> {
 
 #[cfg(not(any(target_os = "espidf", target_os = "redox")))]
 pub(crate) fn unlinkat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::Result<()> {
-    // macOS <= 10.9 lacks `unlinkat`.
+    // macOS ≤ 10.9 lacks `unlinkat`.
     #[cfg(target_os = "macos")]
     unsafe {
         weak! {
@@ -458,7 +458,7 @@ pub(crate) fn renameat(
     new_dirfd: BorrowedFd<'_>,
     new_path: &CStr,
 ) -> io::Result<()> {
-    // macOS <= 10.9 lacks `renameat`.
+    // macOS ≤ 10.9 lacks `renameat`.
     #[cfg(target_os = "macos")]
     unsafe {
         weak! {
@@ -744,7 +744,7 @@ pub(crate) fn accessat(
     access: Access,
     flags: AtFlags,
 ) -> io::Result<()> {
-    // macOS <= 10.9 lacks `faccessat`.
+    // macOS ≤ 10.9 lacks `faccessat`.
     #[cfg(target_os = "macos")]
     unsafe {
         weak! {
@@ -2255,8 +2255,8 @@ pub(crate) fn getxattr(path: &CStr, name: &CStr, value: &mut [u8]) -> io::Result
 
     #[cfg(apple)]
     {
-        // Passing an empty to slice to getxattr leads to ERANGE on macOS. Pass
-        // null instead.
+        // Passing an empty to slice to `getxattr` leads to `ERANGE` on macOS.
+        // Pass null instead.
         let ptr = if value.is_empty() {
             core::ptr::null_mut()
         } else {
@@ -2291,8 +2291,8 @@ pub(crate) fn lgetxattr(path: &CStr, name: &CStr, value: &mut [u8]) -> io::Resul
 
     #[cfg(apple)]
     {
-        // Passing an empty to slice to getxattr leads to ERANGE on macOS. Pass
-        // null instead.
+        // Passing an empty to slice to `getxattr` leads to `ERANGE` on macOS.
+        // Pass null instead.
         let ptr = if value.is_empty() {
             core::ptr::null_mut()
         } else {
@@ -2328,8 +2328,8 @@ pub(crate) fn fgetxattr(fd: BorrowedFd<'_>, name: &CStr, value: &mut [u8]) -> io
 
     #[cfg(apple)]
     {
-        // Passing an empty to slice to getxattr leads to ERANGE on macOS. Pass
-        // null instead.
+        // Passing an empty to slice to `getxattr` leads to `ERANGE` on macOS.
+        // Pass null instead.
         let ptr = if value.is_empty() {
             core::ptr::null_mut()
         } else {

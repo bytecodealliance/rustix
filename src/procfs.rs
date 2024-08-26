@@ -245,7 +245,7 @@ fn proc_opendirat<P: crate::path::Arg, Fd: AsFd>(dirfd: Fd, path: P) -> io::Resu
 fn proc() -> io::Result<(BorrowedFd<'static>, &'static Stat)> {
     static PROC: StaticFd = StaticFd::new();
 
-    // `OnceBox` is "racey" in that the initialization function may run
+    // `OnceBox` is “racy” in that the initialization function may run
     // multiple times. We're ok with that, since the initialization function
     // has no side effects.
     PROC.get_or_try_init(|| {

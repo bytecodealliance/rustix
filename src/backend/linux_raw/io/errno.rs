@@ -41,7 +41,6 @@ use linux_raw_sys::errno;
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=errno&section=2
 /// [illumos]: https://illumos.org/man/3C/errno
 /// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Error-Codes.html
-/// [`std::io::Error`]: Result
 #[repr(transparent)]
 #[doc(alias = "errno")]
 #[derive(Eq, PartialEq, Hash, Copy, Clone)]
