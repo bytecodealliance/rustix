@@ -643,8 +643,10 @@ const fn new_raw_protocol(u: u32) -> RawProtocol {
 }
 
 /// `IPPROTO_*` and other constants for use with [`socket`], [`socket_with`],
-/// and [`socketpair`] when a nondefault value is desired. See the [`ipproto`],
-/// [`sysproto`], and [`netlink`] modules for possible values.
+/// and [`socketpair`] when a nondefault value is desired.
+///
+/// See the [`ipproto`], [`sysproto`], and [`netlink`] modules for possible
+/// values.
 ///
 /// For the default values, such as `IPPROTO_IP` or `NETLINK_ROUTE`, pass
 /// `None` as the `protocol` argument in these functions.

@@ -13,7 +13,7 @@
 //! // A type describing the data to be shared.
 //! #[repr(C)]
 //! struct MyBufferType {
-//!     // ...
+//!     // …
 //! }
 //!
 //! // Create the shared memory object.
@@ -43,7 +43,7 @@
 //!     )?
 //! };
 //!
-//! // Use `ptr`...
+//! // Use `ptr`…
 //!
 //! // Remove the shared memory object name.
 //! shm::unlink(shm_path)?;

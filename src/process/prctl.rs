@@ -110,10 +110,11 @@ pub fn dumpable_behavior() -> io::Result<DumpableBehavior> {
 
 const PR_SET_DUMPABLE: c_int = 4;
 
-/// Set the state of the `dumpable` attribute, which determines whether the
-/// process can be traced and whether core dumps are produced for the calling
-/// process upon delivery of a signal whose default behavior is to produce a
-/// core dump.
+/// Set the state of the `dumpable` attribute.
+///
+/// This attribute determines whether the process can be traced and whether
+/// core dumps are produced for the calling process upon delivery of a signal
+/// whose default behavior is to produce a core dump.
 ///
 /// A similar function with the same name is available on FreeBSD (as part of
 /// the `procctl` interface), but it has an extra argument which allows to
