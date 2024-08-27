@@ -12,13 +12,13 @@ use crate::io::{read_uninit, Errno};
 use core::mem::{align_of, size_of, MaybeUninit};
 use linux_raw_sys::general::inotify_event;
 
-#[deprecated(note = "Use add_watch.")]
+#[deprecated(note = "Use `inotify::add_watch`.")]
 #[doc(hidden)]
 pub use add_watch as inotify_add_watch;
-#[deprecated(note = "Use init.")]
+#[deprecated(note = "Use `inotify::init`.")]
 #[doc(hidden)]
 pub use init as inotify_init;
-#[deprecated(note = "Use remove_watch.")]
+#[deprecated(note = "Use `inotify::remove_watch`.")]
 #[doc(hidden)]
 pub use remove_watch as inotify_remove_watch;
 
