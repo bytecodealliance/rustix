@@ -13,8 +13,9 @@ mod prctl;
 #[cfg(linux_kernel)]
 mod setns;
 
+#[allow(deprecated)]
 #[cfg(linux_kernel)]
-pub use crate::backend::thread::futex::Operation as FutexOperation;
+pub use crate::backend::thread::futex::FutexOperation;
 #[cfg(linux_kernel)]
 pub use crate::thread::futex::{
     Flags as FutexFlags, OWNER_DIED as FUTEX_OWNER_DIED, WAITERS as FUTEX_WAITERS,
@@ -50,7 +51,7 @@ pub use setns::*;
 /// [Linux `futex` feature]: https://man7.org/linux/man-pages/man7/futex.7.html
 /// [futex module]: mod@crate::thread::futex
 #[cfg(linux_kernel)]
-#[allow(unsafe_code)]
+#[allow(unsafe_code, deprecated)]
 #[inline]
 pub unsafe fn futex(
     uaddr: *mut u32,
@@ -61,24 +62,25 @@ pub unsafe fn futex(
     uaddr2: *mut u32,
     val3: u32,
 ) -> crate::io::Result<usize> {
+    use crate::backend::thread::futex::Operation;
     use crate::backend::thread::syscalls::{futex_timeout, futex_val2};
+    use core::mem::transmute;
     use core::sync::atomic::AtomicU32;
     use FutexOperation::*;
 
     match op {
-        Wait | LockPi | WaitBitset | WaitRequeuePi | LockPi2 => futex_timeout(
+        Wait | LockPi | WaitBitset => futex_timeout(
             uaddr as *const AtomicU32,
-            op,
+            transmute::<FutexOperation, Operation>(op),
             flags,
             val,
             utime,
             uaddr2 as *const AtomicU32,
             val3,
         ),
-        Wake | Fd | Requeue | CmpRequeue | WakeOp | UnlockPi | TrylockPi | WakeBitset
-        | CmpRequeuePi => futex_val2(
+        Wake | Fd | Requeue | CmpRequeue | WakeOp | UnlockPi | TrylockPi => futex_val2(
             uaddr as *const AtomicU32,
-            op,
+            transmute::<FutexOperation, Operation>(op),
             flags,
             val,
             utime as usize as u32,

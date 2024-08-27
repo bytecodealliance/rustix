@@ -419,7 +419,7 @@ pub(crate) fn setresgid_thread(
 #[cfg(linux_kernel)]
 pub(crate) unsafe fn futex_val2(
     uaddr: *const AtomicU32,
-    op: super::types::Operation,
+    op: super::futex::Operation,
     flags: futex::Flags,
     val: u32,
     val2: u32,
@@ -492,7 +492,7 @@ pub(crate) unsafe fn futex_val2(
 #[cfg(linux_kernel)]
 pub(crate) unsafe fn futex_timeout(
     uaddr: *const AtomicU32,
-    op: super::types::Operation,
+    op: super::futex::Operation,
     flags: futex::Flags,
     val: u32,
     timeout: *const Timespec,
