@@ -5,7 +5,6 @@
 //! See the `rustix::backend` module documentation for details.
 #![allow(unsafe_code, clippy::undocumented_unsafe_blocks)]
 
-use super::futex::FutexOperation;
 use crate::backend::c;
 use crate::backend::conv::{
     by_mut, by_ref, c_int, c_uint, ret, ret_c_int, ret_c_int_infallible, ret_usize, slice,
@@ -14,7 +13,7 @@ use crate::backend::conv::{
 use crate::fd::BorrowedFd;
 use crate::io;
 use crate::pid::Pid;
-use crate::thread::{ClockId, FutexFlags, NanosleepRelativeResult, Timespec};
+use crate::thread::{futex, ClockId, NanosleepRelativeResult, Timespec};
 use core::mem::MaybeUninit;
 use core::sync::atomic::AtomicU32;
 #[cfg(target_pointer_width = "32")]
@@ -208,14 +207,14 @@ pub(crate) fn gettid() -> Pid {
 #[inline]
 pub(crate) unsafe fn futex_val2(
     uaddr: *const AtomicU32,
-    op: FutexOperation,
-    flags: FutexFlags,
+    op: super::futex::Operation,
+    flags: futex::Flags,
     val: u32,
     val2: u32,
     uaddr2: *const AtomicU32,
     val3: u32,
 ) -> io::Result<usize> {
-    // the least significant four bytes of the timeout pointer are used as `val2`.
+    // The least-significant four bytes of the timeout pointer are used as `val2`.
     // ["the kernel casts the timeout value first to unsigned long, then to uint32_t"](https://man7.org/linux/man-pages/man2/futex.2.html),
     // so we perform that exact conversion in reverse to create the pointer.
     let timeout = val2 as usize as *const Timespec;
@@ -247,8 +246,8 @@ pub(crate) unsafe fn futex_val2(
 #[inline]
 pub(crate) unsafe fn futex_timeout(
     uaddr: *const AtomicU32,
-    op: FutexOperation,
-    flags: FutexFlags,
+    op: super::futex::Operation,
+    flags: futex::Flags,
     val: u32,
     timeout: *const Timespec,
     uaddr2: *const AtomicU32,
@@ -290,8 +289,8 @@ pub(crate) unsafe fn futex_timeout(
 #[cfg(target_pointer_width = "32")]
 unsafe fn futex_old_timespec(
     uaddr: *const AtomicU32,
-    op: FutexOperation,
-    flags: FutexFlags,
+    op: super::futex::Operation,
+    flags: futex::Flags,
     val: u32,
     timeout: *const Timespec,
     uaddr2: *const AtomicU32,
@@ -321,7 +320,6 @@ unsafe fn futex_old_timespec(
         c_uint(val3)
     ))
 }
-
 #[inline]
 pub(crate) fn setns(fd: BorrowedFd<'_>, nstype: c::c_int) -> io::Result<c::c_int> {
     unsafe { ret_c_int(syscall_readonly!(__NR_setns, fd, c_int(nstype))) }

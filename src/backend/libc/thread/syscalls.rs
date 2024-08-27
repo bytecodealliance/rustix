@@ -11,11 +11,10 @@ use core::mem::MaybeUninit;
 use core::sync::atomic::AtomicU32;
 #[cfg(linux_kernel)]
 use {
-    super::futex::FutexOperation,
     crate::backend::conv::{borrowed_fd, ret_c_int, ret_usize},
     crate::fd::BorrowedFd,
     crate::pid::Pid,
-    crate::thread::FutexFlags,
+    crate::thread::futex,
     crate::utils::as_mut_ptr,
 };
 #[cfg(not(any(
@@ -420,14 +419,14 @@ pub(crate) fn setresgid_thread(
 #[cfg(linux_kernel)]
 pub(crate) unsafe fn futex_val2(
     uaddr: *const AtomicU32,
-    op: FutexOperation,
-    flags: FutexFlags,
+    op: super::futex::Operation,
+    flags: futex::Flags,
     val: u32,
     val2: u32,
     uaddr2: *const AtomicU32,
     val3: u32,
 ) -> io::Result<usize> {
-    // the least significant four bytes of the timeout pointer are used as `val2`.
+    // The least-significant four bytes of the timeout pointer are used as `val2`.
     // ["the kernel casts the timeout value first to unsigned long, then to uint32_t"](https://man7.org/linux/man-pages/man2/futex.2.html),
     // so we perform that exact conversion in reverse to create the pointer.
     let timeout = val2 as usize as *const Timespec;
@@ -493,8 +492,8 @@ pub(crate) unsafe fn futex_val2(
 #[cfg(linux_kernel)]
 pub(crate) unsafe fn futex_timeout(
     uaddr: *const AtomicU32,
-    op: FutexOperation,
-    flags: FutexFlags,
+    op: super::futex::Operation,
+    flags: futex::Flags,
     val: u32,
     timeout: *const Timespec,
     uaddr2: *const AtomicU32,
@@ -574,8 +573,8 @@ pub(crate) unsafe fn futex_timeout(
 ))]
 unsafe fn futex_old_timespec(
     uaddr: *const AtomicU32,
-    op: FutexOperation,
-    flags: FutexFlags,
+    op: super::futex::Operation,
+    flags: futex::Flags,
     val: u32,
     timeout: *const Timespec,
     uaddr2: *const AtomicU32,

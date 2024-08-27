@@ -1,81 +1,35 @@
 //! Linux `futex`.
 //!
+//! # References
+//!  - [Linux `futex` system call]
+//!  - [Linux `futex` feature]
+//!
 //! # Safety
 //!
 //! Futex is a very low-level mechanism for implementing concurrency
 //! primitives.
+//!
+//! [Linux `futex` system call]: https://man7.org/linux/man-pages/man2/futex.2.html
+//! [Linux `futex` feature]: https://man7.org/linux/man-pages/man7/futex.7.html
 #![allow(unsafe_code)]
 
 use core::num::NonZeroU32;
 use core::ptr;
 use core::sync::atomic::AtomicU32;
 
+use crate::backend::thread::futex::Operation;
 use crate::backend::thread::syscalls::{futex_timeout, futex_val2};
 use crate::fd::{FromRawFd, OwnedFd, RawFd};
-use crate::thread::Timespec;
 use crate::{backend, io};
 
-pub use backend::thread::futex::FutexFlags;
-pub use backend::thread::futex::FutexOperation;
+pub use crate::timespec::Timespec;
+
+pub use backend::thread::futex::Flags;
 
 /// `FUTEX_WAITERS`
-pub const FUTEX_WAITERS: u32 = backend::thread::futex::FUTEX_WAITERS;
+pub const WAITERS: u32 = backend::thread::futex::WAITERS;
 /// `FUTEX_OWNER_DIED`
-pub const FUTEX_OWNER_DIED: u32 = backend::thread::futex::FUTEX_OWNER_DIED;
-
-/// DEPRECATED: There are now individual functions available to perform futex operations with improved type safety. See the [futex module](`self`).
-///
-/// `futex(uaddr, op, val, utime, uaddr2, val3)`
-///
-/// # References
-///  - [Linux `futex` system call]
-///  - [Linux `futex` feature]
-///
-/// # Safety
-///
-/// This is a very low-level feature for implementing synchronization
-/// primitives. See the references links above.
-///
-/// [Linux `futex` system call]: https://man7.org/linux/man-pages/man2/futex.2.html
-/// [Linux `futex` feature]: https://man7.org/linux/man-pages/man7/futex.7.html
-#[deprecated(
-    since = "0.38.35",
-    note = "There are now individual functions available to perform futex operations with improved type safety. See the futex module."
-)]
-#[inline]
-pub unsafe fn futex(
-    uaddr: *mut u32,
-    op: FutexOperation,
-    flags: FutexFlags,
-    val: u32,
-    utime: *const Timespec,
-    uaddr2: *mut u32,
-    val3: u32,
-) -> io::Result<usize> {
-    use FutexOperation::*;
-
-    match op {
-        Wait | LockPi | WaitBitset | WaitRequeuePi | LockPi2 => futex_timeout(
-            uaddr as *const AtomicU32,
-            op,
-            flags,
-            val,
-            utime,
-            uaddr2 as *const AtomicU32,
-            val3,
-        ),
-        Wake | Fd | Requeue | CmpRequeue | WakeOp | UnlockPi | TrylockPi | WakeBitset
-        | CmpRequeuePi => futex_val2(
-            uaddr as *const AtomicU32,
-            op,
-            flags,
-            val,
-            utime as usize as u32,
-            uaddr2 as *const AtomicU32,
-            val3,
-        ),
-    }
-}
+pub const OWNER_DIED: u32 = backend::thread::futex::OWNER_DIED;
 
 /// Equivalent to `syscall(SYS_futex, uaddr, FUTEX_WAIT, val, timeout, NULL, 0)`
 ///
@@ -93,14 +47,14 @@ pub unsafe fn futex(
 #[inline]
 pub fn wait(
     uaddr: &AtomicU32,
-    flags: FutexFlags,
+    flags: Flags,
     val: u32,
     timeout: Option<Timespec>,
 ) -> io::Result<()> {
     unsafe {
-        backend::thread::syscalls::futex_timeout(
+        futex_timeout(
             uaddr,
-            FutexOperation::Wait,
+            Operation::Wait,
             flags,
             val,
             timeout
@@ -133,18 +87,8 @@ pub fn wait(
 /// [Linux `futex` system call]: https://man7.org/linux/man-pages/man2/futex.2.html
 /// [Linux `futex` feature]: https://man7.org/linux/man-pages/man7/futex.7.html
 #[inline]
-pub fn wake(uaddr: &AtomicU32, flags: FutexFlags, val: u32) -> io::Result<usize> {
-    unsafe {
-        backend::thread::syscalls::futex_val2(
-            uaddr,
-            FutexOperation::Wake,
-            flags,
-            val,
-            0,
-            ptr::null(),
-            0,
-        )
-    }
+pub fn wake(uaddr: &AtomicU32, flags: Flags, val: u32) -> io::Result<usize> {
+    unsafe { futex_val2(uaddr, Operation::Wake, flags, val, 0, ptr::null(), 0) }
 }
 
 /// Equivalent to `syscall(SYS_futex, uaddr, FUTEX_FD, val, NULL, NULL, 0)`
@@ -161,18 +105,9 @@ pub fn wake(uaddr: &AtomicU32, flags: FutexFlags, val: u32) -> io::Result<usize>
 /// [Linux `futex` system call]: https://man7.org/linux/man-pages/man2/futex.2.html
 /// [Linux `futex` feature]: https://man7.org/linux/man-pages/man7/futex.7.html
 #[inline]
-pub fn fd(uaddr: &AtomicU32, flags: FutexFlags, val: u32) -> io::Result<OwnedFd> {
+pub fn fd(uaddr: &AtomicU32, flags: Flags, val: u32) -> io::Result<OwnedFd> {
     unsafe {
-        backend::thread::syscalls::futex_val2(
-            uaddr,
-            FutexOperation::Fd,
-            flags,
-            val,
-            0,
-            ptr::null(),
-            0,
-        )
-        .map(|val| {
+        futex_val2(uaddr, Operation::Fd, flags, val, 0, ptr::null(), 0).map(|val| {
             let fd = val as RawFd;
             debug_assert_eq!(fd as usize, val, "return value should be a valid fd");
             OwnedFd::from_raw_fd(fd)
@@ -196,22 +131,12 @@ pub fn fd(uaddr: &AtomicU32, flags: FutexFlags, val: u32) -> io::Result<OwnedFd>
 #[inline]
 pub fn requeue(
     uaddr: &AtomicU32,
-    flags: FutexFlags,
+    flags: Flags,
     val: u32,
     val2: u32,
     uaddr2: &AtomicU32,
 ) -> io::Result<usize> {
-    unsafe {
-        backend::thread::syscalls::futex_val2(
-            uaddr,
-            FutexOperation::Requeue,
-            flags,
-            val,
-            val2,
-            uaddr2,
-            0,
-        )
-    }
+    unsafe { futex_val2(uaddr, Operation::Requeue, flags, val, val2, uaddr2, 0) }
 }
 
 /// Equivalent to `syscall(SYS_futex, uaddr, FUTEX_CMP_REQUEUE, val, val2, uaddr2, val3)`
@@ -230,23 +155,13 @@ pub fn requeue(
 #[inline]
 pub fn cmp_requeue(
     uaddr: &AtomicU32,
-    flags: FutexFlags,
+    flags: Flags,
     val: u32,
     val2: u32,
     uaddr2: &AtomicU32,
     val3: u32,
 ) -> io::Result<usize> {
-    unsafe {
-        backend::thread::syscalls::futex_val2(
-            uaddr,
-            FutexOperation::CmpRequeue,
-            flags,
-            val,
-            val2,
-            uaddr2,
-            val3,
-        )
-    }
+    unsafe { futex_val2(uaddr, Operation::CmpRequeue, flags, val, val2, uaddr2, val3) }
 }
 
 /// `FUTEX_OP_*` operations for use with [`wake_op`].
@@ -309,7 +224,7 @@ pub enum WakeOpCmp {
 #[inline]
 pub fn wake_op(
     uaddr: &AtomicU32,
-    flags: FutexFlags,
+    flags: Flags,
     val: u32,
     val2: u32,
     uaddr2: &AtomicU32,
@@ -325,17 +240,7 @@ pub fn wake_op(
     let val3 =
         ((op as u32) << 28) | ((cmp as u32) << 24) | ((oparg as u32) << 12) | (cmparg as u32);
 
-    unsafe {
-        backend::thread::syscalls::futex_val2(
-            uaddr,
-            FutexOperation::WakeOp,
-            flags,
-            val,
-            val2,
-            uaddr2,
-            val3,
-        )
-    }
+    unsafe { futex_val2(uaddr, Operation::WakeOp, flags, val, val2, uaddr2, val3) }
 }
 
 /// Equivalent to `syscall(SYS_futex, uaddr, FUTEX_LOCK_PI, 0, timeout, NULL, 0)`
@@ -352,11 +257,11 @@ pub fn wake_op(
 /// [Linux `futex` system call]: https://man7.org/linux/man-pages/man2/futex.2.html
 /// [Linux `futex` feature]: https://man7.org/linux/man-pages/man7/futex.7.html
 #[inline]
-pub fn lock_pi(uaddr: &AtomicU32, flags: FutexFlags, timeout: Option<Timespec>) -> io::Result<()> {
+pub fn lock_pi(uaddr: &AtomicU32, flags: Flags, timeout: Option<Timespec>) -> io::Result<()> {
     unsafe {
-        backend::thread::syscalls::futex_timeout(
+        futex_timeout(
             uaddr,
-            FutexOperation::LockPi,
+            Operation::LockPi,
             flags,
             0,
             timeout
@@ -389,18 +294,9 @@ pub fn lock_pi(uaddr: &AtomicU32, flags: FutexFlags, timeout: Option<Timespec>) 
 /// [Linux `futex` system call]: https://man7.org/linux/man-pages/man2/futex.2.html
 /// [Linux `futex` feature]: https://man7.org/linux/man-pages/man7/futex.7.html
 #[inline]
-pub fn unlock_pi(uaddr: &AtomicU32, flags: FutexFlags) -> io::Result<()> {
+pub fn unlock_pi(uaddr: &AtomicU32, flags: Flags) -> io::Result<()> {
     unsafe {
-        backend::thread::syscalls::futex_val2(
-            uaddr,
-            FutexOperation::UnlockPi,
-            flags,
-            0,
-            0,
-            ptr::null(),
-            0,
-        )
-        .map(|val| {
+        futex_val2(uaddr, Operation::UnlockPi, flags, 0, 0, ptr::null(), 0).map(|val| {
             debug_assert_eq!(
                 val, 0,
                 "The return value should always equal zero, if the call is successful"
@@ -423,22 +319,13 @@ pub fn unlock_pi(uaddr: &AtomicU32, flags: FutexFlags) -> io::Result<()> {
 /// [Linux `futex` system call]: https://man7.org/linux/man-pages/man2/futex.2.html
 /// [Linux `futex` feature]: https://man7.org/linux/man-pages/man7/futex.7.html
 #[inline]
-pub fn trylock_pi(uaddr: &AtomicU32, flags: FutexFlags) -> io::Result<bool> {
+pub fn trylock_pi(uaddr: &AtomicU32, flags: Flags) -> io::Result<bool> {
     unsafe {
-        backend::thread::syscalls::futex_val2(
-            uaddr,
-            FutexOperation::TrylockPi,
-            flags,
-            0,
-            0,
-            ptr::null(),
-            0,
-        )
-        .map(|ret| ret == 0)
+        futex_val2(uaddr, Operation::TrylockPi, flags, 0, 0, ptr::null(), 0).map(|ret| ret == 0)
     }
 }
 
-/// Equivalent to `syscall(SYS_futex, uaddr, FUTEX_WAIT_BITSET, val, timeout/val2, NULL, val3)`
+/// Equivalent to `syscall(SYS_futex, uaddr, FUTEX_WAIT_BITSET, val, timeout, NULL, val3)`
 ///
 /// # References
 ///  - [Linux `futex` system call]
@@ -454,15 +341,15 @@ pub fn trylock_pi(uaddr: &AtomicU32, flags: FutexFlags) -> io::Result<bool> {
 #[inline]
 pub fn wait_bitset(
     uaddr: &AtomicU32,
-    flags: FutexFlags,
+    flags: Flags,
     val: u32,
     timeout: Option<Timespec>,
     val3: NonZeroU32,
 ) -> io::Result<()> {
     unsafe {
-        backend::thread::syscalls::futex_timeout(
+        futex_timeout(
             uaddr,
-            FutexOperation::WaitBitset,
+            Operation::WaitBitset,
             flags,
             val,
             timeout
@@ -497,14 +384,14 @@ pub fn wait_bitset(
 #[inline]
 pub fn wake_bitset(
     uaddr: &AtomicU32,
-    flags: FutexFlags,
+    flags: Flags,
     val: u32,
     val3: NonZeroU32,
 ) -> io::Result<usize> {
     unsafe {
-        backend::thread::syscalls::futex_val2(
+        futex_val2(
             uaddr,
-            FutexOperation::WakeBitset,
+            Operation::WakeBitset,
             flags,
             val,
             0,
@@ -530,15 +417,15 @@ pub fn wake_bitset(
 #[inline]
 pub fn wait_requeue_pi(
     uaddr: &AtomicU32,
-    flags: FutexFlags,
+    flags: Flags,
     val: u32,
     timeout: Option<Timespec>,
     uaddr2: &AtomicU32,
 ) -> io::Result<()> {
     unsafe {
-        backend::thread::syscalls::futex_timeout(
+        futex_timeout(
             uaddr,
-            FutexOperation::WaitRequeuePi,
+            Operation::WaitRequeuePi,
             flags,
             val,
             timeout
@@ -573,22 +460,12 @@ pub fn wait_requeue_pi(
 #[inline]
 pub fn cmp_requeue_pi(
     uaddr: &AtomicU32,
-    flags: FutexFlags,
+    flags: Flags,
     val2: u32,
     uaddr2: &AtomicU32,
     val3: u32,
 ) -> io::Result<usize> {
-    unsafe {
-        backend::thread::syscalls::futex_val2(
-            uaddr,
-            FutexOperation::CmpRequeuePi,
-            flags,
-            1,
-            val2,
-            uaddr2,
-            val3,
-        )
-    }
+    unsafe { futex_val2(uaddr, Operation::CmpRequeuePi, flags, 1, val2, uaddr2, val3) }
 }
 
 /// Equivalent to `syscall(SYS_futex, uaddr, FUTEX_LOCK_PI2, 0, timeout, NULL, 0)`
@@ -605,11 +482,11 @@ pub fn cmp_requeue_pi(
 /// [Linux `futex` system call]: https://man7.org/linux/man-pages/man2/futex.2.html
 /// [Linux `futex` feature]: https://man7.org/linux/man-pages/man7/futex.7.html
 #[inline]
-pub fn lock_pi2(uaddr: &AtomicU32, flags: FutexFlags, timeout: Option<Timespec>) -> io::Result<()> {
+pub fn lock_pi2(uaddr: &AtomicU32, flags: Flags, timeout: Option<Timespec>) -> io::Result<()> {
     unsafe {
-        backend::thread::syscalls::futex_timeout(
+        futex_timeout(
             uaddr,
-            FutexOperation::LockPi2,
+            Operation::LockPi2,
             flags,
             0,
             timeout
