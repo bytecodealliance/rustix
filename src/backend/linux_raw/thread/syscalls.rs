@@ -289,7 +289,7 @@ pub(crate) unsafe fn futex_timeout(
 #[cfg(target_pointer_width = "32")]
 unsafe fn futex_old_timespec(
     uaddr: *const AtomicU32,
-    op: super::types::Operation,
+    op: super::futex::Operation,
     flags: futex::Flags,
     val: u32,
     timeout: *const Timespec,
