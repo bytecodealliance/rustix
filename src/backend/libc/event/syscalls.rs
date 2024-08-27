@@ -200,7 +200,7 @@ pub(crate) fn epoll_create(flags: super::epoll::CreateFlags) -> io::Result<Owned
 #[cfg(any(linux_kernel, target_os = "redox"))]
 pub(crate) fn epoll_add(
     epoll: BorrowedFd<'_>,
-    source: BorrowedFd,
+    source: BorrowedFd<'_>,
     event: &crate::event::epoll::Event,
 ) -> io::Result<()> {
     // We use our own `Event` struct instead of libc's because
@@ -221,7 +221,7 @@ pub(crate) fn epoll_add(
 #[cfg(any(linux_kernel, target_os = "redox"))]
 pub(crate) fn epoll_mod(
     epoll: BorrowedFd<'_>,
-    source: BorrowedFd,
+    source: BorrowedFd<'_>,
     event: &crate::event::epoll::Event,
 ) -> io::Result<()> {
     unsafe {
@@ -237,7 +237,7 @@ pub(crate) fn epoll_mod(
 
 #[inline]
 #[cfg(any(linux_kernel, target_os = "redox"))]
-pub(crate) fn epoll_del(epoll: BorrowedFd<'_>, source: BorrowedFd) -> io::Result<()> {
+pub(crate) fn epoll_del(epoll: BorrowedFd<'_>, source: BorrowedFd<'_>) -> io::Result<()> {
     unsafe {
         ret(c::epoll_ctl(
             borrowed_fd(epoll),

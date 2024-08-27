@@ -182,7 +182,7 @@ impl<'buf, Fd: AsFd> Reader<'buf, Fd> {
     ///    error occurs.
     #[allow(unsafe_code)]
     #[allow(clippy::should_implement_trait)]
-    pub fn next(&mut self) -> io::Result<InotifyEvent> {
+    pub fn next(&mut self) -> io::Result<InotifyEvent<'_>> {
         if self.is_buffer_empty() {
             match read_uninit(self.fd.as_fd(), self.buf).map(|(init, _)| init.len()) {
                 Ok(0) => return Err(Errno::INVAL),
