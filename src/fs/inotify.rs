@@ -8,9 +8,9 @@
 //! use std::mem::MaybeUninit;
 //!
 //! # fn test() -> io::Result<()> {
-//! // Creeate an inotify object. In this example, we use `NONBLOCK` so that
-//! // the reader fails with `WOULDBLOCk` when no events are ready. Otherwise
-//! // it will block until at least one event is ready.
+//! // Create an inotify object. In this example, we use `NONBLOCK` so that the
+//! // reader fails with `WOULDBLOCk` when no events are ready. Otherwise it
+//! // will block until at least one event is ready.
 //! let inotify = inotify::init(inotify::CreateFlags::NONBLOCK)?;
 //!
 //! // Add a directory to watch.
@@ -20,7 +20,7 @@
 //!     inotify::WatchFlags::ALL_EVENTS,
 //! )?;
 //!
-//! // Generate some events in the watched directory...
+//! // Generate some events in the watched directory…
 //!
 //! // Loop over pending events.
 //! let mut buf = [MaybeUninit::uninit(); 512];
@@ -33,7 +33,7 @@
 //!         Ok(entry) => entry,
 //!     };
 //!
-//!     // Use `entry`...
+//!     // Use `entry`…
 //! }
 //!
 //! # Ok(())
