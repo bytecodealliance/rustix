@@ -12,6 +12,7 @@ use crate::backend::conv::{
 use crate::event::{epoll, EventfdFlags, PollFd};
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io;
+#[cfg(feature = "alloc")]
 use core::mem::MaybeUninit;
 use linux_raw_sys::general::{EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD};
 #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
@@ -51,6 +52,7 @@ pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: c::c_int) -> io::Result<usiz
 
 #[inline]
 pub(crate) fn epoll_create(flags: epoll::CreateFlags) -> io::Result<OwnedFd> {
+    // SAFETY: `__NR_epoll_create1` doesn't access any user memory.
     unsafe { ret_owned_fd(syscall_readonly!(__NR_epoll_create1, flags)) }
 }
 
@@ -60,6 +62,8 @@ pub(crate) fn epoll_add(
     fd: BorrowedFd,
     event: &epoll::Event,
 ) -> io::Result<()> {
+    // SAFETY: `__NR_epoll_ctl` with `EPOLL_CTL_ADD` doesn't modify any user
+    // memory, and it only reads from `event`.
     unsafe {
         ret(syscall_readonly!(
             __NR_epoll_ctl,
@@ -77,6 +81,8 @@ pub(crate) fn epoll_mod(
     fd: BorrowedFd,
     event: &epoll::Event,
 ) -> io::Result<()> {
+    // SAFETY: `__NR_epoll_ctl` with `EPOLL_CTL_MOD` doesn't modify any user
+    // memory, and it only reads from `event`.
     unsafe {
         ret(syscall_readonly!(
             __NR_epoll_ctl,
@@ -90,6 +96,8 @@ pub(crate) fn epoll_mod(
 
 #[inline]
 pub(crate) fn epoll_del(epfd: BorrowedFd<'_>, fd: BorrowedFd) -> io::Result<()> {
+    // SAFETY: `__NR_epoll_ctl` with `EPOLL_CTL_DEL` doesn't access any user
+    // memory.
     unsafe {
         ret(syscall_readonly!(
             __NR_epoll_ctl,
@@ -101,6 +109,7 @@ pub(crate) fn epoll_del(epfd: BorrowedFd<'_>, fd: BorrowedFd) -> io::Result<()> 
     }
 }
 
+#[cfg(feature = "alloc")]
 #[inline]
 pub(crate) fn epoll_wait(
     epfd: BorrowedFd<'_>,
@@ -108,6 +117,8 @@ pub(crate) fn epoll_wait(
     timeout: c::c_int,
 ) -> io::Result<usize> {
     let (buf_addr_mut, buf_len) = slice_mut(events);
+    // SAFETY: `__NR_epoll_wait` doesn't access any user memory outside of
+    // the `events` array.
     #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
     unsafe {
         ret_usize(syscall!(
@@ -118,6 +129,8 @@ pub(crate) fn epoll_wait(
             c_int(timeout)
         ))
     }
+    // SAFETY: `__NR_epoll_pwait` doesn't access any user memory outside of
+    // the `events` array, as we don't pass it a `sigmask`.
     #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
     unsafe {
         ret_usize(syscall!(

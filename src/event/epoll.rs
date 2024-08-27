@@ -73,6 +73,7 @@
 #![allow(unused_qualifications)]
 
 use super::epoll;
+#[cfg(feature = "alloc")]
 use crate::backend::c;
 pub use crate::backend::event::epoll::*;
 use crate::backend::event::syscalls;
@@ -102,14 +103,14 @@ pub fn create(flags: epoll::CreateFlags) -> io::Result<OwnedFd> {
 /// `epoll_ctl(self, EPOLL_CTL_ADD, data, event)`—Adds an element to an epoll
 /// object.
 ///
-/// This registers interest in any of the events set in `event_flags` occurring on
-/// the file descriptor associated with `data`.
+/// This registers interest in any of the events set in `event_flags` occurring
+/// on the file descriptor associated with `data`.
 ///
 /// Note that `close`ing a file descriptor does not necessarily unregister
-/// interest which can lead to spurious events being returned from [`epoll::wait`]. If
-/// a file descriptor is an `Arc<dyn SystemResource>`, then `epoll` can be
-/// thought to maintain a `Weak<dyn SystemResource>` to the file descriptor.
-/// Check the [faq] for details.
+/// interest which can lead to spurious events being returned from
+/// [`epoll::wait`]. If a file descriptor is an `Arc<dyn SystemResource>`, then
+/// `epoll` can be thought to maintain a `Weak<dyn SystemResource>` to the file
+/// descriptor. Check the [faq] for details.
 ///
 /// # References
 ///  - [Linux]
@@ -127,7 +128,7 @@ pub fn add(
     syscalls::epoll_add(
         epoll.as_fd(),
         source.as_fd(),
-        &mut Event {
+        &Event {
             flags: event_flags,
             data,
             #[cfg(all(libc, target_os = "redox"))]
@@ -156,7 +157,7 @@ pub fn modify(
     syscalls::epoll_mod(
         epoll.as_fd(),
         source.as_fd(),
-        &mut Event {
+        &Event {
             flags: event_flags,
             data,
             #[cfg(all(libc, target_os = "redox"))]
