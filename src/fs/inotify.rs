@@ -1,5 +1,8 @@
 //! inotify support for working with inotifies
 
+#![allow(unused_qualifications)]
+
+use super::inotify;
 pub use crate::backend::fs::inotify::{CreateFlags, ReadFlags, WatchFlags};
 use crate::backend::fs::syscalls;
 use crate::fd::{AsFd, OwnedFd};
@@ -9,13 +12,23 @@ use crate::io::{read_uninit, Errno};
 use core::mem::{align_of, size_of, MaybeUninit};
 use linux_raw_sys::general::inotify_event;
 
+#[deprecated(note = "Use add_watch.")]
+#[doc(hidden)]
+pub use add_watch as inotify_add_watch;
+#[deprecated(note = "Use init.")]
+#[doc(hidden)]
+pub use init as inotify_init;
+#[deprecated(note = "Use remove_watch.")]
+#[doc(hidden)]
+pub use remove_watch as inotify_remove_watch;
+
 /// `inotify_init1(flags)`—Creates a new inotify object.
 ///
 /// Use the [`CreateFlags::CLOEXEC`] flag to prevent the resulting file
 /// descriptor from being implicitly passed across `exec` boundaries.
 #[doc(alias = "inotify_init1")]
 #[inline]
-pub fn inotify_init(flags: CreateFlags) -> io::Result<OwnedFd> {
+pub fn init(flags: inotify::CreateFlags) -> io::Result<OwnedFd> {
     syscalls::inotify_init1(flags)
 }
 
@@ -27,11 +40,12 @@ pub fn inotify_init(flags: CreateFlags) -> io::Result<OwnedFd> {
 /// Note: Due to the existence of hardlinks, providing two different paths to
 /// this method may result in it returning the same watch descriptor. An
 /// application should keep track of this externally to avoid logic errors.
+#[doc(alias = "inotify_add_watch")]
 #[inline]
-pub fn inotify_add_watch<P: crate::path::Arg>(
+pub fn add_watch<P: crate::path::Arg>(
     inot: impl AsFd,
     path: P,
-    flags: WatchFlags,
+    flags: inotify::WatchFlags,
 ) -> io::Result<i32> {
     path.into_with_c_str(|path| syscalls::inotify_add_watch(inot.as_fd(), path, flags))
 }
@@ -39,10 +53,10 @@ pub fn inotify_add_watch<P: crate::path::Arg>(
 /// `inotify_rm_watch(self, wd)`—Removes a watch from this inotify.
 ///
 /// The watch descriptor provided should have previously been returned by
-/// [`inotify_add_watch`] and not previously have been removed.
+/// [`inotify::add_watch`] and not previously have been removed.
 #[doc(alias = "inotify_rm_watch")]
 #[inline]
-pub fn inotify_remove_watch(inot: impl AsFd, wd: i32) -> io::Result<()> {
+pub fn remove_watch(inot: impl AsFd, wd: i32) -> io::Result<()> {
     syscalls::inotify_rm_watch(inot.as_fd(), wd)
 }
 
@@ -52,14 +66,14 @@ pub fn inotify_remove_watch(inot: impl AsFd, wd: i32) -> io::Result<()> {
 /// based on it.
 ///
 /// [`RawDir`]: crate::fs::raw_dir::RawDir
-pub struct InotifyReader<'buf, Fd: AsFd> {
+pub struct Reader<'buf, Fd: AsFd> {
     fd: Fd,
     buf: &'buf mut [MaybeUninit<u8>],
     initialized: usize,
     offset: usize,
 }
 
-impl<'buf, Fd: AsFd> InotifyReader<'buf, Fd> {
+impl<'buf, Fd: AsFd> Reader<'buf, Fd> {
     /// Create a new iterator from the given file descriptor and buffer.
     pub fn new(fd: Fd, buf: &'buf mut [MaybeUninit<u8>]) -> Self {
         Self {
@@ -114,7 +128,7 @@ impl<'a> InotifyEvent<'a> {
     }
 }
 
-impl<'buf, Fd: AsFd> InotifyReader<'buf, Fd> {
+impl<'buf, Fd: AsFd> Reader<'buf, Fd> {
     /// Read the next inotify event.
     #[allow(unsafe_code)]
     pub fn next(&mut self) -> io::Result<InotifyEvent> {

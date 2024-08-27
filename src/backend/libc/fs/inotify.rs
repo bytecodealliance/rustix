@@ -4,9 +4,9 @@ use crate::backend::c;
 use bitflags::bitflags;
 
 bitflags! {
-    /// `IN_*` for use with [`inotify_init`].
+    /// `IN_*` for use with [`inotify::init`].
     ///
-    /// [`inotify_init`]: crate::fs::inotify::inotify_init
+    /// [`inotify::init`]: crate::fs::inotify::init
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct CreateFlags: u32 {
@@ -21,9 +21,9 @@ bitflags! {
 }
 
 bitflags! {
-    /// `IN*` for use with [`inotify_add_watch`].
+    /// `IN*` for use with [`inotify::add_watch`].
     ///
-    /// [`inotify_add_watch`]: crate::fs::inotify::inotify_add_watch
+    /// [`inotify::add_watch`]: crate::fs::inotify::add_watch
     #[repr(transparent)]
     #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct WatchFlags: u32 {
@@ -78,9 +78,9 @@ bitflags! {
 }
 
 bitflags! {
-    /// `IN*` for use with [`InotifyReader`].
+    /// `IN*` for use with [`inotify::Reader`].
     ///
-    /// [`InotifyReader`]: crate::fs::inotify::InotifyReader
+    /// [`inotify::Reader`]: crate::fs::inotify::Reader
     #[repr(transparent)]
     #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct ReadFlags: u32 {
