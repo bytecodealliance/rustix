@@ -59,7 +59,7 @@ pub(crate) fn epoll_create(flags: epoll::CreateFlags) -> io::Result<OwnedFd> {
 #[inline]
 pub(crate) fn epoll_add(
     epfd: BorrowedFd<'_>,
-    fd: BorrowedFd,
+    fd: BorrowedFd<'_>,
     event: &epoll::Event,
 ) -> io::Result<()> {
     // SAFETY: `__NR_epoll_ctl` with `EPOLL_CTL_ADD` doesn't modify any user
@@ -78,7 +78,7 @@ pub(crate) fn epoll_add(
 #[inline]
 pub(crate) fn epoll_mod(
     epfd: BorrowedFd<'_>,
-    fd: BorrowedFd,
+    fd: BorrowedFd<'_>,
     event: &epoll::Event,
 ) -> io::Result<()> {
     // SAFETY: `__NR_epoll_ctl` with `EPOLL_CTL_MOD` doesn't modify any user
@@ -95,7 +95,7 @@ pub(crate) fn epoll_mod(
 }
 
 #[inline]
-pub(crate) fn epoll_del(epfd: BorrowedFd<'_>, fd: BorrowedFd) -> io::Result<()> {
+pub(crate) fn epoll_del(epfd: BorrowedFd<'_>, fd: BorrowedFd<'_>) -> io::Result<()> {
     // SAFETY: `__NR_epoll_ctl` with `EPOLL_CTL_DEL` doesn't access any user
     // memory.
     unsafe {
