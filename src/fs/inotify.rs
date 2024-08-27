@@ -1,4 +1,43 @@
 //! inotify support for working with inotifies
+//!
+//! # Examples
+//!
+//! ```
+//! use rustix::fs::inotify;
+//! use rustix::io;
+//! use std::mem::MaybeUninit;
+//!
+//! # fn test() -> io::Result<()> {
+//! // Creeate an inotify object. In this example, we use `NONBLOCK` so that
+//! // the reader fails with `WOULDBLOCk` when no events are ready. Otherwise
+//! // it will block until at least one event is ready.
+//! let inotify = inotify::init(inotify::CreateFlags::NONBLOCK)?;
+//!
+//! // Add a directory to watch.
+//! inotify::add_watch(
+//!     &inotify,
+//!     "/path/to/some/directory/to/watch",
+//!     inotify::WatchFlags::ALL_EVENTS,
+//! )?;
+//!
+//! // Generate some events in the watched directory...
+//!
+//! // Loop over pending events.
+//! let mut buf = [MaybeUninit::uninit(); 512];
+//! let mut iter = inotify::Reader::new(inotify, &mut buf);
+//! loop {
+//!     let entry = match iter.next() {
+//!         // Stop iterating if there are no more events for now.
+//!         Err(io::Errno::WOULDBLOCK) => break,
+//!         Err(e) => return Err(e),
+//!         Ok(entry) => entry,
+//!     };
+//!
+//!     // Use `entry`...
+//! }
+//!
+//! # Ok(())
+//! # }
 
 #![allow(unused_qualifications)]
 
@@ -130,7 +169,19 @@ impl<'a> InotifyEvent<'a> {
 
 impl<'buf, Fd: AsFd> Reader<'buf, Fd> {
     /// Read the next inotify event.
+    ///
+    /// This is similar to `[Iterator::next`] except that it doesn't return an
+    /// `Option`, because the stream doesn't have an ending. It always returns
+    /// events or errors.
+    ///
+    /// If there are no events in the buffer and none ready to be read:
+    ///  - If the file descriptor was opened with
+    ///    [`inotify::CreateFlags::NONBLOCK`], this will fail with
+    ///    [`Errno::AGAIN`].
+    ///  - Otherwise this will block until at least one event is ready or an
+    ///    error occurs.
     #[allow(unsafe_code)]
+    #[allow(clippy::should_implement_trait)]
     pub fn next(&mut self) -> io::Result<InotifyEvent> {
         if self.is_buffer_empty() {
             match read_uninit(self.fd.as_fd(), self.buf).map(|(init, _)| init.len()) {
@@ -144,6 +195,7 @@ impl<'buf, Fd: AsFd> Reader<'buf, Fd> {
         }
 
         let ptr = self.buf[self.offset..].as_ptr();
+
         // SAFETY:
         // - This data is initialized by the check above.
         //   - Assumption: the kernel will not give us partial structs.
