@@ -146,6 +146,9 @@ pub(crate) enum FsConfigCmd {
 
     /// `FSCONFIG_CMD_RECONFIGURE`
     Reconfigure = 7,
+
+    /// `FSCONFIG_CMD_CREATE_EXCL`
+    CreateExclusive = 8,
 }
 
 #[cfg(feature = "mount")]

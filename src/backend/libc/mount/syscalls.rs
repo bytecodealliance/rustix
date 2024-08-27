@@ -270,3 +270,17 @@ pub(crate) fn fsconfig_reconfigure(fs_fd: BorrowedFd<'_>) -> io::Result<()> {
         ))
     }
 }
+
+#[cfg(linux_kernel)]
+#[cfg(feature = "mount")]
+pub(crate) fn fsconfig_create_excl(fs_fd: BorrowedFd<'_>) -> io::Result<()> {
+    unsafe {
+        ret(fsconfig(
+            borrowed_fd(fs_fd),
+            super::types::FsConfigCmd::CreateExclusive as _,
+            null(),
+            null(),
+            0,
+        ))
+    }
+}

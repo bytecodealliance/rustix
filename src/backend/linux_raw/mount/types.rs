@@ -144,6 +144,9 @@ pub(crate) enum FsConfigCmd {
 
     /// `FSCONFIG_CMD_RECONFIGURE`
     Reconfigure = linux_raw_sys::general::fsconfig_command::FSCONFIG_CMD_RECONFIGURE as u32,
+
+    /// `FSCONFIG_CMD_CREATE_EXCL`
+    CreateExclusive = linux_raw_sys::general::fsconfig_command::FSCONFIG_CMD_CREATE_EXCL as u32,
 }
 
 #[cfg(feature = "mount")]

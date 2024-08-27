@@ -217,3 +217,15 @@ pub fn fsconfig_create(fs_fd: BorrowedFd<'_>) -> io::Result<()> {
 pub fn fsconfig_reconfigure(fs_fd: BorrowedFd<'_>) -> io::Result<()> {
     backend::mount::syscalls::fsconfig_reconfigure(fs_fd)
 }
+
+/// `fsconfig(fs_fd, FSCONFIG_CMD_CREATE_EXCL, key, NULL, 0)`
+///
+/// # References
+///  - [Unfinished draft]
+///
+/// [Unfinished draft]: https://github.com/sunfishcode/linux-mount-api-documentation/blob/main/fsconfig.md
+#[inline]
+#[doc(alias = "fsconfig")]
+pub fn fsconfig_create_exclusive(fs_fd: BorrowedFd<'_>) -> io::Result<()> {
+    backend::mount::syscalls::fsconfig_create_excl(fs_fd)
+}
