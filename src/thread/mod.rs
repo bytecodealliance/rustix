@@ -34,7 +34,8 @@ pub use prctl::*;
 #[cfg(linux_kernel)]
 pub use setns::*;
 
-/// DEPRECATED: There are now individual functions available to perform futex operations with improved type safety. See the [futex module].
+/// DEPRECATED: There are now individual functions available to perform futex
+/// operations with improved type safety. See the [futex module].
 ///
 /// `futex(uaddr, op, val, utime, uaddr2, val3)`
 ///

@@ -16,9 +16,9 @@ use crate::pid::Pid;
 use crate::thread::{futex, ClockId, NanosleepRelativeResult, Timespec};
 use core::mem::MaybeUninit;
 use core::sync::atomic::AtomicU32;
-#[cfg(target_pointer_width = "32")]
-use linux_raw_sys::general::timespec as __kernel_old_timespec;
 use linux_raw_sys::general::{__kernel_timespec, TIMER_ABSTIME};
+#[cfg(target_pointer_width = "32")]
+use {crate::utils::option_as_ptr, linux_raw_sys::general::timespec as __kernel_old_timespec};
 
 #[inline]
 pub(crate) fn clock_nanosleep_relative(
@@ -204,6 +204,9 @@ pub(crate) fn gettid() -> Pid {
     }
 }
 
+/// # Safety
+///
+/// The raw pointers must point to valid aligned memory.
 #[inline]
 pub(crate) unsafe fn futex_val2(
     uaddr: *const AtomicU32,
@@ -214,9 +217,12 @@ pub(crate) unsafe fn futex_val2(
     uaddr2: *const AtomicU32,
     val3: u32,
 ) -> io::Result<usize> {
-    // The least-significant four bytes of the timeout pointer are used as `val2`.
-    // ["the kernel casts the timeout value first to unsigned long, then to uint32_t"](https://man7.org/linux/man-pages/man2/futex.2.html),
-    // so we perform that exact conversion in reverse to create the pointer.
+    // Pass `val2` in the least-significant bytes of the `timeout` argument.
+    // [“the kernel casts the timeout value first to unsigned long, then to
+    // uint32_t”], so we perform that exact conversion in reverse to create
+    // the pointer.
+    //
+    // [“the kernel casts the timeout value first to unsigned long, then to uint32_t”]: https://man7.org/linux/man-pages/man2/futex.2.html
     let timeout = val2 as usize as *const Timespec;
 
     #[cfg(target_pointer_width = "32")]
@@ -243,6 +249,9 @@ pub(crate) unsafe fn futex_val2(
     ))
 }
 
+/// # Safety
+///
+/// The raw pointers must point to valid aligned memory.
 #[inline]
 pub(crate) unsafe fn futex_timeout(
     uaddr: *const AtomicU32,
@@ -286,6 +295,9 @@ pub(crate) unsafe fn futex_timeout(
     ))
 }
 
+/// # Safety
+///
+/// The raw pointers must point to valid aligned memory.
 #[cfg(target_pointer_width = "32")]
 unsafe fn futex_old_timespec(
     uaddr: *const AtomicU32,
@@ -312,10 +324,7 @@ unsafe fn futex_old_timespec(
         uaddr,
         (op, flags),
         c_uint(val),
-        old_timeout
-            .as_ref()
-            .map(|timeout| timeout as *const __kernel_old_timespec)
-            .unwrap_or(core::ptr::null()),
+        option_as_ptr(old_timeout.as_ref()),
         uaddr2,
         c_uint(val3)
     ))
