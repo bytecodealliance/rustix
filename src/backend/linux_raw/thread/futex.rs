@@ -53,6 +53,8 @@ pub(crate) enum Operation {
 /// `FUTEX_*` operations for use with the [`futex`] function.
 ///
 /// [`futex`]: fn@crate::thread::futex
+// TODO: Deprecate this now that we have a new typed API.
+/*
 #[deprecated(
     since = "0.38.35",
     note = "
@@ -60,6 +62,7 @@ pub(crate) enum Operation {
     individual functions available to perform futex operations with improved
     type safety. See the `rustix::thread::futex` module."
 )]
+*/
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 #[repr(u32)]
 pub enum FutexOperation {
