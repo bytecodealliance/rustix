@@ -190,7 +190,7 @@ pub(crate) use linux_raw_sys::{
         VKILL, VLNEXT, VMIN, VQUIT, VREPRINT, VSTART, VSTOP, VSUSP, VSWTC, VT0, VT1, VTDLY, VTIME,
         VWERASE, XCASE, XTABS,
     },
-    ioctl::{TCGETS2, TCSETS2, TCSETSF2, TCSETSW2, TIOCEXCL, TIOCNXCL},
+    ioctl::{TCGETS, TCGETS2, TCSETS, TCSETS2, TCSETSF2, TCSETSW2, TIOCEXCL, TIOCNXCL},
 };
 
 // On MIPS, `TCSANOW` et al have `TCSETS` added to them, so we need it to

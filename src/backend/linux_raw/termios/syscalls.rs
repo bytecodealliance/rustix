@@ -19,6 +19,7 @@ use crate::termios::{
 #[cfg(all(feature = "alloc", feature = "procfs"))]
 use crate::{ffi::CStr, fs::FileType, path::DecInt};
 use core::mem::MaybeUninit;
+use core::sync::atomic::{AtomicBool, Ordering};
 use linux_raw_sys::general::IBSHIFT;
 use linux_raw_sys::ioctl::{
     TCFLSH, TCSBRK, TCXONC, TIOCGPGRP, TIOCGSID, TIOCGWINSZ, TIOCSPGRP, TIOCSWINSZ,
@@ -33,6 +34,10 @@ pub(crate) fn tcgetwinsize(fd: BorrowedFd<'_>) -> io::Result<Winsize> {
     }
 }
 
+/// Is `TCGETS2` known to be available?
+#[cfg(linux_kernel)]
+static TCGETS2_KNOWN: AtomicBool = AtomicBool::new(false);
+
 #[inline]
 pub(crate) fn tcgetattr(fd: BorrowedFd<'_>) -> io::Result<Termios> {
     unsafe {
@@ -45,38 +50,88 @@ pub(crate) fn tcgetattr(fd: BorrowedFd<'_>) -> io::Result<Termios> {
             result.write(core::mem::zeroed());
         }
 
-        ret(syscall!(__NR_ioctl, fd, c_uint(c::TCGETS2), &mut result))?;
+        let res = ret(syscall!(__NR_ioctl, fd, c_uint(c::TCGETS2), &mut result));
+        match res {
+            Ok(()) => TCGETS2_KNOWN.store(true, Ordering::Relaxed),
+            Err(io::Errno::NOTTY) => tcgetattr_fallback(fd, &mut result)?,
+            Err(err) => {
+                TCGETS2_KNOWN.store(true, Ordering::Relaxed);
+                return Err(err);
+            }
+        }
 
-        let result = result.assume_init();
+        #[allow(unused_mut)]
+        let mut result = result.assume_init();
 
         // QEMU's `TCGETS2` doesn't currently set `input_speed` or
         // `output_speed` on PowerPC, so set them manually if we can.
         #[cfg(any(target_arch = "powerpc", target_arch = "powerpc64"))]
-        let result = {
-            use crate::termios::speed;
-            let mut result = result;
-            if result.output_speed == 0 && (result.control_modes.bits() & c::CBAUD) != c::BOTHER {
-                if let Some(output_speed) = speed::decode(result.control_modes.bits() & c::CBAUD) {
-                    result.output_speed = output_speed;
-                }
-            }
-            if result.input_speed == 0
-                && ((result.control_modes.bits() & c::CIBAUD) >> c::IBSHIFT) != c::BOTHER
-            {
-                // For input speeds, `B0` is special-cased to mean the input
-                // speed is the same as the output speed.
-                if ((result.control_modes.bits() & c::CIBAUD) >> c::IBSHIFT) == c::B0 {
-                    result.input_speed = result.output_speed;
-                } else if let Some(input_speed) =
-                    speed::decode((result.control_modes.bits() & c::CIBAUD) >> c::IBSHIFT)
-                {
-                    result.input_speed = input_speed;
-                }
-            }
-            result
-        };
+        {
+            infer_input_output_speed(&mut result);
+        }
 
         Ok(result)
+    }
+}
+
+/// Workaround for WSL where `TCGETS2` is unavailable.
+#[cold]
+unsafe fn tcgetattr_fallback(
+    fd: BorrowedFd<'_>,
+    result: &mut MaybeUninit<Termios>,
+) -> io::Result<()> {
+    // If we've already seen `TCGETS2` succeed or fail in a way other than
+    // `NOTTY`, then can trust a `NOTTY` error from it.
+    if TCGETS2_KNOWN.load(Ordering::Relaxed) {
+        return Err(io::Errno::NOTTY);
+    }
+
+    // Ensure that the `input_speed` and `output_speed` fields are initialized,
+    // because `TCGETS` won't write to them.
+    result.write(core::mem::zeroed());
+
+    let res = ret(syscall!(
+        __NR_ioctl,
+        fd,
+        c_uint(c::TCGETS),
+        result.as_mut_ptr()
+    ));
+    match res {
+        Ok(()) => {
+            infer_input_output_speed(result.assume_init_mut());
+            Ok(())
+        }
+        Err(io::Errno::NOTTY) => Err(io::Errno::NOTTY),
+        Err(err) => {
+            TCGETS2_KNOWN.store(true, Ordering::Relaxed);
+            Err(err)
+        }
+    }
+}
+
+/// Fill in the `input_speed` and `output_speed` fields of `Termios` using
+/// information available in other fields.
+#[cold]
+fn infer_input_output_speed(result: &mut Termios) {
+    use crate::termios::speed;
+
+    if result.output_speed == 0 && (result.control_modes.bits() & c::CBAUD) != c::BOTHER {
+        if let Some(output_speed) = speed::decode(result.control_modes.bits() & c::CBAUD) {
+            result.output_speed = output_speed;
+        }
+    }
+    if result.input_speed == 0
+        && ((result.control_modes.bits() & c::CIBAUD) >> c::IBSHIFT) != c::BOTHER
+    {
+        // For input speeds, `B0` is special-cased to mean the input
+        // speed is the same as the output speed.
+        if ((result.control_modes.bits() & c::CIBAUD) >> c::IBSHIFT) == c::B0 {
+            result.input_speed = result.output_speed;
+        } else if let Some(input_speed) =
+            speed::decode((result.control_modes.bits() & c::CIBAUD) >> c::IBSHIFT)
+        {
+            result.input_speed = input_speed;
+        }
     }
 }
 
@@ -118,13 +173,46 @@ pub(crate) fn tcsetattr(
             optional_actions as u32
         };
     unsafe {
-        ret(syscall_readonly!(
+        let res = ret(syscall_readonly!(
             __NR_ioctl,
             fd,
             c_uint(request),
             by_ref(termios)
-        ))
+        ));
+        match res {
+            Ok(()) => Ok(()),
+            Err(io::Errno::NOTTY) => tcsetattr_fallback(fd, optional_actions, termios),
+            Err(err) => Err(err),
+        }
     }
+}
+
+/// Workaround for WSL where `TCSETS2` is unavailable.
+#[cold]
+unsafe fn tcsetattr_fallback(
+    fd: BorrowedFd<'_>,
+    optional_actions: OptionalActions,
+    termios: &Termios,
+) -> io::Result<()> {
+    // Translate from `optional_actions` into an ioctl request code. On MIPS,
+    // `optional_actions` already has `TCGETS` added to it.
+    let request = if cfg!(any(
+        target_arch = "mips",
+        target_arch = "mips32r6",
+        target_arch = "mips64",
+        target_arch = "mips64r6"
+    )) {
+        optional_actions as u32
+    } else {
+        optional_actions as u32 + linux_raw_sys::ioctl::TCSETS
+    };
+
+    ret(syscall_readonly!(
+        __NR_ioctl,
+        fd,
+        c_uint(request),
+        by_ref(termios)
+    ))
 }
 
 #[inline]
