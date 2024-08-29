@@ -1,4 +1,4 @@
-//! inotify support for working with inotifies
+//! inotify support for working with inotify objects.
 //!
 //! # Examples
 //!
@@ -9,7 +9,7 @@
 //!
 //! # fn test() -> io::Result<()> {
 //! // Create an inotify object. In this example, we use `NONBLOCK` so that the
-//! // reader fails with `WOULDBLOCk` when no events are ready. Otherwise it
+//! // reader fails with `WOULDBLOCK` when no events are ready. Otherwise it
 //! // will block until at least one event is ready.
 //! let inotify = inotify::init(inotify::CreateFlags::NONBLOCK)?;
 //!

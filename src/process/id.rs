@@ -13,17 +13,8 @@ use alloc::vec::Vec;
 #[cfg(linux_kernel)]
 use backend::process::types::RawCpuid;
 
-/// The raw integer value of a Unix user ID.
-pub use crate::ugid::RawUid;
-
-/// The raw integer value of a Unix group ID.
-pub use crate::ugid::RawGid;
-
-/// The raw integer value of a Unix process ID.
-pub use crate::pid::RawPid;
-
-pub use crate::pid::Pid;
-pub use crate::ugid::{Gid, Uid};
+pub use crate::pid::{Pid, RawPid};
+pub use crate::ugid::{Gid, RawGid, RawUid, Uid};
 
 /// A Linux CPU ID.
 #[cfg(linux_kernel)]

@@ -1,4 +1,4 @@
-//! `read` and `write`, optionally positioned, optionally vectored
+//! `read` and `write`, optionally positioned, optionally vectored.
 
 #![allow(unsafe_code)]
 

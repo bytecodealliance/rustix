@@ -126,7 +126,7 @@ impl Termios {
     /// constant value.
     #[inline]
     pub fn output_speed(&self) -> u32 {
-        // On Linux and BSDs, `input_speed` is the arbitrary integer speed.
+        // On Linux and BSDs, `output_speed` is the arbitrary integer speed.
         #[cfg(any(linux_kernel, bsd))]
         {
             debug_assert!(u32::try_from(self.output_speed).is_ok());
@@ -810,9 +810,9 @@ pub mod speed {
     /// `u32`.
     ///
     /// On BSD platforms, integer speed values are already the same as their
-    /// encoded values, and on Linux platforms, we use `TCGETS2`/`TCSETS2`
-    /// and the `c_ispeed`/`c_ospeed`` fields, except that on Linux on
-    /// PowerPC on QEMU, `TCGETS2`/`TCSETS2` don't set `c_ispeed`/`c_ospeed`.
+    /// encoded values, and on Linux platforms, we use `TCGETS2`/`TCSETS2` and
+    /// the `c_ispeed`/`c_ospeed` fields, except that on Linux on PowerPC on
+    /// QEMU, `TCGETS2`/`TCSETS2` don't set `c_ispeed`/`c_ospeed`.
     #[cfg(not(any(
         bsd,
         all(
