@@ -12,7 +12,7 @@ fn main() {
     // Gather target information.
     let arch = var("CARGO_CFG_TARGET_ARCH").unwrap();
     let env = var("CARGO_CFG_TARGET_ENV").unwrap();
-    let abi = var("CARGO_CFG_TARGET_ABI").unwrap();
+    let abi = var("CARGO_CFG_TARGET_ABI");
     let inline_asm_name = format!("{}/{}.rs", ASM_PATH, arch);
     let inline_asm_name_present = std::fs::metadata(inline_asm_name).is_ok();
     let os = var("CARGO_CFG_TARGET_OS").unwrap();
@@ -150,14 +150,14 @@ fn main() {
             || arch == "sparc"
             || arch == "x86"
             || (arch == "wasm32" && os == "emscripten")
-            || (arch == "aarch64" && os == "linux" && abi == "ilp32"))
+            || (arch == "aarch64" && os == "linux" && abi == Ok("ilp32".to_string())))
         && (apple
             || os == "android"
             || os == "emscripten"
             || os == "haiku"
             || env == "gnu"
             || (env == "musl" && arch == "x86")
-            || (arch == "aarch64" && os == "linux" && abi == "ilp32"))
+            || (arch == "aarch64" && os == "linux" && abi == Ok("ilp32".to_string())))
     {
         use_feature("fix_y2038");
     }
