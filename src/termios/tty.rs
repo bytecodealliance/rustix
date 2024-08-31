@@ -64,8 +64,8 @@ fn _ttyname(dirfd: BorrowedFd<'_>, mut buffer: Vec<u8>) -> io::Result<CString> {
 
                 // SAFETY:
                 // - “ttyname_r stores this pathname in the buffer buf”
-                // - [POSIX definition 3.271: Pathname]: “A string that is used
-                //   to identify a file.”
+                // - [POSIX definition 3.271: Pathname]: “A string that is
+                //   used to identify a file.”
                 // - [POSIX definition 3.375: String]: “A contiguous sequence
                 //   of bytes terminated by and including the first null byte.”
                 //
