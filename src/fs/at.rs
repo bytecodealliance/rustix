@@ -110,10 +110,10 @@ fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, mut buffer: Vec<u8>) -> io::R
             }
 
             // SAFETY:
-            // - “readlink places the contents of the symbolic link pathname in
-            //   the buffer buf”
-            // - [POSIX definition 3.271: Pathname]: “A string that is used to
-            //   identify a file.”
+            // - “readlink places the contents of the symbolic link pathname
+            //   in the buffer buf”
+            // - [POSIX definition 3.271: Pathname]: “A string that is used
+            //   to identify a file.”
             // - [POSIX definition 3.375: String]: “A contiguous sequence of
             //   bytes terminated by and including the first null byte.”
             // - “readlink does not append a terminating null byte to buf.”

@@ -1,4 +1,4 @@
-//! inotify support for working with inotifies
+//! inotify support for working with inotify objects.
 //!
 //! # Examples
 //!
@@ -9,7 +9,7 @@
 //!
 //! # fn test() -> io::Result<()> {
 //! // Create an inotify object. In this example, we use `NONBLOCK` so that the
-//! // reader fails with `WOULDBLOCk` when no events are ready. Otherwise it
+//! // reader fails with `WOULDBLOCK` when no events are ready. Otherwise it
 //! // will block until at least one event is ready.
 //! let inotify = inotify::init(inotify::CreateFlags::NONBLOCK)?;
 //!
@@ -200,7 +200,7 @@ impl<'buf, Fd: AsFd> Reader<'buf, Fd> {
         // - This data is initialized by the check above.
         //   - Assumption: the kernel will not give us partial structs.
         // - Assumption: the kernel uses proper alignment between structs.
-        // - The starting pointer is aligned (performed in RawDir::new)
+        // - The starting pointer is aligned (performed in `Reader::new`).
         let event = unsafe { &*ptr.cast::<inotify_event>() };
 
         self.offset += size_of::<inotify_event>() + usize::try_from(event.len).unwrap();

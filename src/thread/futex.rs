@@ -15,7 +15,7 @@
 //! # Ok(())
 //! # }
 //! ```
-
+//!
 //! # References
 //!  - [Linux `futex` system call]
 //!  - [Linux `futex` feature]
