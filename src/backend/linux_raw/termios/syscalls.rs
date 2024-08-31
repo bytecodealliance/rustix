@@ -53,7 +53,13 @@ pub(crate) fn tcgetattr(fd: BorrowedFd<'_>) -> io::Result<Termios> {
         let res = ret(syscall!(__NR_ioctl, fd, c_uint(c::TCGETS2), &mut result));
         match res {
             Ok(()) => TCGETS2_KNOWN.store(true, Ordering::Relaxed),
-            Err(io::Errno::NOTTY) => tcgetattr_fallback(fd, &mut result)?,
+            // If we failed with `NOTTY`, this might be WSL which doesn't
+            // support `TCGETS2`. If we failed with `ACCESS`, this might be
+            // a seccomp configuration such as on Android which doesn't support
+            // `TCGETS2`. Try falling back to `TCGETS`.
+            Err(err @ io::Errno::NOTTY | err @ io::Errno::ACCESS) => {
+                tcgetattr_fallback(fd, &mut result, err)?
+            }
             Err(err) => {
                 TCGETS2_KNOWN.store(true, Ordering::Relaxed);
                 return Err(err);
@@ -79,11 +85,12 @@ pub(crate) fn tcgetattr(fd: BorrowedFd<'_>) -> io::Result<Termios> {
 unsafe fn tcgetattr_fallback(
     fd: BorrowedFd<'_>,
     result: &mut MaybeUninit<Termios>,
+    err: io::Errno,
 ) -> io::Result<()> {
     // If we've already seen `TCGETS2` succeed or fail in a way other than
-    // `NOTTY`, then can trust a `NOTTY` error from it.
+    // `NOTTY` or `ACCESS`, then can trust a `NOTTY` or `ACCESS` error from it.
     if TCGETS2_KNOWN.load(Ordering::Relaxed) {
-        return Err(io::Errno::NOTTY);
+        return Err(err);
     }
 
     // Ensure that the `input_speed` and `output_speed` fields are initialized,
@@ -101,11 +108,7 @@ unsafe fn tcgetattr_fallback(
             infer_input_output_speed(result.assume_init_mut());
             Ok(())
         }
-        Err(io::Errno::NOTTY) => Err(io::Errno::NOTTY),
-        Err(err) => {
-            TCGETS2_KNOWN.store(true, Ordering::Relaxed);
-            Err(err)
-        }
+        Err(err) => Err(err),
     }
 }
 
@@ -181,7 +184,11 @@ pub(crate) fn tcsetattr(
         ));
         match res {
             Ok(()) => Ok(()),
-            Err(io::Errno::NOTTY) => tcsetattr_fallback(fd, optional_actions, termios),
+            // Similar to `tcgetattr` above, if `TCSETS2` failed with `NOTTY`
+            // or `ACCESS`, fall back to `TCSETS`.
+            Err(io::Errno::NOTTY | io::Errno::ACCESS) => {
+                tcsetattr_fallback(fd, optional_actions, termios)
+            }
             Err(err) => Err(err),
         }
     }
