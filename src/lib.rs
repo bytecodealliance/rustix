@@ -198,7 +198,6 @@ pub mod fd {
 #[cfg(feature = "event")]
 #[cfg_attr(docsrs, doc(cfg(feature = "event")))]
 pub mod event;
-#[cfg(not(windows))]
 pub mod ffi;
 #[cfg(not(windows))]
 #[cfg(feature = "fs")]

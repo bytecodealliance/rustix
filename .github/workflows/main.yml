@@ -208,34 +208,25 @@ jobs:
     - run: rustup component add rust-src
     - run: cargo check -Z build-std --target x86_64-unknown-openbsd --all-targets --features=all-apis
     - run: cargo check -Z build-std --target mips64-openwrt-linux-musl --all-targets --features=all-apis
-    # Temporarily disable this because the target appears to have breakage on nightly.
-    # - run: cargo check -Z build-std --target x86_64-unknown-dragonfly --all-targets --features=all-apis
+    - run: cargo check -Z build-std --target x86_64-unknown-dragonfly --all-targets --features=all-apis
     - run: cargo check -Z build-std --target sparc-unknown-linux-gnu --all-targets --features=all-apis
-    # Temporarily disable this because the target appears to have changed and needs
-    # fixes and we transitively dev-depend on what can be an older version of rustix.
-    #- run: cargo check -Z build-std --target armv7-unknown-freebsd --all-targets --features=all-apis
-    # Omit --all-targets on gnu_ilp32 because dev-dependency tempfile depends on an older rustix
-    - run: cargo check -Z build-std --target aarch64-unknown-linux-gnu_ilp32 --features=all-apis
+    - run: cargo check -Z build-std --target armv7-unknown-freebsd --all-targets --features=all-apis
+    - run: cargo check -Z build-std --target aarch64-unknown-linux-gnu_ilp32 --all-targets --features=all-apis
     # Omit --all-targets on haiku because not all the tests build yet.
-    # Temporarily disable this because the target appears to have breakage on nightly.
-    #- run: cargo check -Z build-std --target x86_64-unknown-haiku --features=all-apis
-    # Temporarily disable this because the target appears to have breakage on nightly.
-    #- run: cargo check -Z build-std --target x86_64-uwp-windows-msvc --all-targets --features=all-apis
+    - run: cargo check -Z build-std --target x86_64-unknown-haiku --features=all-apis
+    - run: cargo check -Z build-std --target x86_64-uwp-windows-msvc --all-targets --features=all-apis
     # Temporarily disable riscv32imc-esp-espidf due to std using SOMAXCONN.
     #- run: cargo check -Z build-std --target=riscv32imc-esp-espidf --features=all-apis
     - run: cargo check -Z build-std --target=aarch64-unknown-nto-qnx710 --features=all-apis
     - run: cargo check -Z build-std --target=x86_64-pc-nto-qnx710 --features=all-apis
     # Temporarily disable --features=all-apis, which doesn't build yet.
-    # Temporarily disable this because the target appears to have breakage on nightly.
-    #- run: cargo check -Z build-std --target=armv6k-nintendo-3ds
+    - run: cargo check -Z build-std --target=armv6k-nintendo-3ds
     # Temporarily disable armv7-sony-vita-newlibeabihf due to std using SOMAXCONN.
     #- run: cargo check -Z build-std --target=armv7-sony-vita-newlibeabihf --features=all-apis
     # `std` doesn't appear to build on AIX yet, so test in `no_std` mode.
     - run: cargo check -Zbuild-std=core,alloc --target=powerpc64-ibm-aix --features=all-apis --no-default-features
-    # Disable MIPS entirely for now as it fails with errors like
-    # "Undefined temporary symbol $BB342_17".
-    #- run: cargo check -Z build-std --target=mipsel-unknown-linux-gnu --features=all-apis
-    #- run: cargo check -Z build-std --target=mips64el-unknown-linux-gnuabi64 --features=all-apis
+    - run: cargo check -Z build-std --target=mipsel-unknown-linux-gnu --features=all-apis
+    - run: cargo check -Z build-std --target=mips64el-unknown-linux-gnuabi64 --features=all-apis
 
 
   test:
