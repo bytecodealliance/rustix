@@ -6,15 +6,22 @@ This implements the `TCGETS2` and `TCSETS2` ioctls.
 diff -ur a/linux-user/ioctls.h b/linux-user/ioctls.h
 --- a/linux-user/ioctls.h
 +++ b/linux-user/ioctls.h
-@@ -2,6 +2,8 @@
+@@ -1,5 +1,15 @@
+      /* emulated ioctl list */
  
-      IOCTL(TCGETS, IOC_R, MK_PTR(MK_STRUCT(STRUCT_termios)))
-      IOCTL(TCSETS, IOC_W, MK_PTR(MK_STRUCT(STRUCT_termios)))
++     /*
++      * Put `TCGETS2`/`TCGETS2` before `TCGETS`/`TCSETS` so that on targets
++      * where these have the same value, we find the `TCGETS2`/`TCSETS2`
++      * entries first, which ensures that we set the `c_ispeed` and `c_ospeed`
++      * fields if the target needed them.
++      */
 +     IOCTL(TCGETS2, IOC_R, MK_PTR(MK_STRUCT(STRUCT_termios2)))
 +     IOCTL(TCSETS2, IOC_W, MK_PTR(MK_STRUCT(STRUCT_termios2)))
++     IOCTL(TCSETSF2, IOC_W, MK_PTR(MK_STRUCT(STRUCT_termios2)))
++     IOCTL(TCSETSW2, IOC_W, MK_PTR(MK_STRUCT(STRUCT_termios2)))
+      IOCTL(TCGETS, IOC_R, MK_PTR(MK_STRUCT(STRUCT_termios)))
+      IOCTL(TCSETS, IOC_W, MK_PTR(MK_STRUCT(STRUCT_termios)))
       IOCTL(TCSETSF, IOC_W, MK_PTR(MK_STRUCT(STRUCT_termios)))
-      IOCTL(TCSETSW, IOC_W, MK_PTR(MK_STRUCT(STRUCT_termios)))
-      IOCTL(TIOCGWINSZ, IOC_R, MK_PTR(MK_STRUCT(STRUCT_winsize)))
 diff -ur a/linux-user/ppc/termbits.h b/linux-user/ppc/termbits.h
 --- a/linux-user/ppc/termbits.h
 +++ b/linux-user/ppc/termbits.h
@@ -53,12 +60,14 @@ diff -ur a/linux-user/ppc/termbits.h b/linux-user/ppc/termbits.h
  
  #define TARGET_CSIZE	00001400
  #define   TARGET_CS5	00000000
-@@ -178,6 +192,8 @@
+@@ -178,6 +192,10 @@
  #define TARGET_TCSETS		TARGET_IOW('t', 20, struct target_termios)
  #define TARGET_TCSETSW		TARGET_IOW('t', 21, struct target_termios)
  #define TARGET_TCSETSF		TARGET_IOW('t', 22, struct target_termios)
 +#define TARGET_TCGETS2		TARGET_TCGETS
 +#define TARGET_TCSETS2		TARGET_TCSETS
++#define TARGET_TCSETSW2		TARGET_TCSETSW
++#define TARGET_TCSETSF2		TARGET_TCSETSF
  
  #define TARGET_TCGETA		TARGET_IOR('t', 23, struct target_termio)
  #define TARGET_TCSETA		TARGET_IOW('t', 24, struct target_termio)
@@ -157,6 +166,15 @@ diff -ur a/linux-user/strace.c b/linux-user/strace.c
  
  #undef UNUSED
  
+@@ -4161,7 +4161,7 @@
+     int target_size;
+ 
+     for (ie = ioctl_entries; ie->target_cmd != 0; ie++) {
+-        if (ie->target_cmd == arg1) {
++        if (ie->target_cmd == (int)arg1) {
+             break;
+         }
+     }
 diff -ur a/linux-user/syscall.c b/linux-user/syscall.c
 --- a/linux-user/syscall.c
 +++ b/linux-user/syscall.c
@@ -326,3 +344,60 @@ diff -ur a/linux-user/user-internals.h b/linux-user/user-internals.h
  
  /* ARM EABI and MIPS expect 64bit types aligned even on pairs or registers */
  #ifdef TARGET_ARM
+diff -ur -x build -x roms a/linux-user/mips/termbits.h b/linux-user/mips/termbits.h
+--- a/linux-user/mips/termbits.h
++++ b/linux-user/mips/termbits.h
+@@ -18,6 +18,17 @@
+     target_cc_t c_cc[TARGET_NCCS];         /* control characters */
+ };
+ 
++struct target_termios2 {
++    target_tcflag_t c_iflag;               /* input mode flags */
++    target_tcflag_t c_oflag;               /* output mode flags */
++    target_tcflag_t c_cflag;               /* control mode flags */
++    target_tcflag_t c_lflag;               /* local mode flags */
++    target_cc_t c_line;                    /* line discipline */
++    target_cc_t c_cc[TARGET_NCCS];         /* control characters */
++    target_speed_t c_ispeed;               /* input speed */
++    target_speed_t c_ospeed;               /* output speed */
++};
++
+ /* c_iflag bits */
+ #define TARGET_IGNBRK  0000001
+ #define TARGET_BRKINT  0000002
+@@ -117,6 +128,7 @@
+ #define  TARGET_B3500000 0010016
+ #define  TARGET_B4000000 0010017
+ #define TARGET_CIBAUD    002003600000  /* input baud rate (not used) */
++#define TARGET_IBSHIFT 16
+ #define TARGET_CMSPAR    010000000000  /* mark or space (stick) parity */
+ #define TARGET_CRTSCTS   020000000000  /* flow control */
+ 
+@@ -217,9 +229,9 @@
+ #define TARGET_TIOCSETP        0x7409
+ #define TARGET_TIOCSETN        0x740a			/* TIOCSETP wo flush */
+ 
+-/* #define TARGET_TIOCSETA	TARGET_IOW('t', 20, struct termios) set termios struct */
+-/* #define TARGET_TIOCSETAW	TARGET_IOW('t', 21, struct termios) drain output, set */
+-/* #define TARGET_TIOCSETAF	TARGET_IOW('t', 22, struct termios) drn out, fls in, set */
++/* #define TARGET_TIOCSETA	TARGET_IOW('t', 20, struct target_termios) set termios struct */
++/* #define TARGET_TIOCSETAW	TARGET_IOW('t', 21, struct target_termios) drain output, set */
++/* #define TARGET_TIOCSETAF	TARGET_IOW('t', 22, struct target_termios) drn out, fls in, set */
+ /* #define TARGET_TIOCGETD	TARGET_IOR('t', 26, int)	get line discipline */
+ /* #define TARGET_TIOCSETD	TARGET_IOW('t', 27, int)	set line discipline */
+ 						/* 127-124 compat */
+@@ -227,10 +239,10 @@
+ #define TARGET_TIOCSBRK	0x5427  /* BSD compatibility */
+ #define TARGET_TIOCCBRK	0x5428  /* BSD compatibility */
+ #define TARGET_TIOCGSID	0x7416  /* Return the session ID of FD */
+-#define TARGET_TCGETS2          TARGET_IOR('T', 0x2A, struct termios2)
+-#define TARGET_TCSETS2          TARGET_IOW('T', 0x2B, struct termios2)
+-#define TARGET_TCSETSW2         TARGET_IOW('T', 0x2C, struct termios2)
+-#define TARGET_TCSETSF2         TARGET_IOW('T', 0x2D, struct termios2)
++#define TARGET_TCGETS2          TARGET_IOR('T', 0x2A, struct target_termios2)
++#define TARGET_TCSETS2          TARGET_IOW('T', 0x2B, struct target_termios2)
++#define TARGET_TCSETSW2         TARGET_IOW('T', 0x2C, struct target_termios2)
++#define TARGET_TCSETSF2         TARGET_IOW('T', 0x2D, struct target_termios2)
+ #define TARGET_TIOCGRS485       TARGET_IOR('T', 0x2E, struct serial_rs485)
+ #define TARGET_TIOCSRS485       TARGET_IOWR('T', 0x2F, struct serial_rs485)
+ #define TARGET_TIOCGPTN	TARGET_IOR('T',0x30, unsigned int) /* Get Pty Number (of pty-mux device) */

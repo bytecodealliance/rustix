@@ -13,70 +13,77 @@ use crate::pid::Pid;
 #[cfg(all(feature = "alloc", feature = "procfs"))]
 use crate::procfs;
 use crate::termios::{
-    Action, ControlModes, InputModes, LocalModes, OptionalActions, OutputModes, QueueSelector,
-    SpecialCodeIndex, Termios, Winsize,
+    speed, Action, ControlModes, InputModes, LocalModes, OptionalActions, OutputModes,
+    QueueSelector, SpecialCodeIndex, Termios, Winsize,
 };
 #[cfg(all(feature = "alloc", feature = "procfs"))]
 use crate::{ffi::CStr, fs::FileType, path::DecInt};
 use core::mem::MaybeUninit;
-use linux_raw_sys::general::IBSHIFT;
-use linux_raw_sys::ioctl::{
-    TCFLSH, TCSBRK, TCXONC, TIOCGPGRP, TIOCGSID, TIOCGWINSZ, TIOCSPGRP, TIOCSWINSZ,
-};
 
 #[inline]
 pub(crate) fn tcgetwinsize(fd: BorrowedFd<'_>) -> io::Result<Winsize> {
     unsafe {
         let mut result = MaybeUninit::<Winsize>::uninit();
-        ret(syscall!(__NR_ioctl, fd, c_uint(TIOCGWINSZ), &mut result))?;
+        ret(syscall!(__NR_ioctl, fd, c_uint(c::TIOCGWINSZ), &mut result))?;
         Ok(result.assume_init())
     }
 }
 
 #[inline]
 pub(crate) fn tcgetattr(fd: BorrowedFd<'_>) -> io::Result<Termios> {
+    // SAFETY: This invokes the `TCGETS` and optionally also `TCGETS2` ioctls.
+    // `TCGETS` doesn't initialize the `input_speed` and `output_speed` fields
+    // of the result, so in the case where we don't call `TCGETS2`, we infer
+    // their values from other fields and then manually initialize them (except
+    // on PowerPC where `TCGETS` does initialize those fields).
     unsafe {
         let mut result = MaybeUninit::<Termios>::uninit();
 
-        // QEMU's `TCGETS2` doesn't currently set `input_speed` or
-        // `output_speed` on PowerPC, so zero out the fields ourselves.
-        #[cfg(any(target_arch = "powerpc", target_arch = "powerpc64"))]
+        // Use the old `TCGETS`. Linux has supported `TCGETS2` since Linux
+        // 2.6.40, however glibc and musl haven't migrated to it yet, so it
+        // tends to get left out of seccomp sandboxes. It's also unsupported
+        // by WSL, and likely enough other things too, so we use the old
+        // `TCGETS` for compatibility.
+        ret(syscall!(__NR_ioctl, fd, c_uint(c::TCGETS), &mut result))?;
+
+        // If `BOTHER` is set for either the input or output, that means
+        // there's a custom speed, which means we really do need to use
+        // `TCGETS2`. Unless we're on PowerPC, where `TCGETS` is the same
+        // as `TCGETS2`.
+        #[cfg(not(any(target_arch = "powerpc", target_arch = "powerpc64")))]
         {
-            result.write(core::mem::zeroed());
+            use core::ptr::{addr_of, addr_of_mut};
+
+            // At this point, `result` is initialized except for the
+            // `input_speed` and `output_speed` fields, so we don't form a
+            // reference yet.
+            let ptr = result.as_mut_ptr();
+
+            let control_modes = addr_of!((*ptr).control_modes).read();
+            let encoded_out = control_modes.bits() & c::CBAUD;
+            let encoded_in = (control_modes.bits() & c::CIBAUD) >> c::IBSHIFT;
+            if encoded_out == c::BOTHER || encoded_in == c::BOTHER {
+                // Do a `TCGETS2` ioctl, which will fill in `input_speed` and
+                // `output_speed`.
+                ret(syscall!(__NR_ioctl, fd, c_uint(c::TCGETS2), ptr))?;
+            } else {
+                // Infer `output_speed`.
+                let output_speed = speed::decode(encoded_out).unwrap();
+                addr_of_mut!((*ptr).output_speed).write(output_speed);
+
+                // Infer `input_speed`. For input speeds, `B0` is special-cased
+                // to mean the input speed is the same as the output speed.
+                let input_speed = if encoded_in == c::B0 {
+                    output_speed
+                } else {
+                    speed::decode(encoded_in).unwrap()
+                };
+                addr_of_mut!((*ptr).input_speed).write(input_speed);
+            }
         }
 
-        ret(syscall!(__NR_ioctl, fd, c_uint(c::TCGETS2), &mut result))?;
-
-        let result = result.assume_init();
-
-        // QEMU's `TCGETS2` doesn't currently set `input_speed` or
-        // `output_speed` on PowerPC, so set them manually if we can.
-        #[cfg(any(target_arch = "powerpc", target_arch = "powerpc64"))]
-        let result = {
-            use crate::termios::speed;
-            let mut result = result;
-            if result.output_speed == 0 && (result.control_modes.bits() & c::CBAUD) != c::BOTHER {
-                if let Some(output_speed) = speed::decode(result.control_modes.bits() & c::CBAUD) {
-                    result.output_speed = output_speed;
-                }
-            }
-            if result.input_speed == 0
-                && ((result.control_modes.bits() & c::CIBAUD) >> c::IBSHIFT) != c::BOTHER
-            {
-                // For input speeds, `B0` is special-cased to mean the input
-                // speed is the same as the output speed.
-                if ((result.control_modes.bits() & c::CIBAUD) >> c::IBSHIFT) == c::B0 {
-                    result.input_speed = result.output_speed;
-                } else if let Some(input_speed) =
-                    speed::decode((result.control_modes.bits() & c::CIBAUD) >> c::IBSHIFT)
-                {
-                    result.input_speed = input_speed;
-                }
-            }
-            result
-        };
-
-        Ok(result)
+        // Now all the fields are set.
+        Ok(result.assume_init())
     }
 }
 
@@ -84,7 +91,7 @@ pub(crate) fn tcgetattr(fd: BorrowedFd<'_>) -> io::Result<Termios> {
 pub(crate) fn tcgetpgrp(fd: BorrowedFd<'_>) -> io::Result<Pid> {
     unsafe {
         let mut result = MaybeUninit::<c::pid_t>::uninit();
-        ret(syscall!(__NR_ioctl, fd, c_uint(TIOCGPGRP), &mut result))?;
+        ret(syscall!(__NR_ioctl, fd, c_uint(c::TIOCGPGRP), &mut result))?;
         let pid = result.assume_init();
 
         // This doesn't appear to be documented, but it appears `tcsetpgrp` can
@@ -104,19 +111,39 @@ pub(crate) fn tcsetattr(
     optional_actions: OptionalActions,
     termios: &Termios,
 ) -> io::Result<()> {
-    // Translate from `optional_actions` into an ioctl request code. On MIPS,
-    // `optional_actions` already has `TCGETS` added to it.
-    let request = linux_raw_sys::ioctl::TCSETS2
-        + if cfg!(any(
+    // Similar to `tcgetattr`, use the old `TCSETS`, unless either input speed
+    // or output speed is custom, then we really have to use `TCSETS2`.
+    let encoded_out = termios.control_modes.bits() & c::CBAUD;
+    let encoded_in = (termios.control_modes.bits() & c::CIBAUD) >> c::IBSHIFT;
+    let request = if encoded_out == c::BOTHER || encoded_in == c::BOTHER {
+        // Translate from `optional_actions` into a `TCGETS2` ioctl request
+        // code. On MIPS, `optional_actions` already has `TCGETS` added to it.
+        c::TCSETS2
+            + if cfg!(any(
+                target_arch = "mips",
+                target_arch = "mips32r6",
+                target_arch = "mips64",
+                target_arch = "mips64r6"
+            )) {
+                optional_actions as u32 - c::TCSETS
+            } else {
+                optional_actions as u32
+            }
+    } else {
+        // Translate from `optional_actions` into a `TCGETS` ioctl request
+        // code. On MIPS, `optional_actions` already has `TCGETS` added to it.
+        if cfg!(any(
             target_arch = "mips",
             target_arch = "mips32r6",
             target_arch = "mips64",
             target_arch = "mips64r6"
         )) {
-            optional_actions as u32 - linux_raw_sys::ioctl::TCSETS
-        } else {
             optional_actions as u32
-        };
+        } else {
+            optional_actions as u32 + c::TCSETS
+        }
+    };
+
     unsafe {
         ret(syscall_readonly!(
             __NR_ioctl,
@@ -129,12 +156,26 @@ pub(crate) fn tcsetattr(
 
 #[inline]
 pub(crate) fn tcsendbreak(fd: BorrowedFd<'_>) -> io::Result<()> {
-    unsafe { ret(syscall_readonly!(__NR_ioctl, fd, c_uint(TCSBRK), c_uint(0))) }
+    unsafe {
+        ret(syscall_readonly!(
+            __NR_ioctl,
+            fd,
+            c_uint(c::TCSBRK),
+            c_uint(0)
+        ))
+    }
 }
 
 #[inline]
 pub(crate) fn tcdrain(fd: BorrowedFd<'_>) -> io::Result<()> {
-    unsafe { ret(syscall_readonly!(__NR_ioctl, fd, c_uint(TCSBRK), c_uint(1))) }
+    unsafe {
+        ret(syscall_readonly!(
+            __NR_ioctl,
+            fd,
+            c_uint(c::TCSBRK),
+            c_uint(1)
+        ))
+    }
 }
 
 #[inline]
@@ -143,7 +184,7 @@ pub(crate) fn tcflush(fd: BorrowedFd<'_>, queue_selector: QueueSelector) -> io::
         ret(syscall_readonly!(
             __NR_ioctl,
             fd,
-            c_uint(TCFLSH),
+            c_uint(c::TCFLSH),
             c_uint(queue_selector as u32)
         ))
     }
@@ -155,7 +196,7 @@ pub(crate) fn tcflow(fd: BorrowedFd<'_>, action: Action) -> io::Result<()> {
         ret(syscall_readonly!(
             __NR_ioctl,
             fd,
-            c_uint(TCXONC),
+            c_uint(c::TCXONC),
             c_uint(action as u32)
         ))
     }
@@ -165,7 +206,7 @@ pub(crate) fn tcflow(fd: BorrowedFd<'_>, action: Action) -> io::Result<()> {
 pub(crate) fn tcgetsid(fd: BorrowedFd<'_>) -> io::Result<Pid> {
     unsafe {
         let mut result = MaybeUninit::<c::pid_t>::uninit();
-        ret(syscall!(__NR_ioctl, fd, c_uint(TIOCGSID), &mut result))?;
+        ret(syscall!(__NR_ioctl, fd, c_uint(c::TIOCGSID), &mut result))?;
         let pid = result.assume_init();
         Ok(Pid::from_raw_unchecked(pid))
     }
@@ -177,7 +218,7 @@ pub(crate) fn tcsetwinsize(fd: BorrowedFd<'_>, winsize: Winsize) -> io::Result<(
         ret(syscall_readonly!(
             __NR_ioctl,
             fd,
-            c_uint(TIOCSWINSZ),
+            c_uint(c::TIOCSWINSZ),
             by_ref(&winsize)
         ))
     }
@@ -190,7 +231,7 @@ pub(crate) fn tcsetpgrp(fd: BorrowedFd<'_>, pid: Pid) -> io::Result<()> {
         ret(syscall_readonly!(
             __NR_ioctl,
             fd,
-            c_uint(TIOCSPGRP),
+            c_uint(c::TIOCSPGRP),
             by_ref(&raw_pid)
         ))
     }
@@ -200,13 +241,13 @@ pub(crate) fn tcsetpgrp(fd: BorrowedFd<'_>, pid: Pid) -> io::Result<()> {
 /// integer speed value.
 #[inline]
 pub(crate) fn set_speed(termios: &mut Termios, arbitrary_speed: u32) -> io::Result<()> {
-    let encoded_speed = crate::termios::speed::encode(arbitrary_speed).unwrap_or(c::BOTHER);
+    let encoded_speed = speed::encode(arbitrary_speed).unwrap_or(c::BOTHER);
 
     debug_assert_eq!(encoded_speed & !c::CBAUD, 0);
 
     termios.control_modes -= ControlModes::from_bits_retain(c::CBAUD | c::CIBAUD);
     termios.control_modes |=
-        ControlModes::from_bits_retain(encoded_speed | (encoded_speed << IBSHIFT));
+        ControlModes::from_bits_retain(encoded_speed | (encoded_speed << c::IBSHIFT));
 
     termios.input_speed = arbitrary_speed;
     termios.output_speed = arbitrary_speed;
@@ -218,7 +259,7 @@ pub(crate) fn set_speed(termios: &mut Termios, arbitrary_speed: u32) -> io::Resu
 /// integer speed value.
 #[inline]
 pub(crate) fn set_output_speed(termios: &mut Termios, arbitrary_speed: u32) -> io::Result<()> {
-    let encoded_speed = crate::termios::speed::encode(arbitrary_speed).unwrap_or(c::BOTHER);
+    let encoded_speed = speed::encode(arbitrary_speed).unwrap_or(c::BOTHER);
 
     debug_assert_eq!(encoded_speed & !c::CBAUD, 0);
 
@@ -234,12 +275,12 @@ pub(crate) fn set_output_speed(termios: &mut Termios, arbitrary_speed: u32) -> i
 /// integer speed value.
 #[inline]
 pub(crate) fn set_input_speed(termios: &mut Termios, arbitrary_speed: u32) -> io::Result<()> {
-    let encoded_speed = crate::termios::speed::encode(arbitrary_speed).unwrap_or(c::BOTHER);
+    let encoded_speed = speed::encode(arbitrary_speed).unwrap_or(c::BOTHER);
 
     debug_assert_eq!(encoded_speed & !c::CBAUD, 0);
 
     termios.control_modes -= ControlModes::from_bits_retain(c::CIBAUD);
-    termios.control_modes |= ControlModes::from_bits_retain(encoded_speed << IBSHIFT);
+    termios.control_modes |= ControlModes::from_bits_retain(encoded_speed << c::IBSHIFT);
 
     termios.input_speed = arbitrary_speed;
 

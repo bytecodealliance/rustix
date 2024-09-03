@@ -112,9 +112,7 @@ fn test_termios_speeds() {
     assert_eq!(tio.output_speed(), speed::B50);
     tcsetattr(&pty, OptionalActions::Now, &tio).unwrap();
 
-    #[allow(unused_variables)]
     let new_tio = tcgetattr(&pty).unwrap();
-
     assert_eq!(new_tio.input_speed(), speed::B50);
     assert_eq!(new_tio.output_speed(), speed::B50);
 
@@ -124,9 +122,7 @@ fn test_termios_speeds() {
     assert_eq!(tio.output_speed(), speed::B134);
     tcsetattr(&pty, OptionalActions::Now, &tio).unwrap();
 
-    #[allow(unused_variables)]
     let new_tio = tcgetattr(&pty).unwrap();
-
     assert_eq!(new_tio.input_speed(), speed::B134);
     assert_eq!(new_tio.output_speed(), speed::B134);
 
@@ -134,22 +130,16 @@ fn test_termios_speeds() {
     // speeds.
     #[cfg(any(bsd, linux_kernel))]
     {
-        tio.set_input_speed(51).unwrap();
-        tio.set_output_speed(51).unwrap();
-        assert_eq!(tio.input_speed(), 51);
-        assert_eq!(tio.output_speed(), 51);
-        tcsetattr(&pty, OptionalActions::Now, &tio).unwrap();
+        for custom_speed in [51, 31250, libc::B50 as _] {
+            tio.set_input_speed(custom_speed).unwrap();
+            tio.set_output_speed(custom_speed).unwrap();
+            assert_eq!(tio.input_speed(), custom_speed);
+            assert_eq!(tio.output_speed(), custom_speed);
+            tcsetattr(&pty, OptionalActions::Now, &tio).unwrap();
 
-        #[allow(unused_variables)]
-        let new_tio = tcgetattr(&pty).unwrap();
-
-        // QEMU's `TCGETS2` doesn't currently set `input_speed` or
-        // `output_speed` on PowerPC, so we can't use them to set
-        // arbitrary speed values.
-        #[cfg(not(all(linux_kernel, any(target_arch = "powerpc", target_arch = "powerpc64"))))]
-        {
-            assert_eq!(new_tio.input_speed(), 51);
-            assert_eq!(new_tio.output_speed(), 51);
+            let new_tio = tcgetattr(&pty).unwrap();
+            assert_eq!(new_tio.input_speed(), custom_speed);
+            assert_eq!(new_tio.output_speed(), custom_speed);
         }
     }
 
@@ -162,11 +152,38 @@ fn test_termios_speeds() {
         assert_eq!(tio.output_speed(), speed::B110);
         tcsetattr(&pty, OptionalActions::Now, &tio).unwrap();
 
-        #[allow(unused_variables)]
         let new_tio = tcgetattr(&pty).unwrap();
-
         assert_eq!(new_tio.input_speed(), speed::B75);
         assert_eq!(new_tio.output_speed(), speed::B110);
+    }
+
+    // These platforms are known to support arbitrary not-pre-defined-by-POSIX
+    // speeds that also differ between input and output.
+    #[cfg(any(bsd, linux_kernel))]
+    {
+        tio.set_output_speed(speed::B134).unwrap();
+        for custom_speed in [51, 31250, libc::B50 as _] {
+            tio.set_input_speed(custom_speed).unwrap();
+            assert_eq!(tio.input_speed(), custom_speed);
+            assert_eq!(tio.output_speed(), speed::B134);
+            tcsetattr(&pty, OptionalActions::Now, &tio).unwrap();
+
+            let new_tio = tcgetattr(&pty).unwrap();
+            assert_eq!(new_tio.input_speed(), custom_speed);
+            assert_eq!(new_tio.output_speed(), speed::B134);
+        }
+
+        tio.set_input_speed(speed::B150).unwrap();
+        for custom_speed in [51, 31250, libc::B50 as _] {
+            tio.set_output_speed(custom_speed).unwrap();
+            assert_eq!(tio.input_speed(), speed::B150);
+            assert_eq!(tio.output_speed(), custom_speed);
+            tcsetattr(&pty, OptionalActions::Now, &tio).unwrap();
+
+            let new_tio = tcgetattr(&pty).unwrap();
+            assert_eq!(new_tio.input_speed(), speed::B150);
+            assert_eq!(new_tio.output_speed(), custom_speed);
+        }
     }
 }
 

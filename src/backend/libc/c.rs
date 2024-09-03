@@ -102,18 +102,25 @@ pub(crate) const O_LARGEFILE: c_int = 0x2000;
 pub(crate) const MAP_DROPPABLE: u32 = 0x8;
 
 // On PowerPC, the regular `termios` has the `termios2` fields and there is no
-// `termios2`. linux-raw-sys has aliases `termios2` to `termios` to cover this
-// difference, but we still need to manually import it since `libc` doesn't
-// have this.
+// `termios2`, so we define aliases.
 #[cfg(all(
     linux_kernel,
     feature = "termios",
     any(target_arch = "powerpc", target_arch = "powerpc64")
 ))]
-pub(crate) use {
-    linux_raw_sys::general::{termios2, CIBAUD},
-    linux_raw_sys::ioctl::{TCGETS2, TCSETS2, TCSETSF2, TCSETSW2},
+pub(crate) use libc::{
+    termios as termios2, TCGETS as TCGETS2, TCSETS as TCSETS2, TCSETSF as TCSETSF2,
+    TCSETSW as TCSETSW2,
 };
+
+// And PowerPC doesn't define `CIBAUD`, but it does define `IBSHIFT`, so we can
+// compute `CIBAUD` ourselves.
+#[cfg(all(
+    linux_kernel,
+    feature = "termios",
+    any(target_arch = "powerpc", target_arch = "powerpc64")
+))]
+pub(crate) const CIBAUD: u32 = libc::CBAUD << libc::IBSHIFT;
 
 // Automatically enable “large file” support (LFS) features.
 

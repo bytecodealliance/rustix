@@ -810,15 +810,17 @@ pub mod speed {
     /// `u32`.
     ///
     /// On BSD platforms, integer speed values are already the same as their
-    /// encoded values, and on Linux platforms, we use `TCGETS2`/`TCSETS2` and
-    /// the `c_ispeed`/`c_ospeed` fields, except that on Linux on PowerPC on
-    /// QEMU, `TCGETS2`/`TCSETS2` don't set `c_ispeed`/`c_ospeed`.
+    /// encoded values.
+    ///
+    /// On Linux on PowerPC, `TCGETS`/`TCSETS` support the `c_ispeed` and
+    /// `c_ospeed` fields.
+    ///
+    /// On Linux on architectures other than PowerPC, `TCGETS`/`TCSETS` don't
+    /// support the `c_ispeed` and `c_ospeed` fields, so we have to fall back
+    /// to `TCGETS2`/`TCSETS2` to support them.
     #[cfg(not(any(
         bsd,
-        all(
-            linux_kernel,
-            not(any(target_arch = "powerpc", target_arch = "powerpc64"))
-        )
+        all(linux_kernel, any(target_arch = "powerpc", target_arch = "powerpc64"))
     )))]
     pub(crate) const fn decode(encoded_speed: c::speed_t) -> Option<u32> {
         match encoded_speed {
