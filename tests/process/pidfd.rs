@@ -71,8 +71,9 @@ fn test_pidfd_poll() {
         process::WaitId::PidFd(pidfd.as_fd()),
         process::WaitidOptions::EXITED,
     ) {
-        Err(e) if e == io::Errno::AGAIN => (),
-        _ => panic!("unexpected result"),
+        Err(io::Errno::AGAIN) => (),
+        Err(e) => panic!("unexpected result: {:?}", e),
+        Ok(_) => panic!("unexpected success"),
     }
 
     // Wait for the child process to exit.
