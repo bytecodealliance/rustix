@@ -6,7 +6,7 @@ pub use backend::process::types::Resource;
 
 /// `struct rlimit`—Current and maximum values used in [`getrlimit`],
 /// [`setrlimit`], and [`prlimit`].
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Rlimit {
     /// Current effective, “soft”, limit.
     pub current: Option<u64>,
