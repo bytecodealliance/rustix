@@ -3,10 +3,10 @@
 use crate::backend::c;
 #[cfg(any(linux_kernel, solarish, target_os = "redox"))]
 use crate::backend::conv::ret;
+use crate::backend::conv::ret_c_int;
 #[cfg(feature = "alloc")]
 #[cfg(any(linux_kernel, target_os = "redox"))]
 use crate::backend::conv::ret_u32;
-use crate::backend::conv::{borrowed_fd, ret_c_int, ret_owned_fd};
 #[cfg(solarish)]
 use crate::event::port::Event;
 #[cfg(any(
@@ -17,7 +17,6 @@ use crate::event::port::Event;
 ))]
 use crate::event::EventfdFlags;
 use crate::event::PollFd;
-use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io;
 #[cfg(solarish)]
 use crate::utils::as_mut_ptr;
@@ -31,6 +30,23 @@ use crate::utils::as_ptr;
 use core::mem::MaybeUninit;
 #[cfg(any(linux_kernel, solarish, target_os = "redox"))]
 use core::ptr::null_mut;
+#[cfg(any(
+    linux_kernel,
+    solarish,
+    target_os = "redox",
+    all(feature = "alloc", bsd)
+))]
+use {crate::backend::conv::borrowed_fd, crate::fd::BorrowedFd};
+#[cfg(any(
+    linux_kernel,
+    solarish,
+    target_os = "freebsd",
+    target_os = "illumos",
+    target_os = "espidf",
+    target_os = "redox",
+    all(feature = "alloc", bsd)
+))]
+use {crate::backend::conv::ret_owned_fd, crate::fd::OwnedFd};
 #[cfg(all(feature = "alloc", bsd))]
 use {crate::event::kqueue::Event, crate::utils::as_ptr, core::ptr::null};
 
