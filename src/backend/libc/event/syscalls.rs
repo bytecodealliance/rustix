@@ -1,10 +1,12 @@
 //! libc syscalls supporting `rustix::event`.
 
 use crate::backend::c;
+#[cfg(any(linux_kernel, solarish, target_os = "redox"))]
+use crate::backend::conv::ret;
 #[cfg(feature = "alloc")]
 #[cfg(any(linux_kernel, target_os = "redox"))]
 use crate::backend::conv::ret_u32;
-use crate::backend::conv::{borrowed_fd, ret, ret_c_int, ret_owned_fd};
+use crate::backend::conv::{borrowed_fd, ret_c_int, ret_owned_fd};
 #[cfg(solarish)]
 use crate::event::port::Event;
 #[cfg(any(
@@ -27,6 +29,7 @@ use crate::utils::as_ptr;
     all(feature = "alloc", any(linux_kernel, target_os = "redox")),
 ))]
 use core::mem::MaybeUninit;
+#[cfg(any(linux_kernel, solarish, target_os = "redox"))]
 use core::ptr::null_mut;
 #[cfg(all(feature = "alloc", bsd))]
 use {crate::event::kqueue::Event, crate::utils::as_ptr, core::ptr::null};
