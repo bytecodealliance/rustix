@@ -1,6 +1,7 @@
 //! libc syscalls supporting `rustix::event`.
 
 use crate::backend::c;
+#[cfg(feature = "alloc")]
 #[cfg(any(linux_kernel, target_os = "redox"))]
 use crate::backend::conv::ret_u32;
 use crate::backend::conv::{borrowed_fd, ret, ret_c_int, ret_owned_fd};
@@ -20,6 +21,11 @@ use crate::io;
 use crate::utils::as_mut_ptr;
 #[cfg(any(linux_kernel, target_os = "redox"))]
 use crate::utils::as_ptr;
+#[cfg(any(
+    all(feature = "alloc", bsd),
+    solarish,
+    all(feature = "alloc", any(linux_kernel, target_os = "redox")),
+))]
 use core::mem::MaybeUninit;
 use core::ptr::null_mut;
 #[cfg(all(feature = "alloc", bsd))]
@@ -249,6 +255,7 @@ pub(crate) fn epoll_del(epoll: BorrowedFd<'_>, source: BorrowedFd<'_>) -> io::Re
 }
 
 #[inline]
+#[cfg(feature = "alloc")]
 #[cfg(any(linux_kernel, target_os = "redox"))]
 pub(crate) fn epoll_wait(
     epoll: BorrowedFd<'_>,
