@@ -18,6 +18,19 @@ diff -ur -x roms -x build a/linux-user/generic/sockbits.h b/linux-user/generic/s
 +#define TARGET_SO_COOKIE               57
 +#endif
  #endif
+diff -ur -x roms -x build a/linux-user/mips/sockbits.h b/linux-user/mips/sockbits.h
+--- a/linux-user/mips/sockbits.h
++++ b/linux-user/mips/sockbits.h
+@@ -73,6 +73,9 @@
+ #define TARGET_SO_RCVBUFFORCE          33
+ #define TARGET_SO_PASSSEC              34
+ 
++#define TARGET_SO_INCOMING_CPU         49
++#define TARGET_SO_COOKIE               57
++
+ /** sock_type - Socket types
+  *
+  * Please notice that for binary compat reasons MIPS has to
 diff -ur -x roms -x build a/linux-user/syscall.c b/linux-user/syscall.c
 --- a/linux-user/syscall.c
 +++ b/linux-user/syscall.c

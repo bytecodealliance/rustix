@@ -484,7 +484,9 @@ jobs:
         patch -p1 < $GITHUB_WORKSPACE/ci/s390x-stat-have-nsec.patch
         patch -p1 < $GITHUB_WORKSPACE/ci/aarch64-o-largefile.patch
         patch -p1 < $GITHUB_WORKSPACE/ci/tcgets2-tcsets2.patch
+        patch -p1 < $GITHUB_WORKSPACE/ci/tiocgsid.patch
         patch -p1 < $GITHUB_WORKSPACE/ci/more-sockopts.patch
+        patch -p1 < $GITHUB_WORKSPACE/ci/pidfd-open.patch
         ./configure --target-list=${{ matrix.qemu_target }} --prefix=${{ runner.tool_cache }}/qemu --disable-tools --disable-slirp --disable-fdt --disable-capstone --disable-docs
         ninja -C build install
       if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'
@@ -621,7 +623,9 @@ jobs:
         patch -p1 < $GITHUB_WORKSPACE/ci/s390x-stat-have-nsec.patch
         patch -p1 < $GITHUB_WORKSPACE/ci/aarch64-o-largefile.patch
         patch -p1 < $GITHUB_WORKSPACE/ci/tcgets2-tcsets2.patch
+        patch -p1 < $GITHUB_WORKSPACE/ci/tiocgsid.patch
         patch -p1 < $GITHUB_WORKSPACE/ci/more-sockopts.patch
+        patch -p1 < $GITHUB_WORKSPACE/ci/pidfd-open.patch
         ./configure --target-list=${{ matrix.qemu_target }} --prefix=${{ runner.tool_cache }}/qemu --disable-tools --disable-slirp --disable-fdt --disable-capstone --disable-docs
         ninja -C build install
       if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'
@@ -715,7 +719,9 @@ jobs:
         patch -p1 < $GITHUB_WORKSPACE/ci/s390x-stat-have-nsec.patch
         patch -p1 < $GITHUB_WORKSPACE/ci/aarch64-o-largefile.patch
         patch -p1 < $GITHUB_WORKSPACE/ci/tcgets2-tcsets2.patch
+        patch -p1 < $GITHUB_WORKSPACE/ci/tiocgsid.patch
         patch -p1 < $GITHUB_WORKSPACE/ci/more-sockopts.patch
+        patch -p1 < $GITHUB_WORKSPACE/ci/pidfd-open.patch
         ./configure --target-list=${{ matrix.qemu_target }} --prefix=${{ runner.tool_cache }}/qemu --disable-tools --disable-slirp --disable-fdt --disable-capstone --disable-docs
         ninja -C build install
       if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'
