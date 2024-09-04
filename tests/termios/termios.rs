@@ -126,11 +126,50 @@ fn test_termios_speeds() {
     assert_eq!(new_tio.input_speed(), speed::B134);
     assert_eq!(new_tio.output_speed(), speed::B134);
 
+    // Check various speeds.
+    for custom_speed in [speed::B50, speed::B19200, speed::B38400] {
+        tio.set_speed(custom_speed).unwrap();
+        assert_eq!(tio.input_speed(), custom_speed);
+        assert_eq!(tio.output_speed(), custom_speed);
+        tcsetattr(&pty, OptionalActions::Now, &tio).unwrap();
+
+        let new_tio = tcgetattr(&pty).unwrap();
+        assert_eq!(new_tio.input_speed(), custom_speed);
+        assert_eq!(new_tio.output_speed(), custom_speed);
+    }
+
+    // Similar, but using `set_input_speed` and `set_output_speed` instead
+    // of `set_speed`.
+    for custom_speed in [speed::B50, speed::B19200, speed::B38400] {
+        tio.set_input_speed(custom_speed).unwrap();
+        tio.set_output_speed(custom_speed).unwrap();
+        assert_eq!(tio.input_speed(), custom_speed);
+        assert_eq!(tio.output_speed(), custom_speed);
+        tcsetattr(&pty, OptionalActions::Now, &tio).unwrap();
+
+        let new_tio = tcgetattr(&pty).unwrap();
+        assert_eq!(new_tio.input_speed(), custom_speed);
+        assert_eq!(new_tio.output_speed(), custom_speed);
+    }
+
     // These platforms are known to support arbitrary not-pre-defined-by-POSIX
     // speeds.
     #[cfg(any(bsd, linux_kernel))]
     {
-        for custom_speed in [51, 31250, libc::B50 as _] {
+        for custom_speed in [speed::B50, 51, 31250, 74880, 256000] {
+            tio.set_speed(custom_speed).unwrap();
+            assert_eq!(tio.input_speed(), custom_speed);
+            assert_eq!(tio.output_speed(), custom_speed);
+            tcsetattr(&pty, OptionalActions::Now, &tio).unwrap();
+
+            let new_tio = tcgetattr(&pty).unwrap();
+            assert_eq!(new_tio.input_speed(), custom_speed);
+            assert_eq!(new_tio.output_speed(), custom_speed);
+        }
+
+        // Similar, but using `set_input_speed` and `set_output_speed` instead
+        // of `set_speed`.
+        for custom_speed in [speed::B50, 51, 31250, 74880, 256000] {
             tio.set_input_speed(custom_speed).unwrap();
             tio.set_output_speed(custom_speed).unwrap();
             assert_eq!(tio.input_speed(), custom_speed);
@@ -162,7 +201,7 @@ fn test_termios_speeds() {
     #[cfg(any(bsd, linux_kernel))]
     {
         tio.set_output_speed(speed::B134).unwrap();
-        for custom_speed in [51, 31250, libc::B50 as _] {
+        for custom_speed in [speed::B50, 51, 31250, 74880, 256000] {
             tio.set_input_speed(custom_speed).unwrap();
             assert_eq!(tio.input_speed(), custom_speed);
             assert_eq!(tio.output_speed(), speed::B134);
@@ -174,7 +213,7 @@ fn test_termios_speeds() {
         }
 
         tio.set_input_speed(speed::B150).unwrap();
-        for custom_speed in [51, 31250, libc::B50 as _] {
+        for custom_speed in [speed::B50, 51, 31250, 74880, 256000] {
             tio.set_output_speed(custom_speed).unwrap();
             assert_eq!(tio.input_speed(), speed::B150);
             assert_eq!(tio.output_speed(), custom_speed);
