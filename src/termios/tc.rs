@@ -9,6 +9,11 @@ pub use crate::pid::Pid;
 ///
 /// Also known as the `TCGETS` (or `TCGETS2` on Linux) operation with `ioctl`.
 ///
+/// On Linux, this uses `TCGETS2`. If that fails in a way that indicates that
+/// the host doesn't support it, this falls back to the old `TCGETS`, manually
+/// initializes the fields that `TCGETS` doesn't initialize, and fails with
+/// `io::Errno::RANGE` if the input or output speeds cannot be supported.
+///
 /// # References
 ///  - [POSIX `tcgetattr`]
 ///  - [Linux `ioctl_tty`]
@@ -83,6 +88,10 @@ pub fn tcsetpgrp<Fd: AsFd>(fd: Fd, pid: Pid) -> io::Result<()> {
 /// `tcsetattr(fd)`—Set terminal attributes.
 ///
 /// Also known as the `TCSETS` (or `TCSETS2` on Linux) operation with `ioctl`.
+///
+/// On Linux, this uses `TCSETS2`. If that fails in a way that indicates that
+/// the host doesn't support it, this falls back to the old `TCSETS`, and fails
+/// with `io::Errno::RANGE` if the input or output speeds cannot be supported.
 ///
 /// # References
 ///  - [POSIX `tcsetattr`]

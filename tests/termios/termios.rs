@@ -85,6 +85,82 @@ fn test_termios_winsize() {
 // pseudoterminals.
 #[cfg(not(target_os = "illumos"))]
 #[test]
+fn test_termios_modes() {
+    use rustix::pty::*;
+    use rustix::termios::*;
+
+    let pty = match openpt(OpenptFlags::empty()) {
+        Ok(pty) => pty,
+        Err(rustix::io::Errno::NOSYS) => return,
+        Err(err) => panic!("{:?}", err),
+    };
+    let mut tio = match tcgetattr(&pty) {
+        Ok(tio) => tio,
+        Err(rustix::io::Errno::NOSYS) => return,
+        #[cfg(apple)]
+        Err(rustix::io::Errno::NOTTY) => return,
+        Err(err) => panic!("{:?}", err),
+    };
+
+    assert!(!tio.local_modes.contains(LocalModes::TOSTOP));
+    assert!(!tio.output_modes.contains(OutputModes::OFILL));
+    assert!(!tio.input_modes.contains(InputModes::IGNBRK));
+    assert!(!tio.control_modes.contains(ControlModes::CRTSCTS));
+
+    tio.local_modes.insert(LocalModes::TOSTOP);
+    tio.output_modes.insert(OutputModes::OFILL);
+    tio.input_modes.insert(InputModes::IGNBRK);
+    tio.control_modes.insert(ControlModes::CRTSCTS);
+
+    tcsetattr(&pty, OptionalActions::Now, &tio).unwrap();
+
+    let new_tio = tcgetattr(&pty).unwrap();
+
+    assert!(new_tio.local_modes.contains(LocalModes::TOSTOP));
+    assert!(new_tio.output_modes.contains(OutputModes::OFILL));
+    assert!(new_tio.input_modes.contains(InputModes::IGNBRK));
+    assert!(new_tio.control_modes.contains(ControlModes::CRTSCTS));
+}
+
+// Disable on illumos where `tcgetattr` doesn't appear to support
+// pseudoterminals.
+#[cfg(not(target_os = "illumos"))]
+#[test]
+fn test_termios_special_codes() {
+    use rustix::pty::*;
+    use rustix::termios::*;
+
+    let pty = match openpt(OpenptFlags::empty()) {
+        Ok(pty) => pty,
+        Err(rustix::io::Errno::NOSYS) => return,
+        Err(err) => panic!("{:?}", err),
+    };
+    let mut tio = match tcgetattr(&pty) {
+        Ok(tio) => tio,
+        Err(rustix::io::Errno::NOSYS) => return,
+        #[cfg(apple)]
+        Err(rustix::io::Errno::NOTTY) => return,
+        Err(err) => panic!("{:?}", err),
+    };
+
+    assert_eq!(tio.special_codes[SpecialCodeIndex::VINTR], 3);
+    assert_eq!(tio.special_codes[SpecialCodeIndex::VEOL], 0);
+
+    tio.special_codes[SpecialCodeIndex::VINTR] = 47;
+    tio.special_codes[SpecialCodeIndex::VEOL] = 99;
+
+    tcsetattr(&pty, OptionalActions::Now, &tio).unwrap();
+
+    let new_tio = tcgetattr(&pty).unwrap();
+
+    assert_eq!(new_tio.special_codes[SpecialCodeIndex::VINTR], 47);
+    assert_eq!(new_tio.special_codes[SpecialCodeIndex::VEOL], 99);
+}
+
+// Disable on illumos where `tcgetattr` doesn't appear to support
+// pseudoterminals.
+#[cfg(not(target_os = "illumos"))]
+#[test]
 fn test_termios_speeds() {
     use rustix::pty::*;
     use rustix::termios::*;

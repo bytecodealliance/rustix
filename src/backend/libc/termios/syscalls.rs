@@ -30,69 +30,35 @@ use {
 
 #[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
 pub(crate) fn tcgetattr(fd: BorrowedFd<'_>) -> io::Result<Termios> {
-    // On Linux, use `TCGETS`, and fall back to `TCGETS2` if we need to get the
-    // `c_ispeed` and `c_ospeed` field values.
-    //
-    // SAFETY: This invokes the `TCGETS` and optionally also `TCGETS2` ioctls.
-    // `TCGETS` doesn't initialize the `input_speed` and `output_speed` fields
-    // of the result, so in the case where we don't call `TCGETS2`, we infer
-    // their values from other fields and then manually initialize them (except
-    // on PowerPC where `TCGETS` does initialize those fields).
+    // On Linux, use `TCGETS2`, and fall back to `TCGETS` if needed.
     #[cfg(linux_kernel)]
-    unsafe {
+    {
         use crate::termios::{ControlModes, InputModes, LocalModes, OutputModes, SpecialCodes};
         use crate::utils::default_array;
 
         let mut termios2 = MaybeUninit::<c::termios2>::uninit();
+        let ptr = termios2.as_mut_ptr();
 
-        // Use the old `TCGETS`. Linux has supported `TCGETS2` since Linux
-        // 2.6.40, however glibc and musl haven't migrated to it yet, so it
-        // tends to get left out of seccomp sandboxes. It's also unsupported
-        // by WSL, and likely enough other things too, so we use the old
-        // `TCGETS` for compatibility.
-        ret(c::ioctl(
-            borrowed_fd(fd),
-            c::TCGETS as _,
-            termios2.as_mut_ptr(),
-        ))?;
+        // SAFETY: This invokes the `TCGETS2` ioctl, which initializes the full
+        // `Termios` structure.
+        let termios2 = unsafe {
+            match ret(c::ioctl(borrowed_fd(fd), c::TCGETS2 as _, ptr)) {
+                Ok(()) => {}
 
-        // If `BOTHER` is set for either the input or output, that means
-        // there's a custom speed, which means we really do need to use
-        // `TCGETS2`. Unless we're on PowerPC, where `TCGETS` is the same
-        // as `TCGETS2`.
-        #[cfg(not(any(target_arch = "powerpc", target_arch = "powerpc64")))]
-        {
-            use crate::termios::speed;
-            use core::ptr::{addr_of, addr_of_mut};
+                // A `NOTTY` or `ACCESS` might mean the OS doesn't support
+                // `TCGETS2`, for example a seccomp environment or WSL that
+                // only knows about `TCGETS`. Fall back to the old `TCGETS`.
+                #[cfg(not(any(target_arch = "powerpc", target_arch = "powerpc64")))]
+                Err(io::Errno::NOTTY) | Err(io::Errno::ACCESS) => {
+                    tcgetattr_fallback(fd, &mut termios2)?
+                }
 
-            // At this point, `termios2` is initialized except for the
-            // `c_ispeed` and `c_ospeed` fields, so we don't form a reference
-            // yet.
-            let ptr = termios2.as_mut_ptr();
-
-            let control_modes = addr_of!((*ptr).c_cflag).read();
-            let encoded_out = control_modes & c::CBAUD;
-            let encoded_in = (control_modes & c::CIBAUD) >> c::IBSHIFT;
-            if encoded_out == c::BOTHER || encoded_in == c::BOTHER {
-                ret(c::ioctl(borrowed_fd(fd), c::TCGETS2 as _, ptr))?;
-            } else {
-                // Otherwise, set the speeds from other fields.
-                let output_speed = speed::decode(encoded_out).unwrap();
-                addr_of_mut!((*ptr).c_ospeed).write(output_speed);
-
-                // For input speeds, `B0` is special-cased to mean the input
-                // speed is the same as the output speed.
-                let input_speed = if encoded_in == c::B0 {
-                    output_speed
-                } else {
-                    speed::decode(encoded_in).unwrap()
-                };
-                addr_of_mut!((*ptr).c_ispeed).write(input_speed);
+                Err(err) => return Err(err),
             }
-        }
 
-        // Now all the fields are set.
-        let termios2 = termios2.assume_init();
+            // Now all the fields are set.
+            termios2.assume_init()
+        };
 
         // Convert from the Linux `termios2` to our `Termios`.
         let mut result = Termios {
@@ -123,6 +89,59 @@ pub(crate) fn tcgetattr(fd: BorrowedFd<'_>) -> io::Result<Termios> {
     }
 }
 
+/// Implement `tcgetattr` using the old `TCGETS` ioctl.
+#[cfg(all(
+    linux_kernel,
+    not(any(target_arch = "powerpc", target_arch = "powerpc64"))
+))]
+#[cold]
+fn tcgetattr_fallback(
+    fd: BorrowedFd<'_>,
+    termios: &mut MaybeUninit<c::termios2>,
+) -> io::Result<()> {
+    use crate::termios::speed;
+    use core::ptr::{addr_of, addr_of_mut};
+
+    // SAFETY: This invokes the `TCGETS` ioctl, which, if it succeeds,
+    // initializes the `Termios` structure except for the `input_speed` and
+    // `output_speed` fields, which we manually initialize before forming a
+    // reference to the full `Termios`.
+    unsafe {
+        let ptr = termios.as_mut_ptr();
+
+        // Do the old `TCGETS` call, which doesn't initialize `input_speed` or
+        // `output_speed`.
+        ret(c::ioctl(borrowed_fd(fd), c::TCGETS as _, ptr))?;
+
+        // Read the `control_modes` field without forming a reference to the
+        // `Termios` because it isn't fully initialized yet.
+        let control_modes = addr_of!((*ptr).c_cflag).read();
+
+        // Infer `output_speed`.
+        let encoded_out = control_modes & c::CBAUD;
+        let output_speed = match speed::decode(encoded_out) {
+            Some(output_speed) => output_speed,
+            None => return Err(io::Errno::RANGE),
+        };
+        addr_of_mut!((*ptr).c_ospeed).write(output_speed);
+
+        // Infer `input_speed`. For input speeds, `B0` is special-cased to mean
+        // the input speed is the same as the output speed.
+        let encoded_in = (control_modes & c::CIBAUD) >> c::IBSHIFT;
+        let input_speed = if encoded_in == c::B0 {
+            output_speed
+        } else {
+            match speed::decode(encoded_in) {
+                Some(input_speed) => input_speed,
+                None => return Err(io::Errno::RANGE),
+            }
+        };
+        addr_of_mut!((*ptr).c_ispeed).write(input_speed);
+    }
+
+    Ok(())
+}
+
 #[cfg(not(target_os = "wasi"))]
 pub(crate) fn tcgetpgrp(fd: BorrowedFd<'_>) -> io::Result<Pid> {
     unsafe {
@@ -151,46 +170,11 @@ pub(crate) fn tcsetattr(
     optional_actions: OptionalActions,
     termios: &Termios,
 ) -> io::Result<()> {
+    // On Linux, use `TCSETS2`, and fall back to `TCSETS` if needed.
     #[cfg(linux_kernel)]
     {
         use crate::termios::speed;
         use crate::utils::default_array;
-
-        // Similar to `tcgetattr`, use the old `TCSETS`, unless either input
-        // speed or output speed is custom, then we really have to use
-        // `TCSETS2`.
-        let encoded_out = termios.control_modes.bits() & c::CBAUD;
-        let encoded_in = (termios.control_modes.bits() & c::CIBAUD) >> c::IBSHIFT;
-        let request = if encoded_out == c::BOTHER || encoded_in == c::BOTHER {
-            // Translate from `optional_actions` into a `TCGETS2` ioctl request
-            // code. On MIPS, `optional_actions` already has `TCGETS` added to
-            // it.
-            c::TCSETS2 as c::c_ulong
-                + if cfg!(any(
-                    target_arch = "mips",
-                    target_arch = "mips32r6",
-                    target_arch = "mips64",
-                    target_arch = "mips64r6"
-                )) {
-                    optional_actions as c::c_ulong - c::TCSETS as c::c_ulong
-                } else {
-                    optional_actions as c::c_ulong
-                }
-        } else {
-            // Translate from `optional_actions` into a `TCGETS` ioctl request
-            // code. On MIPS, `optional_actions` already has `TCGETS` added to
-            // it.
-            if cfg!(any(
-                target_arch = "mips",
-                target_arch = "mips32r6",
-                target_arch = "mips64",
-                target_arch = "mips64r6"
-            )) {
-                optional_actions as c::c_ulong
-            } else {
-                optional_actions as c::c_ulong + c::TCSETS as c::c_ulong
-            }
-        };
 
         let output_speed = termios.output_speed();
         let input_speed = termios.input_speed();
@@ -216,12 +200,35 @@ pub(crate) fn tcsetattr(
             .c_cc
             .copy_from_slice(&termios.special_codes.0[..nccs]);
 
+        // Translate from `optional_actions` into a `TCGETS2` ioctl request code.
+        // On MIPS, `optional_actions` has `TCGETS` added to it.
+        let request = c::TCSETS2 as c::c_ulong
+            + if cfg!(any(
+                target_arch = "mips",
+                target_arch = "mips32r6",
+                target_arch = "mips64",
+                target_arch = "mips64r6"
+            )) {
+                optional_actions as c::c_ulong - c::TCSETS as c::c_ulong
+            } else {
+                optional_actions as c::c_ulong
+            };
+
+        // SAFETY: This invokes the `TCSETS2` ioctl.
         unsafe {
-            ret(c::ioctl(
-                borrowed_fd(fd),
-                request as _,
-                crate::utils::as_ptr(&termios2),
-            ))
+            match ret(c::ioctl(borrowed_fd(fd), request, &termios2)) {
+                Ok(()) => Ok(()),
+
+                // Similar to `tcgetattr_fallback`, `NOTTY` or `ACCESS` might
+                // mean the OS doesn't support `TCSETS2`. Fall back to the old
+                // `TCGETS`.
+                #[cfg(not(any(target_arch = "powerpc", target_arch = "powerpc64")))]
+                Err(io::Errno::NOTTY) | Err(io::Errno::ACCESS) => {
+                    tcsetattr_fallback(fd, optional_actions, &termios2)
+                }
+
+                Err(err) => Err(err),
+            }
         }
     }
 
@@ -233,6 +240,44 @@ pub(crate) fn tcsetattr(
             crate::utils::as_ptr(termios).cast(),
         ))
     }
+}
+
+/// Implement `tcsetattr` using the old `TCSETS` ioctl.
+#[cfg(all(
+    linux_kernel,
+    not(any(target_arch = "powerpc", target_arch = "powerpc64"))
+))]
+#[cold]
+pub(crate) fn tcsetattr_fallback(
+    fd: BorrowedFd<'_>,
+    optional_actions: OptionalActions,
+    termios2: &c::termios2,
+) -> io::Result<()> {
+    // `TCSETS` silently accepts a `BOTHER` in the `c_cflag` even though it
+    // doesn't read the `c_ispeed` or `c_ospeed` fields, so we detect this
+    // case and fail as needed.
+    let encoded_out = termios2.c_cflag & c::CBAUD;
+    let encoded_in = (termios2.c_cflag & c::CIBAUD) >> c::IBSHIFT;
+    if encoded_out == c::BOTHER || encoded_in == c::BOTHER {
+        return Err(io::Errno::RANGE);
+    }
+
+    // Translate from `optional_actions` into a `TCGETS` ioctl request
+    // code. On MIPS, `optional_actions` already has `TCGETS` added to
+    // it.
+    let request = if cfg!(any(
+        target_arch = "mips",
+        target_arch = "mips32r6",
+        target_arch = "mips64",
+        target_arch = "mips64r6"
+    )) {
+        optional_actions as c::c_ulong
+    } else {
+        optional_actions as c::c_ulong + c::TCSETS as c::c_ulong
+    };
+
+    // SAFETY: This invokes the `TCSETS` ioctl.
+    unsafe { ret(c::ioctl(borrowed_fd(fd), request as _, termios2)) }
 }
 
 #[cfg(not(target_os = "wasi"))]

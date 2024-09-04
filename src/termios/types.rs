@@ -1115,6 +1115,7 @@ impl core::ops::IndexMut<SpecialCodeIndex> for SpecialCodes {
 }
 
 /// Indices for use with [`Termios::special_codes`].
+#[derive(Copy, Clone, Eq, PartialEq, Hash)]
 pub struct SpecialCodeIndex(usize);
 
 #[rustfmt::skip]
@@ -1181,6 +1182,43 @@ impl SpecialCodeIndex {
 
     /// `VEOL2`
     pub const VEOL2: Self = Self(c::VEOL2 as usize);
+}
+
+impl core::fmt::Debug for SpecialCodeIndex {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match *self {
+            Self::VINTR => write!(f, "VINTR"),
+            Self::VQUIT => write!(f, "VQUIT"),
+            Self::VERASE => write!(f, "VERASE"),
+            Self::VKILL => write!(f, "VKILL"),
+            Self::VEOF => write!(f, "VEOF"),
+            Self::VTIME => write!(f, "VTIME"),
+            Self::VMIN => write!(f, "VMIN"),
+            #[cfg(not(any(
+                bsd,
+                solarish,
+                target_os = "aix",
+                target_os = "haiku",
+                target_os = "hurd",
+                target_os = "nto",
+            )))]
+            Self::VSWTC => write!(f, "VSWTC"),
+            Self::VSTART => write!(f, "VSTART"),
+            Self::VSTOP => write!(f, "VSTOP"),
+            Self::VSUSP => write!(f, "VSUSP"),
+            Self::VEOL => write!(f, "VEOL"),
+            #[cfg(not(target_os = "haiku"))]
+            Self::VREPRINT => write!(f, "VREPRINT"),
+            #[cfg(not(any(target_os = "aix", target_os = "haiku")))]
+            Self::VDISCARD => write!(f, "VDISCARD"),
+            #[cfg(not(any(target_os = "aix", target_os = "haiku")))]
+            Self::VWERASE => write!(f, "VWERASE"),
+            #[cfg(not(target_os = "haiku"))]
+            Self::VLNEXT => write!(f, "VLNEXT"),
+            Self::VEOL2 => write!(f, "VEOL2"),
+            _ => write!(f, "unknown"),
+        }
+    }
 }
 
 /// `TCSA*` values for use with [`tcsetattr`].
