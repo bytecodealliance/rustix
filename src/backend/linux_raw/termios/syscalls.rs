@@ -120,8 +120,8 @@ pub(crate) fn tcsetattr(
     optional_actions: OptionalActions,
     termios: &Termios,
 ) -> io::Result<()> {
-    // Translate from `optional_actions` into a `TCGETS2` ioctl request code.
-    // On MIPS, `optional_actions` has `TCGETS` added to it.
+    // Translate from `optional_actions` into a `TCSETS2` ioctl request code.
+    // On MIPS, `optional_actions` has `TCSETS` added to it.
     let request = c::TCSETS2
         + if cfg!(any(
             target_arch = "mips",
@@ -145,7 +145,7 @@ pub(crate) fn tcsetattr(
             Ok(()) => Ok(()),
 
             // Similar to `tcgetattr_fallback`, `NOTTY` or `ACCESS` might mean
-            // the OS doesn't support `TCSETS2`. Fall back to the old `TCGETS`.
+            // the OS doesn't support `TCSETS2`. Fall back to the old `TCSETS`.
             #[cfg(not(any(target_arch = "powerpc", target_arch = "powerpc64")))]
             Err(io::Errno::NOTTY) | Err(io::Errno::ACCESS) => {
                 tcsetattr_fallback(fd, optional_actions, termios)

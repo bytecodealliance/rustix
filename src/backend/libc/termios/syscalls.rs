@@ -200,8 +200,8 @@ pub(crate) fn tcsetattr(
             .c_cc
             .copy_from_slice(&termios.special_codes.0[..nccs]);
 
-        // Translate from `optional_actions` into a `TCGETS2` ioctl request code.
-        // On MIPS, `optional_actions` has `TCGETS` added to it.
+        // Translate from `optional_actions` into a `TCSETS2` ioctl request code.
+        // On MIPS, `optional_actions` has `TCSETS` added to it.
         let request = c::TCSETS2 as c::c_ulong
             + if cfg!(any(
                 target_arch = "mips",
@@ -221,7 +221,7 @@ pub(crate) fn tcsetattr(
 
                 // Similar to `tcgetattr_fallback`, `NOTTY` or `ACCESS` might
                 // mean the OS doesn't support `TCSETS2`. Fall back to the old
-                // `TCGETS`.
+                // `TCSETS`.
                 #[cfg(not(any(target_arch = "powerpc", target_arch = "powerpc64")))]
                 Err(io::Errno::NOTTY) | Err(io::Errno::ACCESS) => {
                     tcsetattr_fallback(fd, optional_actions, &termios2)
@@ -262,8 +262,8 @@ pub(crate) fn tcsetattr_fallback(
         return Err(io::Errno::RANGE);
     }
 
-    // Translate from `optional_actions` into a `TCGETS` ioctl request
-    // code. On MIPS, `optional_actions` already has `TCGETS` added to
+    // Translate from `optional_actions` into a `TCSETS` ioctl request
+    // code. On MIPS, `optional_actions` already has `TCSETS` added to
     // it.
     let request = if cfg!(any(
         target_arch = "mips",
