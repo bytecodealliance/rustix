@@ -103,12 +103,12 @@ fn test_termios_modes() {
     };
 
     assert!(!tio.local_modes.contains(LocalModes::TOSTOP));
-    assert!(!tio.output_modes.contains(OutputModes::OFILL));
+    assert!(!tio.output_modes.contains(OutputModes::ONOCR));
     assert!(!tio.input_modes.contains(InputModes::IGNBRK));
     assert!(!tio.control_modes.contains(ControlModes::CRTSCTS));
 
     tio.local_modes.insert(LocalModes::TOSTOP);
-    tio.output_modes.insert(OutputModes::OFILL);
+    tio.output_modes.insert(OutputModes::ONOCR);
     tio.input_modes.insert(InputModes::IGNBRK);
     tio.control_modes.insert(ControlModes::CRTSCTS);
 
@@ -117,7 +117,7 @@ fn test_termios_modes() {
     let new_tio = tcgetattr(&pty).unwrap();
 
     assert!(new_tio.local_modes.contains(LocalModes::TOSTOP));
-    assert!(new_tio.output_modes.contains(OutputModes::OFILL));
+    assert!(new_tio.output_modes.contains(OutputModes::ONOCR));
     assert!(new_tio.input_modes.contains(InputModes::IGNBRK));
     assert!(new_tio.control_modes.contains(ControlModes::CRTSCTS));
 }
