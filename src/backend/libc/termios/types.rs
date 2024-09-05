@@ -1,3 +1,5 @@
+#![allow(non_camel_case_types)]
+
 #[cfg(not(target_os = "redox"))]
 use crate::ffi;
 
