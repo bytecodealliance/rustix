@@ -1191,9 +1191,19 @@ impl core::fmt::Debug for SpecialCodeIndex {
             Self::VQUIT => write!(f, "VQUIT"),
             Self::VERASE => write!(f, "VERASE"),
             Self::VKILL => write!(f, "VKILL"),
+            #[cfg(not(solarish))]
             Self::VEOF => write!(f, "VEOF"),
             Self::VTIME => write!(f, "VTIME"),
+            #[cfg(not(solarish))]
             Self::VMIN => write!(f, "VMIN"),
+
+            // On Solarish platforms, `VMIN` and `VTIME` have the same value
+            // as `VEOF` and `VEOL`.
+            #[cfg(solarish)]
+            Self::VMIN => write!(f, "VMIN/VEOF"),
+            #[cfg(solarish)]
+            Self::VTIME => write!(f, "VTIME/VEOL"),
+
             #[cfg(not(any(
                 bsd,
                 solarish,
@@ -1206,6 +1216,7 @@ impl core::fmt::Debug for SpecialCodeIndex {
             Self::VSTART => write!(f, "VSTART"),
             Self::VSTOP => write!(f, "VSTOP"),
             Self::VSUSP => write!(f, "VSUSP"),
+            #[cfg(not(solarish))]
             Self::VEOL => write!(f, "VEOL"),
             #[cfg(not(target_os = "haiku"))]
             Self::VREPRINT => write!(f, "VREPRINT"),
