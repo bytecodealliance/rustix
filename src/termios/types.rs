@@ -1191,18 +1191,33 @@ impl core::fmt::Debug for SpecialCodeIndex {
             Self::VQUIT => write!(f, "VQUIT"),
             Self::VERASE => write!(f, "VERASE"),
             Self::VKILL => write!(f, "VKILL"),
-            #[cfg(not(solarish))]
+            #[cfg(not(any(
+                solarish,
+                all(linux_kernel, any(target_arch = "sparc", target_arch = "sparc64"))
+            )))]
             Self::VEOF => write!(f, "VEOF"),
-            #[cfg(not(solarish))]
+            #[cfg(not(any(
+                solarish,
+                all(linux_kernel, any(target_arch = "sparc", target_arch = "sparc64"))
+            )))]
             Self::VTIME => write!(f, "VTIME"),
-            #[cfg(not(solarish))]
+            #[cfg(not(any(
+                solarish,
+                all(linux_kernel, any(target_arch = "sparc", target_arch = "sparc64"))
+            )))]
             Self::VMIN => write!(f, "VMIN"),
 
-            // On Solarish platforms, `VMIN` and `VTIME` have the same value
-            // as `VEOF` and `VEOL`.
-            #[cfg(solarish)]
+            // On Solarish platforms, and Linux on SPARC, `VMIN` and `VTIME`
+            // have the same value as `VEOF` and `VEOL`.
+            #[cfg(any(
+                solarish,
+                all(linux_kernel, any(target_arch = "sparc", target_arch = "sparc64"))
+            ))]
             Self::VMIN => write!(f, "VMIN/VEOF"),
-            #[cfg(solarish)]
+            #[cfg(any(
+                solarish,
+                all(linux_kernel, any(target_arch = "sparc", target_arch = "sparc64"))
+            ))]
             Self::VTIME => write!(f, "VTIME/VEOL"),
 
             #[cfg(not(any(
@@ -1217,7 +1232,10 @@ impl core::fmt::Debug for SpecialCodeIndex {
             Self::VSTART => write!(f, "VSTART"),
             Self::VSTOP => write!(f, "VSTOP"),
             Self::VSUSP => write!(f, "VSUSP"),
-            #[cfg(not(solarish))]
+            #[cfg(not(any(
+                solarish,
+                all(linux_kernel, any(target_arch = "sparc", target_arch = "sparc64"))
+            )))]
             Self::VEOL => write!(f, "VEOL"),
             #[cfg(not(target_os = "haiku"))]
             Self::VREPRINT => write!(f, "VREPRINT"),
@@ -1344,7 +1362,7 @@ fn termios_layouts() {
 
     #[cfg(not(linux_raw))]
     {
-        // On Mips, Sparc, and Android, the libc lacks the ospeed and ispeed
+        // On MIPS, SPARC, and Android, the libc lacks the ospeed and ispeed
         // fields.
         #[cfg(all(
             not(all(
