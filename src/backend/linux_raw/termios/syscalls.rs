@@ -164,9 +164,8 @@ fn tcsetattr_fallback(
     optional_actions: OptionalActions,
     termios: &Termios,
 ) -> io::Result<()> {
-    // `TCSETS` silently accepts a `BOTHER` in the `c_cflag` even though it
-    // doesn't read the `c_ispeed` or `c_ospeed` fields, so we detect this
-    // case and fail as needed.
+    // `TCSETS` silently accepts `BOTHER` in `c_cflag` even though it doesn't
+    // read `c_ispeed`/`c_ospeed`, so detect this case and fail if needed.
     let control_modes_bits = termios.control_modes.bits();
     let encoded_out = control_modes_bits & c::CBAUD;
     let encoded_in = (control_modes_bits & c::CIBAUD) >> c::IBSHIFT;
@@ -174,8 +173,8 @@ fn tcsetattr_fallback(
         return Err(io::Errno::RANGE);
     }
 
-    // Translate from `optional_actions` into a `TCSETS` ioctl request
-    // code. On MIPS, `optional_actions` already has `TCSETS` added to it.
+    // Translate from `optional_actions` into a `TCSETS` ioctl request code. On
+    // MIPS, `optional_actions` already has `TCSETS` added to it.
     let request = if cfg!(any(
         target_arch = "mips",
         target_arch = "mips32r6",

@@ -200,8 +200,8 @@ pub(crate) fn tcsetattr(
             .c_cc
             .copy_from_slice(&termios.special_codes.0[..nccs]);
 
-        // Translate from `optional_actions` into a `TCSETS2` ioctl request code.
-        // On MIPS, `optional_actions` has `TCSETS` added to it.
+        // Translate from `optional_actions` into a `TCSETS2` ioctl request
+        // code. On MIPS, `optional_actions` has `TCSETS` added to it.
         let request = c::TCSETS2 as c::c_ulong
             + if cfg!(any(
                 target_arch = "mips",
@@ -253,18 +253,16 @@ pub(crate) fn tcsetattr_fallback(
     optional_actions: OptionalActions,
     termios2: &c::termios2,
 ) -> io::Result<()> {
-    // `TCSETS` silently accepts a `BOTHER` in the `c_cflag` even though it
-    // doesn't read the `c_ispeed` or `c_ospeed` fields, so we detect this
-    // case and fail as needed.
+    // `TCSETS` silently accepts `BOTHER` in `c_cflag` even though it doesn't
+    // read `c_ispeed`/`c_ospeed`, so detect this case and fail if needed.
     let encoded_out = termios2.c_cflag & c::CBAUD;
     let encoded_in = (termios2.c_cflag & c::CIBAUD) >> c::IBSHIFT;
     if encoded_out == c::BOTHER || encoded_in == c::BOTHER {
         return Err(io::Errno::RANGE);
     }
 
-    // Translate from `optional_actions` into a `TCSETS` ioctl request
-    // code. On MIPS, `optional_actions` already has `TCSETS` added to
-    // it.
+    // Translate from `optional_actions` into a `TCSETS` ioctl request code. On
+    // MIPS, `optional_actions` already has `TCSETS` added to it.
     let request = if cfg!(any(
         target_arch = "mips",
         target_arch = "mips32r6",
