@@ -1193,6 +1193,7 @@ impl core::fmt::Debug for SpecialCodeIndex {
             Self::VKILL => write!(f, "VKILL"),
             #[cfg(not(solarish))]
             Self::VEOF => write!(f, "VEOF"),
+            #[cfg(not(solarish))]
             Self::VTIME => write!(f, "VTIME"),
             #[cfg(not(solarish))]
             Self::VMIN => write!(f, "VMIN"),
