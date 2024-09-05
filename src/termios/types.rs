@@ -1182,6 +1182,22 @@ impl SpecialCodeIndex {
 
     /// `VEOL2`
     pub const VEOL2: Self = Self(c::VEOL2 as usize);
+
+    /// `VSWTCH`
+    #[cfg(any(solarish, target_os = "haiku", target_os = "nto"))]
+    pub const VSWTCH: Self = Self(c::VSWTCH as usize);
+
+    /// `VDSUSP`
+    #[cfg(any(bsd, solarish, target_os = "aix", target_os = "hurd", target_os = "nto"))]
+    pub const VDSUSP: Self = Self(c::VDSUSP as usize);
+
+    /// `VSTATUS`
+    #[cfg(any(bsd, solarish, target_os = "hurd"))]
+    pub const VSTATUS: Self = Self(c::VSTATUS as usize);
+
+    /// `VERASE2`
+    #[cfg(any(freebsdlike, solarish))]
+    pub const VERASE2: Self = Self(c::VERASE2 as usize);
 }
 
 impl core::fmt::Debug for SpecialCodeIndex {
@@ -1246,6 +1262,21 @@ impl core::fmt::Debug for SpecialCodeIndex {
             #[cfg(not(target_os = "haiku"))]
             Self::VLNEXT => write!(f, "VLNEXT"),
             Self::VEOL2 => write!(f, "VEOL2"),
+            #[cfg(any(solarish, target_os = "haiku", target_os = "nto"))]
+            Self::VSWTCH => write!(f, "VSWTCH"),
+            #[cfg(any(
+                bsd,
+                solarish,
+                target_os = "aix",
+                target_os = "hurd",
+                target_os = "nto"
+            ))]
+            Self::VDSUSP => write!(f, "VDSUSP"),
+            #[cfg(any(bsd, solarish, target_os = "hurd"))]
+            Self::VSTATUS => write!(f, "VSTATUS"),
+            #[cfg(any(freebsdlike, solarish))]
+            Self::VERASE2 => write!(f, "VERASE2"),
+
             _ => write!(f, "unknown"),
         }
     }
