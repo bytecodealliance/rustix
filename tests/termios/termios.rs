@@ -143,7 +143,13 @@ fn test_termios_special_codes() {
         Err(err) => panic!("{:?}", err),
     };
 
+    // Check some initial values of `special_codes`. On Linux, `VINTR`'s code
+    // is set to ETX. On BSD's, it appears to be set to zero for
+    // pseudo-terminals.
+    #[cfg(linux_kernel)]
     assert_eq!(tio.special_codes[SpecialCodeIndex::VINTR], 3);
+    #[cfg(bsd)]
+    assert_eq!(tio.special_codes[SpecialCodeIndex::VINTR], 0);
     assert_eq!(tio.special_codes[SpecialCodeIndex::VEOL], 0);
 
     tio.special_codes[SpecialCodeIndex::VINTR] = 47;
