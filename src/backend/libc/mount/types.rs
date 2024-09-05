@@ -310,8 +310,16 @@ bitflags! {
         const SHARED = c::MS_SHARED;
         /// `MS_PRIVATE`
         const PRIVATE = c::MS_PRIVATE;
-        /// `MS_SLAVE`
-        const SLAVE = c::MS_SLAVE;
+        /// Mark a mount as a downstream of its current peer group.
+        ///
+        /// Mount and unmount events propagate from the upstream peer group
+        /// into the downstream.
+        ///
+        /// In Linux documentation, this flag is named <code>MS_SLAVE</code>,
+        /// and the concepts of “upstream” and “downstream” are called
+        /// “master” and “slave”.
+        #[doc(alias = "SLAVE")]
+        const DOWNSTREAM = c::MS_SLAVE;
         /// `MS_UNBINDABLE`
         const UNBINDABLE = c::MS_UNBINDABLE;
         /// `MS_REC`
