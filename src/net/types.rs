@@ -1786,6 +1786,7 @@ pub struct UCred {
 
 #[test]
 fn test_sizes() {
+    #[cfg(target_os = "linux")]
     use crate::backend::c;
     use crate::ffi::c_int;
     use core::mem::transmute;
