@@ -216,7 +216,7 @@ pub(crate) fn tcsetattr(
 
         // SAFETY: This invokes the `TCSETS2` ioctl.
         unsafe {
-            match ret(c::ioctl(borrowed_fd(fd), request, &termios2)) {
+            match ret(c::ioctl(borrowed_fd(fd), request as _, &termios2)) {
                 Ok(()) => Ok(()),
 
                 // Similar to `tcgetattr_fallback`, `NOTTY` or `ACCESS` might
