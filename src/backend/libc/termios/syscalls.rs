@@ -71,7 +71,10 @@ pub(crate) fn tcgetattr(fd: BorrowedFd<'_>) -> io::Result<Termios> {
             output_speed: termios2.c_ospeed,
         };
 
-        result.special_codes.0[..termios2.c_cc.len()].copy_from_slice(&termios2.c_cc);
+        // Copy in the control codes, since libc's `c_cc` array may have a
+        // different length from the ioctl's.
+        let nccs = termios2.c_cc.len();
+        result.special_codes.0[..nccs].copy_from_slice(&termios2.c_cc);
 
         Ok(result)
     }
@@ -194,6 +197,8 @@ pub(crate) fn tcsetattr(
         termios2.c_cflag &= !c::CIBAUD;
         termios2.c_cflag |= speed::encode(input_speed).unwrap_or(c::BOTHER) << c::IBSHIFT;
 
+        // Copy in the control codes, since libc's `c_cc` array may have a
+        // different length from the ioctl's.
         let nccs = termios2.c_cc.len();
         termios2
             .c_cc
