@@ -100,7 +100,7 @@ fn test_renameat_with() {
 
     match renameat_with(&dir, "file", &dir, "red", RenameFlags::empty()) {
         Ok(()) => (),
-        Err(err) if err == rustix::io::Errno::NOSYS => return,
+        Err(rustix::io::Errno::NOSYS) => return,
         Err(err) => unreachable!("unexpected error from renameat_with: {:?}", err),
     }
 
