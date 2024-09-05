@@ -34,7 +34,6 @@ pub(crate) fn tcgetattr(fd: BorrowedFd<'_>) -> io::Result<Termios> {
     #[cfg(linux_kernel)]
     {
         use crate::termios::{ControlModes, InputModes, LocalModes, OutputModes, SpecialCodes};
-        use crate::utils::default_array;
 
         let mut termios2 = MaybeUninit::<c::termios2>::uninit();
         let ptr = termios2.as_mut_ptr();
@@ -67,7 +66,7 @@ pub(crate) fn tcgetattr(fd: BorrowedFd<'_>) -> io::Result<Termios> {
             control_modes: ControlModes::from_bits_retain(termios2.c_cflag),
             local_modes: LocalModes::from_bits_retain(termios2.c_lflag),
             line_discipline: termios2.c_line,
-            special_codes: SpecialCodes(default_array()),
+            special_codes: SpecialCodes(Default::default()),
             input_speed: termios2.c_ispeed,
             output_speed: termios2.c_ospeed,
         };
@@ -174,7 +173,6 @@ pub(crate) fn tcsetattr(
     #[cfg(linux_kernel)]
     {
         use crate::termios::speed;
-        use crate::utils::default_array;
 
         let output_speed = termios.output_speed();
         let input_speed = termios.input_speed();
@@ -184,7 +182,7 @@ pub(crate) fn tcsetattr(
             c_cflag: termios.control_modes.bits(),
             c_lflag: termios.local_modes.bits(),
             c_line: termios.line_discipline,
-            c_cc: default_array(),
+            c_cc: Default::default(),
             c_ispeed: input_speed,
             c_ospeed: output_speed,
         };
@@ -195,6 +193,7 @@ pub(crate) fn tcsetattr(
         termios2.c_cflag |= speed::encode(output_speed).unwrap_or(c::BOTHER);
         termios2.c_cflag &= !c::CIBAUD;
         termios2.c_cflag |= speed::encode(input_speed).unwrap_or(c::BOTHER) << c::IBSHIFT;
+
         let nccs = termios2.c_cc.len();
         termios2
             .c_cc
