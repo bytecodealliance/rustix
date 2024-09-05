@@ -16,7 +16,7 @@ use crate::pid::Pid;
 use crate::thread::{futex, ClockId, NanosleepRelativeResult, Timespec};
 use core::mem::MaybeUninit;
 use core::sync::atomic::AtomicU32;
-use linux_raw_sys::general::{__kernel_timespec, TIMER_ABSTIME};
+use linux_raw_sys::general::TIMER_ABSTIME;
 #[cfg(target_pointer_width = "32")]
 use {crate::utils::option_as_ptr, linux_raw_sys::general::timespec as __kernel_old_timespec};
 
