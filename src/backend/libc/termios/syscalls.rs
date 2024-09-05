@@ -248,7 +248,7 @@ pub(crate) fn tcsetattr(
     not(any(target_arch = "powerpc", target_arch = "powerpc64"))
 ))]
 #[cold]
-pub(crate) fn tcsetattr_fallback(
+fn tcsetattr_fallback(
     fd: BorrowedFd<'_>,
     optional_actions: OptionalActions,
     termios2: &c::termios2,
