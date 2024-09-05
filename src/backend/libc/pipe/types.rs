@@ -1,7 +1,9 @@
 #[cfg(linux_kernel)]
+use crate::ffi;
+#[cfg(linux_kernel)]
 use core::marker::PhantomData;
 #[cfg(not(any(apple, target_os = "wasi")))]
-use {crate::backend::c, crate::ffi, bitflags::bitflags};
+use {crate::backend::c, bitflags::bitflags};
 
 #[cfg(not(any(apple, target_os = "wasi")))]
 bitflags! {
