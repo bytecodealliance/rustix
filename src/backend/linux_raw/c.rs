@@ -190,21 +190,11 @@ pub(crate) use linux_raw_sys::{
         VKILL, VLNEXT, VMIN, VQUIT, VREPRINT, VSTART, VSTOP, VSUSP, VSWTC, VT0, VT1, VTDLY, VTIME,
         VWERASE, XCASE, XTABS,
     },
-    ioctl::{TCGETS2, TCSETS2, TCSETSF2, TCSETSW2, TIOCEXCL, TIOCNXCL},
+    ioctl::{
+        TCFLSH, TCGETS, TCGETS2, TCSBRK, TCSETS, TCSETS2, TCSETSF2, TCSETSW2, TCXONC, TIOCEXCL,
+        TIOCGPGRP, TIOCGSID, TIOCGWINSZ, TIOCNXCL, TIOCSPGRP, TIOCSWINSZ,
+    },
 };
-
-// On MIPS, `TCSANOW` et al have `TCSETS` added to them, so we need it to
-// subtract it out.
-#[cfg(all(
-    feature = "termios",
-    any(
-        target_arch = "mips",
-        target_arch = "mips32r6",
-        target_arch = "mips64",
-        target_arch = "mips64r6"
-    )
-))]
-pub(crate) use linux_raw_sys::ioctl::TCSETS;
 
 // Define our own `uid_t` and `gid_t` if the kernel's versions are not 32-bit.
 #[cfg(any(target_arch = "arm", target_arch = "sparc", target_arch = "x86"))]

@@ -44,7 +44,7 @@ pub fn ioctl_blkpbszget<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
 
 /// `ioctl(fd, FICLONE, src_fd)`—Share data between open files.
 ///
-/// This ioctl is not available on Sparc platforms.
+/// This ioctl is not available on SPARC platforms.
 ///
 /// # References
 ///  - [Linux]
