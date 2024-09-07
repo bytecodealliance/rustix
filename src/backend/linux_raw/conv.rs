@@ -439,7 +439,7 @@ pub(crate) mod fs {
     }
 }
 
-#[cfg(any(feature = "fs", feature = "mount"))]
+#[cfg(feature = "mount")]
 impl<'a, Num: ArgNumber> From<crate::backend::mount::types::MountFlagsArg> for ArgReg<'a, Num> {
     #[inline]
     fn from(flags: crate::backend::mount::types::MountFlagsArg) -> Self {
@@ -447,9 +447,7 @@ impl<'a, Num: ArgNumber> From<crate::backend::mount::types::MountFlagsArg> for A
     }
 }
 
-// When the deprecated "fs" aliases are removed, we can remove the "fs"
-// here too.
-#[cfg(any(feature = "fs", feature = "mount"))]
+#[cfg(feature = "mount")]
 impl<'a, Num: ArgNumber> From<crate::backend::mount::types::UnmountFlags> for ArgReg<'a, Num> {
     #[inline]
     fn from(flags: crate::backend::mount::types::UnmountFlags) -> Self {
