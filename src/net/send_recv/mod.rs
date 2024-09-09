@@ -75,7 +75,8 @@ pub fn recv<Fd: AsFd>(fd: Fd, buf: &mut [u8], flags: RecvFlags) -> io::Result<us
 ///
 /// Because this interface returns the length via the returned slice, it's
 /// unsable to return the untruncated length that would be returned when the
-/// `RecvFlags::TRUNC` flag is used.
+/// `RecvFlags::TRUNC` flag is used. If you need the untruncated length, use
+/// [`recv`].
 #[inline]
 pub fn recv_uninit<Fd: AsFd>(
     fd: Fd,
@@ -170,7 +171,8 @@ pub fn recvfrom<Fd: AsFd>(
 ///
 /// Because this interface returns the length via the returned slice, it's
 /// unsable to return the untruncated length that would be returned when the
-/// `RecvFlags::TRUNC` flag is used.
+/// `RecvFlags::TRUNC` flag is used. If you need the untruncated length, use
+/// [`recvfrom`].
 #[allow(clippy::type_complexity)]
 #[inline]
 pub fn recvfrom_uninit<Fd: AsFd>(
