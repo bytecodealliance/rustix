@@ -225,6 +225,7 @@ jobs:
     - run: cargo check -Zbuild-std=core,alloc --target=powerpc64-ibm-aix --features=all-apis --no-default-features
     - run: cargo check -Z build-std --target=mipsel-unknown-linux-gnu --features=all-apis
     - run: cargo check -Z build-std --target=mips64el-unknown-linux-gnuabi64 --features=all-apis
+    - run: cargo check -Z build-std --target=powerpc64le-unknown-linux-musl --features=all-apis
 
 
   test:
