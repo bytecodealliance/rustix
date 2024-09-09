@@ -12,6 +12,8 @@ mod connect_bind_send;
 mod dgram;
 #[cfg(feature = "event")]
 mod poll;
+#[cfg(unix)]
+mod recv_trunc;
 mod sockopt;
 #[cfg(unix)]
 mod unix;
