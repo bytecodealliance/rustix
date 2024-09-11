@@ -55,7 +55,7 @@ pub const UTIME_OMIT: Nsecs = backend::c::UTIME_OMIT as Nsecs;
 ///  - [POSIX]
 ///  - [Linux]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/openat.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/openat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/openat.2.html
 #[inline]
 pub fn openat<P: path::Arg, Fd: AsFd>(
@@ -77,7 +77,7 @@ pub fn openat<P: path::Arg, Fd: AsFd>(
 ///  - [POSIX]
 ///  - [Linux]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/readlinkat.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/readlinkat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/readlinkat.2.html
 #[cfg(feature = "alloc")]
 #[inline]
@@ -120,8 +120,8 @@ fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, mut buffer: Vec<u8>) -> io::R
             //
             // Thus, there will be no NUL bytes in the string.
             //
-            // [POSIX definition 3.271: Pathname]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_271
-            // [POSIX definition 3.375: String]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_375
+            // [POSIX definition 3.271: Pathname]: https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/V1_chap03.html#tag_03_271
+            // [POSIX definition 3.375: String]: https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/V1_chap03.html#tag_03_375
             unsafe {
                 return Ok(CString::from_vec_unchecked(buffer));
             }
@@ -148,7 +148,7 @@ fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, mut buffer: Vec<u8>) -> io::R
 ///  - [POSIX]
 ///  - [Linux]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/readlinkat.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/readlinkat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/readlinkat.2.html
 #[inline]
 pub fn readlinkat_raw<P: path::Arg, Fd: AsFd>(
@@ -180,7 +180,7 @@ fn _readlinkat_raw<'a>(
 ///  - [POSIX]
 ///  - [Linux]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/mkdirat.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/mkdirat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/mkdirat.2.html
 #[inline]
 pub fn mkdirat<P: path::Arg, Fd: AsFd>(dirfd: Fd, path: P, mode: Mode) -> io::Result<()> {
@@ -194,7 +194,7 @@ pub fn mkdirat<P: path::Arg, Fd: AsFd>(dirfd: Fd, path: P, mode: Mode) -> io::Re
 ///  - [POSIX]
 ///  - [Linux]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/linkat.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/linkat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/linkat.2.html
 #[cfg(not(target_os = "espidf"))]
 #[inline]
@@ -228,7 +228,7 @@ pub fn linkat<P: path::Arg, Q: path::Arg, PFd: AsFd, QFd: AsFd>(
 ///  - [Linux]
 ///
 /// [`REMOVEDIR`]: AtFlags::REMOVEDIR
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/unlinkat.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/unlinkat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/unlinkat.2.html
 #[cfg(not(target_os = "espidf"))]
 #[inline]
@@ -243,7 +243,7 @@ pub fn unlinkat<P: path::Arg, Fd: AsFd>(dirfd: Fd, path: P, flags: AtFlags) -> i
 ///  - [POSIX]
 ///  - [Linux]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/renameat.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/renameat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/renameat.2.html
 #[inline]
 pub fn renameat<P: path::Arg, Q: path::Arg, PFd: AsFd, QFd: AsFd>(
@@ -300,7 +300,7 @@ pub fn renameat_with<P: path::Arg, Q: path::Arg, PFd: AsFd, QFd: AsFd>(
 ///  - [POSIX]
 ///  - [Linux]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/symlinkat.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/symlinkat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/symlinkat.2.html
 #[inline]
 pub fn symlinkat<P: path::Arg, Q: path::Arg, Fd: AsFd>(
@@ -324,7 +324,7 @@ pub fn symlinkat<P: path::Arg, Q: path::Arg, Fd: AsFd>(
 ///  - [POSIX]
 ///  - [Linux]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/fstatat.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/fstatat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/fstatat.2.html
 /// [`Mode::from_raw_mode`]: crate::fs::Mode::from_raw_mode
 /// [`FileType::from_raw_mode`]: crate::fs::FileType::from_raw_mode
@@ -349,7 +349,7 @@ pub fn statat<P: path::Arg, Fd: AsFd>(dirfd: Fd, path: P, flags: AtFlags) -> io:
 ///  - [POSIX]
 ///  - [Linux]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/faccessat.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/faccessat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/faccessat.2.html
 #[cfg(not(any(target_os = "espidf", target_os = "vita")))]
 #[inline]
@@ -369,7 +369,7 @@ pub fn accessat<P: path::Arg, Fd: AsFd>(
 ///  - [POSIX]
 ///  - [Linux]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/utimensat.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/utimensat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/utimensat.2.html
 #[cfg(not(any(target_os = "espidf", target_os = "vita")))]
 #[inline]
@@ -392,7 +392,7 @@ pub fn utimensat<P: path::Arg, Fd: AsFd>(
 ///  - [POSIX]
 ///  - [Linux]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/fchmodat.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/fchmodat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/fchmodat.2.html
 #[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
 #[inline]
@@ -431,7 +431,7 @@ pub fn fclonefileat<Fd: AsFd, DstFd: AsFd, P: path::Arg>(
 ///  - [POSIX]
 ///  - [Linux]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/mknodat.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/mknodat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/mknodat.2.html
 #[cfg(not(any(apple, target_os = "espidf", target_os = "vita", target_os = "wasi")))]
 #[inline]
@@ -454,7 +454,7 @@ pub fn mknodat<P: path::Arg, Fd: AsFd>(
 ///  - [POSIX]
 ///  - [Linux]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/fchownat.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/fchownat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/fchownat.2.html
 #[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
 #[inline]

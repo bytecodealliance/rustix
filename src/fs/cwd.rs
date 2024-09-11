@@ -21,7 +21,7 @@ use backend::fd::{BorrowedFd, RawFd};
 ///  - [POSIX]
 ///
 /// [`openat`]: crate::fs::openat
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/fcntl.h.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/fcntl.h.html
 // SAFETY: `AT_FDCWD` is a reserved value that is never dynamically
 // allocated, so it'll remain valid for the duration of `'static`.
 #[doc(alias = "AT_FDCWD")]

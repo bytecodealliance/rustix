@@ -42,7 +42,7 @@ use {
 ///  - [illumos]
 ///  - [glibc]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stdin.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/stdin.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/stdin.3.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=stdin&sektion=4
 /// [NetBSD]: https://man.netbsd.org/stdin.4
@@ -88,7 +88,7 @@ pub const fn stdin() -> BorrowedFd<'static> {
 ///  - [illumos]
 ///  - [glibc]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stdin.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/stdin.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/stdin.3.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=stdin&sektion=4
 /// [NetBSD]: https://man.netbsd.org/stdin.4
@@ -128,7 +128,7 @@ pub const unsafe fn stdin() -> BorrowedFd<'static> {
 ///  - [illumos]
 ///  - [glibc]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stdin.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/stdin.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/stdin.3.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=stdin&sektion=4
 /// [NetBSD]: https://man.netbsd.org/stdin.4
@@ -164,7 +164,7 @@ pub unsafe fn take_stdin() -> OwnedFd {
 ///  - [illumos]
 ///  - [glibc]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stdout.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/stdout.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/stdout.3.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=stdout&sektion=4
 /// [NetBSD]: https://man.netbsd.org/stdout.4
@@ -210,7 +210,7 @@ pub const fn stdout() -> BorrowedFd<'static> {
 ///  - [illumos]
 ///  - [glibc]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stdout.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/stdout.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/stdout.3.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=stdout&sektion=4
 /// [NetBSD]: https://man.netbsd.org/stdout.4
@@ -250,7 +250,7 @@ pub const unsafe fn stdout() -> BorrowedFd<'static> {
 ///  - [illumos]
 ///  - [glibc]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stdout.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/stdout.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/stdout.3.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=stdout&sektion=4
 /// [NetBSD]: https://man.netbsd.org/stdout.4
@@ -280,7 +280,7 @@ pub unsafe fn take_stdout() -> OwnedFd {
 ///  - [illumos]
 ///  - [glibc]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stderr.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/stderr.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/stderr.3.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=stderr&sektion=4
 /// [NetBSD]: https://man.netbsd.org/stderr.4
@@ -320,7 +320,7 @@ pub const fn stderr() -> BorrowedFd<'static> {
 ///  - [illumos]
 ///  - [glibc]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stderr.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/stderr.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/stderr.3.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=stderr&sektion=4
 /// [NetBSD]: https://man.netbsd.org/stderr.4
@@ -365,7 +365,7 @@ pub const unsafe fn stderr() -> BorrowedFd<'static> {
 ///  - [illumos]
 ///  - [glibc]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stderr.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/stderr.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/stderr.3.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=stderr&sektion=4
 /// [NetBSD]: https://man.netbsd.org/stderr.4
@@ -397,7 +397,7 @@ pub unsafe fn take_stderr() -> OwnedFd {
 ///  - [illumos]
 ///  - [glibc]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stdin.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/stdin.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/stdin.3.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=stdin&sektion=4
 /// [NetBSD]: https://man.netbsd.org/stdin.4
@@ -429,7 +429,7 @@ pub const fn raw_stdin() -> RawFd {
 ///  - [illumos]
 ///  - [glibc]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stdout.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/stdout.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/stdout.3.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=stdout&sektion=4
 /// [NetBSD]: https://man.netbsd.org/stdout.4
@@ -461,7 +461,7 @@ pub const fn raw_stdout() -> RawFd {
 ///  - [illumos]
 ///  - [glibc]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/stderr.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/stderr.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/stderr.3.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=stderr&sektion=4
 /// [NetBSD]: https://man.netbsd.org/stderr.4

@@ -34,7 +34,7 @@ use backend::fd::RawFd;
 ///  - [glibc]
 ///
 /// [Beej's Guide to Network Programming]: https://beej.us/guide/bgnet/html/split/system-calls-or-bust.html#close-and-shutdownget-outta-my-face
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/close.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/close.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/close.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/close.2.html#//apple_ref/doc/man/2/close
 /// [Winsock]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-closesocket

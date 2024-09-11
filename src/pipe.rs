@@ -34,7 +34,7 @@ pub use backend::pipe::types::{IoSliceRaw, SpliceFlags};
 ///  - [POSIX]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man7/pipe.7.html
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/write.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/write.html
 #[cfg(not(any(
     solarish,
     windows,
@@ -63,7 +63,7 @@ pub const PIPE_BUF: usize = c::PIPE_BUF;
 ///  - [illumos]
 ///  - [glibc]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/pipe.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/pipe.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/pipe.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/pipe.2.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=pipe&sektion=2
