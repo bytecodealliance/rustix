@@ -48,9 +48,6 @@ mod makedev;
 #[cfg(any(linux_kernel, target_os = "freebsd"))]
 mod memfd_create;
 #[cfg(linux_kernel)]
-#[cfg(feature = "fs")]
-mod mount;
-#[cfg(linux_kernel)]
 mod openat2;
 #[cfg(linux_kernel)]
 mod raw_dir;
@@ -114,9 +111,6 @@ pub use ioctl::*;
 pub use makedev::*;
 #[cfg(any(linux_kernel, target_os = "freebsd"))]
 pub use memfd_create::memfd_create;
-#[cfg(linux_kernel)]
-#[cfg(feature = "fs")]
-pub use mount::*;
 #[cfg(linux_kernel)]
 pub use openat2::openat2;
 #[cfg(linux_kernel)]

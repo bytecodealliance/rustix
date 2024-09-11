@@ -242,9 +242,6 @@ rustc-dep-of-std = [
     "compiler_builtins?/rustc-dep-of-std",
 ]
 
-# Obsolete and deprecated.
-cc = []
-
 # Enable `rustix::io::try_close`. The rustix developers do not intend the
 # existence of this feature to imply that anyone should use it.
 try_close = []

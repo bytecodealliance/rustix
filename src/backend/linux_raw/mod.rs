@@ -47,8 +47,6 @@ pub(crate) mod io_uring;
 pub(crate) mod mm;
 #[cfg(feature = "mount")]
 pub(crate) mod mount;
-#[cfg(all(feature = "fs", not(feature = "mount")))]
-pub(crate) mod mount; // for deprecated mount functions in "fs"
 #[cfg(feature = "net")]
 pub(crate) mod net;
 #[cfg(any(
