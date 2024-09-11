@@ -82,7 +82,7 @@ pub use unlink as shm_unlink;
 ///  - [POSIX]
 ///  - [Linux]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/shm_open.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/shm_open.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/shm_open.3.html
 #[doc(alias = "shm_open")]
 #[inline]
@@ -96,7 +96,7 @@ pub fn open<P: path::Arg>(name: P, flags: shm::OFlags, mode: Mode) -> io::Result
 ///  - [POSIX]
 ///  - [Linux]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/shm_unlink.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/shm_unlink.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/shm_unlink.3.html
 #[doc(alias = "shm_unlink")]
 #[inline]

@@ -52,7 +52,7 @@ pub use msg::*;
 ///  - [glibc]
 ///
 /// [Beej's Guide to Network Programming]: https://beej.us/guide/bgnet/html/split/system-calls-or-bust.html#sendrecv
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/recv.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/recv.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/recv.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/recv.2.html
 /// [Winsock]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-recv
@@ -108,7 +108,7 @@ pub fn recv_uninit<Fd: AsFd>(
 ///  - [glibc]
 ///
 /// [Beej's Guide to Network Programming]: https://beej.us/guide/bgnet/html/split/system-calls-or-bust.html#sendrecv
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/send.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/send.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/send.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/send.2.html
 /// [Winsock]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-send
@@ -143,7 +143,7 @@ pub fn send<Fd: AsFd>(fd: Fd, buf: &[u8], flags: SendFlags) -> io::Result<usize>
 ///  - [glibc]
 ///
 /// [Beej's Guide to Network Programming]: https://beej.us/guide/bgnet/html/split/system-calls-or-bust.html#sendtorecv
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/recvfrom.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/recvfrom.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/recvfrom.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/recvfrom.2.html
 /// [Winsock]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-recvfrom
@@ -212,7 +212,7 @@ pub fn recvfrom_uninit<Fd: AsFd>(
 ///  - [glibc]
 ///
 /// [Beej's Guide to Network Programming]: https://beej.us/guide/bgnet/html/split/system-calls-or-bust.html#sendtorecv
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/sendto.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/sendto.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/sendto.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/sendto.2.html
 /// [Winsock]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-sendto
@@ -260,7 +260,7 @@ fn _sendto(
 ///  - [glibc]
 ///
 /// [Beej's Guide to Network Programming]: https://beej.us/guide/bgnet/html/split/system-calls-or-bust.html#sendtorecv
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/sendto.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/sendto.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/sendto.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/sendto.2.html
 /// [Winsock]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-sendto
@@ -312,7 +312,7 @@ fn _sendto_any(
 ///  - [glibc]
 ///
 /// [Beej's Guide to Network Programming]: https://beej.us/guide/bgnet/html/split/system-calls-or-bust.html#sendtorecv
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/sendto.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/sendto.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/sendto.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/sendto.2.html
 /// [Winsock]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-sendto
@@ -350,7 +350,7 @@ pub fn sendto_v4<Fd: AsFd>(
 ///  - [glibc]
 ///
 /// [Beej's Guide to Network Programming]: https://beej.us/guide/bgnet/html/split/system-calls-or-bust.html#sendtorecv
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/sendto.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/sendto.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/sendto.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/sendto.2.html
 /// [Winsock]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-sendto
@@ -388,7 +388,7 @@ pub fn sendto_v6<Fd: AsFd>(
 ///  - [glibc]
 ///
 /// [Beej's Guide to Network Programming]: https://beej.us/guide/bgnet/html/split/system-calls-or-bust.html#sendtorecv
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/sendto.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/sendto.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/sendto.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/sendto.2.html
 /// [Winsock]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-sendto
