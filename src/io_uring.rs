@@ -1433,6 +1433,39 @@ pub struct io_uring_buf {
     pub resv: u16,
 }
 
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Copy, Clone, Default)]
+pub struct buf_ring_tail_struct {
+    pub resv1: u64,
+    pub resv2: u32,
+    pub resv3: u16,
+    pub tail: u16,
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Default)]
+pub struct buf_ring_bufs_struct {
+    pub bufs: sys::__IncompleteArrayField<io_uring_buf>,
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Default)]
+pub struct tail_or_bufs_struct {
+    pub tail: sys::__BindgenUnionField<buf_ring_tail_struct>,
+    pub bufs: sys::__BindgenUnionField<buf_ring_bufs_struct>,
+    pub union_field: [u64; 2],
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Default)]
+pub struct io_uring_buf_ring {
+    pub tail_or_bufs: tail_or_bufs_struct,
+}
+
 impl Default for ioprio_union {
     #[inline]
     fn default() -> Self {
@@ -1595,4 +1628,15 @@ fn io_uring_layouts() {
     check_struct!(io_uring_buf_reg, ring_addr, ring_entries, bgid, pad, resv);
     check_struct!(io_uring_buf, addr, len, bid, resv);
     check_struct!(io_uring_sync_cancel_reg, addr, fd, flags, timeout, pad);
+
+    check_renamed_type!(tail_or_bufs_struct, io_uring_buf_ring__bindgen_ty_1);
+    check_renamed_type!(
+        buf_ring_tail_struct,
+        io_uring_buf_ring__bindgen_ty_1__bindgen_ty_1
+    );
+    check_renamed_type!(
+        buf_ring_bufs_struct,
+        io_uring_buf_ring__bindgen_ty_1__bindgen_ty_2
+    );
+    check_struct_renamed_field!(io_uring_buf_ring, tail_or_bufs, __bindgen_anon_1);
 }
