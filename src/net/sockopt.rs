@@ -1474,11 +1474,16 @@ pub fn get_xdp_options<Fd: AsFd>(fd: Fd) -> io::Result<XdpOptionsFlags> {
     backend::net::sockopt::get_xdp_options(fd.as_fd())
 }
 
-#[test]
-fn test_sizes() {
-    use c::c_int;
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-    // Backend code needs to cast these to `c_int` so make sure that cast
-    // isn't lossy.
-    assert_eq_size!(Timeout, c_int);
+    #[test]
+    fn test_sizes() {
+        use c::c_int;
+
+        // Backend code needs to cast these to `c_int` so make sure that cast
+        // isn't lossy.
+        assert_eq_size!(Timeout, c_int);
+    }
 }
