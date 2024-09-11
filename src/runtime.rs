@@ -148,7 +148,7 @@ pub unsafe fn exit_thread(status: i32) -> ! {
 ///  - [Linux `exit_group`]
 ///  - [Linux `_Exit`]
 ///
-/// [POSIX `_Exit`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/_Exit.html
+/// [POSIX `_Exit`]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/_Exit.html
 /// [Linux `exit_group`]: https://man7.org/linux/man-pages/man2/exit_group.2.html
 /// [Linux `_Exit`]: https://man7.org/linux/man-pages/man2/_Exit.2.html
 #[doc(alias = "_exit")]
@@ -164,7 +164,7 @@ pub fn exit_group(status: i32) -> ! {
 ///  - [POSIX]
 ///  - [Linux]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/stdlib.h.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/stdlib.h.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/exit.3.html
 pub const EXIT_SUCCESS: i32 = backend::c::EXIT_SUCCESS;
 
@@ -174,7 +174,7 @@ pub const EXIT_SUCCESS: i32 = backend::c::EXIT_SUCCESS;
 ///  - [POSIX]
 ///  - [Linux]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/stdlib.h.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/stdlib.h.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/exit.3.html
 pub const EXIT_FAILURE: i32 = backend::c::EXIT_FAILURE;
 
@@ -315,12 +315,12 @@ pub use backend::runtime::tls::StartupTlsInfo;
 ///
 /// — “Rules”, by Karla Kuskin
 ///
-/// [`MAP_SHARED`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/mmap.html
+/// [`MAP_SHARED`]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/mmap.html
 /// [not considered unsafe]: https://doc.rust-lang.org/reference/behavior-not-considered-unsafe.html#deadlocks
 /// [`memfd_create`]: https://man7.org/linux/man-pages/man2/memfd_create.2.html
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/fork.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/fork.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/fork.2.html
-/// [async-signal-safe]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/V2_chap02.html#tag_15_04_03
+/// [async-signal-safe]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/V2_chap02.html#tag_15_04_03
 pub unsafe fn fork() -> io::Result<Fork> {
     backend::runtime::syscalls::fork()
 }
@@ -392,7 +392,7 @@ pub unsafe fn execve(path: &CStr, argv: *const *const u8, envp: *const *const u8
 ///  - [POSIX]
 ///  - [Linux]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/sigaction.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/sigaction.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/sigaction.2.html
 #[inline]
 pub unsafe fn sigaction(signal: Signal, new: Option<Sigaction>) -> io::Result<Sigaction> {
@@ -410,7 +410,7 @@ pub unsafe fn sigaction(signal: Signal, new: Option<Sigaction>) -> io::Result<Si
 ///  - [POSIX]
 ///  - [Linux]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/sigaltstack.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/sigaltstack.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/sigaltstack.2.html
 #[inline]
 pub unsafe fn sigaltstack(new: Option<Stack>) -> io::Result<Stack> {

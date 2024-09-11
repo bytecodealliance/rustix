@@ -28,9 +28,9 @@ pub use backend::io::types::DupFlags;
 ///  - [illumos]
 ///  - [glibc]
 ///
-/// [file description]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_258
+/// [file description]: https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/V1_chap03.html#tag_03_258
 /// [`fcntl_dupfd_cloexec`]: crate::io::fcntl_dupfd_cloexec
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/dup.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/dup.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/dup.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/dup.2.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=dup&sektion=2
@@ -70,9 +70,9 @@ pub fn dup<Fd: AsFd>(fd: Fd) -> io::Result<OwnedFd> {
 ///  - [illumos]
 ///  - [glibc]
 ///
-/// [file description]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_258
+/// [file description]: https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/V1_chap03.html#tag_03_258
 /// [`fcntl_dupfd_cloexec`]: crate::io::fcntl_dupfd_cloexec
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/dup2.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/dup2.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/dup2.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/dup2.2.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=dup2&sektion=2
@@ -105,7 +105,7 @@ pub fn dup2<Fd: AsFd>(fd: Fd, new: &mut OwnedFd) -> io::Result<()> {
 ///  - [OpenBSD]
 ///  - [DragonFly BSD]
 ///
-/// [file description]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_258
+/// [file description]: https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/V1_chap03.html#tag_03_258
 /// [Linux]: https://man7.org/linux/man-pages/man2/dup3.2.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=dup3&sektion=3
 /// [NetBSD]: https://man.netbsd.org/dup3.2

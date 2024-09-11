@@ -16,7 +16,7 @@
 //!  - [illumos `getsockopt`]
 //!  - [glibc `getsockopt`]
 //!
-//! [POSIX `getsockopt`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/getsockopt.html
+//! [POSIX `getsockopt`]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/getsockopt.html
 //! [Linux `getsockopt`]: https://man7.org/linux/man-pages/man2/getsockopt.2.html
 //! [Winsock `getsockopt`]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-getsockopt
 //! [Apple `getsockopt`]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/getsockopt.2.html
@@ -40,7 +40,7 @@
 //!  - [illumos `setsockopt`]
 //!  - [glibc `setsockopt`]
 //!
-//! [POSIX `setsockopt`]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/setsockopt.html
+//! [POSIX `setsockopt`]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/setsockopt.html
 //! [Linux `setsockopt`]: https://man7.org/linux/man-pages/man2/setsockopt.2.html
 //! [Winsock `setsockopt`]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-setsockopt
 //! [Apple `setsockopt`]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/setsockopt.2.html
@@ -60,7 +60,7 @@
 //!  - [Winsock `SOL_SOCKET` options]
 //!  - [glibc `SOL_SOCKET` Options]
 //!
-//! [POSIX `sys/socket.h`]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/sys_socket.h.html
+//! [POSIX `sys/socket.h`]: https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/sys_socket.h.html
 //! [Linux `socket`]: https://man7.org/linux/man-pages/man7/socket.7.html
 //! [Winsock `SOL_SOCKET` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/sol-socket-socket-options
 //! [glibc `SOL_SOCKET` options]: https://www.gnu.org/software/libc/manual/html_node/Socket_002dLevel-Options.html
@@ -79,7 +79,7 @@
 //!  - [DragonFly BSD `ip`]
 //!  - [illumos `ip`]
 //!
-//! [POSIX `netinet/in.h`]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/netinet_in.h.html
+//! [POSIX `netinet/in.h`]: https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/netinet_in.h.html
 //! [Linux `ip`]: https://man7.org/linux/man-pages/man7/ip.7.html
 //! [Winsock `IPPROTO_IP` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-ip-socket-options
 //! [Apple `ip`]: https://opensource.apple.com/source/xnu/xnu-7195.81.3/bsd/man/man4/ip.4.auto.html
@@ -103,7 +103,7 @@
 //!  - [DragonFly BSD `ip6`]
 //!  - [illumos `ip6`]
 //!
-//! [POSIX `netinet/in.h`]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/netinet_in.h.html
+//! [POSIX `netinet/in.h`]: https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/netinet_in.h.html
 //! [Linux `ipv6`]: https://man7.org/linux/man-pages/man7/ipv6.7.html
 //! [Winsock `IPPROTO_IPV6` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-ipv6-socket-options
 //! [Apple `ip6`]: https://opensource.apple.com/source/xnu/xnu-7195.81.3/bsd/man/man4/ip6.4.auto.html
@@ -127,7 +127,7 @@
 //!  - [DragonFly BSD `tcp`]
 //!  - [illumos `tcp`]
 //!
-//! [POSIX `netinet/tcp.h`]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/netinet_tcp.h.html
+//! [POSIX `netinet/tcp.h`]: https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/netinet_tcp.h.html
 //! [Linux `tcp`]: https://man7.org/linux/man-pages/man7/tcp.7.html
 //! [Winsock `IPPROTO_TCP` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-tcp-socket-options
 //! [Apple `tcp`]: https://opensource.apple.com/source/xnu/xnu-7195.81.3/bsd/man/man4/tcp.4.auto.html
@@ -1474,11 +1474,16 @@ pub fn get_xdp_options<Fd: AsFd>(fd: Fd) -> io::Result<XdpOptionsFlags> {
     backend::net::sockopt::get_xdp_options(fd.as_fd())
 }
 
-#[test]
-fn test_sizes() {
-    use c::c_int;
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-    // Backend code needs to cast these to `c_int` so make sure that cast
-    // isn't lossy.
-    assert_eq_size!(Timeout, c_int);
+    #[test]
+    fn test_sizes() {
+        use c::c_int;
+
+        // Backend code needs to cast these to `c_int` so make sure that cast
+        // isn't lossy.
+        assert_eq_size!(Timeout, c_int);
+    }
 }

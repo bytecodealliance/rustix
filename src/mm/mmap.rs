@@ -65,7 +65,7 @@ impl MapFlags {
 ///  - [illumos]
 ///  - [glibc]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/mmap.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/mmap.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/mmap.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/mmap.2.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=mmap&sektion=2
@@ -106,7 +106,7 @@ pub unsafe fn mmap<Fd: AsFd>(
 ///  - [illumos]
 ///  - [glibc]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/mmap.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/mmap.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/mmap.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/mmap.2.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=mmap&sektion=2
@@ -143,7 +143,7 @@ pub unsafe fn mmap_anonymous(
 ///  - [illumos]
 ///  - [glibc]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/munmap.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/munmap.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/munmap.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/munmap.2.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=munmap&sektion=2
@@ -226,7 +226,7 @@ pub unsafe fn mremap_fixed(
 ///  - [DragonFly BSD]
 ///  - [illumos]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/mprotect.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/mprotect.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/mprotect.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/mprotect.2.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=mprotect&sektion=2
@@ -264,7 +264,7 @@ pub unsafe fn mprotect(ptr: *mut c_void, len: usize, flags: MprotectFlags) -> io
 ///  - [illumos]
 ///  - [glibc]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/mlock.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/mlock.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/mlock.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/mlock.2.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=mlock&sektion=2
@@ -329,7 +329,7 @@ pub unsafe fn mlock_with(ptr: *mut c_void, len: usize, flags: MlockFlags) -> io:
 ///  - [illumos]
 ///  - [glibc]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/munlock.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/munlock.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/munlock.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/munlock.2.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=munlock&sektion=2
@@ -361,7 +361,7 @@ pub unsafe fn munlock(ptr: *mut c_void, len: usize) -> io::Result<()> {
 ///  - [illumos]
 ///  - [glibc]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/mlockall.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/mlockall.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/mlockall.2.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=mlockall&sektion=2
 /// [NetBSD]: https://man.netbsd.org/mlockall.2
@@ -394,7 +394,7 @@ pub fn mlockall(flags: MlockAllFlags) -> io::Result<()> {
 ///  - [illumos]
 ///  - [glibc]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/munlockall.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/munlockall.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/munlockall.2.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=munlockall&sektion=2
 /// [NetBSD]: https://man.netbsd.org/munlockall.2

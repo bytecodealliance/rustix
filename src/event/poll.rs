@@ -17,7 +17,7 @@ pub use backend::event::poll_fd::{PollFd, PollFlags};
 ///  - [illumos]
 ///
 /// [Beej's Guide to Network Programming]: https://beej.us/guide/bgnet/html/split/slightly-advanced-techniques.html#poll
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/poll.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/poll.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/poll.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/poll.2.html
 /// [Winsock]: https://docs.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-wsapoll
