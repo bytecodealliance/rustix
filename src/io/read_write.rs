@@ -30,7 +30,7 @@ pub use backend::io::types::ReadWriteFlags;
 ///  - [illumos]
 ///  - [glibc]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/read.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/read.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/read.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/read.2.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=read&sektion=2
@@ -76,7 +76,7 @@ pub fn read_uninit<Fd: AsFd>(
 ///  - [illumos]
 ///  - [glibc]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/write.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/write.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/write.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/write.2.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=write&sektion=2
@@ -105,7 +105,7 @@ pub fn write<Fd: AsFd>(fd: Fd, buf: &[u8]) -> io::Result<usize> {
 ///  - [DragonFly BSD]
 ///  - [illumos]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/pread.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/pread.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/pread.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/pread.2.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=pread&sektion=2
@@ -151,7 +151,7 @@ pub fn pread_uninit<Fd: AsFd>(
 ///  - [DragonFly BSD]
 ///  - [illumos]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/pwrite.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/pwrite.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/pwrite.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/pwrite.2.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=pwrite&sektion=2
@@ -176,7 +176,7 @@ pub fn pwrite<Fd: AsFd>(fd: Fd, buf: &[u8], offset: u64) -> io::Result<usize> {
 ///  - [DragonFly BSD]
 ///  - [illumos]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/readv.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/readv.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/readv.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/readv.2.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=readv&sektion=2
@@ -202,7 +202,7 @@ pub fn readv<Fd: AsFd>(fd: Fd, bufs: &mut [IoSliceMut<'_>]) -> io::Result<usize>
 ///  - [DragonFly BSD]
 ///  - [illumos]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/writev.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/writev.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/writev.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/writev.2.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=writev&sektion=2

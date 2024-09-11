@@ -32,7 +32,7 @@ pub use backend::mm::types::Advice;
 ///  - [illumos]
 ///  - [glibc]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/posix_madvise.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/posix_madvise.html
 /// [Linux `madvise`]: https://man7.org/linux/man-pages/man2/madvise.2.html
 /// [Linux `posix_madvise`]: https://man7.org/linux/man-pages/man3/posix_madvise.3.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/madvise.2.html
