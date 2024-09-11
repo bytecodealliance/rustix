@@ -43,7 +43,7 @@ use backend::fd::RawFd;
 /// [OpenBSD]: https://man.openbsd.org/close.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=close&section=2
 /// [illumos]: https://illumos.org/man/2/close
-/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Opening-and-Closing-Files.html#index-close
+/// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Opening-and-Closing-Files.html#index-close
 ///
 /// # Safety
 ///
