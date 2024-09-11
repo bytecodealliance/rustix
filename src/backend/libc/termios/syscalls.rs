@@ -67,8 +67,29 @@ pub(crate) fn tcgetattr(fd: BorrowedFd<'_>) -> io::Result<Termios> {
             local_modes: LocalModes::from_bits_retain(termios2.c_lflag),
             line_discipline: termios2.c_line,
             special_codes: SpecialCodes(Default::default()),
+
+            // On PowerPC musl targets, `c_ispeed`/`c_ospeed` are named
+            // `__c_ispeed`/`__c_ospeed`.
+            #[cfg(not(all(
+                target_env = "musl",
+                any(target_arch = "powerpc", target_arch = "powerpc64")
+            )))]
             input_speed: termios2.c_ispeed,
+            #[cfg(not(all(
+                target_env = "musl",
+                any(target_arch = "powerpc", target_arch = "powerpc64")
+            )))]
             output_speed: termios2.c_ospeed,
+            #[cfg(all(
+                target_env = "musl",
+                any(target_arch = "powerpc", target_arch = "powerpc64")
+            ))]
+            input_speed: termios2.__c_ispeed,
+            #[cfg(all(
+                target_env = "musl",
+                any(target_arch = "powerpc", target_arch = "powerpc64")
+            ))]
+            output_speed: termios2.__c_ospeed,
         };
 
         // Copy in the control codes, since libc's `c_cc` array may have a
@@ -179,6 +200,7 @@ pub(crate) fn tcsetattr(
 
         let output_speed = termios.output_speed();
         let input_speed = termios.input_speed();
+
         let mut termios2 = c::termios2 {
             c_iflag: termios.input_modes.bits(),
             c_oflag: termios.output_modes.bits(),
@@ -186,8 +208,29 @@ pub(crate) fn tcsetattr(
             c_lflag: termios.local_modes.bits(),
             c_line: termios.line_discipline,
             c_cc: Default::default(),
+
+            // On PowerPC musl targets, `c_ispeed`/`c_ospeed` are named
+            // `__c_ispeed`/`__c_ospeed`.
+            #[cfg(not(all(
+                target_env = "musl",
+                any(target_arch = "powerpc", target_arch = "powerpc64")
+            )))]
             c_ispeed: input_speed,
+            #[cfg(not(all(
+                target_env = "musl",
+                any(target_arch = "powerpc", target_arch = "powerpc64")
+            )))]
             c_ospeed: output_speed,
+            #[cfg(all(
+                target_env = "musl",
+                any(target_arch = "powerpc", target_arch = "powerpc64")
+            ))]
+            __c_ispeed: input_speed,
+            #[cfg(all(
+                target_env = "musl",
+                any(target_arch = "powerpc", target_arch = "powerpc64")
+            ))]
+            __c_ospeed: output_speed,
         };
 
         // Ensure that our input and output speeds are set, as `libc`
