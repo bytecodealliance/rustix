@@ -83,7 +83,7 @@ pub unsafe fn select(
     backend::event::syscalls::select(nfds, readfds, writefds, exceptfds, timeout)
 }
 
-const BITS: usize = size_of::<FdSetElement>() * 8;
+const BITS: usize = core::mem::size_of::<FdSetElement>() * 8;
 use crate::fd::RawFd;
 
 /// Set `fd` in the bitvector pointed to by `fds`.
