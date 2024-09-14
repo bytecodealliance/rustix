@@ -87,8 +87,7 @@ fn test_select_with_great_fds() {
     use core::cmp::max;
     use core::mem::size_of;
     use core::ptr::null_mut;
-    use rustix::event::select;
-    use rustix::event::Timespec;
+    use rustix::event::{select, Timespec};
     use rustix::io::{read, write};
     use rustix::pipe::pipe;
     use rustix::process::{getrlimit, setrlimit, Resource};
