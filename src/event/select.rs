@@ -2,14 +2,14 @@ use crate::{backend, io};
 
 pub use crate::timespec::Timespec;
 
-/// Bitfield array element type for use with [`select`].
+/// Bitvector element type for use with [`select`].
 #[cfg(all(
     target_pointer_width = "64",
     any(target_os = "freebsd", target_os = "dragonfly")
 ))]
 pub type FdSetElement = i64;
 
-/// Bitfield array element type for use with [`select`].
+/// Bitvector element type for use with [`select`].
 #[cfg(not(all(
     target_pointer_width = "64",
     any(target_os = "freebsd", target_os = "dragonfly")
@@ -27,10 +27,15 @@ pub type FdSetElement = i32;
 /// `fd / (size_of::<FdSetElement>() * 8)` has the bit
 /// `1 << (fd % (size_of::<FdSetElement>() * 8))` set.
 ///
-/// In particular, on Apple platforms, it behaves as if
-/// `_DARWIN_UNLIMITED_SELECT` were predefined. And on Linux platforms, it is
-/// not defined because Linux's `select` always has an `FD_SETSIZE` limitation.
-/// On Linux, it is recommended to use [`poll`] instead.
+/// In particular, on Apple platforms, this function behaves as if
+/// `_DARWIN_UNLIMITED_SELECT` were predefined.
+///
+/// On Linux, illumos, and OpenBSD, this function is not defined because the
+/// `select` functions on these platforms always has an `FD_SETSIZE`
+/// limitation, following POSIX. These platforms' documentation recommend using
+/// [`poll`] instead.
+///
+/// [`poll`]: crate::event::poll
 ///
 /// # Safety
 ///
