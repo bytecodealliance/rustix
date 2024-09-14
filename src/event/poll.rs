@@ -2,7 +2,7 @@ use crate::{backend, io};
 
 pub use backend::event::poll_fd::{PollFd, PollFlags};
 
-/// `poll(self.fds, timeout)`
+/// `poll(self.fds, timeout)`—Wait for events on lists of file descriptors.
 ///
 /// # References
 ///  - [Beej's Guide to Network Programming]

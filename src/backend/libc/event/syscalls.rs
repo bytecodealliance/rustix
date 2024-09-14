@@ -16,6 +16,8 @@ use crate::event::port::Event;
     target_os = "espidf"
 ))]
 use crate::event::EventfdFlags;
+#[cfg(any(apple, freebsdlike, target_os = "netbsd"))]
+use crate::event::FdSetElement;
 use crate::event::PollFd;
 use crate::io;
 #[cfg(solarish)]
@@ -123,6 +125,58 @@ pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: c::c_int) -> io::Result<usiz
 
     ret_c_int(unsafe { c::poll(fds.as_mut_ptr().cast(), nfds, timeout) })
         .map(|nready| nready as usize)
+}
+
+#[cfg(any(apple, freebsdlike, target_os = "netbsd"))]
+pub(crate) unsafe fn select(
+    nfds: i32,
+    readfds: *mut FdSetElement,
+    writefds: *mut FdSetElement,
+    exceptfds: *mut FdSetElement,
+    timeout: Option<&crate::timespec::Timespec>,
+) -> io::Result<i32> {
+    let timeout_data;
+    let timeout_ptr = match timeout {
+        Some(timeout) => {
+            // Convert from `Timespec` to `c::timeval`.
+            timeout_data = c::timeval {
+                tv_sec: timeout.tv_sec,
+                tv_usec: ((timeout.tv_nsec + 999) / 1000) as _,
+            };
+            &timeout_data
+        }
+        None => core::ptr::null(),
+    };
+
+    // On Apple platforms, use the specially mangled `select` which doesn't
+    // have an `FD_SETSIZE` limitation.
+    #[cfg(apple)]
+    {
+        extern "C" {
+            #[link_name = "select$DARWIN_EXTSN$NOCANCEL"]
+            fn select(
+                nfds: c::c_int,
+                readfds: *mut FdSetElement,
+                writefds: *mut FdSetElement,
+                errorfds: *mut FdSetElement,
+                timeout: *const c::timeval,
+            ) -> c::c_int;
+        }
+
+        ret_c_int(select(nfds, readfds, writefds, exceptfds, timeout_ptr))
+    }
+
+    // Otherwise just use the normal `select`.
+    #[cfg(not(apple))]
+    {
+        ret_c_int(c::select(
+            nfds,
+            readfds.cast(),
+            writefds.cast(),
+            exceptfds.cast(),
+            timeout_ptr as *mut c::timeval,
+        ))
+    }
 }
 
 #[cfg(solarish)]

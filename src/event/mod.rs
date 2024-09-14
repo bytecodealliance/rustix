@@ -16,6 +16,8 @@ mod pause;
 mod poll;
 #[cfg(solarish)]
 pub mod port;
+#[cfg(any(apple, freebsdlike, target_os = "netbsd"))]
+mod select;
 
 #[cfg(any(
     linux_kernel,
@@ -27,3 +29,5 @@ pub use eventfd::{eventfd, EventfdFlags};
 #[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
 pub use pause::*;
 pub use poll::{poll, PollFd, PollFlags};
+#[cfg(any(apple, freebsdlike, target_os = "netbsd"))]
+pub use select::{select, FdSetElement, Timespec};

@@ -10,3 +10,5 @@ mod epoll;
 #[cfg(not(target_os = "wasi"))]
 mod eventfd;
 mod poll;
+#[cfg(any(apple, freebsdlike, target_os = "netbsd"))]
+mod select;

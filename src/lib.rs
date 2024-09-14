@@ -71,6 +71,7 @@
 //!  - Provide y2038 compatibility, on platforms which support this.
 //!  - Correct selected platform bugs, such as behavioral differences when
 //!    running under seccomp.
+//!  - Use `timespec` for timestamps instead of `timeval`.
 //!
 //! Things they don't do include:
 //!  - Detecting whether functions are supported at runtime, except in specific
@@ -362,6 +363,7 @@ mod signal;
     feature = "runtime",
     feature = "thread",
     feature = "time",
+    all(feature = "event", any(apple, freebsdlike, target_os = "netbsd")),
     all(
         linux_raw,
         not(feature = "use-libc-auxv"),
