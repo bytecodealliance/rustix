@@ -23,7 +23,7 @@ fn test_select() {
     let nfds = max(reader.as_raw_fd(), writer.as_raw_fd()) + 1;
 
     // `select` should say there's nothing ready to be read from the pipe.
-    let mut readfds = vec![0 as FdSetElement; nfds as usize];
+    let mut readfds = vec![0 as FdSetElement; (nfds as usize + (bits - 1)) / bits];
     readfds[reader.as_raw_fd() as usize / BITS] |= 1 << (reader.as_raw_fd() as usize % BITS);
     let num = retry_on_intr(|| unsafe {
         select(
@@ -45,7 +45,7 @@ fn test_select() {
     assert_eq!(retry_on_intr(|| write(&writer, b"a")).unwrap(), 1);
 
     // `select` should now say there's data to be read.
-    let mut readfds = vec![0 as FdSetElement; nfds as usize];
+    let mut readfds = vec![0 as FdSetElement; (nfds as usize + (bits - 1)) / bits];
     readfds[reader.as_raw_fd() as usize / BITS] |= 1 << (reader.as_raw_fd() as usize % BITS);
     let num = retry_on_intr(|| unsafe {
         select(nfds, readfds.as_mut_ptr(), null_mut(), null_mut(), None)
@@ -118,7 +118,7 @@ fn test_select_with_great_fds() {
     let nfds = max(reader.as_raw_fd(), writer.as_raw_fd()) + 1;
 
     // `select` should say there's nothing ready to be read from the pipe.
-    let mut readfds = vec![0 as FdSetElement; nfds as usize];
+    let mut readfds = vec![0 as FdSetElement; (nfds as usize + (bits - 1)) / bits];
     readfds[reader.as_raw_fd() as usize / BITS] |= 1 << (reader.as_raw_fd() as usize % BITS);
     let num = retry_on_intr(|| unsafe {
         select(
@@ -140,7 +140,7 @@ fn test_select_with_great_fds() {
     assert_eq!(retry_on_intr(|| write(&writer, b"a")).unwrap(), 1);
 
     // `select` should now say there's data to be read.
-    let mut readfds = vec![0 as FdSetElement; nfds as usize];
+    let mut readfds = vec![0 as FdSetElement; (nfds as usize + (bits - 1)) / bits];
     readfds[reader.as_raw_fd() as usize / BITS] |= 1 << (reader.as_raw_fd() as usize % BITS);
     let num = retry_on_intr(|| unsafe {
         select(nfds, readfds.as_mut_ptr(), null_mut(), null_mut(), None)
