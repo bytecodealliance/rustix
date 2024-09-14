@@ -19,6 +19,9 @@ pub type FdSetElement = i32;
 /// `select(nfds, readfds, writefds, exceptfds, timeout)`—Wait for events on
 /// sets of file descriptors.
 ///
+/// `readfds`, `writefds`, `exceptfds` must point to arrays of `FdSetElement`
+/// containing at least `nfds.div_ceil(size_of::<FdSetElement>())` elements.
+///
 /// This `select` wrapper differs from POSIX in that `nfds` is not limited to
 /// `FD_SETSIZE`. Instead of using the opaque fixed-sized `fd_set` type, this
 /// function takes raw pointers to arrays of
@@ -37,12 +40,7 @@ pub type FdSetElement = i32;
 /// limitation, following POSIX. These platforms' documentation recommend using
 /// [`poll`] instead.
 ///
-/// [`poll`]: crate::event::poll
-///
-/// # Safety
-///
-/// `readfds`, `writefds`, `exceptfds` must point to arrays of `FdSetElement`
-/// containing at least `nfds.div_ceil(size_of::<FdSetElement>())` elements.
+/// [`poll`]: crate::event::poll()
 ///
 /// # References
 ///  - [POSIX]
@@ -56,11 +54,11 @@ pub type FdSetElement = i32;
 ///  [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=select&sektion=2
 ///  [NetBSD]: https://man.netbsd.org/select.2
 ///  [DragonFly BSD]: https://man.dragonflybsd.org/?command=select&section=2
-pub unsafe fn select(
+pub fn select(
     nfds: i32,
-    readfds: *mut FdSetElement,
-    writefds: *mut FdSetElement,
-    exceptfds: *mut FdSetElement,
+    readfds: Option<&mut [FdSetElement]>,
+    writefds: Option<&mut [FdSetElement]>,
+    exceptfds: Option<&mut [FdSetElement]>,
     timeout: Option<&Timespec>,
 ) -> io::Result<i32> {
     backend::event::syscalls::select(nfds, readfds, writefds, exceptfds, timeout)

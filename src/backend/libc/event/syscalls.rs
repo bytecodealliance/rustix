@@ -128,13 +128,39 @@ pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: c::c_int) -> io::Result<usiz
 }
 
 #[cfg(any(apple, freebsdlike, target_os = "netbsd"))]
-pub(crate) unsafe fn select(
+pub(crate) fn select(
     nfds: i32,
-    readfds: *mut FdSetElement,
-    writefds: *mut FdSetElement,
-    exceptfds: *mut FdSetElement,
+    readfds: Option<&mut [FdSetElement]>,
+    writefds: Option<&mut [FdSetElement]>,
+    exceptfds: Option<&mut [FdSetElement]>,
     timeout: Option<&crate::timespec::Timespec>,
 ) -> io::Result<i32> {
+    use core::ptr::{null, null_mut};
+
+    let len = crate::event::fd_bitvector_len(nfds);
+
+    let readfds = match readfds {
+        Some(readfds) => {
+            assert!(readfds.len() >= len);
+            readfds.as_mut_ptr()
+        }
+        None => null_mut(),
+    };
+    let writefds = match writefds {
+        Some(writefds) => {
+            assert!(writefds.len() >= len);
+            writefds.as_mut_ptr()
+        }
+        None => null_mut(),
+    };
+    let exceptfds = match exceptfds {
+        Some(exceptfds) => {
+            assert!(exceptfds.len() >= len);
+            exceptfds.as_mut_ptr()
+        }
+        None => null_mut(),
+    };
+
     let timeout_data;
     let timeout_ptr = match timeout {
         Some(timeout) => {
@@ -145,13 +171,13 @@ pub(crate) unsafe fn select(
             };
             &timeout_data
         }
-        None => core::ptr::null(),
+        None => null(),
     };
 
     // On Apple platforms, use the specially mangled `select` which doesn't
     // have an `FD_SETSIZE` limitation.
     #[cfg(apple)]
-    {
+    unsafe {
         extern "C" {
             #[link_name = "select$DARWIN_EXTSN$NOCANCEL"]
             fn select(
@@ -168,7 +194,7 @@ pub(crate) unsafe fn select(
 
     // Otherwise just use the normal `select`.
     #[cfg(not(apple))]
-    {
+    unsafe {
         ret_c_int(c::select(
             nfds,
             readfds.cast(),

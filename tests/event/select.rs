@@ -9,7 +9,6 @@ use {
 #[cfg(feature = "pipe")]
 #[test]
 fn test_select() {
-    use core::ptr::null_mut;
     use rustix::io::{read, write};
     use rustix::pipe::pipe;
 
@@ -20,12 +19,12 @@ fn test_select() {
     // `select` should say there's nothing ready to be read from the pipe.
     let mut readfds = vec![0 as FdSetElement; fd_bitvector_len(nfds)];
     fd_set(reader.as_raw_fd(), &mut readfds);
-    let num = retry_on_intr(|| unsafe {
+    let num = retry_on_intr(|| {
         select(
             nfds,
-            readfds.as_mut_ptr(),
-            null_mut(),
-            null_mut(),
+            Some(&mut readfds),
+            None,
+            None,
             Some(&Timespec {
                 tv_sec: 0,
                 tv_nsec: 0,
@@ -42,10 +41,7 @@ fn test_select() {
     // `select` should now say there's data to be read.
     let mut readfds = vec![0 as FdSetElement; fd_bitvector_len(nfds)];
     fd_set(reader.as_raw_fd(), &mut readfds);
-    let num = retry_on_intr(|| unsafe {
-        select(nfds, readfds.as_mut_ptr(), null_mut(), null_mut(), None)
-    })
-    .unwrap();
+    let num = retry_on_intr(|| select(nfds, Some(&mut readfds), None, None, None)).unwrap();
     assert_eq!(num, 1);
     assert!(fd_isset(reader.as_raw_fd(), &readfds));
     fd_clr(reader.as_raw_fd(), &mut readfds);
@@ -58,12 +54,12 @@ fn test_select() {
 
     // Select should now say there's no more data to be read.
     fd_set(reader.as_raw_fd(), &mut readfds);
-    let num = retry_on_intr(|| unsafe {
+    let num = retry_on_intr(|| {
         select(
             nfds,
-            readfds.as_mut_ptr(),
-            null_mut(),
-            null_mut(),
+            Some(&mut readfds),
+            None,
+            None,
             Some(&Timespec {
                 tv_sec: 0,
                 tv_nsec: 0,
@@ -79,7 +75,6 @@ fn test_select() {
 #[test]
 fn test_select_with_great_fds() {
     use core::cmp::max;
-    use core::ptr::null_mut;
     use rustix::io::{read, write};
     use rustix::pipe::pipe;
     use rustix::process::{getrlimit, setrlimit, Resource};
@@ -108,12 +103,12 @@ fn test_select_with_great_fds() {
     // `select` should say there's nothing ready to be read from the pipe.
     let mut readfds = vec![0 as FdSetElement; fd_bitvector_len(nfds)];
     fd_set(reader.as_raw_fd(), &mut readfds);
-    let num = retry_on_intr(|| unsafe {
+    let num = retry_on_intr(|| {
         select(
             nfds,
-            readfds.as_mut_ptr(),
-            null_mut(),
-            null_mut(),
+            Some(&mut readfds),
+            None,
+            None,
             Some(&Timespec {
                 tv_sec: 0,
                 tv_nsec: 0,
@@ -130,10 +125,7 @@ fn test_select_with_great_fds() {
     // `select` should now say there's data to be read.
     let mut readfds = vec![0 as FdSetElement; fd_bitvector_len(nfds)];
     fd_set(reader.as_raw_fd(), &mut readfds);
-    let num = retry_on_intr(|| unsafe {
-        select(nfds, readfds.as_mut_ptr(), null_mut(), null_mut(), None)
-    })
-    .unwrap();
+    let num = retry_on_intr(|| select(nfds, Some(&mut readfds), None, None, None)).unwrap();
     assert_eq!(num, 1);
     assert!(fd_isset(reader.as_raw_fd(), &readfds));
     fd_clr(reader.as_raw_fd(), &mut readfds);
@@ -146,12 +138,12 @@ fn test_select_with_great_fds() {
 
     // Select should now say there's no more data to be read.
     fd_set(reader.as_raw_fd(), &mut readfds);
-    let num = retry_on_intr(|| unsafe {
+    let num = retry_on_intr(|| {
         select(
             nfds,
-            readfds.as_mut_ptr(),
-            null_mut(),
-            null_mut(),
+            Some(&mut readfds),
+            None,
+            None,
             Some(&Timespec {
                 tv_sec: 0,
                 tv_nsec: 0,
