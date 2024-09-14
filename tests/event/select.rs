@@ -1,12 +1,19 @@
+use rustix::event::{
+    fd_set_bound, fd_set_contains, fd_set_insert, fd_set_num_elements, fd_set_remove, FdSetElement,
+    FdSetIter,
+};
+use rustix::fd::RawFd;
 #[cfg(feature = "pipe")]
+#[cfg(not(windows))]
 use {
-    rustix::event::{fd_bitvector_len, fd_clr, fd_isset, fd_set, select, FdSetElement, Timespec},
-    rustix::fd::{AsRawFd, FromRawFd, OwnedFd, RawFd},
+    rustix::event::{select, Timespec},
+    rustix::fd::{AsRawFd, FromRawFd, OwnedFd},
     rustix::io::retry_on_intr,
     std::cmp::max,
 };
 
 #[cfg(feature = "pipe")]
+#[cfg(not(windows))]
 #[test]
 fn test_select() {
     use rustix::io::{read, write};
@@ -17,9 +24,9 @@ fn test_select() {
     let nfds = max(reader.as_raw_fd(), writer.as_raw_fd()) + 1;
 
     // `select` should say there's nothing ready to be read from the pipe.
-    let mut readfds = vec![0 as FdSetElement; fd_bitvector_len(nfds)];
-    fd_set(reader.as_raw_fd(), &mut readfds);
-    let num = retry_on_intr(|| {
+    let mut readfds = vec![0 as FdSetElement; fd_set_num_elements(nfds)];
+    fd_set_insert(&mut readfds, reader.as_raw_fd());
+    let num = retry_on_intr(|| unsafe {
         select(
             nfds,
             Some(&mut readfds),
@@ -33,19 +40,23 @@ fn test_select() {
     })
     .unwrap();
     assert_eq!(num, 0);
-    assert!(!fd_isset(reader.as_raw_fd(), &readfds));
+    assert!(!fd_set_contains(&readfds, reader.as_raw_fd()));
+    assert_eq!(fd_set_bound(&readfds), 0);
 
     // Write a byte to the pipe.
     assert_eq!(retry_on_intr(|| write(&writer, b"a")).unwrap(), 1);
 
     // `select` should now say there's data to be read.
-    let mut readfds = vec![0 as FdSetElement; fd_bitvector_len(nfds)];
-    fd_set(reader.as_raw_fd(), &mut readfds);
-    let num = retry_on_intr(|| select(nfds, Some(&mut readfds), None, None, None)).unwrap();
+    let mut readfds = vec![0 as FdSetElement; fd_set_num_elements(nfds)];
+    fd_set_insert(&mut readfds, reader.as_raw_fd());
+    let num =
+        retry_on_intr(|| unsafe { select(nfds, Some(&mut readfds), None, None, None) }).unwrap();
     assert_eq!(num, 1);
-    assert!(fd_isset(reader.as_raw_fd(), &readfds));
-    fd_clr(reader.as_raw_fd(), &mut readfds);
-    assert!(!fd_isset(reader.as_raw_fd(), &readfds));
+    assert!(fd_set_contains(&readfds, reader.as_raw_fd()));
+    assert_eq!(fd_set_bound(&readfds), reader.as_raw_fd() + 1);
+    fd_set_remove(&mut readfds, reader.as_raw_fd());
+    assert!(!fd_set_contains(&readfds, reader.as_raw_fd()));
+    assert_eq!(fd_set_bound(&readfds), 0);
 
     // Read the byte from the pipe.
     let mut buf = [b'\0'];
@@ -53,8 +64,8 @@ fn test_select() {
     assert_eq!(buf[0], b'a');
 
     // Select should now say there's no more data to be read.
-    fd_set(reader.as_raw_fd(), &mut readfds);
-    let num = retry_on_intr(|| {
+    fd_set_insert(&mut readfds, reader.as_raw_fd());
+    let num = retry_on_intr(|| unsafe {
         select(
             nfds,
             Some(&mut readfds),
@@ -68,10 +79,12 @@ fn test_select() {
     })
     .unwrap();
     assert_eq!(num, 0);
-    assert!(!fd_isset(reader.as_raw_fd(), &readfds));
+    assert!(!fd_set_contains(&readfds, reader.as_raw_fd()));
+    assert_eq!(fd_set_bound(&readfds), 0);
 }
 
 #[cfg(feature = "pipe")]
+#[cfg(not(windows))]
 #[test]
 fn test_select_with_great_fds() {
     use core::cmp::max;
@@ -101,9 +114,9 @@ fn test_select_with_great_fds() {
     let nfds = max(reader.as_raw_fd(), writer.as_raw_fd()) + 1;
 
     // `select` should say there's nothing ready to be read from the pipe.
-    let mut readfds = vec![0 as FdSetElement; fd_bitvector_len(nfds)];
-    fd_set(reader.as_raw_fd(), &mut readfds);
-    let num = retry_on_intr(|| {
+    let mut readfds = vec![0 as FdSetElement; fd_set_num_elements(nfds)];
+    fd_set_insert(&mut readfds, reader.as_raw_fd());
+    let num = retry_on_intr(|| unsafe {
         select(
             nfds,
             Some(&mut readfds),
@@ -117,19 +130,23 @@ fn test_select_with_great_fds() {
     })
     .unwrap();
     assert_eq!(num, 0);
-    assert!(!fd_isset(reader.as_raw_fd(), &readfds));
+    assert!(!fd_set_contains(&readfds, reader.as_raw_fd()));
+    assert_eq!(fd_set_bound(&readfds), 0);
 
     // Write a byte to the pipe.
     assert_eq!(retry_on_intr(|| write(&writer, b"a")).unwrap(), 1);
 
     // `select` should now say there's data to be read.
-    let mut readfds = vec![0 as FdSetElement; fd_bitvector_len(nfds)];
-    fd_set(reader.as_raw_fd(), &mut readfds);
-    let num = retry_on_intr(|| select(nfds, Some(&mut readfds), None, None, None)).unwrap();
+    let mut readfds = vec![0 as FdSetElement; fd_set_num_elements(nfds)];
+    fd_set_insert(&mut readfds, reader.as_raw_fd());
+    let num =
+        retry_on_intr(|| unsafe { select(nfds, Some(&mut readfds), None, None, None) }).unwrap();
     assert_eq!(num, 1);
-    assert!(fd_isset(reader.as_raw_fd(), &readfds));
-    fd_clr(reader.as_raw_fd(), &mut readfds);
-    assert!(!fd_isset(reader.as_raw_fd(), &readfds));
+    assert!(fd_set_contains(&readfds, reader.as_raw_fd()));
+    assert_eq!(fd_set_bound(&readfds), reader.as_raw_fd() + 1);
+    fd_set_remove(&mut readfds, reader.as_raw_fd());
+    assert!(!fd_set_contains(&readfds, reader.as_raw_fd()));
+    assert_eq!(fd_set_bound(&readfds), 0);
 
     // Read the byte from the pipe.
     let mut buf = [b'\0'];
@@ -137,8 +154,8 @@ fn test_select_with_great_fds() {
     assert_eq!(buf[0], b'a');
 
     // Select should now say there's no more data to be read.
-    fd_set(reader.as_raw_fd(), &mut readfds);
-    let num = retry_on_intr(|| {
+    fd_set_insert(&mut readfds, reader.as_raw_fd());
+    let num = retry_on_intr(|| unsafe {
         select(
             nfds,
             Some(&mut readfds),
@@ -152,8 +169,42 @@ fn test_select_with_great_fds() {
     })
     .unwrap();
     assert_eq!(num, 0);
-    assert!(!fd_isset(reader.as_raw_fd(), &readfds));
+    assert!(!fd_set_contains(&readfds, reader.as_raw_fd()));
+    assert_eq!(fd_set_bound(&readfds), 0);
 
     // Reset the process limit.
     setrlimit(Resource::Nofile, orig_rlimit).unwrap();
+}
+
+#[test]
+fn test_select_iter() {
+    for stuff in [
+        &[1, 3, 31, 64, 128, 1024, 1025, 1030][..],
+        &[100, 101, 102, 103, 104, 105, 106, 107, 2999][..],
+        &[0, 8, 32, 64, 128][..],
+        &[0, 1, 2, 3, 31, 32, 33, 34, 35][..],
+        &[500][..],
+        &[128][..],
+        &[127][..],
+        &[0][..],
+        &[][..],
+    ] {
+        let nfds = if stuff.is_empty() {
+            0
+        } else {
+            *stuff.last().unwrap() + 1
+        };
+        let mut fds = vec![0 as FdSetElement; fd_set_num_elements(nfds)];
+        for fd in stuff {
+            assert!(!fd_set_contains(&mut fds, *fd));
+            fd_set_insert(&mut fds, *fd);
+            assert!(fd_set_contains(&mut fds, *fd));
+            fd_set_remove(&mut fds, *fd);
+            assert!(!fd_set_contains(&mut fds, *fd));
+            fd_set_insert(&mut fds, *fd);
+            assert!(fd_set_contains(&mut fds, *fd));
+        }
+        assert_eq!(fd_set_bound(&fds), nfds);
+        assert_eq!(FdSetIter::new(&fds).collect::<Vec<RawFd>>(), stuff);
+    }
 }

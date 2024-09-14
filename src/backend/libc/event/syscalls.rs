@@ -16,7 +16,7 @@ use crate::event::port::Event;
     target_os = "espidf"
 ))]
 use crate::event::EventfdFlags;
-#[cfg(any(apple, freebsdlike, target_os = "netbsd"))]
+#[cfg(any(bsd, linux_kernel))]
 use crate::event::FdSetElement;
 use crate::event::PollFd;
 use crate::io;
@@ -30,7 +30,9 @@ use crate::utils::as_ptr;
     all(feature = "alloc", any(linux_kernel, target_os = "redox")),
 ))]
 use core::mem::MaybeUninit;
-#[cfg(any(linux_kernel, solarish, target_os = "redox"))]
+#[cfg(any(bsd, linux_kernel))]
+use core::ptr::null;
+#[cfg(any(bsd, linux_kernel, solarish, target_os = "redox"))]
 use core::ptr::null_mut;
 #[cfg(any(
     linux_kernel,
@@ -50,7 +52,7 @@ use {crate::backend::conv::borrowed_fd, crate::fd::BorrowedFd};
 ))]
 use {crate::backend::conv::ret_owned_fd, crate::fd::OwnedFd};
 #[cfg(all(feature = "alloc", bsd))]
-use {crate::event::kqueue::Event, crate::utils::as_ptr, core::ptr::null};
+use {crate::event::kqueue::Event, crate::utils::as_ptr};
 
 #[cfg(any(
     linux_kernel,
@@ -127,17 +129,15 @@ pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: c::c_int) -> io::Result<usiz
         .map(|nready| nready as usize)
 }
 
-#[cfg(any(apple, freebsdlike, target_os = "netbsd"))]
-pub(crate) fn select(
+#[cfg(any(bsd, linux_kernel))]
+pub(crate) unsafe fn select(
     nfds: i32,
     readfds: Option<&mut [FdSetElement]>,
     writefds: Option<&mut [FdSetElement]>,
     exceptfds: Option<&mut [FdSetElement]>,
     timeout: Option<&crate::timespec::Timespec>,
 ) -> io::Result<i32> {
-    use core::ptr::{null, null_mut};
-
-    let len = crate::event::fd_bitvector_len(nfds);
+    let len = crate::event::fd_set_num_elements(nfds);
 
     let readfds = match readfds {
         Some(readfds) => {
@@ -177,7 +177,7 @@ pub(crate) fn select(
     // On Apple platforms, use the specially mangled `select` which doesn't
     // have an `FD_SETSIZE` limitation.
     #[cfg(apple)]
-    unsafe {
+    {
         extern "C" {
             #[link_name = "select$DARWIN_EXTSN$NOCANCEL"]
             fn select(
@@ -194,7 +194,7 @@ pub(crate) fn select(
 
     // Otherwise just use the normal `select`.
     #[cfg(not(apple))]
-    unsafe {
+    {
         ret_c_int(c::select(
             nfds,
             readfds.cast(),
@@ -287,7 +287,7 @@ pub(crate) fn port_send(
     unsafe { ret(c::port_send(borrowed_fd(port), events, userdata)) }
 }
 
-#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn pause() {
     let r = unsafe { c::pause() };
     let errno = libc_errno::errno().0;
