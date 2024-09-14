@@ -23,9 +23,11 @@ pub type FdSetElement = i32;
 /// `FD_SETSIZE`. Instead of using the opaque fixed-sized `fd_set` type, this
 /// function takes raw pointers to arrays of
 /// `nfds.div_ceil(size_of::<FdSetElement>())` elements of type `FdSetElement`,
-/// where a fd `fd` is in the set if the element at index
+/// representing bitvectors where a fd `fd` is set if the element at index
 /// `fd / (size_of::<FdSetElement>() * 8)` has the bit
-/// `1 << (fd % (size_of::<FdSetElement>() * 8))` set.
+/// `1 << (fd % (size_of::<FdSetElement>() * 8))` set. Convenience functions
+/// [`fd_set`], [`fd_clr`], [`fd_isset`], and [`fd_bitvector_len`] are provided
+/// for setting, clearing, testing, and sizing bitvectors.
 ///
 /// In particular, on Apple platforms, this function behaves as if
 /// `_DARWIN_UNLIMITED_SELECT` were predefined.
@@ -62,4 +64,39 @@ pub unsafe fn select(
     timeout: Option<&Timespec>,
 ) -> io::Result<i32> {
     backend::event::syscalls::select(nfds, readfds, writefds, exceptfds, timeout)
+}
+
+const BITS: usize = size_of::<FdSetElement>() * 8;
+use crate::fd::RawFd;
+
+/// Set `fd` in the bitvector pointed to by `fds`.
+#[doc(alias = "FD_SET")]
+#[inline]
+pub fn fd_set(fd: RawFd, fds: &mut [FdSetElement]) {
+    let fd = fd as usize;
+    fds[fd / BITS] |= 1 << (fd % BITS);
+}
+
+/// Clear `fd` in the bitvector pointed to by `fds`.
+#[doc(alias = "FD_CLR")]
+#[inline]
+pub fn fd_clr(fd: RawFd, fds: &mut [FdSetElement]) {
+    let fd = fd as usize;
+    fds[fd / BITS] &= !(1 << (fd % BITS));
+}
+
+/// Test whether `fd` is set in the bitvector pointed to by `fds`.
+#[doc(alias = "FD_ISSET")]
+#[inline]
+pub fn fd_isset(fd: RawFd, fds: &[FdSetElement]) -> bool {
+    let fd = fd as usize;
+    (fds[fd / BITS] & (1 << (fd % BITS))) != 0
+}
+
+/// Compute the number of `FdSetElement`s needed to hold a bitvector which can
+/// contain file descriptors less than `nfds`.
+#[inline]
+pub fn fd_bitvector_len(nfds: RawFd) -> usize {
+    let nfds = nfds as usize;
+    (nfds + (BITS - 1)) / BITS
 }

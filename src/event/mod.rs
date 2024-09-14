@@ -30,4 +30,4 @@ pub use eventfd::{eventfd, EventfdFlags};
 pub use pause::*;
 pub use poll::{poll, PollFd, PollFlags};
 #[cfg(any(apple, freebsdlike, target_os = "netbsd"))]
-pub use select::{select, FdSetElement, Timespec};
+pub use select::*;
