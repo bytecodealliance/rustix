@@ -4,6 +4,11 @@ pub use backend::event::poll_fd::{PollFd, PollFlags};
 
 /// `poll(self.fds, timeout)`—Wait for events on lists of file descriptors.
 ///
+/// On macOS, `poll` doesn't work on fds for /dev/tty or /dev/null, however
+/// [`select`] is available on macOS and does work on these fds.
+///
+/// [`select`]: https://docs.rs/rustix/*/x86_64-apple-darwin/rustix/event/fn.select.html
+///
 /// # References
 ///  - [Beej's Guide to Network Programming]
 ///  - [POSIX]

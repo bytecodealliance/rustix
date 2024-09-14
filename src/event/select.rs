@@ -21,8 +21,11 @@ pub type FdSetElement = i32;
 ///
 /// This `select` wrapper differs from POSIX in that `nfds` is not limited to
 /// `FD_SETSIZE`. Instead of using the opaque fixed-sized `fd_set` type, this
-/// function takes raw pointers to arrays of `nfds / size_of::<FdSetElement>()`
-/// elements of type `FdSetElement`.
+/// function takes raw pointers to arrays of
+/// `nfds.div_ceil(size_of::<FdSetElement>())` elements of type `FdSetElement`,
+/// where a fd `fd` is in the set if the element at index
+/// `fd / (size_of::<FdSetElement>() * 8)` has the bit
+/// `1 << (fd % (size_of::<FdSetElement>() * 8))` set.
 ///
 /// In particular, on Apple platforms, it behaves as if
 /// `_DARWIN_UNLIMITED_SELECT` were predefined. And on Linux platforms, it is
