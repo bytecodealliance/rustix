@@ -23,6 +23,9 @@ fn test_waitpid_none() {
         .unwrap();
     assert_eq!(pid, process::Pid::from_child(&child));
     assert!(status.stopped());
+
+    // Clean up the child process.
+    unsafe { kill(child.id() as _, SIGKILL) };
 }
 
 #[test]
@@ -41,6 +44,9 @@ fn test_waitpid_some() {
         .unwrap();
     assert_eq!(rpid, pid);
     assert!(status.stopped());
+
+    // Clean up the child process.
+    unsafe { kill(child.id() as _, SIGKILL) };
 }
 
 #[test]
@@ -59,6 +65,9 @@ fn test_waitpgid() {
         .unwrap();
     assert_eq!(pid, process::Pid::from_child(&child));
     assert!(status.stopped());
+
+    // Clean up the child process.
+    unsafe { kill(child.id() as _, SIGKILL) };
 }
 
 #[cfg(not(any(
