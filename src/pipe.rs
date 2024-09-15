@@ -215,6 +215,6 @@ pub fn fcntl_getpipe_size<Fd: AsFd>(fd: Fd) -> io::Result<usize> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/fcntl.2.html
 #[cfg(linux_kernel)]
 #[inline]
-pub fn fcntl_setpipe_size<Fd: AsFd>(fd: Fd, size: usize) -> io::Result<()> {
+pub fn fcntl_setpipe_size<Fd: AsFd>(fd: Fd, size: usize) -> io::Result<usize> {
     backend::pipe::syscalls::fcntl_setpipe_sz(fd.as_fd(), size)
 }
