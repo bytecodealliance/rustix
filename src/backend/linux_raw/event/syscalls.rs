@@ -89,7 +89,7 @@ pub(crate) unsafe fn select(
     let mut timeout_data;
     let timeout_ptr = match timeout {
         Some(timeout) => {
-            timeout_data = timeout.clone();
+            timeout_data = *timeout;
             as_mut_ptr(&mut timeout_data)
         }
         None => null_mut(),
