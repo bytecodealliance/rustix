@@ -204,7 +204,7 @@ pub fn tee<FdIn: AsFd, FdOut: AsFd>(
 #[cfg(linux_kernel)]
 #[inline]
 pub fn fcntl_getpipe_size<Fd: AsFd>(fd: Fd) -> io::Result<usize> {
-    backend::pipe::syscalls::fcntl_getpipe_sz(fd.as_fd())
+    backend::pipe::syscalls::fcntl_getpipe_size(fd.as_fd())
 }
 
 /// `fnctl(fd, F_SETPIPE_SZ)`—Set the buffer capacity of a pipe.
@@ -216,5 +216,5 @@ pub fn fcntl_getpipe_size<Fd: AsFd>(fd: Fd) -> io::Result<usize> {
 #[cfg(linux_kernel)]
 #[inline]
 pub fn fcntl_setpipe_size<Fd: AsFd>(fd: Fd, size: usize) -> io::Result<usize> {
-    backend::pipe::syscalls::fcntl_setpipe_sz(fd.as_fd(), size)
+    backend::pipe::syscalls::fcntl_setpipe_size(fd.as_fd(), size)
 }
