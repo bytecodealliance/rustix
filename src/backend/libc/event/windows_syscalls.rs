@@ -2,8 +2,7 @@
 
 use crate::backend::c;
 use crate::backend::conv::ret_c_int;
-use crate::event::{FdSetElement, PollFd};
-use crate::fd::RawFd;
+use crate::event::PollFd;
 use crate::io;
 
 pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: c::c_int) -> io::Result<usize> {
@@ -14,64 +13,4 @@ pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: c::c_int) -> io::Result<usiz
 
     ret_c_int(unsafe { c::poll(fds.as_mut_ptr().cast(), nfds, timeout) })
         .map(|nready| nready as usize)
-}
-
-pub(crate) fn select(
-    nfds: i32,
-    readfds: Option<&mut [FdSetElement]>,
-    writefds: Option<&mut [FdSetElement]>,
-    exceptfds: Option<&mut [FdSetElement]>,
-    timeout: Option<&crate::timespec::Timespec>,
-) -> io::Result<i32> {
-    use core::ptr::{null, null_mut};
-
-    let len = crate::event::fd_set_num_elements(nfds as RawFd);
-
-    let readfds = match readfds {
-        Some(readfds) => {
-            assert!(readfds.len() >= len);
-            readfds.as_mut_ptr()
-        }
-        None => null_mut(),
-    };
-    let writefds = match writefds {
-        Some(writefds) => {
-            assert!(writefds.len() >= len);
-            writefds.as_mut_ptr()
-        }
-        None => null_mut(),
-    };
-    let exceptfds = match exceptfds {
-        Some(exceptfds) => {
-            assert!(exceptfds.len() >= len);
-            exceptfds.as_mut_ptr()
-        }
-        None => null_mut(),
-    };
-
-    let timeout_data;
-    let timeout_ptr = match timeout {
-        Some(timeout) => {
-            // Convert from `Timespec` to `TIMEVAL`.
-            timeout_data = c::TIMEVAL {
-                tv_sec: timeout
-                    .tv_sec
-                    .try_into()
-                    .map_err(|_| io::Errno::OPNOTSUPP)?,
-                tv_usec: ((timeout.tv_nsec + 999) / 1000) as _,
-            };
-            &timeout_data
-        }
-        None => null(),
-    };
-
-    unsafe {
-        ret_c_int(c::select(
-            nfds,
-            readfds.cast(),
-            writefds.cast(),
-            exceptfds.cast(),
-            timeout_ptr,
-        ))
-    }
 }

@@ -4,7 +4,6 @@ use rustix::event::{
 };
 use rustix::fd::RawFd;
 #[cfg(feature = "pipe")]
-#[cfg(not(windows))]
 use {
     rustix::event::{select, Timespec},
     rustix::fd::{AsRawFd, FromRawFd, OwnedFd},
@@ -13,7 +12,6 @@ use {
 };
 
 #[cfg(feature = "pipe")]
-#[cfg(not(windows))]
 #[test]
 fn test_select() {
     use rustix::io::{read, write};
@@ -84,7 +82,6 @@ fn test_select() {
 }
 
 #[cfg(feature = "pipe")]
-#[cfg(not(windows))]
 #[test]
 fn test_select_with_great_fds() {
     use core::cmp::max;

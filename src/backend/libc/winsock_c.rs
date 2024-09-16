@@ -57,9 +57,3 @@ pub(crate) use WinSock::{
     WSAEWOULDBLOCK as EWOULDBLOCK, WSAEWOULDBLOCK as EAGAIN, WSAPOLLFD as pollfd,
     WSA_E_CANCELLED as ECANCELED, *,
 };
-
-pub struct timespec {
-    pub tv_sec: time_t,
-    pub tv_nsec: i64,
-}
-pub type time_t = i64;

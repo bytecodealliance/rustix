@@ -47,6 +47,9 @@ pub type FdSetElement = u32;
 /// this platform always has an `FD_SETSIZE` limitation, following POSIX. This
 /// platform's documentation recommends using [`poll`] instead.
 ///
+/// On Windows, this function is not defined because the `select` function on
+/// this platform doesn't use bitvectors for file descriptor sets.
+///
 /// [`poll`]: crate::event::poll()
 ///
 /// # Safety
@@ -61,7 +64,6 @@ pub type FdSetElement = u32;
 ///  - [NetBSD]
 ///  - [OpenBSD]
 ///  - [DragonFly BSD]
-///  - [Winsock]
 ///  - [glibc]
 ///
 ///  [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/select.html
@@ -71,7 +73,6 @@ pub type FdSetElement = u32;
 ///  [NetBSD]: https://man.netbsd.org/select.2
 ///  [OpenBSD]: https://man.openbsd.org/select.2
 ///  [DragonFly BSD]: https://man.dragonflybsd.org/?command=select&section=2
-///  [Winsock]: https://learn.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-select
 ///  [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Waiting-for-I_002fO.html#index-select
 pub unsafe fn select(
     nfds: i32,
