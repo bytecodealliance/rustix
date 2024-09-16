@@ -4,5 +4,6 @@
 #![cfg(not(windows))]
 
 mod basic;
+mod fcntl;
 mod splice;
 mod tee;
