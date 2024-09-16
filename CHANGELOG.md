@@ -1,5 +1,8 @@
 # Changes from 0.38.x to 1.0
 
+`rustix::pipe::fcntl_getpipe_size` now returns the new size, which may be
+greater than the requested size.
+
 `rustix::thread::FutexOperation` and `rustix::thread::futex` are removed. Use
 the functions in the `rustix::thread::futex` module instead.
 
