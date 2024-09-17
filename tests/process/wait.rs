@@ -23,6 +23,15 @@ fn test_waitpid_none() {
         .unwrap();
     assert_eq!(pid, process::Pid::from_child(&child));
     assert!(status.stopped());
+
+    // Clean up the child process.
+    unsafe { kill(child.id() as _, SIGKILL) };
+
+    let (pid, status) = process::waitpid(None, process::WaitOptions::UNTRACED)
+        .expect("failed to wait")
+        .unwrap();
+    assert_eq!(pid, process::Pid::from_child(&child));
+    assert!(status.signaled());
 }
 
 #[test]
@@ -41,6 +50,15 @@ fn test_waitpid_some() {
         .unwrap();
     assert_eq!(rpid, pid);
     assert!(status.stopped());
+
+    // Clean up the child process.
+    unsafe { kill(child.id() as _, SIGKILL) };
+
+    let (rpid, status) = process::waitpid(Some(pid), process::WaitOptions::UNTRACED)
+        .expect("failed to wait")
+        .unwrap();
+    assert_eq!(rpid, pid);
+    assert!(status.signaled());
 }
 
 #[test]
@@ -59,6 +77,15 @@ fn test_waitpgid() {
         .unwrap();
     assert_eq!(pid, process::Pid::from_child(&child));
     assert!(status.stopped());
+
+    // Clean up the child process.
+    unsafe { kill(child.id() as _, SIGKILL) };
+
+    let (pid, status) = process::waitpgid(pgid, process::WaitOptions::UNTRACED)
+        .expect("failed to wait")
+        .unwrap();
+    assert_eq!(pid, process::Pid::from_child(&child));
+    assert!(status.signaled());
 }
 
 #[cfg(not(any(
