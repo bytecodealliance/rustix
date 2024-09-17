@@ -25,7 +25,7 @@
 //! [OpenBSD `getsockopt`]: https://man.openbsd.org/getsockopt.2
 //! [DragonFly BSD `getsockopt`]: https://man.dragonflybsd.org/?command=getsockopt&section=2
 //! [illumos `getsockopt`]: https://illumos.org/man/3SOCKET/getsockopt
-//! [glibc `getsockopt`]: https://www.gnu.org/software/libc/manual/html_node/Socket-Option-Functions.html
+//! [glibc `getsockopt`]: https://sourceware.org/glibc/manual/latest/html_node/Socket-Option-Functions.html
 //!
 //! # References for all `set_*` functions:
 //!
@@ -49,7 +49,7 @@
 //! [OpenBSD `setsockopt`]: https://man.openbsd.org/setsockopt.2
 //! [DragonFly BSD `setsockopt`]: https://man.dragonflybsd.org/?command=setsockopt&section=2
 //! [illumos `setsockopt`]: https://illumos.org/man/3SOCKET/setsockopt
-//! [glibc `setsockopt`]: https://www.gnu.org/software/libc/manual/html_node/Socket-Option-Functions.html
+//! [glibc `setsockopt`]: https://sourceware.org/glibc/manual/latest/html_node/Socket-Option-Functions.html
 //!
 //! # References for `get_socket_*` and `set_socket_*` functions:
 //!
@@ -63,7 +63,7 @@
 //! [POSIX `sys/socket.h`]: https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/sys_socket.h.html
 //! [Linux `socket`]: https://man7.org/linux/man-pages/man7/socket.7.html
 //! [Winsock `SOL_SOCKET` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/sol-socket-socket-options
-//! [glibc `SOL_SOCKET` options]: https://www.gnu.org/software/libc/manual/html_node/Socket_002dLevel-Options.html
+//! [glibc `SOL_SOCKET` options]: https://sourceware.org/glibc/manual/latest/html_node/Socket_002dLevel-Options.html
 //!
 //! # References for `get_ip_*` and `set_ip_*` functions:
 //!

@@ -38,7 +38,7 @@ pub use backend::io::types::DupFlags;
 /// [OpenBSD]: https://man.openbsd.org/dup.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=dup&section=2
 /// [illumos]: https://illumos.org/man/2/dup
-/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Duplicating-Descriptors.html
+/// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Duplicating-Descriptors.html
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 pub fn dup<Fd: AsFd>(fd: Fd) -> io::Result<OwnedFd> {
@@ -80,7 +80,7 @@ pub fn dup<Fd: AsFd>(fd: Fd) -> io::Result<OwnedFd> {
 /// [OpenBSD]: https://man.openbsd.org/dup2.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=dup2&section=2
 /// [illumos]: https://illumos.org/man/2/dup
-/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Duplicating-Descriptors.html
+/// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Duplicating-Descriptors.html
 /// [`stdio::dup2_stdin`]: https://docs.rs/rustix/*/rustix/stdio/fn.dup2_stdin.html
 /// [`stdio::dup2_stdout`]: https://docs.rs/rustix/*/rustix/stdio/fn.dup2_stdout.html
 /// [`stdio::dup2_stderr`]: https://docs.rs/rustix/*/rustix/stdio/fn.dup2_stderr.html

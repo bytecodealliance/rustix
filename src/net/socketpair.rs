@@ -24,7 +24,7 @@ use crate::{backend, io};
 /// [OpenBSD]: https://man.openbsd.org/socketpair.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=socketpair&section=2
 /// [illumos]: https://illumos.org/man/3SOCKET/socketpair
-/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Socket-Pairs.html
+/// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Socket-Pairs.html
 #[inline]
 pub fn socketpair(
     domain: AddressFamily,
