@@ -22,6 +22,14 @@ fn test_waitpid_none() {
         .expect("failed to wait")
         .unwrap();
     assert!(status.stopped());
+
+    // Clean up the child process.
+    unsafe { kill(child.id() as _, SIGKILL) };
+
+    let status = process::waitpid(None, process::WaitOptions::UNTRACED)
+        .expect("failed to wait")
+        .unwrap();
+    assert!(status.signaled());
 }
 
 #[test]
@@ -39,6 +47,14 @@ fn test_waitpid_some() {
         .expect("failed to wait")
         .unwrap();
     assert!(status.stopped());
+
+    // Clean up the child process.
+    unsafe { kill(child.id() as _, SIGKILL) };
+
+    let status = process::waitpid(Some(pid), process::WaitOptions::UNTRACED)
+        .expect("failed to wait")
+        .unwrap();
+    assert!(status.signaled());
 }
 
 #[test]
@@ -56,6 +72,14 @@ fn test_waitpgid() {
         .expect("failed to wait")
         .unwrap();
     assert!(status.stopped());
+
+    // Clean up the child process.
+    unsafe { kill(child.id() as _, SIGKILL) };
+
+    let status = process::waitpgid(pgid, process::WaitOptions::UNTRACED)
+        .expect("failed to wait")
+        .unwrap();
+    assert!(status.signaled());
 }
 
 #[cfg(not(any(
