@@ -71,7 +71,7 @@ pub const PIPE_BUF: usize = c::PIPE_BUF;
 /// [OpenBSD]: https://man.openbsd.org/pipe.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=pipe&section=2
 /// [illumos]: https://illumos.org/man/2/pipe
-/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Creating-a-Pipe.html
+/// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Creating-a-Pipe.html
 #[inline]
 pub fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
     backend::pipe::syscalls::pipe()
