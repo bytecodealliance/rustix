@@ -16,6 +16,8 @@ use super::send_recv::{RecvFlags, SendFlags};
 use super::write_sockaddr::encode_sockaddr_xdp;
 use super::write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6};
 use crate::backend::c;
+#[cfg(target_os = "linux")]
+use crate::backend::conv::slice_mut;
 use crate::backend::conv::{
     by_mut, by_ref, c_int, c_uint, pass_usize, ret, ret_owned_fd, ret_usize, size_of, slice,
     socklen_t, zero,
@@ -24,6 +26,8 @@ use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io::{self, IoSlice, IoSliceMut};
 #[cfg(target_os = "linux")]
 use crate::net::xdp::SocketAddrXdp;
+#[cfg(target_os = "linux")]
+use crate::net::MMsgHdr;
 use crate::net::{
     AddressFamily, Protocol, RecvAncillaryBuffer, RecvMsgReturn, SendAncillaryBuffer, Shutdown,
     SocketAddrAny, SocketAddrUnix, SocketAddrV4, SocketAddrV6, SocketFlags, SocketType,
@@ -36,8 +40,8 @@ use {
     crate::backend::reg::{ArgReg, SocketArg},
     linux_raw_sys::net::{
         SYS_ACCEPT, SYS_ACCEPT4, SYS_BIND, SYS_CONNECT, SYS_GETPEERNAME, SYS_GETSOCKNAME,
-        SYS_LISTEN, SYS_RECV, SYS_RECVFROM, SYS_RECVMSG, SYS_SEND, SYS_SENDMSG, SYS_SENDTO,
-        SYS_SHUTDOWN, SYS_SOCKET, SYS_SOCKETPAIR,
+        SYS_LISTEN, SYS_RECV, SYS_RECVFROM, SYS_RECVMSG, SYS_SEND, SYS_SENDMMSG, SYS_SENDMSG,
+        SYS_SENDTO, SYS_SHUTDOWN, SYS_SOCKET, SYS_SOCKETPAIR,
     },
 };
 
@@ -437,6 +441,30 @@ pub(crate) fn sendmsg_xdp(
 
         result
     })
+}
+
+#[cfg(target_os = "linux")]
+#[inline]
+pub(crate) fn sendmmsg(
+    sockfd: BorrowedFd<'_>,
+    msgs: &mut [MMsgHdr<'_>],
+    flags: SendFlags,
+) -> io::Result<usize> {
+    let (msgs, len) = slice_mut(msgs);
+
+    #[cfg(not(target_arch = "x86"))]
+    let result = unsafe { ret_usize(syscall!(__NR_sendmmsg, sockfd, msgs, len, flags)) };
+
+    #[cfg(target_arch = "x86")]
+    let result = unsafe {
+        ret_usize(syscall!(
+            __NR_socketcall,
+            x86_sys(SYS_SENDMMSG),
+            slice_just_addr::<ArgReg<'_, SocketArg>, _>(&[sockfd.into(), msgs, len, flags.into()])
+        ))
+    };
+
+    result
 }
 
 #[inline]
