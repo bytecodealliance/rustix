@@ -12,7 +12,7 @@ fn test_timespec_layout() {
     // Test that `Timespec` implements `Copy` and `Debug`.
     let _y = Timespec { tv_sec, tv_nsec };
     let _z = Timespec { tv_sec, tv_nsec };
-    dbg!(&x);
+    dbg!(x.tv_sec, x.tv_nsec);
 
     #[cfg(not(target_os = "redox"))]
     #[cfg(feature = "fs")]
