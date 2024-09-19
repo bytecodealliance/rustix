@@ -9,6 +9,9 @@ the functions in the `rustix::thread::futex` module instead.
 `rustix::process::waitpid`'s return type changed from `WaitStatus` to
 `(Pid, WaitStatus)`, to additionally return the pid of the child.
 
+The `SLAVE` flag in `rustix::mount::MountPropagationFlags` is renamed
+to `DOWNSTREAM`.
+
 The "cc" feature is removed. It hasn't had any effect for several
 major releases.
 
