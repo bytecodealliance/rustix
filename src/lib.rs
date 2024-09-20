@@ -356,14 +356,13 @@ mod prctl;
 #[cfg(not(any(windows, target_os = "espidf", target_os = "wasi")))]
 #[cfg(any(feature = "process", feature = "runtime", all(bsd, feature = "event")))]
 mod signal;
-#[cfg(not(windows))]
 #[cfg(any(
     feature = "fs",
     feature = "process",
     feature = "runtime",
     feature = "thread",
     feature = "time",
-    all(feature = "event", any(bsd, linux_kernel)),
+    all(feature = "event", any(bsd, linux_kernel, windows)),
     all(
         linux_raw,
         not(feature = "use-libc-auxv"),

@@ -137,7 +137,7 @@ pub(crate) unsafe fn select(
     exceptfds: Option<&mut [FdSetElement]>,
     timeout: Option<&crate::timespec::Timespec>,
 ) -> io::Result<i32> {
-    let len = crate::event::fd_set_num_elements(nfds);
+    let len = crate::event::fd_set_num_elements_for_bitvector(nfds);
 
     let readfds = match readfds {
         Some(readfds) => {

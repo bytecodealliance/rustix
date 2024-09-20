@@ -10,5 +10,5 @@ mod epoll;
 #[cfg(not(target_os = "wasi"))]
 mod eventfd;
 mod poll;
-#[cfg(any(bsd, linux_kernel))]
+#[cfg(any(bsd, linux_kernel, windows, target_os = "wasi"))]
 mod select;
