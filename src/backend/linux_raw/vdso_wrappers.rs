@@ -317,7 +317,7 @@ fn init_syscall() -> SyscallType {
 /// placeholder type, and cast it as needed.
 struct Function;
 #[cfg(feature = "time")]
-static mut CLOCK_GETTIME: AtomicPtr<Function> = AtomicPtr::new(null_mut());
+static CLOCK_GETTIME: AtomicPtr<Function> = AtomicPtr::new(null_mut());
 #[cfg(feature = "process")]
 #[cfg(any(
     target_arch = "x86_64",
@@ -325,9 +325,9 @@ static mut CLOCK_GETTIME: AtomicPtr<Function> = AtomicPtr::new(null_mut());
     target_arch = "riscv64",
     target_arch = "powerpc64"
 ))]
-static mut GETCPU: AtomicPtr<Function> = AtomicPtr::new(null_mut());
+static GETCPU: AtomicPtr<Function> = AtomicPtr::new(null_mut());
 #[cfg(target_arch = "x86")]
-static mut SYSCALL: AtomicPtr<Function> = AtomicPtr::new(null_mut());
+static SYSCALL: AtomicPtr<Function> = AtomicPtr::new(null_mut());
 
 #[cfg(feature = "time")]
 unsafe extern "C" fn rustix_clock_gettime_via_syscall(
@@ -434,52 +434,50 @@ rustix_int_0x80:
 );
 
 fn minimal_init() {
-    // SAFETY: Store default function addresses in static storage so that if we
+    // Store default function addresses in static storage so that if we
     // end up making any system calls while we read the vDSO, they'll work. If
     // the memory happens to already be initialized, this is redundant, but not
     // harmful.
-    unsafe {
-        #[cfg(feature = "time")]
-        {
-            CLOCK_GETTIME
-                .compare_exchange(
-                    null_mut(),
-                    rustix_clock_gettime_via_syscall as *mut Function,
-                    Relaxed,
-                    Relaxed,
-                )
-                .ok();
-        }
+    #[cfg(feature = "time")]
+    {
+        CLOCK_GETTIME
+            .compare_exchange(
+                null_mut(),
+                rustix_clock_gettime_via_syscall as *mut Function,
+                Relaxed,
+                Relaxed,
+            )
+            .ok();
+    }
 
-        #[cfg(feature = "process")]
-        #[cfg(any(
-            target_arch = "x86_64",
-            target_arch = "x86",
-            target_arch = "riscv64",
-            target_arch = "powerpc64"
-        ))]
-        {
-            GETCPU
-                .compare_exchange(
-                    null_mut(),
-                    rustix_getcpu_via_syscall as *mut Function,
-                    Relaxed,
-                    Relaxed,
-                )
-                .ok();
-        }
+    #[cfg(feature = "process")]
+    #[cfg(any(
+        target_arch = "x86_64",
+        target_arch = "x86",
+        target_arch = "riscv64",
+        target_arch = "powerpc64"
+    ))]
+    {
+        GETCPU
+            .compare_exchange(
+                null_mut(),
+                rustix_getcpu_via_syscall as *mut Function,
+                Relaxed,
+                Relaxed,
+            )
+            .ok();
+    }
 
-        #[cfg(target_arch = "x86")]
-        {
-            SYSCALL
-                .compare_exchange(
-                    null_mut(),
-                    rustix_int_0x80 as *mut Function,
-                    Relaxed,
-                    Relaxed,
-                )
-                .ok();
-        }
+    #[cfg(target_arch = "x86")]
+    {
+        SYSCALL
+            .compare_exchange(
+                null_mut(),
+                rustix_int_0x80 as *mut Function,
+                Relaxed,
+                Relaxed,
+            )
+            .ok();
     }
 }
 
@@ -529,12 +527,10 @@ fn init() {
             if ok {
                 assert!(!ptr.is_null());
 
-                // SAFETY: Store the computed function addresses in static
+                // Store the computed function addresses in static
                 // storage so that we don't need to compute it again (but if
                 // we do, it doesn't hurt anything).
-                unsafe {
-                    CLOCK_GETTIME.store(ptr.cast(), Relaxed);
-                }
+                CLOCK_GETTIME.store(ptr.cast(), Relaxed);
             }
         }
 
@@ -583,12 +579,10 @@ fn init() {
             if ok {
                 assert!(!ptr.is_null());
 
-                // SAFETY: Store the computed function addresses in static
+                // Store the computed function addresses in static
                 // storage so that we don't need to compute it again (but if
                 // we do, it doesn't hurt anything).
-                unsafe {
-                    GETCPU.store(ptr.cast(), Relaxed);
-                }
+                GETCPU.store(ptr.cast(), Relaxed);
             }
         }
 
@@ -598,11 +592,9 @@ fn init() {
             let ptr = vdso.sym(cstr!("LINUX_2.5"), cstr!("__kernel_vsyscall"));
             assert!(!ptr.is_null());
 
-            // SAFETY: As above, store the computed function addresses in
+            // As above, store the computed function addresses in
             // static storage.
-            unsafe {
-                SYSCALL.store(ptr.cast(), Relaxed);
-            }
+            SYSCALL.store(ptr.cast(), Relaxed);
         }
     }
 }
