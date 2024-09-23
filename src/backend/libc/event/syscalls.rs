@@ -16,7 +16,7 @@ use crate::event::port::Event;
     target_os = "espidf"
 ))]
 use crate::event::EventfdFlags;
-#[cfg(any(bsd, linux_kernel))]
+#[cfg(any(bsd, linux_kernel, target_os = "wasi"))]
 use crate::event::FdSetElement;
 use crate::event::PollFd;
 use crate::io;
@@ -30,9 +30,9 @@ use crate::utils::as_ptr;
     all(feature = "alloc", any(linux_kernel, target_os = "redox")),
 ))]
 use core::mem::MaybeUninit;
-#[cfg(any(bsd, linux_kernel))]
+#[cfg(any(bsd, linux_kernel, target_os = "wasi"))]
 use core::ptr::null;
-#[cfg(any(bsd, linux_kernel, solarish, target_os = "redox"))]
+#[cfg(any(bsd, linux_kernel, solarish, target_os = "redox", target_os = "wasi"))]
 use core::ptr::null_mut;
 #[cfg(any(
     linux_kernel,
@@ -203,6 +203,61 @@ pub(crate) unsafe fn select(
             timeout_ptr as *mut c::timeval,
         ))
     }
+}
+
+// WASI uses a count + array instead of a bitvector.
+#[cfg(target_os = "wasi")]
+pub(crate) unsafe fn select(
+    nfds: i32,
+    readfds: Option<&mut [FdSetElement]>,
+    writefds: Option<&mut [FdSetElement]>,
+    exceptfds: Option<&mut [FdSetElement]>,
+    timeout: Option<&crate::timespec::Timespec>,
+) -> io::Result<i32> {
+    let len = crate::event::fd_set_num_elements_for_fd_array(nfds as usize);
+
+    let readfds = match readfds {
+        Some(readfds) => {
+            assert!(readfds.len() >= len);
+            readfds.as_mut_ptr()
+        }
+        None => null_mut(),
+    };
+    let writefds = match writefds {
+        Some(writefds) => {
+            assert!(writefds.len() >= len);
+            writefds.as_mut_ptr()
+        }
+        None => null_mut(),
+    };
+    let exceptfds = match exceptfds {
+        Some(exceptfds) => {
+            assert!(exceptfds.len() >= len);
+            exceptfds.as_mut_ptr()
+        }
+        None => null_mut(),
+    };
+
+    let timeout_data;
+    let timeout_ptr = match timeout {
+        Some(timeout) => {
+            // Convert from `Timespec` to `c::timeval`.
+            timeout_data = c::timeval {
+                tv_sec: timeout.tv_sec.try_into().map_err(|_| io::Errno::OVERFLOW)?,
+                tv_usec: ((timeout.tv_nsec + 999) / 1000) as _,
+            };
+            &timeout_data
+        }
+        None => null(),
+    };
+
+    ret_c_int(c::select(
+        nfds,
+        readfds.cast(),
+        writefds.cast(),
+        exceptfds.cast(),
+        timeout_ptr as *mut c::timeval,
+    ))
 }
 
 #[cfg(solarish)]

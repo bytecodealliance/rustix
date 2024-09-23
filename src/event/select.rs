@@ -5,9 +5,27 @@
 //! `select` is unsafe due to I/O safety.
 #![allow(unsafe_code)]
 
+use crate::fd::RawFd;
 use crate::{backend, io};
+#[cfg(any(windows, target_os = "wasi"))]
+use core::slice;
 
 pub use crate::timespec::{Nsecs, Secs, Timespec};
+
+/// wasi-libc's `fd_set` type. The libc bindings for it have private fields,
+/// so we redeclare it for ourselves so that we can access the fields. They're
+/// publicly exposed in wasi-libc.
+#[cfg(target_os = "wasi")]
+#[repr(C)]
+struct FD_SET {
+    /// The wasi-libc headers call this `__nfds`.
+    fd_count: usize,
+    /// The wasi-libc headers call this `__fds`.
+    fd_array: [i32; libc::FD_SETSIZE],
+}
+
+#[cfg(windows)]
+use windows_sys::Win32::Networking::WinSock::FD_SET;
 
 /// Storage element type for use with [`select`].
 #[cfg(any(
@@ -24,6 +42,7 @@ pub struct FdSetElement(pub(crate) u64);
 /// Storage element type for use with [`select`].
 #[cfg(not(any(
     windows,
+    target_os = "wasi",
     all(
         target_pointer_width = "64",
         any(target_os = "freebsd", target_os = "dragonfly")
@@ -32,6 +51,12 @@ pub struct FdSetElement(pub(crate) u64);
 #[repr(transparent)]
 #[derive(Copy, Clone, Default)]
 pub struct FdSetElement(pub(crate) u32);
+
+/// Storage element type for use with [`select`].
+#[cfg(target_os = "wasi")]
+#[repr(transparent)]
+#[derive(Copy, Clone, Default)]
+pub struct FdSetElement(pub(crate) usize);
 
 /// `select(nfds, readfds, writefds, exceptfds, timeout)`—Wait for events on
 /// sets of file descriptors.
@@ -92,37 +117,62 @@ pub unsafe fn select(
     backend::event::syscalls::select(nfds, readfds, writefds, exceptfds, timeout)
 }
 
+#[cfg(not(any(windows, target_os = "wasi")))]
 const BITS: usize = core::mem::size_of::<FdSetElement>() * 8;
-use crate::fd::RawFd;
 
 /// Set `fd` in the set pointed to by `fds`.
 #[doc(alias = "FD_SET")]
 #[inline]
 pub fn fd_set_insert(fds: &mut [FdSetElement], fd: RawFd) {
-    let fd = fd as usize;
-    fds[fd / BITS].0 |= 1 << (fd % BITS);
+    #[cfg(not(any(windows, target_os = "wasi")))]
+    {
+        let fd = fd as usize;
+        fds[fd / BITS].0 |= 1 << (fd % BITS);
+    }
+
+    #[cfg(any(windows, target_os = "wasi"))]
+    {
+        let set = unsafe { &mut *fds.as_mut_ptr().cast::<FD_SET>() };
+        let fd_count = set.fd_count;
+        let fd_array = unsafe { slice::from_raw_parts(set.fd_array.as_ptr(), fd_count as usize) };
+
+        if !fd_array.iter().any(|p| *p as RawFd == fd) {
+            let fd_array = unsafe {
+                slice::from_raw_parts_mut(set.fd_array.as_mut_ptr(), fd_count as usize + 1)
+            };
+            set.fd_count = fd_count + 1;
+            fd_array[fd_count as usize] = fd as _;
+        }
+    }
 }
 
 /// Clear `fd` in the set pointed to by `fds`.
 #[doc(alias = "FD_CLR")]
 #[inline]
 pub fn fd_set_remove(fds: &mut [FdSetElement], fd: RawFd) {
-    let fd = fd as usize;
-    fds[fd / BITS].0 &= !(1 << (fd % BITS));
+    #[cfg(not(any(windows, target_os = "wasi")))]
+    {
+        let fd = fd as usize;
+        fds[fd / BITS].0 &= !(1 << (fd % BITS));
+    }
+
+    #[cfg(any(windows, target_os = "wasi"))]
+    {
+        let set = unsafe { &mut *fds.as_mut_ptr().cast::<FD_SET>() };
+        let fd_count = set.fd_count;
+        let fd_array = unsafe { slice::from_raw_parts(set.fd_array.as_ptr(), fd_count as usize) };
+
+        if let Some(pos) = fd_array.iter().position(|p| *p as RawFd == fd) {
+            set.fd_count = fd_count - 1;
+            set.fd_array[pos] = *set.fd_array.last().unwrap();
+        }
+    }
 }
 
 /// Compute the minimum `nfds` value needed for the set pointed to by
 /// `fds`.
 #[inline]
 pub fn fd_set_bound(fds: &[FdSetElement]) -> RawFd {
-    #[cfg(any(windows, target_os = "wasi"))]
-    {
-        assert!(cfg!(target_endian = "little"), "what");
-
-        let fd_count = fds[0].0 as usize;
-        (fd_count + 1) as RawFd
-    }
-
     #[cfg(not(any(windows, target_os = "wasi")))]
     {
         if let Some(position) = fds.iter().rposition(|element| element.0 != 0) {
@@ -131,6 +181,15 @@ pub fn fd_set_bound(fds: &[FdSetElement]) -> RawFd {
         } else {
             0
         }
+    }
+
+    #[cfg(any(windows, target_os = "wasi"))]
+    {
+        assert!(cfg!(target_endian = "little"), "what");
+
+        let set = unsafe { &*fds.as_ptr().cast::<FD_SET>() };
+        let fd_count = set.fd_count;
+        fd_count as RawFd
     }
 }
 
@@ -245,12 +304,17 @@ impl<'a> Iterator for FdSetIter<'a> {
         assert!(cfg!(target_endian = "little"), "what");
 
         let current = self.current;
-        if current as u64 == self.fds[0].0 {
+
+        let set = unsafe { &*self.fds.as_ptr().cast::<FD_SET>() };
+        let fd_count = set.fd_count;
+        let fd_array = unsafe { slice::from_raw_parts(set.fd_array.as_ptr(), fd_count as usize) };
+
+        if current == fd_count as usize {
             return None;
         }
-        let fd = self.fds[current as usize + 1].0;
+        let fd = fd_array[current as usize];
         self.current = current + 1;
-        Some(fd)
+        Some(fd as RawFd)
     }
 }
 
