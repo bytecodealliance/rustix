@@ -321,6 +321,7 @@ impl<'a> Iterator for FdSetIter<'a> {
 #[cfg(test)]
 mod test {
     use super::*;
+    use core::mem::align_of;
 
     #[test]
     #[cfg(windows)]
