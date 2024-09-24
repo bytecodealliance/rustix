@@ -10,6 +10,8 @@ use crate::backend::c;
 use crate::fd::RawFd;
 use crate::{backend, io};
 #[cfg(any(windows, target_os = "wasi"))]
+use core::mem::{align_of, size_of};
+#[cfg(any(windows, target_os = "wasi"))]
 use core::slice;
 
 pub use crate::timespec::{Nsecs, Secs, Timespec};
