@@ -46,7 +46,7 @@ diff -ur a/linux-user/syscall.c b/linux-user/syscall.c
              if ((b >> j) & 1)
 -                FD_SET(k, fds);
 +                fds[k / (sizeof(unsigned long) * 8)] |=
-+                    1 << (k % (sizeof(unsigned long) * 8));
++                    1ul << (k % (sizeof(unsigned long) * 8));
              k++;
          }
      }
@@ -76,7 +76,7 @@ diff -ur a/linux-user/syscall.c b/linux-user/syscall.c
 -            v |= ((abi_ulong)(FD_ISSET(k, fds) != 0) << j);
 +            bool set =
 +                (fds[k / (sizeof(unsigned long) * 8)] &
-+                 (1 << (k % (sizeof(unsigned long) * 8)))) != 0;
++                 (1ul << (k % (sizeof(unsigned long) * 8)))) != 0;
 +            v |= ((abi_ulong)set << j);
              k++;
          }
