@@ -5,7 +5,7 @@
 //! `select` is unsafe due to I/O safety.
 #![allow(unsafe_code)]
 
-#[cfg(linux_like)]
+#[cfg(any(linux_like, target_os = "wasi"))]
 use crate::backend::c;
 use crate::fd::RawFd;
 use crate::{backend, io};
@@ -23,7 +23,7 @@ struct FD_SET {
     /// The wasi-libc headers call this `__nfds`.
     fd_count: usize,
     /// The wasi-libc headers call this `__fds`.
-    fd_array: [i32; libc::FD_SETSIZE],
+    fd_array: [i32; c::FD_SETSIZE],
 }
 
 #[cfg(windows)]
@@ -233,7 +233,10 @@ pub fn fd_set_num_elements(set_count: usize, nfds: RawFd) -> usize {
 pub(crate) fn fd_set_num_elements_for_fd_array(set_count: usize) -> usize {
     // Allocate space for an `fd_count` field, plus `set_count` elements
     // for the `fd_array` field.
-    1 + set_count
+    div_ceil(
+        align_of::<FD_SET>() + set_count * size_of::<RawFd>(),
+        size_of::<FdSetElement>(),
+    )
 }
 
 /// `fd_set_num_elements` implementation on platforms with bitvector
@@ -246,7 +249,6 @@ pub(crate) fn fd_set_num_elements_for_bitvector(nfds: RawFd) -> usize {
     div_ceil(nfds, BITS)
 }
 
-#[cfg(not(any(windows, target_os = "wasi")))]
 fn div_ceil(lhs: usize, rhs: usize) -> usize {
     let d = lhs / rhs;
     let r = lhs % rhs;
@@ -333,19 +335,35 @@ impl<'a> Iterator for FdSetIter<'a> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use core::mem::align_of;
+    use core::mem::{align_of, size_of};
 
     #[test]
     #[cfg(any(windows, target_os = "wasi"))]
     fn layouts() {
         // The `FdSetElement` array should be suitably aligned.
         assert_eq!(align_of::<FdSetElement>(), align_of::<FD_SET>());
+
+        // The layout of `FD_SET` should match our layout of a set of the same
+        // size.
+        assert_eq!(
+            fd_set_num_elements_for_fd_array(
+                memoffset::span_of!(FD_SET, fd_array).len() / size_of::<RawFd>()
+            ) * size_of::<FdSetElement>(),
+            size_of::<FD_SET>()
+        );
     }
 
     #[test]
     #[cfg(any(bsd, linux_kernel))]
     fn layouts() {
         // The `FdSetElement` array should be suitably aligned.
-        assert_eq!(align_of::<FdSetElement>(), align_of::<libc::fd_set>());
+        assert_eq!(align_of::<FdSetElement>(), align_of::<c::fd_set>());
+
+        // The layout of `fd_set` should match our layout of a set of the same
+        // size.
+        assert_eq!(
+            fd_set_num_elements_for_bitvector(c::FD_SETSIZE as RawFd) * size_of::<FdSetElement>(),
+            size_of::<c::fd_set>()
+        );
     }
 }

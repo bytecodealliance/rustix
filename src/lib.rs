@@ -362,7 +362,7 @@ mod signal;
     feature = "runtime",
     feature = "thread",
     feature = "time",
-    all(feature = "event", any(bsd, linux_kernel, windows)),
+    all(feature = "event", any(bsd, linux_kernel, windows, target_os = "wasi")),
     all(
         linux_raw,
         not(feature = "use-libc-auxv"),
