@@ -5,6 +5,8 @@
 //! `select` is unsafe due to I/O safety.
 #![allow(unsafe_code)]
 
+#[cfg(linux_like)]
+use crate::backend::c;
 use crate::fd::RawFd;
 use crate::{backend, io};
 #[cfg(any(windows, target_os = "wasi"))]
@@ -40,7 +42,14 @@ use windows_sys::Win32::Networking::WinSock::FD_SET;
 pub struct FdSetElement(pub(crate) u64);
 
 /// Storage element type for use with [`select`].
+#[cfg(linux_like)]
+#[repr(transparent)]
+#[derive(Copy, Clone, Default)]
+pub struct FdSetElement(pub(crate) c::c_ulong);
+
+/// Storage element type for use with [`select`].
 #[cfg(not(any(
+    linux_like,
     windows,
     target_os = "wasi",
     all(
@@ -185,11 +194,16 @@ pub fn fd_set_bound(fds: &[FdSetElement]) -> RawFd {
 
     #[cfg(any(windows, target_os = "wasi"))]
     {
-        assert!(cfg!(target_endian = "little"), "what");
-
         let set = unsafe { &*fds.as_ptr().cast::<FD_SET>() };
         let fd_count = set.fd_count;
-        fd_count as RawFd
+        let fd_array = unsafe { slice::from_raw_parts(set.fd_array.as_ptr(), fd_count as usize) };
+        let mut max = 0;
+        for fd in fd_array {
+            if *fd >= max {
+                max = *fd + 1;
+            }
+        }
+        max as RawFd
     }
 }
 
@@ -301,8 +315,6 @@ impl<'a> Iterator for FdSetIter<'a> {
     type Item = RawFd;
 
     fn next(&mut self) -> Option<Self::Item> {
-        assert!(cfg!(target_endian = "little"), "what");
-
         let current = self.current;
 
         let set = unsafe { &*self.fds.as_ptr().cast::<FD_SET>() };
@@ -324,21 +336,8 @@ mod test {
     use core::mem::align_of;
 
     #[test]
-    #[cfg(windows)]
+    #[cfg(any(windows, target_os = "wasi"))]
     fn layouts() {
-        use windows_sys::Win32::Networking::WinSock::FD_SET;
-
-        // The first element of the `FdSetElement` array corresponds to the
-        // `fd_count` field.
-        assert_eq!(memoffset::offset_of!(FD_SET, fd_count), 0);
-
-        // The following elements of the `FdSetElement` array correspond to the
-        // `fd_array` field.
-        let array = [FdSetElement::default()];
-        assert_eq!(memoffset::offset_of!(FD_SET, fd_array), unsafe {
-            array[1..1].as_ptr().offset_from(array[0..0].as_ptr()) as usize
-        });
-
         // The `FdSetElement` array should be suitably aligned.
         assert_eq!(align_of::<FdSetElement>(), align_of::<FD_SET>());
     }

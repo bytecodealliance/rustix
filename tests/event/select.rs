@@ -7,7 +7,6 @@ use rustix::fd::{AsRawFd, RawFd};
 #[cfg(not(windows))]
 use rustix::fd::{FromRawFd, OwnedFd};
 use rustix::io::retry_on_intr;
-#[cfg(not(windows))]
 use serial_test::serial;
 use std::cmp::max;
 
@@ -178,9 +177,12 @@ fn test_select_with_great_fds() {
 
 #[cfg(feature = "net")]
 #[test]
+#[serial] // for `crate::init`
 fn test_select_with_sockets() {
     use rustix::net::{recv, send, AddressFamily, RecvFlags, SendFlags, SocketType};
     use std::net::{IpAddr, Ipv4Addr, SocketAddr};
+
+    crate::init();
 
     // Create a socket pair (but don't use `socketpair` because we want this
     // to work on Windows too).
@@ -271,11 +273,13 @@ fn test_select_with_sockets() {
 #[cfg(feature = "net")]
 #[cfg(not(windows))] // for `dup2` usage
 #[test]
-#[serial] // for `setrlimit` usage
+#[serial] // for `setrlimit` usage, and `crate::init`
 fn test_select_with_maxfd_sockets() {
     use rustix::net::{recv, send, AddressFamily, RecvFlags, SendFlags, SocketType};
     use rustix::process::{getrlimit, setrlimit, Resource};
     use std::net::{IpAddr, Ipv4Addr, SocketAddr};
+
+    crate::init();
 
     let localhost = IpAddr::V4(Ipv4Addr::LOCALHOST);
     let addr = SocketAddr::new(localhost, 0);
@@ -299,6 +303,14 @@ fn test_select_with_maxfd_sockets() {
 
     // Renumber the fds to the maximum possible values.
     let great_fd = unsafe { libc::dup2(reader.as_raw_fd(), fd_limit as RawFd - 1) };
+
+    // On old versions of macOS, the above `dup2` call fails with `EBADF`. Just
+    // skip the rest of this test in that case.
+    #[cfg(apple)]
+    if great_fd == -1 && libc_errno::errno().0 == libc::EBADF {
+        return;
+    }
+
     let reader = unsafe { OwnedFd::from_raw_fd(great_fd) };
     let great_fd = unsafe { libc::dup2(writer.as_raw_fd(), fd_limit as RawFd - 2) };
     let writer = unsafe { OwnedFd::from_raw_fd(great_fd) };
