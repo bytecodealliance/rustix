@@ -356,6 +356,8 @@ mod test {
     #[test]
     #[cfg(any(bsd, linux_kernel))]
     fn layouts() {
+        use crate::backend::c;
+
         // The `FdSetElement` array should be suitably aligned.
         assert_eq!(align_of::<FdSetElement>(), align_of::<c::fd_set>());
 
