@@ -9,15 +9,12 @@ use crate::backend::c;
 use crate::backend::conv::ret_pid_t;
 use crate::backend::conv::{borrowed_fd, ret};
 use crate::fd::BorrowedFd;
-#[cfg(all(feature = "alloc", feature = "procfs"))]
+#[cfg(feature = "alloc")]
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 use crate::ffi::CStr;
 #[cfg(any(
     not(target_os = "espidf"),
-    all(
-        feature = "procfs",
-        not(any(target_os = "fuchsia", target_os = "wasi"))
-    )
+    not(any(target_os = "fuchsia", target_os = "wasi"))
 ))]
 use core::mem::MaybeUninit;
 #[cfg(not(target_os = "wasi"))]
@@ -508,7 +505,7 @@ pub(crate) fn isatty(fd: BorrowedFd<'_>) -> bool {
     unsafe { c::isatty(borrowed_fd(fd)) != 0 }
 }
 
-#[cfg(all(feature = "alloc", feature = "procfs"))]
+#[cfg(feature = "alloc")]
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 pub(crate) fn ttyname(dirfd: BorrowedFd<'_>, buf: &mut [MaybeUninit<u8>]) -> io::Result<usize> {
     unsafe {

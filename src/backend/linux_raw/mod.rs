@@ -89,7 +89,7 @@ pub(crate) mod fd {
 pub(crate) mod c;
 
 // Private modules used by multiple public modules.
-#[cfg(any(feature = "procfs", feature = "process", feature = "runtime"))]
+#[cfg(any(feature = "process", feature = "runtime"))]
 pub(crate) mod pid;
 #[cfg(any(feature = "process", feature = "thread"))]
 pub(crate) mod prctl;

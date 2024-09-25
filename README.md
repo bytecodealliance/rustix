@@ -66,7 +66,6 @@ default. The rest of the API is conditional with cargo feature flags:
 | `param`    | [`rustix::param`]—Process parameters.                          |
 | `pipe`     | [`rustix::pipe`]—Pipe operations.                              |
 | `process`  | [`rustix::process`]—Process-associated operations.             |
-| `procfs`   | [`rustix::procfs`]—Utilities for reading `/proc` on Linux.     |
 | `pty`      | [`rustix::pty`]—Pseudoterminal operations.                     |
 | `rand`     | [`rustix::rand`]—Random-related operations.                    |
 | `shm`      | [`rustix::shm`]—POSIX shared memory.                           |
@@ -87,7 +86,6 @@ default. The rest of the API is conditional with cargo feature flags:
 [`rustix::param`]: https://docs.rs/rustix/*/rustix/param/index.html
 [`rustix::pipe`]: https://docs.rs/rustix/*/rustix/pipe/index.html
 [`rustix::process`]: https://docs.rs/rustix/*/rustix/process/index.html
-[`rustix::procfs`]: https://docs.rs/rustix/*/rustix/procfs/index.html
 [`rustix::pty`]: https://docs.rs/rustix/*/rustix/pty/index.html
 [`rustix::rand`]: https://docs.rs/rustix/*/rustix/rand/index.html
 [`rustix::shm`]: https://docs.rs/rustix/*/rustix/shm/index.html

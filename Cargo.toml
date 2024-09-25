@@ -23,11 +23,6 @@ core = { version = "1.0.0", optional = true, package = "rustc-std-workspace-core
 rustc-std-workspace-alloc = { version = "1.0.0", optional = true } # not aliased here but in lib.rs because of name collision with the alloc feature
 compiler_builtins = { version = '0.1.49', optional = true }
 
-# The procfs feature needs once_cell.
-# With Rust 1.70.0, we can switch to `core::cell::OnceCell`.
-[target.'cfg(any(target_os = "android", target_os = "linux"))'.dependencies]
-once_cell = { version = "1.5.2", optional = true }
-
 # Dependencies for platforms where linux_raw is supported, in addition to libc:
 #
 # On Linux on selected architectures, the linux_raw backend is supported, in
@@ -151,10 +146,7 @@ shm = ["fs"]
 time = []
 
 # Enable `rustix::param::*`.
-param = ["fs"]
-
-# Enable this to enable `rustix::io::proc_self_*` (on Linux) and `ttyname`.
-procfs = ["once_cell", "fs"]
+param = []
 
 # Enable `rustix::pty::*`.
 pty = ["fs"]
@@ -192,7 +184,6 @@ all-apis = [
     "param",
     "pipe",
     "process",
-    "procfs",
     "pty",
     "rand",
     "runtime",
