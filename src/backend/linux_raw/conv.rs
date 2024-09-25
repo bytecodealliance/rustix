@@ -296,20 +296,7 @@ pub(super) fn socklen_t<'a, Num: ArgNumber>(i: socklen_t) -> ArgReg<'a, Num> {
     pass_usize(i as usize)
 }
 
-#[cfg(any(
-    feature = "fs",
-    all(
-        not(feature = "use-libc-auxv"),
-        not(feature = "use-explicitly-provided-auxv"),
-        any(
-            feature = "param",
-            feature = "process",
-            feature = "runtime",
-            feature = "time",
-            target_arch = "x86",
-        )
-    )
-))]
+#[cfg(feature = "fs")]
 pub(crate) mod fs {
     use super::*;
     use crate::fs::{FileType, Mode, OFlags};

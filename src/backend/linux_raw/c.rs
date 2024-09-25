@@ -22,20 +22,7 @@ pub(crate) use linux_raw_sys::general::{
 #[cfg(test)]
 pub(crate) use linux_raw_sys::general::epoll_event;
 
-#[cfg(any(
-    feature = "fs",
-    all(
-        not(feature = "use-libc-auxv"),
-        not(feature = "use-explicitly-provided-auxv"),
-        any(
-            feature = "param",
-            feature = "process",
-            feature = "runtime",
-            feature = "time",
-            target_arch = "x86",
-        )
-    )
-))]
+#[cfg(feature = "fs")]
 pub(crate) use linux_raw_sys::general::{
     AT_FDCWD, NFS_SUPER_MAGIC, O_LARGEFILE, PROC_SUPER_MAGIC, UTIME_NOW, UTIME_OMIT, XATTR_CREATE,
     XATTR_REPLACE,
