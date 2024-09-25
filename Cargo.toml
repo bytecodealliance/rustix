@@ -156,7 +156,7 @@ shm = ["fs"]
 time = []
 
 # Enable `rustix::param::*`.
-param = []
+param = ["fs"]
 
 # Enable this to enable `rustix::io::proc_self_*` (on Linux) and `ttyname`.
 procfs = ["once_cell", "itoa", "fs"]
