@@ -1,4 +1,5 @@
 use crate::backend::c;
+use crate::ffi;
 
 /// A signal number for use with [`kill_process`], [`kill_process_group`], and
 /// [`kill_current_process_group`].
@@ -148,7 +149,7 @@ pub enum Signal {
 
 impl Signal {
     /// Convert a raw signal number into a `Signal`, if possible.
-    pub fn from_raw(sig: c::c_int) -> Option<Self> {
+    pub fn from_raw(sig: ffi::c_int) -> Option<Self> {
         match sig {
             c::SIGHUP => Some(Self::Hup),
             c::SIGINT => Some(Self::Int),
