@@ -509,6 +509,8 @@ fn init() {
             let ptr = vdso.sym(cstr!("LINUX_2.6"), cstr!("__vdso_clock_gettime64"));
             #[cfg(any(target_arch = "mips64", target_arch = "mips64r6"))]
             let ptr = vdso.sym(cstr!("LINUX_2.6"), cstr!("__vdso_clock_gettime"));
+            #[cfg(target_arch = "loongarch64")]
+            let ptr = vdso.sym(cstr!("LINUX_5.10"), cstr!("__vdso_clock_gettime"));
 
             // On all 64-bit platforms, the 64-bit `clock_gettime` symbols are
             // always available.
