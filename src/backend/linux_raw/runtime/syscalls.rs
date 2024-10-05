@@ -60,6 +60,7 @@ pub(crate) unsafe fn fork() -> io::Result<Fork> {
         target_arch = "mips64r6",
         target_arch = "powerpc64",
         target_arch = "riscv64",
+        target_arch = "s390x",
         target_arch = "x86"
     ))]
     let pid = ret_c_int(syscall_readonly!(
