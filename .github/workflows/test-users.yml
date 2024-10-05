@@ -12,7 +12,7 @@ jobs:
       QEMU_BUILD_VERSION: 7.0.0
     strategy:
       matrix:
-        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, mipsel-linux, mips64el-linux, arm-linux, macos-latest]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, s390x-linux, mipsel-linux, mips64el-linux, arm-linux, macos-latest]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -69,6 +69,15 @@ jobs:
             qemu: qemu-riscv64
             qemu_args: -L /usr/riscv64-linux-gnu
             qemu_target: riscv64-linux-user
+          - build: s390x-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: s390x-unknown-linux-gnu
+            gcc_package: gcc-s390x-linux-gnu
+            gcc: s390x-linux-gnu-gcc
+            qemu: qemu-s390x
+            qemu_args: -L /usr/s390x-linux-gnu
+            qemu_target: s390x-linux-user
           - build: arm-linux
             os: ubuntu-latest
             rust: nightly
@@ -177,7 +186,7 @@ jobs:
       QEMU_BUILD_VERSION: 7.0.0
     strategy:
       matrix:
-        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, mipsel-linux, mips64el-linux, arm-linux, macos-latest]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, s390x-linux, mipsel-linux, mips64el-linux, arm-linux, macos-latest]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -234,6 +243,15 @@ jobs:
             qemu: qemu-riscv64
             qemu_args: -L /usr/riscv64-linux-gnu
             qemu_target: riscv64-linux-user
+          - build: s390x-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: s390x-unknown-linux-gnu
+            gcc_package: gcc-s390x-linux-gnu
+            gcc: s390x-linux-gnu-gcc
+            qemu: qemu-s390x
+            qemu_args: -L /usr/s390x-linux-gnu
+            qemu_target: s390x-linux-user
           - build: arm-linux
             os: ubuntu-latest
             rust: nightly
@@ -324,7 +342,7 @@ jobs:
       QEMU_BUILD_VERSION: 7.0.0
     strategy:
       matrix:
-        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, mipsel-linux, mips64el-linux, arm-linux, macos-latest]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, s390x-linux, mipsel-linux, mips64el-linux, arm-linux, macos-latest]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -381,6 +399,15 @@ jobs:
             qemu: qemu-riscv64
             qemu_args: -L /usr/riscv64-linux-gnu
             qemu_target: riscv64-linux-user
+          - build: s390x-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: s390x-unknown-linux-gnu
+            gcc_package: gcc-s390x-linux-gnu
+            gcc: s390x-linux-gnu-gcc
+            qemu: qemu-s390x
+            qemu_args: -L /usr/s390x-linux-gnu
+            qemu_target: s390x-linux-user
           - build: arm-linux
             os: ubuntu-latest
             rust: nightly
@@ -503,7 +530,7 @@ jobs:
       QEMU_BUILD_VERSION: 7.0.0
     strategy:
       matrix:
-        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, mipsel-linux, mips64el-linux, arm-linux]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, s390x-linux, mipsel-linux, mips64el-linux, arm-linux]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -560,6 +587,15 @@ jobs:
             qemu: qemu-riscv64
             qemu_args: -L /usr/riscv64-linux-gnu
             qemu_target: riscv64-linux-user
+          - build: s390x-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: s390x-unknown-linux-gnu
+            gcc_package: gcc-s390x-linux-gnu
+            gcc: s390x-linux-gnu-gcc
+            qemu: qemu-s390x
+            qemu_args: -L /usr/s390x-linux-gnu
+            qemu_target: s390x-linux-user
           - build: arm-linux
             os: ubuntu-latest
             rust: nightly
@@ -647,7 +683,7 @@ jobs:
       QEMU_BUILD_VERSION: 7.0.0
     strategy:
       matrix:
-        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, mipsel-linux, mips64el-linux, arm-linux]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, s390x-linux, mipsel-linux, mips64el-linux, arm-linux]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -702,6 +738,15 @@ jobs:
             qemu: qemu-riscv64
             qemu_args: -L /usr/riscv64-linux-gnu
             qemu_target: riscv64-linux-user
+          - build: s390x-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: s390x-unknown-linux-gnu
+            gcc_package: gcc-s390x-linux-gnu
+            gcc: s390x-linux-gnu-gcc
+            qemu: qemu-s390x
+            qemu_args: -L /usr/s390x-linux-gnu
+            qemu_target: s390x-linux-user
           - build: arm-linux
             os: ubuntu-latest
             rust: nightly
@@ -789,7 +834,7 @@ jobs:
       QEMU_BUILD_VERSION: 7.0.0
     strategy:
       matrix:
-        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, mipsel-linux, mips64el-linux, arm-linux]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, s390x-linux, mipsel-linux, mips64el-linux, arm-linux]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -844,6 +889,15 @@ jobs:
             qemu: qemu-riscv64
             qemu_args: -L /usr/riscv64-linux-gnu
             qemu_target: riscv64-linux-user
+          - build: s390x-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: s390x-unknown-linux-gnu
+            gcc_package: gcc-s390x-linux-gnu
+            gcc: s390x-linux-gnu-gcc
+            qemu: qemu-s390x
+            qemu_args: -L /usr/s390x-linux-gnu
+            qemu_target: s390x-linux-user
           - build: arm-linux
             os: ubuntu-latest
             rust: nightly
@@ -931,7 +985,7 @@ jobs:
       QEMU_BUILD_VERSION: 7.0.0
     strategy:
       matrix:
-        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, mipsel-linux, mips64el-linux, arm-linux]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, s390x-linux, mipsel-linux, mips64el-linux, arm-linux]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -986,6 +1040,15 @@ jobs:
             qemu: qemu-riscv64
             qemu_args: -L /usr/riscv64-linux-gnu
             qemu_target: riscv64-linux-user
+          - build: s390x-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: s390x-unknown-linux-gnu
+            gcc_package: gcc-s390x-linux-gnu
+            gcc: s390x-linux-gnu-gcc
+            qemu: qemu-s390x
+            qemu_args: -L /usr/s390x-linux-gnu
+            qemu_target: s390x-linux-user
           - build: arm-linux
             os: ubuntu-latest
             rust: nightly
@@ -1073,7 +1136,7 @@ jobs:
       QEMU_BUILD_VERSION: 7.0.0
     strategy:
       matrix:
-        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, mipsel-linux, mips64el-linux, arm-linux]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, s390x-linux, mipsel-linux, mips64el-linux, arm-linux]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -1128,6 +1191,15 @@ jobs:
             qemu: qemu-riscv64
             qemu_args: -L /usr/riscv64-linux-gnu
             qemu_target: riscv64-linux-user
+          - build: s390x-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: s390x-unknown-linux-gnu
+            gcc_package: gcc-s390x-linux-gnu
+            gcc: s390x-linux-gnu-gcc
+            qemu: qemu-s390x
+            qemu_args: -L /usr/s390x-linux-gnu
+            qemu_target: s390x-linux-user
           - build: arm-linux
             os: ubuntu-latest
             rust: nightly
@@ -1215,7 +1287,7 @@ jobs:
       QEMU_BUILD_VERSION: 7.0.0
     strategy:
       matrix:
-        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, mipsel-linux, mips64el-linux, arm-linux, macos-latest]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, s390x-linux, mipsel-linux, mips64el-linux, arm-linux, macos-latest]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -1272,6 +1344,15 @@ jobs:
             qemu: qemu-riscv64
             qemu_args: -L /usr/riscv64-linux-gnu
             qemu_target: riscv64-linux-user
+          - build: s390x-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: s390x-unknown-linux-gnu
+            gcc_package: gcc-s390x-linux-gnu
+            gcc: s390x-linux-gnu-gcc
+            qemu: qemu-s390x
+            qemu_args: -L /usr/s390x-linux-gnu
+            qemu_target: s390x-linux-user
           - build: arm-linux
             os: ubuntu-latest
             rust: nightly
@@ -1362,7 +1443,7 @@ jobs:
       QEMU_BUILD_VERSION: 7.0.0
     strategy:
       matrix:
-        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, mipsel-linux, mips64el-linux, arm-linux, macos-latest]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, s390x-linux, mipsel-linux, mips64el-linux, arm-linux, macos-latest]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -1419,6 +1500,15 @@ jobs:
             qemu: qemu-riscv64
             qemu_args: -L /usr/riscv64-linux-gnu
             qemu_target: riscv64-linux-user
+          - build: s390x-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: s390x-unknown-linux-gnu
+            gcc_package: gcc-s390x-linux-gnu
+            gcc: s390x-linux-gnu-gcc
+            qemu: qemu-s390x
+            qemu_args: -L /usr/s390x-linux-gnu
+            qemu_target: s390x-linux-user
           - build: arm-linux
             os: ubuntu-latest
             rust: nightly
@@ -1576,7 +1666,7 @@ jobs:
     strategy:
       matrix:
         # cap-std-ext only builds on Linux at the moment.
-        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, mipsel-linux, mips64el-linux, arm-linux]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, s390x-linux, mipsel-linux, mips64el-linux, arm-linux]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -1633,6 +1723,15 @@ jobs:
             qemu: qemu-riscv64
             qemu_args: -L /usr/riscv64-linux-gnu
             qemu_target: riscv64-linux-user
+          - build: s390x-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: s390x-unknown-linux-gnu
+            gcc_package: gcc-s390x-linux-gnu
+            gcc: s390x-linux-gnu-gcc
+            qemu: qemu-s390x
+            qemu_args: -L /usr/s390x-linux-gnu
+            qemu_target: s390x-linux-user
           - build: arm-linux
             os: ubuntu-latest
             rust: nightly

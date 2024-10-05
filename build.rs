@@ -95,7 +95,8 @@ fn main() {
         || !inline_asm_name_present
         || is_unsupported_abi
         || miri
-        || ((arch == "powerpc64" || arch.starts_with("mips")) && !rustix_use_experimental_asm);
+        || ((arch == "powerpc64" || arch == "s390x" || arch.starts_with("mips"))
+            && !rustix_use_experimental_asm);
     if libc {
         // Use the libc backend.
         use_feature("libc");
