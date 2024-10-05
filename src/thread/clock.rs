@@ -1,7 +1,7 @@
 use crate::{backend, io};
 use core::fmt;
 
-pub use crate::timespec::Timespec;
+pub use crate::timespec::{Nsecs, Secs, Timespec};
 
 #[cfg(not(any(
     apple,

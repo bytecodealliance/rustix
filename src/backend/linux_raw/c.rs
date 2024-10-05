@@ -9,6 +9,7 @@
 pub(crate) type size_t = usize;
 pub(crate) use linux_raw_sys::ctypes::*;
 pub(crate) use linux_raw_sys::errno::EINVAL;
+pub(crate) use linux_raw_sys::general::{__kernel_fd_set as fd_set, __FD_SETSIZE as FD_SETSIZE};
 pub(crate) use linux_raw_sys::ioctl::{FIONBIO, FIONREAD};
 // Import the kernel's `uid_t` and `gid_t` if they're 32-bit.
 #[cfg(not(any(target_arch = "arm", target_arch = "sparc", target_arch = "x86")))]

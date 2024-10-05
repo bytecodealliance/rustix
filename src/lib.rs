@@ -71,6 +71,7 @@
 //!  - Provide y2038 compatibility, on platforms which support this.
 //!  - Correct selected platform bugs, such as behavioral differences when
 //!    running under seccomp.
+//!  - Use `timespec` for timestamps instead of `timeval`.
 //!
 //! Things they don't do include:
 //!  - Detecting whether functions are supported at runtime, except in specific
@@ -355,13 +356,13 @@ mod prctl;
 #[cfg(not(any(windows, target_os = "espidf", target_os = "wasi")))]
 #[cfg(any(feature = "process", feature = "runtime", all(bsd, feature = "event")))]
 mod signal;
-#[cfg(not(windows))]
 #[cfg(any(
     feature = "fs",
     feature = "process",
     feature = "runtime",
     feature = "thread",
     feature = "time",
+    all(feature = "event", any(bsd, linux_kernel, windows, target_os = "wasi")),
     all(
         linux_raw,
         not(feature = "use-libc-auxv"),
