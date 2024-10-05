@@ -2,11 +2,17 @@
 
 #![allow(unsafe_code)]
 
+#[cfg(target_os = "linux")]
+use crate::backend::net::msghdr::{
+    with_noaddr_msghdr, with_unix_msghdr, with_v4_msghdr, with_v6_msghdr, with_xdp_msghdr,
+};
 use crate::backend::{self, c};
 use crate::fd::{AsFd, BorrowedFd, OwnedFd};
 use crate::io::{self, IoSlice, IoSliceMut};
 #[cfg(linux_kernel)]
 use crate::net::UCred;
+#[cfg(target_os = "linux")]
+use crate::net::{xdp::SocketAddrXdp, SocketAddrUnix};
 
 use core::iter::FusedIterator;
 use core::marker::PhantomData;
@@ -591,6 +597,75 @@ impl<'buf> Iterator for AncillaryDrain<'buf> {
 
 impl FusedIterator for AncillaryDrain<'_> {}
 
+/// An ABI-compatible wrapper for `mmsghdr`, for sending multiple messages with
+/// [sendmmsg].
+#[cfg(target_os = "linux")]
+#[repr(transparent)]
+pub struct MMsgHdr<'a> {
+    raw: c::mmsghdr,
+    _phantom: PhantomData<&'a mut ()>,
+}
+
+#[cfg(target_os = "linux")]
+impl<'a> MMsgHdr<'a> {
+    /// Constructs a new message with no destination address.
+    pub fn new(iov: &[IoSlice<'a>], control: &mut SendAncillaryBuffer<'_, '_, '_>) -> Self {
+        with_noaddr_msghdr(iov, control, Self::wrap)
+    }
+
+    /// Constructs a new message to a specific IPv4 address.
+    pub fn new_v4(
+        addr: &SocketAddrV4,
+        iov: &[IoSlice<'a>],
+        control: &mut SendAncillaryBuffer<'_, '_, '_>,
+    ) -> Self {
+        with_v4_msghdr(addr, iov, control, Self::wrap)
+    }
+
+    /// Constructs a new message to a specific IPv6 address.
+    pub fn new_v6(
+        addr: &SocketAddrV6,
+        iov: &[IoSlice<'a>],
+        control: &mut SendAncillaryBuffer<'_, '_, '_>,
+    ) -> Self {
+        with_v6_msghdr(addr, iov, control, Self::wrap)
+    }
+
+    /// Constructs a new message to a specific Unix-domain address.
+    pub fn new_unix(
+        addr: &SocketAddrUnix,
+        iov: &[IoSlice<'a>],
+        control: &mut SendAncillaryBuffer<'_, '_, '_>,
+    ) -> Self {
+        with_unix_msghdr(addr, iov, control, Self::wrap)
+    }
+
+    /// Constructs a new message to a specific XDP address.
+    pub fn new_xdp(
+        addr: &SocketAddrXdp,
+        iov: &[IoSlice<'a>],
+        control: &mut SendAncillaryBuffer<'_, '_, '_>,
+    ) -> Self {
+        with_xdp_msghdr(addr, iov, control, Self::wrap)
+    }
+
+    fn wrap(msg_hdr: c::msghdr) -> Self {
+        Self {
+            raw: c::mmsghdr {
+                msg_hdr,
+                msg_len: 0,
+            },
+            _phantom: PhantomData,
+        }
+    }
+
+    /// Returns the number of bytes sent. This will return 0 until after a
+    /// successful call to [sendmmsg].
+    pub fn bytes_sent(&self) -> usize {
+        self.raw.msg_len as _
+    }
+}
+
 /// `sendmsg(msghdr)`—Sends a message on a socket.
 ///
 /// # References
@@ -779,6 +854,22 @@ pub fn sendmsg_any(
             backend::net::syscalls::sendmsg_xdp(socket.as_fd(), addr, iov, control, flags)
         }
     }
+}
+
+/// `sendmmsg(msghdr)`—Sends multiple messages on a socket.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/sendmmsg.2.html
+#[inline]
+#[cfg(target_os = "linux")]
+pub fn sendmmsg(
+    socket: impl AsFd,
+    msgs: &mut [MMsgHdr<'_>],
+    flags: SendFlags,
+) -> io::Result<usize> {
+    backend::net::syscalls::sendmmsg(socket.as_fd(), msgs, flags)
 }
 
 /// `recvmsg(msghdr)`—Receives a message from a socket.
