@@ -396,6 +396,17 @@ pub fn set_socket_recv_buffer_size<Fd: AsFd>(fd: Fd, value: usize) -> io::Result
     backend::net::sockopt::set_socket_recv_buffer_size(fd.as_fd(), value)
 }
 
+/// `setsockopt(fd, SOL_SOCKET, SO_RCVBUFFORCE, value)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_socket_-and-set_socket_-functions
+#[inline]
+#[doc(alias = "SO_RCVBUFFORCE")]
+pub fn set_socket_recv_buffer_size_force<Fd: AsFd>(fd: Fd, value: usize) -> io::Result<()> {
+    backend::net::sockopt::set_socket_recv_buffer_size_force(fd.as_fd(), value)
+}
+
 /// `getsockopt(fd, SOL_SOCKET, SO_RCVBUF)`
 ///
 /// See the [module-level documentation] for more.
