@@ -1658,7 +1658,7 @@ pub mod xdp {
     /// XDP umem registration.
     ///
     /// `struct xdp_umem_reg`
-    // https://github.com/torvalds/linux/blob/v6.6/include/uapi/linux/if_xdp.h#L73-L79
+    // https://github.com/torvalds/linux/blob/v6.8/include/uapi/linux/if_xdp.h#L79-L86
     #[repr(C)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct XdpUmemReg {
@@ -1674,6 +1674,10 @@ pub mod xdp {
         ///
         /// Requires kernel version 5.4.
         pub flags: XdpUmemRegFlags,
+        /// AF_XDP TX metadata length
+        ///
+        /// Requires kernel version 6.8.
+        pub tx_metadata_len: u32,
     }
 
     /// XDP statistics.
