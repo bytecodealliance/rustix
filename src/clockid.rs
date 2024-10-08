@@ -138,7 +138,7 @@ pub enum DynamicClockId<'a> {
     Dynamic(BorrowedFd<'a>),
 
     /// `CLOCK_REALTIME_ALARM`
-    #[cfg(linux_kernel)]
+    #[cfg(any(linux_kernel, target_os = "fuchsia"))]
     #[doc(alias = "CLOCK_REALTIME_ALARM")]
     RealtimeAlarm,
 
