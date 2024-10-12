@@ -486,6 +486,7 @@ jobs:
         patch -p1 < $GITHUB_WORKSPACE/ci/tiocgsid.patch
         patch -p1 < $GITHUB_WORKSPACE/ci/more-sockopts.patch
         patch -p1 < $GITHUB_WORKSPACE/ci/pidfd-open.patch
+        patch -p1 < $GITHUB_WORKSPACE/ci/select-setsize.patch
         ./configure --target-list=${{ matrix.qemu_target }} --prefix=${{ runner.tool_cache }}/qemu --disable-tools --disable-slirp --disable-fdt --disable-capstone --disable-docs
         ninja -C build install
       if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'
@@ -624,6 +625,7 @@ jobs:
         patch -p1 < $GITHUB_WORKSPACE/ci/tiocgsid.patch
         patch -p1 < $GITHUB_WORKSPACE/ci/more-sockopts.patch
         patch -p1 < $GITHUB_WORKSPACE/ci/pidfd-open.patch
+        patch -p1 < $GITHUB_WORKSPACE/ci/select-setsize.patch
         ./configure --target-list=${{ matrix.qemu_target }} --prefix=${{ runner.tool_cache }}/qemu --disable-tools --disable-slirp --disable-fdt --disable-capstone --disable-docs
         ninja -C build install
       if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'
@@ -718,6 +720,7 @@ jobs:
         patch -p1 < $GITHUB_WORKSPACE/ci/tiocgsid.patch
         patch -p1 < $GITHUB_WORKSPACE/ci/more-sockopts.patch
         patch -p1 < $GITHUB_WORKSPACE/ci/pidfd-open.patch
+        patch -p1 < $GITHUB_WORKSPACE/ci/select-setsize.patch
         ./configure --target-list=${{ matrix.qemu_target }} --prefix=${{ runner.tool_cache }}/qemu --disable-tools --disable-slirp --disable-fdt --disable-capstone --disable-docs
         ninja -C build install
       if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'

@@ -1,3 +1,6 @@
+// TODO: Rename `Arg::as_str` to avoid collisions.
+#![allow(unstable_name_collisions)]
+
 use rustix::ffi::{CStr, CString};
 use rustix::io;
 use rustix::path::Arg;

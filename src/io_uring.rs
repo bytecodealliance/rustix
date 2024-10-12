@@ -40,7 +40,7 @@ pub use crate::fs::{
 };
 pub use crate::io::ReadWriteFlags;
 pub use crate::net::{RecvFlags, SendFlags, SocketFlags};
-pub use crate::timespec::Timespec;
+pub use crate::timespec::{Nsecs, Secs, Timespec};
 pub use linux_raw_sys::general::sigset_t;
 
 pub use net::{__kernel_sockaddr_storage as sockaddr_storage, msghdr, sockaddr, socklen_t};
