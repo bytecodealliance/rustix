@@ -505,6 +505,8 @@ fn init() {
             let ptr = vdso.sym(cstr!("LINUX_4.15"), cstr!("__vdso_clock_gettime"));
             #[cfg(target_arch = "powerpc64")]
             let ptr = vdso.sym(cstr!("LINUX_2.6.15"), cstr!("__kernel_clock_gettime"));
+            #[cfg(target_arch = "s390x")]
+            let ptr = vdso.sym(cstr!("LINUX_2.6.29"), cstr!("__kernel_clock_gettime"));
             #[cfg(any(target_arch = "mips", target_arch = "mips32r6"))]
             let ptr = vdso.sym(cstr!("LINUX_2.6"), cstr!("__vdso_clock_gettime64"));
             #[cfg(any(target_arch = "mips64", target_arch = "mips64r6"))]
@@ -573,7 +575,8 @@ fn init() {
                 target_arch = "mips",
                 target_arch = "mips32r6",
                 target_arch = "mips64",
-                target_arch = "mips64r6"
+                target_arch = "mips64r6",
+                target_arch = "s390x",
             ))]
             let ok = false;
 

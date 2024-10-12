@@ -510,7 +510,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, arm-linux]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, s390x-linux, arm-linux]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -549,6 +549,15 @@ jobs:
             qemu: qemu-riscv64
             qemu_args: -L /usr/riscv64-linux-gnu
             qemu_target: riscv64-linux-user
+          - build: s390x-linux
+            os: ubuntu-latest
+            rust: stable
+            target: s390x-unknown-linux-gnu
+            gcc_package: gcc-s390x-linux-gnu
+            gcc: s390x-linux-gnu-gcc
+            qemu: qemu-s390x
+            qemu_args: -L /usr/s390x-linux-gnu
+            qemu_target: s390x-linux-user
           - build: arm-linux
             os: ubuntu-latest
             rust: stable
@@ -640,7 +649,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [powerpc64le-linux]
+        build: [powerpc64le-linux, s390x-linux]
         include:
           - build: powerpc64le-linux
             os: ubuntu-latest
@@ -651,11 +660,21 @@ jobs:
             qemu: qemu-ppc64le
             qemu_args: -L /usr/powerpc64le-linux-gnu
             qemu_target: ppc64le-linux-user
+          - build: s390x-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: s390x-unknown-linux-gnu
+            gcc_package: gcc-s390x-linux-gnu
+            gcc: s390x-linux-gnu-gcc
+            qemu: qemu-s390x
+            qemu_args: -L /usr/s390x-linux-gnu
+            qemu_target: s390x-linux-user
     env:
       # -D warnings is commented out in our install-rust action; re-add it here.
       RUSTFLAGS: --cfg rustix_use_experimental_asm -D warnings -D elided-lifetimes-in-paths
       RUSTDOCFLAGS: --cfg rustix_use_experimental_asm
       CARGO_TARGET_POWERPC64LE_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rustix_use_experimental_asm
+      CARGO_TARGET_S390X_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rustix_use_experimental_asm
       QEMU_BUILD_VERSION: 8.1.2
     steps:
     - uses: actions/checkout@v4
