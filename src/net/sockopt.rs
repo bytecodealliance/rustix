@@ -401,6 +401,7 @@ pub fn set_socket_recv_buffer_size<Fd: AsFd>(fd: Fd, value: usize) -> io::Result
 /// See the [module-level documentation] for more.
 ///
 /// [module-level documentation]: self#references-for-get_socket_-and-set_socket_-functions
+#[cfg(any(linux_kernel, target_os = "fuchsia", target_os = "redox"))]
 #[inline]
 #[doc(alias = "SO_RCVBUFFORCE")]
 pub fn set_socket_recv_buffer_size_force<Fd: AsFd>(fd: Fd, value: usize) -> io::Result<()> {
