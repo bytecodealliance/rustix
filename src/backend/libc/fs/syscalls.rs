@@ -9,9 +9,9 @@ use crate::backend::c;
 use crate::backend::conv::ret_usize;
 use crate::backend::conv::{borrowed_fd, c_str, ret, ret_c_int, ret_off_t, ret_owned_fd};
 use crate::fd::{BorrowedFd, OwnedFd};
-use crate::ffi::CStr;
 #[cfg(all(apple, feature = "alloc"))]
 use crate::ffi::CString;
+use crate::ffi::{self, CStr};
 #[cfg(not(any(target_os = "espidf", target_os = "vita")))]
 use crate::fs::Access;
 #[cfg(not(any(
@@ -89,7 +89,7 @@ use {
 };
 
 #[cfg(all(target_env = "gnu", fix_y2038))]
-weak!(fn __utimensat64(c::c_int, *const c::c_char, *const LibcTimespec, c::c_int) -> c::c_int);
+weak!(fn __utimensat64(c::c_int, *const ffi::c_char, *const LibcTimespec, c::c_int) -> c::c_int);
 #[cfg(all(target_env = "gnu", fix_y2038))]
 weak!(fn __futimens64(c::c_int, *const LibcTimespec) -> c::c_int);
 
@@ -122,7 +122,7 @@ fn open_via_syscall(path: &CStr, oflags: OFlags, mode: Mode) -> io::Result<Owned
     unsafe {
         syscall! {
             fn open(
-                pathname: *const c::c_char,
+                pathname: *const ffi::c_char,
                 oflags: c::c_int,
                 mode: c::mode_t
             ) via SYS_open -> c::c_int
@@ -182,7 +182,7 @@ fn openat_via_syscall(
     syscall! {
         fn openat(
             base_dirfd: c::c_int,
-            pathname: *const c::c_char,
+            pathname: *const ffi::c_char,
             oflags: c::c_int,
             mode: c::mode_t
         ) via SYS_openat -> c::c_int
@@ -277,9 +277,11 @@ pub(crate) fn statvfs(filename: &CStr) -> io::Result<StatVfs> {
 #[inline]
 pub(crate) fn readlink(path: &CStr, buf: &mut [u8]) -> io::Result<usize> {
     unsafe {
-        ret_usize(
-            c::readlink(c_str(path), buf.as_mut_ptr().cast::<c::c_char>(), buf.len()) as isize,
-        )
+        ret_usize(c::readlink(
+            c_str(path),
+            buf.as_mut_ptr().cast::<ffi::c_char>(),
+            buf.len(),
+        ) as isize)
     }
 }
 
@@ -294,7 +296,7 @@ pub(crate) fn readlinkat(
         ret_usize(c::readlinkat(
             borrowed_fd(dirfd),
             c_str(path),
-            buf.as_mut_ptr().cast::<c::c_char>(),
+            buf.as_mut_ptr().cast::<ffi::c_char>(),
             buf.len(),
         ) as isize)
     }
@@ -354,9 +356,9 @@ pub(crate) fn linkat(
         weak! {
             fn linkat(
                 c::c_int,
-                *const c::c_char,
+                *const ffi::c_char,
                 c::c_int,
-                *const c::c_char,
+                *const ffi::c_char,
                 c::c_int
             ) -> c::c_int
         }
@@ -411,7 +413,7 @@ pub(crate) fn unlinkat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io
         weak! {
             fn unlinkat(
                 c::c_int,
-                *const c::c_char,
+                *const ffi::c_char,
                 c::c_int
             ) -> c::c_int
         }
@@ -464,9 +466,9 @@ pub(crate) fn renameat(
         weak! {
             fn renameat(
                 c::c_int,
-                *const c::c_char,
+                *const ffi::c_char,
                 c::c_int,
-                *const c::c_char
+                *const ffi::c_char
             ) -> c::c_int
         }
         // If we have `renameat`, use it.
@@ -508,9 +510,9 @@ pub(crate) fn renameat2(
     weak_or_syscall! {
         fn renameat2(
             olddirfd: c::c_int,
-            oldpath: *const c::c_char,
+            oldpath: *const ffi::c_char,
             newdirfd: c::c_int,
-            newpath: *const c::c_char,
+            newpath: *const ffi::c_char,
             flags: c::c_uint
         ) via SYS_renameat2 -> c::c_int
     }
@@ -547,9 +549,9 @@ pub(crate) fn renameat2(
         syscall! {
             fn renameat2(
                 olddirfd: c::c_int,
-                oldpath: *const c::c_char,
+                oldpath: *const ffi::c_char,
                 newdirfd: c::c_int,
-                newpath: *const c::c_char,
+                newpath: *const ffi::c_char,
                 flags: c::c_uint
             ) via SYS_renameat2 -> c::c_int
         }
@@ -750,7 +752,7 @@ pub(crate) fn accessat(
         weak! {
             fn faccessat(
                 c::c_int,
-                *const c::c_char,
+                *const ffi::c_char,
                 c::c_int,
                 c::c_int
             ) -> c::c_int
@@ -857,14 +859,14 @@ pub(crate) fn utimensat(
         weak! {
             fn utimensat(
                 c::c_int,
-                *const c::c_char,
+                *const ffi::c_char,
                 *const c::timespec,
                 c::c_int
             ) -> c::c_int
         }
         extern "C" {
             fn setattrlist(
-                path: *const c::c_char,
+                path: *const ffi::c_char,
                 attr_list: *const Attrlist,
                 attr_buf: *const c::c_void,
                 attr_buf_size: c::size_t,
@@ -1051,7 +1053,7 @@ pub(crate) fn chmodat(
     syscall! {
         fn fchmodat(
             base_dirfd: c::c_int,
-            pathname: *const c::c_char,
+            pathname: *const ffi::c_char,
             mode: c::mode_t
         ) via SYS_fchmodat -> c::c_int
     }
@@ -1081,7 +1083,7 @@ pub(crate) fn fclonefileat(
         fn fclonefileat(
             srcfd: BorrowedFd<'_>,
             dst_dirfd: BorrowedFd<'_>,
-            dst: *const c::c_char,
+            dst: *const ffi::c_char,
             flags: c::c_int
         ) via SYS_fclonefileat -> c::c_int
     }
@@ -1713,7 +1715,7 @@ pub(crate) fn memfd_create(name: &CStr, flags: MemfdFlags) -> io::Result<OwnedFd
     #[cfg(target_os = "freebsd")]
     weakcall! {
         fn memfd_create(
-            name: *const c::c_char,
+            name: *const ffi::c_char,
             flags: c::c_uint
         ) -> c::c_int
     }
@@ -1721,7 +1723,7 @@ pub(crate) fn memfd_create(name: &CStr, flags: MemfdFlags) -> io::Result<OwnedFd
     #[cfg(linux_kernel)]
     weak_or_syscall! {
         fn memfd_create(
-            name: *const c::c_char,
+            name: *const ffi::c_char,
             flags: c::c_uint
         ) via SYS_memfd_create -> c::c_int
     }
@@ -1742,7 +1744,7 @@ pub(crate) fn openat2(
     syscall! {
         fn openat2(
             base_dirfd: c::c_int,
-            pathname: *const c::c_char,
+            pathname: *const ffi::c_char,
             how: *mut open_how,
             size: usize
         ) via SYS_OPENAT2 -> c::c_int
@@ -1910,12 +1912,12 @@ fn stat64_to_stat(s64: c::stat64) -> io::Result<Stat> {
 #[cfg(linux_kernel)]
 #[allow(non_upper_case_globals)]
 mod sys {
-    use super::{c, BorrowedFd, Statx};
+    use super::{c, ffi, BorrowedFd, Statx};
 
     weak_or_syscall! {
         pub(super) fn statx(
             dirfd_: BorrowedFd<'_>,
-            path: *const c::c_char,
+            path: *const ffi::c_char,
             flags: c::c_int,
             mask: c::c_uint,
             buf: *mut Statx
@@ -2442,7 +2444,7 @@ pub(crate) fn fsetxattr(
 }
 
 #[cfg(any(apple, linux_kernel, target_os = "hurd"))]
-pub(crate) fn listxattr(path: &CStr, list: &mut [c::c_char]) -> io::Result<usize> {
+pub(crate) fn listxattr(path: &CStr, list: &mut [ffi::c_char]) -> io::Result<usize> {
     #[cfg(not(apple))]
     unsafe {
         ret_usize(c::listxattr(path.as_ptr(), list.as_mut_ptr(), list.len()))
@@ -2460,7 +2462,7 @@ pub(crate) fn listxattr(path: &CStr, list: &mut [c::c_char]) -> io::Result<usize
 }
 
 #[cfg(any(apple, linux_kernel, target_os = "hurd"))]
-pub(crate) fn llistxattr(path: &CStr, list: &mut [c::c_char]) -> io::Result<usize> {
+pub(crate) fn llistxattr(path: &CStr, list: &mut [ffi::c_char]) -> io::Result<usize> {
     #[cfg(not(apple))]
     unsafe {
         ret_usize(c::llistxattr(path.as_ptr(), list.as_mut_ptr(), list.len()))
@@ -2478,7 +2480,7 @@ pub(crate) fn llistxattr(path: &CStr, list: &mut [c::c_char]) -> io::Result<usiz
 }
 
 #[cfg(any(apple, linux_kernel, target_os = "hurd"))]
-pub(crate) fn flistxattr(fd: BorrowedFd<'_>, list: &mut [c::c_char]) -> io::Result<usize> {
+pub(crate) fn flistxattr(fd: BorrowedFd<'_>, list: &mut [ffi::c_char]) -> io::Result<usize> {
     let fd = borrowed_fd(fd);
 
     #[cfg(not(apple))]

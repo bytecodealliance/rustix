@@ -1,4 +1,5 @@
 use crate::backend::c;
+use crate::ffi;
 use bitflags::bitflags;
 
 #[cfg(not(any(target_os = "espidf", target_os = "vita")))]
@@ -8,7 +9,7 @@ bitflags! {
     /// [`accessat`]: fn.accessat.html
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct Access: c::c_int {
+    pub struct Access: ffi::c_int {
         /// `R_OK`
         const READ_OK = c::R_OK;
 
@@ -378,7 +379,7 @@ bitflags! {
     /// [`fcopyfile`]: crate::fs::fcopyfile
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct CopyfileFlags: c::c_uint {
+    pub struct CopyfileFlags: ffi::c_uint {
         /// `COPYFILE_ACL`
         const ACL = copyfile::ACL;
 
@@ -443,7 +444,7 @@ bitflags! {
     /// [`renameat_with`]: crate::fs::renameat_with
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct RenameFlags: c::c_uint {
+    pub struct RenameFlags: ffi::c_uint {
         /// `RENAME_EXCHANGE`
         const EXCHANGE = bitcast!(c::RENAME_EXCHANGE);
 
@@ -598,7 +599,7 @@ bitflags! {
     /// [`memfd_create`]: crate::fs::memfd_create
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct MemfdFlags: c::c_uint {
+    pub struct MemfdFlags: ffi::c_uint {
         /// `MFD_CLOEXEC`
         const CLOEXEC = c::MFD_CLOEXEC;
 
@@ -1127,7 +1128,7 @@ pub type RawMode = c::mode_t;
 
 /// `mode_t`
 #[cfg(all(target_os = "android", target_pointer_width = "32"))]
-pub type RawMode = c::c_uint;
+pub type RawMode = ffi::c_uint;
 
 /// `dev_t`
 #[cfg(not(all(target_os = "android", target_pointer_width = "32")))]
@@ -1135,7 +1136,7 @@ pub type Dev = c::dev_t;
 
 /// `dev_t`
 #[cfg(all(target_os = "android", target_pointer_width = "32"))]
-pub type Dev = c::c_ulonglong;
+pub type Dev = ffi::c_ulonglong;
 
 /// `__fsword_t`
 #[cfg(all(

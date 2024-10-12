@@ -1,4 +1,4 @@
-use crate::{backend, io, path};
+use crate::{backend, ffi, io, path};
 use backend::c;
 use backend::fd::AsFd;
 use bitflags::bitflags;
@@ -8,7 +8,7 @@ bitflags! {
     /// functions.
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct XattrFlags: c::c_uint {
+    pub struct XattrFlags: ffi::c_uint {
         /// `XATTR_CREATE`
         const CREATE = c::XATTR_CREATE as c::c_uint;
 
@@ -137,7 +137,7 @@ pub fn fsetxattr<Fd: AsFd, Name: path::Arg>(
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/listxattr.2.html
 #[inline]
-pub fn listxattr<P: path::Arg>(path: P, list: &mut [c::c_char]) -> io::Result<usize> {
+pub fn listxattr<P: path::Arg>(path: P, list: &mut [ffi::c_char]) -> io::Result<usize> {
     path.into_with_c_str(|path| backend::fs::syscalls::listxattr(path, list))
 }
 
@@ -149,7 +149,7 @@ pub fn listxattr<P: path::Arg>(path: P, list: &mut [c::c_char]) -> io::Result<us
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/llistxattr.2.html
 #[inline]
-pub fn llistxattr<P: path::Arg>(path: P, list: &mut [c::c_char]) -> io::Result<usize> {
+pub fn llistxattr<P: path::Arg>(path: P, list: &mut [ffi::c_char]) -> io::Result<usize> {
     path.into_with_c_str(|path| backend::fs::syscalls::llistxattr(path, list))
 }
 
@@ -161,7 +161,7 @@ pub fn llistxattr<P: path::Arg>(path: P, list: &mut [c::c_char]) -> io::Result<u
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/flistxattr.2.html
 #[inline]
-pub fn flistxattr<Fd: AsFd>(fd: Fd, list: &mut [c::c_char]) -> io::Result<usize> {
+pub fn flistxattr<Fd: AsFd>(fd: Fd, list: &mut [ffi::c_char]) -> io::Result<usize> {
     backend::fs::syscalls::flistxattr(fd.as_fd(), list)
 }
 
