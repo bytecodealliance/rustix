@@ -16,6 +16,8 @@ use crate::event::port::Event;
     target_os = "espidf"
 ))]
 use crate::event::EventfdFlags;
+#[cfg(any(bsd, linux_kernel, target_os = "wasi"))]
+use crate::event::FdSetElement;
 use crate::event::PollFd;
 use crate::io;
 #[cfg(solarish)]
@@ -28,7 +30,9 @@ use crate::utils::as_ptr;
     all(feature = "alloc", any(linux_kernel, target_os = "redox")),
 ))]
 use core::mem::MaybeUninit;
-#[cfg(any(linux_kernel, solarish, target_os = "redox"))]
+#[cfg(any(bsd, linux_kernel, target_os = "wasi"))]
+use core::ptr::null;
+#[cfg(any(bsd, linux_kernel, solarish, target_os = "redox", target_os = "wasi"))]
 use core::ptr::null_mut;
 #[cfg(any(
     linux_kernel,
@@ -48,7 +52,7 @@ use {crate::backend::conv::borrowed_fd, crate::fd::BorrowedFd};
 ))]
 use {crate::backend::conv::ret_owned_fd, crate::fd::OwnedFd};
 #[cfg(all(feature = "alloc", bsd))]
-use {crate::event::kqueue::Event, crate::utils::as_ptr, core::ptr::null};
+use {crate::event::kqueue::Event, crate::utils::as_ptr};
 
 #[cfg(any(
     linux_kernel,
@@ -123,6 +127,137 @@ pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: c::c_int) -> io::Result<usiz
 
     ret_c_int(unsafe { c::poll(fds.as_mut_ptr().cast(), nfds, timeout) })
         .map(|nready| nready as usize)
+}
+
+#[cfg(any(bsd, linux_kernel))]
+pub(crate) unsafe fn select(
+    nfds: i32,
+    readfds: Option<&mut [FdSetElement]>,
+    writefds: Option<&mut [FdSetElement]>,
+    exceptfds: Option<&mut [FdSetElement]>,
+    timeout: Option<&crate::timespec::Timespec>,
+) -> io::Result<i32> {
+    let len = crate::event::fd_set_num_elements_for_bitvector(nfds);
+
+    let readfds = match readfds {
+        Some(readfds) => {
+            assert!(readfds.len() >= len);
+            readfds.as_mut_ptr()
+        }
+        None => null_mut(),
+    };
+    let writefds = match writefds {
+        Some(writefds) => {
+            assert!(writefds.len() >= len);
+            writefds.as_mut_ptr()
+        }
+        None => null_mut(),
+    };
+    let exceptfds = match exceptfds {
+        Some(exceptfds) => {
+            assert!(exceptfds.len() >= len);
+            exceptfds.as_mut_ptr()
+        }
+        None => null_mut(),
+    };
+
+    let timeout_data;
+    let timeout_ptr = match timeout {
+        Some(timeout) => {
+            // Convert from `Timespec` to `c::timeval`.
+            timeout_data = c::timeval {
+                tv_sec: timeout.tv_sec.try_into().map_err(|_| io::Errno::OVERFLOW)?,
+                tv_usec: ((timeout.tv_nsec + 999) / 1000) as _,
+            };
+            &timeout_data
+        }
+        None => null(),
+    };
+
+    // On Apple platforms, use the specially mangled `select` which doesn't
+    // have an `FD_SETSIZE` limitation.
+    #[cfg(apple)]
+    {
+        extern "C" {
+            #[link_name = "select$DARWIN_EXTSN$NOCANCEL"]
+            fn select(
+                nfds: c::c_int,
+                readfds: *mut FdSetElement,
+                writefds: *mut FdSetElement,
+                errorfds: *mut FdSetElement,
+                timeout: *const c::timeval,
+            ) -> c::c_int;
+        }
+
+        ret_c_int(select(nfds, readfds, writefds, exceptfds, timeout_ptr))
+    }
+
+    // Otherwise just use the normal `select`.
+    #[cfg(not(apple))]
+    {
+        ret_c_int(c::select(
+            nfds,
+            readfds.cast(),
+            writefds.cast(),
+            exceptfds.cast(),
+            timeout_ptr as *mut c::timeval,
+        ))
+    }
+}
+
+// WASI uses a count + array instead of a bitvector.
+#[cfg(target_os = "wasi")]
+pub(crate) unsafe fn select(
+    nfds: i32,
+    readfds: Option<&mut [FdSetElement]>,
+    writefds: Option<&mut [FdSetElement]>,
+    exceptfds: Option<&mut [FdSetElement]>,
+    timeout: Option<&crate::timespec::Timespec>,
+) -> io::Result<i32> {
+    let len = crate::event::fd_set_num_elements_for_fd_array(nfds as usize);
+
+    let readfds = match readfds {
+        Some(readfds) => {
+            assert!(readfds.len() >= len);
+            readfds.as_mut_ptr()
+        }
+        None => null_mut(),
+    };
+    let writefds = match writefds {
+        Some(writefds) => {
+            assert!(writefds.len() >= len);
+            writefds.as_mut_ptr()
+        }
+        None => null_mut(),
+    };
+    let exceptfds = match exceptfds {
+        Some(exceptfds) => {
+            assert!(exceptfds.len() >= len);
+            exceptfds.as_mut_ptr()
+        }
+        None => null_mut(),
+    };
+
+    let timeout_data;
+    let timeout_ptr = match timeout {
+        Some(timeout) => {
+            // Convert from `Timespec` to `c::timeval`.
+            timeout_data = c::timeval {
+                tv_sec: timeout.tv_sec.try_into().map_err(|_| io::Errno::OVERFLOW)?,
+                tv_usec: ((timeout.tv_nsec + 999) / 1000) as _,
+            };
+            &timeout_data
+        }
+        None => null(),
+    };
+
+    ret_c_int(c::select(
+        nfds,
+        readfds.cast(),
+        writefds.cast(),
+        exceptfds.cast(),
+        timeout_ptr as *mut c::timeval,
+    ))
 }
 
 #[cfg(solarish)]
@@ -207,7 +342,7 @@ pub(crate) fn port_send(
     unsafe { ret(c::port_send(borrowed_fd(port), events, userdata)) }
 }
 
-#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn pause() {
     let r = unsafe { c::pause() };
     let errno = libc_errno::errno().0;
