@@ -87,14 +87,11 @@ fn main() {
         // Rust's inline asm is considered experimental, so only use it if
         // `--cfg=rustix_use_experimental_asm` is given.
         if (feature_rustc_dep_of_std || vendor == "mustang" || can_compile("use std::arch::asm;"))
-            && (arch != "x86" || has_feature("naked_functions"))
+            && (arch != "x86")
             && ((arch != "powerpc64" && arch != "mips" && arch != "mips64")
                 || rustix_use_experimental_asm)
         {
             use_feature("asm");
-            if arch == "x86" {
-                use_feature("naked_functions");
-            }
             if rustix_use_experimental_asm {
                 use_feature("asm_experimental_arch");
             }
@@ -191,6 +188,7 @@ fn link_in_librustix_outline(arch: &str, asm_name: &str) {
         build.file(&asm_name);
         build.compile(&name);
         println!("cargo:rerun-if-changed={}", asm_name);
+        /*
         if std::fs::metadata(".git").is_ok() {
             let from = format!("{}/lib{}.a", out_dir, name);
             let prev_metadata = std::fs::metadata(&to);
@@ -212,6 +210,7 @@ fn link_in_librustix_outline(arch: &str, asm_name: &str) {
                 to
             );
         }
+        */
     }
 }
 

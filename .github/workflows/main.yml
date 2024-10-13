@@ -37,10 +37,6 @@ jobs:
             os: ubuntu-latest
             rust: 1.48
 
-    env:
-      # -D warnings is commented out in our install-rust action; re-add it here.
-      # In theory we should add --cfg criterion here, but criterion doesn't compile under Rust 1.48.
-      RUSTFLAGS: -D warnings
     steps:
     - uses: actions/checkout@v3
       with:
@@ -141,9 +137,6 @@ jobs:
             os: ubuntu-latest
             rust: nightly
 
-    env:
-      # -D warnings is commented out in our install-rust action; re-add it here.
-      RUSTFLAGS: -D warnings
     steps:
     - uses: actions/checkout@v3
       with:
@@ -573,8 +566,6 @@ jobs:
             qemu_args: -L /usr/arm-linux-gnueabihf
             qemu_target: arm-linux-user
     env:
-      # -D warnings is commented out in our install-rust action; re-add it here.
-      RUSTFLAGS: -D warnings
       QEMU_BUILD_VERSION: 7.0.0
     steps:
     - uses: actions/checkout@v3
@@ -660,8 +651,7 @@ jobs:
             qemu_args: -L /usr/powerpc64le-linux-gnu
             qemu_target: ppc64le-linux-user
     env:
-      # -D warnings is commented out in our install-rust action; re-add it here.
-      RUSTFLAGS: --cfg rustix_use_experimental_asm -D warnings
+      RUSTFLAGS: --cfg rustix_use_experimental_asm
       RUSTDOCFLAGS: --cfg rustix_use_experimental_asm
       CARGO_TARGET_POWERPC64LE_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rustix_use_experimental_asm
       QEMU_BUILD_VERSION: 7.0.0
