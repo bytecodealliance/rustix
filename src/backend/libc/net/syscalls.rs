@@ -7,11 +7,15 @@ use super::msghdr::with_xdp_msghdr;
 #[cfg(target_os = "linux")]
 use super::write_sockaddr::encode_sockaddr_xdp;
 use crate::backend::c;
+#[cfg(target_os = "linux")]
+use crate::backend::conv::ret_u32;
 use crate::backend::conv::{borrowed_fd, ret, ret_owned_fd, ret_send_recv, send_recv_len};
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io;
 #[cfg(target_os = "linux")]
 use crate::net::xdp::SocketAddrXdp;
+#[cfg(target_os = "linux")]
+use crate::net::MMsgHdr;
 use crate::net::{SocketAddrAny, SocketAddrV4, SocketAddrV6};
 use crate::utils::as_ptr;
 use core::mem::{size_of, MaybeUninit};
@@ -453,6 +457,23 @@ pub(crate) fn sendmsg_xdp(
             bitflags_bits!(msg_flags),
         ))
     })
+}
+
+#[cfg(target_os = "linux")]
+pub(crate) fn sendmmsg(
+    sockfd: BorrowedFd<'_>,
+    msgs: &mut [MMsgHdr<'_>],
+    flags: SendFlags,
+) -> io::Result<usize> {
+    unsafe {
+        ret_u32(c::sendmmsg(
+            borrowed_fd(sockfd),
+            msgs.as_mut_ptr() as _,
+            msgs.len().try_into().unwrap_or(c::c_uint::MAX),
+            bitflags_bits!(flags),
+        ))
+        .map(|ret| ret as usize)
+    }
 }
 
 #[cfg(not(any(
