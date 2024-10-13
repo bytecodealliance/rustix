@@ -188,6 +188,7 @@ fn link_in_librustix_outline(arch: &str, asm_name: &str) {
         build.file(&asm_name);
         build.compile(&name);
         println!("cargo:rerun-if-changed={}", asm_name);
+        /*
         if std::fs::metadata(".git").is_ok() {
             let from = format!("{}/lib{}.a", out_dir, name);
             let prev_metadata = std::fs::metadata(&to);
@@ -209,6 +210,7 @@ fn link_in_librustix_outline(arch: &str, asm_name: &str) {
                 to
             );
         }
+        */
     }
 }
 
