@@ -74,7 +74,7 @@ impl SocketAddrUnix {
         })
     }
 
-    fn init() -> c::sockaddr_un {
+    const fn init() -> c::sockaddr_un {
         c::sockaddr_un {
             #[cfg(any(
                 bsd,
