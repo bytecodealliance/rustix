@@ -530,9 +530,9 @@ fn init() {
             if ok {
                 assert!(!ptr.is_null());
 
-                // Store the computed function addresses in static
-                // storage so that we don't need to compute it again (but if
-                // we do, it doesn't hurt anything).
+                // Store the computed function addresses in static storage so
+                // that we don't need to compute them again (but if we do, it
+                // doesn't hurt anything).
                 CLOCK_GETTIME.store(ptr.cast(), Relaxed);
             }
         }
@@ -583,9 +583,9 @@ fn init() {
             if ok {
                 assert!(!ptr.is_null());
 
-                // Store the computed function addresses in static
-                // storage so that we don't need to compute it again (but if
-                // we do, it doesn't hurt anything).
+                // Store the computed function addresses in static storage so
+                // that we don't need to compute them again (but if we do, it
+                // doesn't hurt anything).
                 GETCPU.store(ptr.cast(), Relaxed);
             }
         }

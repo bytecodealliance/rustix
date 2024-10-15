@@ -134,9 +134,11 @@ pub enum DumpableBehavior {
 }
 
 /// Set the state of the `dumpable` attribute for the process indicated by
-/// `idtype` and `id`. This determines whether the process can be traced and
-/// whether core dumps are produced for the process upon delivery of a signal
-/// whose default behavior is to produce a core dump.
+/// `idtype` and `id`.
+///
+/// This determines whether the process can be traced and whether core dumps
+/// are produced for the process upon delivery of a signal whose default
+/// behavior is to produce a core dump.
 ///
 /// This is similar to `set_dumpable_behavior` on Linux, with the exception
 /// that on FreeBSD there is an extra argument `process`. When `process` is set
@@ -453,6 +455,7 @@ pub enum TrapCapBehavior {
 }
 
 /// Set the current value of the capability mode violation trapping behavior.
+///
 /// If this behavior is enabled, the kernel would deliver a [`Signal::Trap`]
 /// signal on any return from a system call that would result in a
 /// [`io::Errno::NOTCAPABLE`] or [`io::Errno::CAPMODE`] error.
