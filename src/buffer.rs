@@ -9,13 +9,16 @@ use core::slice;
 ///
 /// # Safety
 ///
-/// At least `init` bytes must be initialized.
+/// At least `init_len` bytes must be initialized.
 #[inline]
 pub(super) unsafe fn split_init(
     buf: &mut [MaybeUninit<u8>],
-    init: usize,
+    init_len: usize,
 ) -> (&mut [u8], &mut [MaybeUninit<u8>]) {
-    let (init, uninit) = buf.split_at_mut(init);
-    let init = slice::from_raw_parts_mut(init.as_mut_ptr().cast::<u8>(), init.len());
+    debug_assert!(init_len <= buf.len());
+    let buf_ptr = buf.as_mut_ptr();
+    let uninit_len = buf.len() - init_len;
+    let init = slice::from_raw_parts_mut(buf_ptr.cast::<u8>(), init_len);
+    let uninit = slice::from_raw_parts_mut(buf_ptr.add(init_len), uninit_len);
     (init, uninit)
 }
