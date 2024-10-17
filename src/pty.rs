@@ -112,7 +112,7 @@ pub fn openpt(flags: OpenptFlags) -> io::Result<OwnedFd> {
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/ptsname.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/ptsname.3.html
-/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Allocation.html#index-ptsname
+/// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Allocation.html#index-ptsname
 #[cfg(all(
     feature = "alloc",
     any(apple, linux_like, target_os = "freebsd", target_os = "fuchsia")
@@ -132,7 +132,7 @@ pub fn ptsname<Fd: AsFd, B: Into<Vec<u8>>>(fd: Fd, reuse: B) -> io::Result<CStri
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/unlockpt.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/unlockpt.3.html
-/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Allocation.html#index-unlockpt
+/// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Allocation.html#index-unlockpt
 #[inline]
 pub fn unlockpt<Fd: AsFd>(fd: Fd) -> io::Result<()> {
     backend::pty::syscalls::unlockpt(fd.as_fd())
@@ -152,7 +152,7 @@ pub fn unlockpt<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/grantpt.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/grantpt.3.html
-/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Allocation.html#index-grantpt
+/// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Allocation.html#index-grantpt
 /// [`Signal::Child`]: crate::process::Signal::Child
 #[inline]
 pub fn grantpt<Fd: AsFd>(fd: Fd) -> io::Result<()> {

@@ -9,6 +9,7 @@
 pub(crate) type size_t = usize;
 pub(crate) use linux_raw_sys::ctypes::*;
 pub(crate) use linux_raw_sys::errno::EINVAL;
+pub(crate) use linux_raw_sys::general::{__kernel_fd_set as fd_set, __FD_SETSIZE as FD_SETSIZE};
 pub(crate) use linux_raw_sys::ioctl::{FIONBIO, FIONREAD};
 // Import the kernel's `uid_t` and `gid_t` if they're 32-bit.
 #[cfg(not(any(target_arch = "arm", target_arch = "sparc", target_arch = "x86")))]
@@ -73,10 +74,10 @@ pub(crate) use linux_raw_sys::{
         SCM_RIGHTS, SHUT_RD, SHUT_RDWR, SHUT_WR, SOCK_DGRAM, SOCK_RAW, SOCK_RDM, SOCK_SEQPACKET,
         SOCK_STREAM, SOL_SOCKET, SOL_XDP, SO_ACCEPTCONN, SO_BROADCAST, SO_COOKIE, SO_DOMAIN,
         SO_ERROR, SO_INCOMING_CPU, SO_KEEPALIVE, SO_LINGER, SO_OOBINLINE, SO_ORIGINAL_DST,
-        SO_PASSCRED, SO_PROTOCOL, SO_RCVBUF, SO_RCVTIMEO_NEW, SO_RCVTIMEO_NEW as SO_RCVTIMEO,
-        SO_RCVTIMEO_OLD, SO_REUSEADDR, SO_REUSEPORT, SO_SNDBUF, SO_SNDTIMEO_NEW,
-        SO_SNDTIMEO_NEW as SO_SNDTIMEO, SO_SNDTIMEO_OLD, SO_TYPE, TCP_CONGESTION, TCP_CORK,
-        TCP_KEEPCNT, TCP_KEEPIDLE, TCP_KEEPINTVL, TCP_NODELAY, TCP_QUICKACK,
+        SO_PASSCRED, SO_PROTOCOL, SO_RCVBUF, SO_RCVBUFFORCE, SO_RCVTIMEO_NEW,
+        SO_RCVTIMEO_NEW as SO_RCVTIMEO, SO_RCVTIMEO_OLD, SO_REUSEADDR, SO_REUSEPORT, SO_SNDBUF,
+        SO_SNDTIMEO_NEW, SO_SNDTIMEO_NEW as SO_SNDTIMEO, SO_SNDTIMEO_OLD, SO_TYPE, TCP_CONGESTION,
+        TCP_CORK, TCP_KEEPCNT, TCP_KEEPIDLE, TCP_KEEPINTVL, TCP_NODELAY, TCP_QUICKACK,
         TCP_THIN_LINEAR_TIMEOUTS, TCP_USER_TIMEOUT,
     },
     netlink::*,

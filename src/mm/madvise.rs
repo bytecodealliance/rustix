@@ -41,7 +41,7 @@ pub use backend::mm::types::Advice;
 /// [OpenBSD]: https://man.openbsd.org/madvise.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=madvise&section=2
 /// [illumos]: https://illumos.org/man/3C/madvise
-/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Memory_002dmapped-I_002fO.html#index-madvise
+/// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Memory_002dmapped-I_002fO.html#index-madvise
 #[inline]
 #[doc(alias = "posix_madvise")]
 pub unsafe fn madvise(addr: *mut c_void, len: usize, advice: Advice) -> io::Result<()> {

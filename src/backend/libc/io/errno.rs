@@ -30,7 +30,7 @@ use libc_errno::errno;
 /// [OpenBSD]: https://man.openbsd.org/errno.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=errno&section=2
 /// [illumos]: https://illumos.org/man/3C/errno
-/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Error-Codes.html
+/// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Error-Codes.html
 #[repr(transparent)]
 #[doc(alias = "errno")]
 #[derive(Eq, PartialEq, Hash, Copy, Clone)]

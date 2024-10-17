@@ -46,7 +46,7 @@ use c::c_int;
 /// [OpenBSD]: https://man.openbsd.org/uname.3
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=uname&section=3
 /// [illumos]: https://illumos.org/man/2/uname
-/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Platform-Type.html
+/// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Platform-Type.html
 #[doc(alias = "gethostname")]
 #[inline]
 pub fn uname() -> Uname {

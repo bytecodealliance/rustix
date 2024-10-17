@@ -39,7 +39,7 @@ pub use backend::mm::types::MsyncFlags;
 /// [OpenBSD]: https://man.openbsd.org/msync.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=msync&section=2
 /// [illumos]: https://illumos.org/man/3C/msync
-/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Memory_002dmapped-I_002fO.html#index-msync
+/// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Memory_002dmapped-I_002fO.html#index-msync
 #[inline]
 pub unsafe fn msync(addr: *mut c_void, len: usize, flags: MsyncFlags) -> io::Result<()> {
     backend::mm::syscalls::msync(addr, len, flags)

@@ -34,7 +34,6 @@ fn invalid_offset_seek() {
 
 #[cfg(not(any(
     netbsdlike,
-    solarish,
     target_os = "dragonfly",
     target_os = "nto",
     target_os = "redox"
@@ -61,7 +60,7 @@ fn invalid_offset_fallocate() {
 #[cfg(not(any(
     apple,
     netbsdlike,
-    solarish,
+    target_os = "solaris",
     target_os = "dragonfly",
     target_os = "haiku",
     target_os = "redox",

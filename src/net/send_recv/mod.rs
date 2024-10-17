@@ -61,7 +61,7 @@ pub use msg::*;
 /// [OpenBSD]: https://man.openbsd.org/recv.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=recv&section=2
 /// [illumos]: https://illumos.org/man/3SOCKET/recv
-/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Receiving-Data.html
+/// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Receiving-Data.html
 #[inline]
 pub fn recv<Fd: AsFd>(fd: Fd, buf: &mut [u8], flags: RecvFlags) -> io::Result<usize> {
     unsafe { backend::net::syscalls::recv(fd.as_fd(), buf.as_mut_ptr(), buf.len(), flags) }
@@ -117,7 +117,7 @@ pub fn recv_uninit<Fd: AsFd>(
 /// [OpenBSD]: https://man.openbsd.org/send.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=send&section=2
 /// [illumos]: https://illumos.org/man/3SOCKET/send
-/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Sending-Data.html
+/// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Sending-Data.html
 #[inline]
 pub fn send<Fd: AsFd>(fd: Fd, buf: &[u8], flags: SendFlags) -> io::Result<usize> {
     backend::net::syscalls::send(fd.as_fd(), buf, flags)
@@ -152,7 +152,7 @@ pub fn send<Fd: AsFd>(fd: Fd, buf: &[u8], flags: SendFlags) -> io::Result<usize>
 /// [OpenBSD]: https://man.openbsd.org/recvfrom.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=recvfrom&section=2
 /// [illumos]: https://illumos.org/man/3SOCKET/recvfrom
-/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Receiving-Datagrams.html
+/// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Receiving-Datagrams.html
 #[inline]
 pub fn recvfrom<Fd: AsFd>(
     fd: Fd,
@@ -221,7 +221,7 @@ pub fn recvfrom_uninit<Fd: AsFd>(
 /// [OpenBSD]: https://man.openbsd.org/sendto.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=sendto&section=2
 /// [illumos]: https://illumos.org/man/3SOCKET/sendto
-/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Sending-Datagrams.html
+/// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Sending-Datagrams.html
 pub fn sendto<Fd: AsFd>(
     fd: Fd,
     buf: &[u8],
@@ -269,7 +269,7 @@ fn _sendto(
 /// [OpenBSD]: https://man.openbsd.org/sendto.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=sendto&section=2
 /// [illumos]: https://illumos.org/man/3SOCKET/sendto
-/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Sending-Datagrams.html
+/// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Sending-Datagrams.html
 pub fn sendto_any<Fd: AsFd>(
     fd: Fd,
     buf: &[u8],
@@ -321,7 +321,7 @@ fn _sendto_any(
 /// [OpenBSD]: https://man.openbsd.org/sendto.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=sendto&section=2
 /// [illumos]: https://illumos.org/man/3SOCKET/sendto
-/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Sending-Datagrams.html
+/// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Sending-Datagrams.html
 #[inline]
 #[doc(alias = "sendto")]
 pub fn sendto_v4<Fd: AsFd>(
@@ -359,7 +359,7 @@ pub fn sendto_v4<Fd: AsFd>(
 /// [OpenBSD]: https://man.openbsd.org/sendto.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=sendto&section=2
 /// [illumos]: https://illumos.org/man/3SOCKET/sendto
-/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Sending-Datagrams.html
+/// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Sending-Datagrams.html
 #[inline]
 #[doc(alias = "sendto")]
 pub fn sendto_v6<Fd: AsFd>(
@@ -397,7 +397,7 @@ pub fn sendto_v6<Fd: AsFd>(
 /// [OpenBSD]: https://man.openbsd.org/sendto.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=sendto&section=2
 /// [illumos]: https://illumos.org/man/3SOCKET/sendto
-/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Sending-Datagrams.html
+/// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Sending-Datagrams.html
 #[cfg(unix)]
 #[inline]
 #[doc(alias = "sendto")]

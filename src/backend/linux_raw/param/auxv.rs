@@ -32,6 +32,10 @@ use linux_raw_sys::general::{
 #[cfg(feature = "alloc")]
 use {alloc::borrow::Cow, alloc::vec};
 
+// TODO: Fix linux-raw-sys to define EM_CURRENT for s390x.
+#[cfg(target_arch = "s390x")]
+const EM_CURRENT: u16 = 22; // EM_S390
+
 #[cfg(feature = "param")]
 #[inline]
 pub(crate) fn page_size() -> usize {

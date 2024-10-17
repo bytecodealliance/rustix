@@ -9,7 +9,6 @@ use crate::{backend, io};
 use backend::fd::{AsFd, BorrowedFd};
 #[cfg(not(any(
     netbsdlike,
-    solarish,
     target_os = "dragonfly",
     target_os = "espidf",
     target_os = "nto",
@@ -241,7 +240,6 @@ pub fn futimens<Fd: AsFd>(fd: Fd, times: &Timestamps) -> io::Result<()> {
 /// [Linux `posix_fallocate`]: https://man7.org/linux/man-pages/man3/posix_fallocate.3.html
 #[cfg(not(any(
     netbsdlike,
-    solarish,
     target_os = "dragonfly",
     target_os = "espidf",
     target_os = "nto",

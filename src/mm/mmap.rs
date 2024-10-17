@@ -73,7 +73,7 @@ impl MapFlags {
 /// [OpenBSD]: https://man.openbsd.org/mmap.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=mmap&section=2
 /// [illumos]: https://illumos.org/man/2/mmap
-/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Memory_002dmapped-I_002fO.html#index-mmap
+/// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Memory_002dmapped-I_002fO.html#index-mmap
 #[inline]
 pub unsafe fn mmap<Fd: AsFd>(
     ptr: *mut c_void,
@@ -114,7 +114,7 @@ pub unsafe fn mmap<Fd: AsFd>(
 /// [OpenBSD]: https://man.openbsd.org/mmap.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=mmap&section=2
 /// [illumos]: https://illumos.org/man/2/mmap
-/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Memory_002dmapped-I_002fO.html#index-mmap
+/// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Memory_002dmapped-I_002fO.html#index-mmap
 #[inline]
 #[doc(alias = "mmap")]
 pub unsafe fn mmap_anonymous(
@@ -151,7 +151,7 @@ pub unsafe fn mmap_anonymous(
 /// [OpenBSD]: https://man.openbsd.org/munmap.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=munmap&section=2
 /// [illumos]: https://illumos.org/man/2/munmap
-/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Memory_002dmapped-I_002fO.html#index-munmap
+/// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Memory_002dmapped-I_002fO.html#index-munmap
 #[inline]
 pub unsafe fn munmap(ptr: *mut c_void, len: usize) -> io::Result<()> {
     backend::mm::syscalls::munmap(ptr, len)
@@ -272,7 +272,7 @@ pub unsafe fn mprotect(ptr: *mut c_void, len: usize, flags: MprotectFlags) -> io
 /// [OpenBSD]: https://man.openbsd.org/mlock.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=mlock&section=2
 /// [illumos]: https://illumos.org/man/3C/mlock
-/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Page-Lock-Functions.html#index-mlock
+/// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Page-Lock-Functions.html#index-mlock
 #[inline]
 pub unsafe fn mlock(ptr: *mut c_void, len: usize) -> io::Result<()> {
     backend::mm::syscalls::mlock(ptr, len)
@@ -298,7 +298,7 @@ pub unsafe fn mlock(ptr: *mut c_void, len: usize) -> io::Result<()> {
 ///  - [glibc]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/mlock2.2.html
-/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Page-Lock-Functions.html#index-mlock2
+/// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Page-Lock-Functions.html#index-mlock2
 #[cfg(linux_kernel)]
 #[inline]
 #[doc(alias = "mlock2")]
@@ -337,7 +337,7 @@ pub unsafe fn mlock_with(ptr: *mut c_void, len: usize, flags: MlockFlags) -> io:
 /// [OpenBSD]: https://man.openbsd.org/munlock.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=munlock&section=2
 /// [illumos]: https://illumos.org/man/3C/munlock
-/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Page-Lock-Functions.html#index-munlock
+/// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Page-Lock-Functions.html#index-munlock
 #[inline]
 pub unsafe fn munlock(ptr: *mut c_void, len: usize) -> io::Result<()> {
     backend::mm::syscalls::munlock(ptr, len)
@@ -368,7 +368,7 @@ pub unsafe fn munlock(ptr: *mut c_void, len: usize) -> io::Result<()> {
 /// [OpenBSD]: https://man.openbsd.org/mlockall.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=mlockall&section=2
 /// [illumos]: https://illumos.org/man/3C/mlockall
-/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Page-Lock-Functions.html#index-mlockall
+/// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Page-Lock-Functions.html#index-mlockall
 #[cfg(any(linux_kernel, freebsdlike, netbsdlike))]
 #[inline]
 pub fn mlockall(flags: MlockAllFlags) -> io::Result<()> {
@@ -401,7 +401,7 @@ pub fn mlockall(flags: MlockAllFlags) -> io::Result<()> {
 /// [OpenBSD]: https://man.openbsd.org/munlockall.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=munlockall&section=2
 /// [illumos]: https://illumos.org/man/3C/munlockall
-/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/Page-Lock-Functions.html#index-munlockall
+/// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Page-Lock-Functions.html#index-munlockall
 #[cfg(any(linux_kernel, freebsdlike, netbsdlike))]
 #[inline]
 pub fn munlockall() -> io::Result<()> {
