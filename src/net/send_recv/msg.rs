@@ -593,6 +593,11 @@ impl FusedIterator for AncillaryDrain<'_> {}
 
 /// `sendmsg(msghdr)`—Sends a message on a socket.
 ///
+/// This function is for use on connected sockets, as it doesn't have
+/// a way to specify an address. See the [`sendmsg_v4`], [`sendmsg_v6`]
+/// [`sendmsg_unix`], [`sendmsg_xdp`], and [`sendmsg_any`] to send
+/// messages on unconnected sockets.
+///
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
