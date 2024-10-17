@@ -40,7 +40,7 @@ pub fn fchdir<Fd: AsFd>(fd: Fd) -> io::Result<()> {
     backend::process::syscalls::fchdir(fd.as_fd())
 }
 
-/// `getCWD`—Return the current working directory.
+/// `getcwd`—Return the current working directory.
 ///
 /// If `reuse` already has available capacity, reuse it if possible.
 ///
