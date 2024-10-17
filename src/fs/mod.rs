@@ -15,7 +15,7 @@ mod dir;
 #[cfg(not(any(
     apple,
     netbsdlike,
-    solarish,
+    target_os = "solaris",
     target_os = "dragonfly",
     target_os = "espidf",
     target_os = "haiku",
@@ -81,7 +81,7 @@ pub use dir::{Dir, DirEntry};
 #[cfg(not(any(
     apple,
     netbsdlike,
-    solarish,
+    target_os = "solaris",
     target_os = "dragonfly",
     target_os = "espidf",
     target_os = "haiku",
