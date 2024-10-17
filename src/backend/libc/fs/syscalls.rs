@@ -17,7 +17,7 @@ use crate::fs::Access;
 #[cfg(not(any(
     apple,
     netbsdlike,
-    solarish,
+    target_os = "solaris",
     target_os = "dragonfly",
     target_os = "espidf",
     target_os = "haiku",
@@ -29,7 +29,6 @@ use crate::fs::Advice;
 use crate::fs::AtFlags;
 #[cfg(not(any(
     netbsdlike,
-    solarish,
     target_os = "dragonfly",
     target_os = "espidf",
     target_os = "nto",
@@ -1196,7 +1195,7 @@ pub(crate) fn copy_file_range(
 #[cfg(not(any(
     apple,
     netbsdlike,
-    solarish,
+    target_os = "solaris",
     target_os = "dragonfly",
     target_os = "espidf",
     target_os = "haiku",
@@ -1614,7 +1613,6 @@ fn futimens_old(fd: BorrowedFd<'_>, times: &Timestamps) -> io::Result<()> {
 #[cfg(not(any(
     apple,
     netbsdlike,
-    solarish,
     target_os = "dragonfly",
     target_os = "espidf",
     target_os = "nto",
