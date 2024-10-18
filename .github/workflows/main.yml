@@ -12,7 +12,7 @@ jobs:
     name: Rustfmt
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
     - uses: ./.github/actions/install-rust
@@ -37,12 +37,8 @@ jobs:
             os: ubuntu-latest
             rust: 1.48
 
-    env:
-      # -D warnings is commented out in our install-rust action; re-add it here.
-      # In theory we should add --cfg criterion here, but criterion doesn't compile under Rust 1.48.
-      RUSTFLAGS: -D warnings
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
     - uses: ./.github/actions/install-rust
@@ -91,6 +87,7 @@ jobs:
         cargo update --package=once_cell --precise 1.14.0
         cargo update --package=flate2 --precise=1.0.25
         cargo update --package=tempfile --precise=3.6.0
+        cargo update --package=cc --precise=1.0.68
 
     - run: cargo check --workspace --release -vv --all-targets
     - run: cargo check --workspace --release -vv --features=all-apis --all-targets
@@ -141,11 +138,8 @@ jobs:
             os: ubuntu-latest
             rust: nightly
 
-    env:
-      # -D warnings is commented out in our install-rust action; re-add it here.
-      RUSTFLAGS: -D warnings
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
     - uses: ./.github/actions/install-rust
@@ -172,7 +166,7 @@ jobs:
             rust: nightly
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
     - uses: ./.github/actions/install-rust
@@ -199,7 +193,7 @@ jobs:
             rust: nightly
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
     - uses: ./.github/actions/install-rust
@@ -228,7 +222,7 @@ jobs:
       QEMU_BUILD_VERSION: 7.0.0
     strategy:
       matrix:
-        build: [ubuntu, ubuntu-20.04, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, s390x-linux, arm-linux, ubuntu-stable, ubuntu-1.48, i686-linux-stable, aarch64-linux-stable, riscv64-linux-stable, s390x-linux-stable, powerpc64le-linux-stable, arm-linux-stable, ubuntu-1.48, i686-linux-1.48, aarch64-linux-1.48, riscv64-linux-1.48, s390x-linux-1.48, powerpc64le-linux-1.48, arm-linux-1.48, macos-latest, macos-11, windows, windows-2019]
+        build: [ubuntu, ubuntu-20.04, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, s390x-linux, arm-linux, ubuntu-stable, ubuntu-1.48, i686-linux-stable, aarch64-linux-stable, riscv64-linux-stable, s390x-linux-stable, powerpc64le-linux-stable, arm-linux-stable, ubuntu-1.48, i686-linux-1.48, aarch64-linux-1.48, riscv64-linux-1.48, s390x-linux-1.48, powerpc64le-linux-1.48, arm-linux-1.48, macos-latest, macos-12, windows, windows-2019]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -401,8 +395,8 @@ jobs:
           - build: macos-latest
             os: macos-latest
             rust: stable
-          - build: macos-11
-            os: macos-11
+          - build: macos-12
+            os: macos-12
             rust: stable
           - build: windows
             os: windows-latest
@@ -411,7 +405,7 @@ jobs:
             os: windows-2019
             rust: nightly
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
     - uses: ./.github/actions/install-rust
@@ -424,7 +418,7 @@ jobs:
         rustup target add ${{ matrix.target }}
       if: matrix.target != ''
 
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       with:
         path: ${{ runner.tool_cache }}/qemu
         key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patched
@@ -478,6 +472,7 @@ jobs:
         cargo update --package=once_cell --precise 1.14.0
         cargo update --package=flate2 --precise=1.0.25
         cargo update --package=tempfile --precise=3.6.0
+        cargo update --package=cc --precise=1.0.68
 
     - run: |
         # Run the tests, and check the prebuilt release libraries.
@@ -573,11 +568,9 @@ jobs:
             qemu_args: -L /usr/arm-linux-gnueabihf
             qemu_target: arm-linux-user
     env:
-      # -D warnings is commented out in our install-rust action; re-add it here.
-      RUSTFLAGS: -D warnings
       QEMU_BUILD_VERSION: 7.0.0
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
     - uses: ./.github/actions/install-rust
@@ -590,7 +583,7 @@ jobs:
         rustup target add ${{ matrix.target }}
       if: matrix.target != ''
 
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       with:
         path: ${{ runner.tool_cache }}/qemu
         key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patched
@@ -660,13 +653,12 @@ jobs:
             qemu_args: -L /usr/powerpc64le-linux-gnu
             qemu_target: ppc64le-linux-user
     env:
-      # -D warnings is commented out in our install-rust action; re-add it here.
-      RUSTFLAGS: --cfg rustix_use_experimental_asm -D warnings
+      RUSTFLAGS: --cfg rustix_use_experimental_asm
       RUSTDOCFLAGS: --cfg rustix_use_experimental_asm
       CARGO_TARGET_POWERPC64LE_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rustix_use_experimental_asm
       QEMU_BUILD_VERSION: 7.0.0
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
     - uses: ./.github/actions/install-rust
@@ -679,7 +671,7 @@ jobs:
         rustup target add ${{ matrix.target }}
       if: matrix.target != ''
 
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       with:
         path: ${{ runner.tool_cache }}/qemu
         key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patched

@@ -122,7 +122,7 @@ weak!(fn __futimens64(c::c_int, *const LibcTimespec) -> c::c_int);
 /// Use a direct syscall (via libc) for `openat`.
 ///
 /// This is only currently necessary as a workaround for old glibc; see below.
-#[cfg(all(unix, target_env = "gnu", not(target_os = "hurd")))]
+#[cfg(all(linux_kernel, target_env = "gnu", not(target_os = "hurd")))]
 fn openat_via_syscall(
     dirfd: BorrowedFd<'_>,
     path: &CStr,
@@ -153,7 +153,7 @@ pub(crate) fn openat(
 ) -> io::Result<OwnedFd> {
     // Work around <https://sourceware.org/bugzilla/show_bug.cgi?id=17523>.
     // glibc versions before 2.25 don't handle `O_TMPFILE` correctly.
-    #[cfg(all(unix, target_env = "gnu", not(target_os = "hurd")))]
+    #[cfg(all(linux_kernel, target_env = "gnu", not(target_os = "hurd")))]
     if oflags.contains(OFlags::TMPFILE) && crate::backend::if_glibc_is_less_than_2_25() {
         return openat_via_syscall(dirfd, path, oflags, mode);
     }

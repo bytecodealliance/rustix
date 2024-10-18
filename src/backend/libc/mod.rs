@@ -94,7 +94,7 @@ pub(crate) mod time;
 ///
 /// For now, this function is only available on Linux, but if it ends up being
 /// used beyond that, this could be changed to e.g. `#[cfg(unix)]`.
-#[cfg(all(unix, target_env = "gnu"))]
+#[cfg(all(linux_kernel, target_env = "gnu"))]
 pub(crate) fn if_glibc_is_less_than_2_25() -> bool {
     // This is also defined inside `weak_or_syscall!` in
     // backend/libc/rand/syscalls.rs, but it's not convenient to re-export the

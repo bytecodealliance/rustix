@@ -82,17 +82,17 @@ jobs:
             os: macos-latest
             rust: nightly
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         repository: sunfishcode/rust-listenfd
         path: rust-listenfd
         ref: rustix-0.35.6-beta.2
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         repository: davidedelpapa/thttp
         path: thttp
@@ -103,7 +103,7 @@ jobs:
         rustup target add ${{ matrix.target }}
       if: matrix.target != ''
 
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       with:
         path: ${{ runner.tool_cache }}/qemu
         key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patched
@@ -247,11 +247,11 @@ jobs:
             os: macos-latest
             rust: nightly
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         repository: sunfishcode/async-io
         path: async-io
@@ -263,7 +263,7 @@ jobs:
         rustup target add ${{ matrix.target }}
       if: matrix.target != ''
 
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       with:
         path: ${{ runner.tool_cache }}/qemu
         key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patched
@@ -394,11 +394,11 @@ jobs:
             os: macos-latest
             rust: nightly
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         repository: bytecodealliance/cap-std
         path: cap-std
@@ -410,7 +410,7 @@ jobs:
         rustup target add ${{ matrix.target }}
       if: matrix.target != ''
 
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       with:
         path: ${{ runner.tool_cache }}/qemu
         key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patched
@@ -476,11 +476,11 @@ jobs:
             os: ubuntu-latest
             rust: nightly
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         repository: sunfishcode/cargo
         path: cargo
@@ -570,11 +570,11 @@ jobs:
             qemu_args: -L /usr/arm-linux-gnueabi
             qemu_target: arm-linux-user
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         repository: sunfishcode/memfd-rs
         path: memfd-rs
@@ -586,7 +586,7 @@ jobs:
         rustup target add ${{ matrix.target }}
       if: matrix.target != ''
 
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       with:
         path: ${{ runner.tool_cache }}/qemu
         key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patched
@@ -712,11 +712,11 @@ jobs:
             qemu_args: -L /usr/arm-linux-gnueabi
             qemu_target: arm-linux-user
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         repository: sunfishcode/rust-timerfd
         path: rust-timerfd
@@ -728,7 +728,7 @@ jobs:
         rustup target add ${{ matrix.target }}
       if: matrix.target != ''
 
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       with:
         path: ${{ runner.tool_cache }}/qemu
         key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patched
@@ -854,11 +854,11 @@ jobs:
             qemu_args: -L /usr/arm-linux-gnueabi
             qemu_target: arm-linux-user
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         repository: sunfishcode/procfs
         path: procfs
@@ -870,7 +870,7 @@ jobs:
         rustup target add ${{ matrix.target }}
       if: matrix.target != ''
 
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       with:
         path: ${{ runner.tool_cache }}/qemu
         key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patched
@@ -996,11 +996,11 @@ jobs:
             qemu_args: -L /usr/arm-linux-gnueabi
             qemu_target: arm-linux-user
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         repository: sunfishcode/rust-atomicwrites
         path: rust-atomicwrites
@@ -1012,7 +1012,7 @@ jobs:
         rustup target add ${{ matrix.target }}
       if: matrix.target != ''
 
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       with:
         path: ${{ runner.tool_cache }}/qemu
         key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patched
@@ -1138,11 +1138,11 @@ jobs:
             qemu_args: -L /usr/arm-linux-gnueabi
             qemu_target: arm-linux-user
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         repository: sunfishcode/io-uring
         path: io-uring
@@ -1154,7 +1154,7 @@ jobs:
         rustup target add ${{ matrix.target }}
       if: matrix.target != ''
 
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       with:
         path: ${{ runner.tool_cache }}/qemu
         key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patched
@@ -1285,11 +1285,11 @@ jobs:
             os: macos-latest
             rust: nightly
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         repository: sunfishcode/tempfile
         path: tempfile
@@ -1301,7 +1301,7 @@ jobs:
         rustup target add ${{ matrix.target }}
       if: matrix.target != ''
 
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       with:
         path: ${{ runner.tool_cache }}/qemu
         key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patched
@@ -1432,11 +1432,11 @@ jobs:
             os: macos-latest
             rust: nightly
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         repository: sunfishcode/fd-lock
         path: fd-lock
@@ -1448,7 +1448,7 @@ jobs:
         rustup target add ${{ matrix.target }}
       if: matrix.target != ''
 
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       with:
         path: ${{ runner.tool_cache }}/qemu
         key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patched
@@ -1517,11 +1517,11 @@ jobs:
             os: macos-latest
             rust: nightly
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         repository: sunfishcode/wasmtime
         path: wasmtime
@@ -1548,11 +1548,11 @@ jobs:
             os: ubuntu-latest
             rust: nightly
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         repository: sunfishcode/nameless
         path: nameless
@@ -1643,11 +1643,11 @@ jobs:
             qemu_args: -L /usr/arm-linux-gnueabi
             qemu_target: arm-linux-user
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         #repository: coreos/cap-std-ext
         repository: sunfishcode/cap-std-ext
@@ -1660,7 +1660,7 @@ jobs:
         rustup target add ${{ matrix.target }}
       if: matrix.target != ''
 
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       with:
         path: ${{ runner.tool_cache }}/qemu
         key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patched
@@ -1728,11 +1728,11 @@ jobs:
             #rust: nightly
             rust: stable
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         repository: sunfishcode/dbus-rs
         path: dbus-rs
@@ -1759,11 +1759,11 @@ jobs:
             os: ubuntu-latest
             rust: nightly
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         repository: sunfishcode/mustang
         path: mustang
@@ -1789,14 +1789,14 @@ jobs:
             os: ubuntu-latest
             rust: nightly
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         # Fetch everything to get rebase with rustc-dep-of-std.
         fetch-depth: 0
     - uses: ./.github/actions/install-rust
       with:
         toolchain: ${{ matrix.rust }}
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         repository: sunfishcode/rust
         path: rust

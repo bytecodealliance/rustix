@@ -26,6 +26,7 @@ use {
 use {crate::thread::ClockId, core::ptr::null_mut};
 
 #[cfg(all(
+    linux_kernel,
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu",
 ))]
@@ -93,6 +94,7 @@ pub(crate) fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> Nanos
 }
 
 #[cfg(all(
+    linux_kernel,
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu",
 ))]
@@ -146,6 +148,7 @@ pub(crate) fn clock_nanosleep_absolute(id: ClockId, request: &Timespec) -> io::R
     // 32-bit gnu version: libc has `clock_nanosleep` but it is not y2038 safe
     // by default.
     #[cfg(all(
+        linux_kernel,
         any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
         target_env = "gnu",
     ))]
@@ -169,6 +172,7 @@ pub(crate) fn clock_nanosleep_absolute(id: ClockId, request: &Timespec) -> io::R
 
     // Main version: libc is y2038 safe and has `clock_nanosleep`.
     #[cfg(not(all(
+        linux_kernel,
         any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
         target_env = "gnu",
     )))]
@@ -179,6 +183,7 @@ pub(crate) fn clock_nanosleep_absolute(id: ClockId, request: &Timespec) -> io::R
 }
 
 #[cfg(all(
+    linux_kernel,
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu",
 ))]
@@ -205,6 +210,7 @@ pub(crate) fn nanosleep(request: &Timespec) -> NanosleepRelativeResult {
     // 32-bit gnu version: libc has `nanosleep` but it is not y2038 safe by
     // default.
     #[cfg(all(
+        linux_kernel,
         any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
         target_env = "gnu",
     ))]
@@ -224,6 +230,7 @@ pub(crate) fn nanosleep(request: &Timespec) -> NanosleepRelativeResult {
 
     // Main version: libc is y2038 safe and has `nanosleep`.
     #[cfg(not(all(
+        linux_kernel,
         any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
         target_env = "gnu",
     )))]
@@ -237,6 +244,7 @@ pub(crate) fn nanosleep(request: &Timespec) -> NanosleepRelativeResult {
 }
 
 #[cfg(all(
+    linux_kernel,
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu",
 ))]
