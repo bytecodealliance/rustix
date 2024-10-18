@@ -193,3 +193,97 @@ fn test_v6_msg() {
     client.join().unwrap();
     server.join().unwrap();
 }
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_v6_sendmmsg() {
+    crate::init();
+
+    use std::net::TcpStream;
+
+    use rustix::io::IoSlice;
+    use rustix::net::{sendmmsg, MMsgHdr, RawSocketAddr};
+
+    fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
+        let connection_socket = socket(AddressFamily::INET6, SocketType::STREAM, None).unwrap();
+
+        let name = SocketAddrV6::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1), 0, 0, 0);
+        bind_v6(&connection_socket, &name).unwrap();
+
+        let who = match getsockname(&connection_socket).unwrap() {
+            SocketAddrAny::V6(addr) => addr,
+            _ => panic!(),
+        };
+
+        listen(&connection_socket, 1).unwrap();
+
+        {
+            let (lock, cvar) = &*ready;
+            let mut port = lock.lock().unwrap();
+            *port = who.port();
+            cvar.notify_all();
+        }
+
+        let mut buffer = vec![0; 13];
+        let mut data_socket: TcpStream = accept(&connection_socket).unwrap().into();
+
+        std::io::Read::read_exact(&mut data_socket, &mut buffer).unwrap();
+        assert_eq!(String::from_utf8_lossy(&buffer), "hello...world");
+    }
+
+    fn client(ready: Arc<(Mutex<u16>, Condvar)>) {
+        let port = {
+            let (lock, cvar) = &*ready;
+            let mut port = lock.lock().unwrap();
+            while *port == 0 {
+                port = cvar.wait(port).unwrap();
+            }
+            *port
+        };
+
+        let addr = SocketAddrV6::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1), port, 0, 0);
+        let data_socket = socket(AddressFamily::INET6, SocketType::STREAM, None).unwrap();
+        connect_v6(&data_socket, &addr).unwrap();
+
+        let raw_addr = RawSocketAddr::new(addr);
+
+        let mut off = 0;
+        while off < 2 {
+            let sent = sendmmsg(
+                &data_socket,
+                &mut [
+                    MMsgHdr::new_with_addr(
+                        &raw_addr,
+                        &[IoSlice::new(b"hello")],
+                        &mut Default::default(),
+                    ),
+                    MMsgHdr::new(&[IoSlice::new(b"...world")], &mut Default::default()),
+                ][off..],
+                SendFlags::empty(),
+            )
+            .unwrap();
+
+            off += sent;
+        }
+    }
+
+    let ready = Arc::new((Mutex::new(0_u16), Condvar::new()));
+    let ready_clone = Arc::clone(&ready);
+
+    let server = thread::Builder::new()
+        .name("server".to_string())
+        .spawn(move || {
+            server(ready);
+        })
+        .unwrap();
+
+    let client = thread::Builder::new()
+        .name("client".to_string())
+        .spawn(move || {
+            client(ready_clone);
+        })
+        .unwrap();
+
+    client.join().unwrap();
+    server.join().unwrap();
+}
