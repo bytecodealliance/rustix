@@ -3,7 +3,7 @@
 //! # Safety
 //!
 //! `mmap` and related functions manipulate raw pointers and have special
-//! semantics and are wildly unsafe.
+//! semantics.
 #![allow(unsafe_code)]
 
 use crate::{backend, io};
@@ -52,7 +52,16 @@ impl MapFlags {
 ///
 /// # Safety
 ///
-/// Raw pointers and lots of special semantics.
+/// If `ptr` is not null, it must be aligned to the applicable page size, and
+/// the range of memory starting at `ptr` and extending for `len` bytes,
+/// rounded up to the applicable page size, must be valid to mutate using
+/// `ptr`'s provenance.
+///
+/// If there exist any Rust references referring to the memory region, or if
+/// you subsequently create a Rust reference referring to the resulting region,
+/// it is your responsibility to ensure that the Rust reference invariants are
+/// preserved, including ensuring that the memory is not mutated in a way that
+/// a Rust reference would not expect.
 ///
 /// # References
 ///  - [POSIX]
@@ -93,7 +102,10 @@ pub unsafe fn mmap<Fd: AsFd>(
 ///
 /// # Safety
 ///
-/// Raw pointers and lots of special semantics.
+/// If `ptr` is not null, it must be aligned to the applicable page size, and
+/// the range of memory starting at `ptr` and extending for `len` bytes,
+/// rounded up to the applicable page size, must be valid to mutate with
+/// `ptr`'s provenance.
 ///
 /// # References
 ///  - [POSIX]
@@ -130,7 +142,10 @@ pub unsafe fn mmap_anonymous(
 ///
 /// # Safety
 ///
-/// Raw pointers and lots of special semantics.
+/// `ptr` must be aligned to the applicable page size, and the range of memory
+/// starting at `ptr` and extending for `len` bytes, rounded up to the
+/// applicable page size, must be valid to mutate with `ptr`'s provenance. And
+/// there must be no Rust references referring to that memory.
 ///
 /// # References
 ///  - [POSIX]
@@ -165,7 +180,15 @@ pub unsafe fn munmap(ptr: *mut c_void, len: usize) -> io::Result<()> {
 ///
 /// # Safety
 ///
-/// Raw pointers and lots of special semantics.
+/// `old_address` must be aligned to the applicable page size, and the range of
+/// memory starting at `old_address` and extending for `old_size` bytes,
+/// rounded up to the applicable page size, must be valid to mutate with
+/// `old_address`'s provenance. If `MremapFlags::MAY_MOVE` is set in `flags`,
+/// there must be no Rust references referring to that the memory.
+///
+/// If `new_size` is less than `old_size`, than there must be no Rust
+/// references referring to the memory starting at offset `new_size` and ending
+/// at `old_size`.
 ///
 /// # References
 ///  - [Linux]
@@ -190,7 +213,16 @@ pub unsafe fn mremap(
 ///
 /// # Safety
 ///
-/// Raw pointers and lots of special semantics.
+/// `old_address` and `new_address` must be aligned to the applicable page
+/// size, the range of memory starting at `old_address` and extending for
+/// `old_size` bytes, rounded up to the applicable page size, must be valid to
+/// mutate with `old_address`'s provenance, and the range of memory starting at
+/// `new_address` and extending for `new_size` bytes, rounded up to the
+/// applicable page size, must be valid to mutate with `new_address`'s
+/// provenance.
+///
+/// There must be no Rust references referring to either of those memory
+/// regions.
 ///
 /// # References
 ///  - [Linux]
@@ -214,7 +246,9 @@ pub unsafe fn mremap_fixed(
 ///
 /// # Safety
 ///
-/// Raw pointers and lots of special semantics.
+/// The range of memory starting at `ptr` and extending for `len` bytes,
+/// rounded up to the applicable page size, must be valid to read with `ptr`'s
+/// provenance.
 ///
 /// # References
 ///  - [POSIX]
@@ -241,17 +275,16 @@ pub unsafe fn mprotect(ptr: *mut c_void, len: usize, flags: MprotectFlags) -> io
 
 /// `mlock(ptr, len)`—Lock memory into RAM.
 ///
-/// # Safety
-///
-/// This function operates on raw pointers, but it should only be used on
-/// memory which the caller owns. Technically, locking memory shouldn't violate
-/// any invariants, but since unlocking it can violate invariants, this
-/// function is also unsafe for symmetry.
-///
 /// Some implementations implicitly round the memory region out to the nearest
 /// page boundaries, so this function may lock more memory than explicitly
 /// requested if the memory isn't page-aligned. Other implementations fail if
 /// the memory isn't page-aligned.
+///
+/// # Safety
+///
+/// The range of memory starting at `ptr`, rounded down to the applicable page
+/// boundary, and extending for `len` bytes, rounded up to the applicable page
+/// size, must be valid to read with `ptr`'s provenance.
 ///
 /// # References
 ///  - [POSIX]
@@ -282,16 +315,15 @@ pub unsafe fn mlock(ptr: *mut c_void, len: usize) -> io::Result<()> {
 ///
 /// `mlock_with` is the same as [`mlock`] but adds an additional flags operand.
 ///
-/// # Safety
-///
-/// This function operates on raw pointers, but it should only be used on
-/// memory which the caller owns. Technically, locking memory shouldn't violate
-/// any invariants, but since unlocking it can violate invariants, this
-/// function is also unsafe for symmetry.
-///
 /// Some implementations implicitly round the memory region out to the nearest
 /// page boundaries, so this function may lock more memory than explicitly
 /// requested if the memory isn't page-aligned.
+///
+/// # Safety
+///
+/// The range of memory starting at `ptr`, rounded down to the applicable page
+/// boundary, and extending for `len` bytes, rounded up to the applicable page
+/// size, must be valid to read with `ptr`'s provenance.
 ///
 /// # References
 ///  - [Linux]
@@ -308,15 +340,15 @@ pub unsafe fn mlock_with(ptr: *mut c_void, len: usize, flags: MlockFlags) -> io:
 
 /// `munlock(ptr, len)`—Unlock memory.
 ///
-/// # Safety
-///
-/// This function operates on raw pointers, but it should only be used on
-/// memory which the caller owns, to avoid compromising the `mlock` invariants
-/// of other unrelated code in the process.
-///
 /// Some implementations implicitly round the memory region out to the nearest
 /// page boundaries, so this function may unlock more memory than explicitly
 /// requested if the memory isn't page-aligned.
+///
+/// # Safety
+///
+/// The range of memory starting at `ptr`, rounded down to the applicable page
+/// boundary, and extending for `len` bytes, rounded up to the applicable page
+/// size, must be valid to read with `ptr`'s provenance.
 ///
 /// # References
 ///  - [POSIX]
