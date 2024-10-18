@@ -6,6 +6,7 @@ use bitflags::bitflags;
 
 /// `struct timespec`
 #[cfg(not(all(
+    linux_kernel,
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu",
 )))]
@@ -13,6 +14,7 @@ pub type Timespec = c::timespec;
 
 /// `struct timespec`
 #[cfg(all(
+    linux_kernel,
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu",
 ))]
@@ -28,6 +30,7 @@ pub struct Timespec {
 
 /// A type for the `tv_sec` field of [`Timespec`].
 #[cfg(not(all(
+    linux_kernel,
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu",
 )))]
@@ -36,6 +39,7 @@ pub type Secs = c::time_t;
 
 /// A type for the `tv_sec` field of [`Timespec`].
 #[cfg(all(
+    linux_kernel,
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu",
 ))]
@@ -51,6 +55,7 @@ pub type Nsecs = c::c_long;
 
 /// On most platforms, `LibcTimespec` is just `Timespec`.
 #[cfg(not(all(
+    linux_kernel,
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu",
 )))]
@@ -60,6 +65,7 @@ pub(crate) type LibcTimespec = Timespec;
 /// Rust doesn't support yet (see `unnamed_fields`), so we define our own
 /// struct with explicit padding, with bidirectional `From` impls.
 #[cfg(all(
+    linux_kernel,
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu",
 ))]
@@ -78,6 +84,7 @@ pub(crate) struct LibcTimespec {
 }
 
 #[cfg(all(
+    linux_kernel,
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu",
 ))]
@@ -92,6 +99,7 @@ impl From<LibcTimespec> for Timespec {
 }
 
 #[cfg(all(
+    linux_kernel,
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu",
 ))]
@@ -216,6 +224,7 @@ pub enum DynamicClockId<'a> {
 /// [`timerfd_settime`]: crate::time::timerfd_settime
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
 #[cfg(not(all(
+    linux_kernel,
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu",
 )))]
@@ -228,6 +237,7 @@ pub type Itimerspec = c::itimerspec;
 /// [`timerfd_settime`]: crate::time::timerfd_settime
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
 #[cfg(all(
+    linux_kernel,
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu",
 ))]
@@ -242,6 +252,7 @@ pub struct Itimerspec {
 /// On most platforms, `LibcItimerspec` is just `Itimerspec`.
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
 #[cfg(not(all(
+    linux_kernel,
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu",
 )))]
@@ -251,6 +262,7 @@ pub(crate) type LibcItimerspec = Itimerspec;
 /// define our own struct, with bidirectional `From` impls.
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
 #[cfg(all(
+    linux_kernel,
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu",
 ))]
@@ -263,6 +275,7 @@ pub(crate) struct LibcItimerspec {
 
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
 #[cfg(all(
+    linux_kernel,
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu",
 ))]
@@ -278,6 +291,7 @@ impl From<LibcItimerspec> for Itimerspec {
 
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
 #[cfg(all(
+    linux_kernel,
     any(target_arch = "arm", target_arch = "mips", target_arch = "x86"),
     target_env = "gnu",
 ))]
