@@ -37,7 +37,7 @@ pub const CWD: BorrowedFd<'static> =
 /// as the directory argument in `*at` functions such as [`openat`], which
 /// causes them to fail with [`BADF`] if the accompanying path is not absolute.
 ///
-/// This corresponds to the undocumentted by commonly used convention of
+/// This corresponds to the undocumented by commonly used convention of
 /// passing `-EBADF` as the `dirfd` argument, which is ignored if the path
 /// is absolute, and evokes an `EBADF` error otherwise.
 ///
