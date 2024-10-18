@@ -9,7 +9,8 @@ use core::slice;
 ///
 /// # Safety
 ///
-/// At least `init_len` bytes must be initialized.
+/// `init_len` must not be greater than `buf.len()`, and at least `init_len`
+/// bytes must be initialized.
 #[inline]
 pub(super) unsafe fn split_init(
     buf: &mut [MaybeUninit<u8>],
