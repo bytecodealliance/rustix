@@ -8,5 +8,5 @@ inputs:
     default: 'stable'
 
 runs:
-  using: node16
+  using: node20
   main: 'main.js'
