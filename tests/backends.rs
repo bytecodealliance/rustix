@@ -76,6 +76,7 @@ fn test_backends() {
     );
 
     // Test the use-default crate with `--cfg=rustix_use_libc`.
+    #[cfg(not(windows))]
     assert!(
         has_dependency(
             "test-crates/use-default",
@@ -89,6 +90,7 @@ fn test_backends() {
     );
 
     // Test the use-default crate with `--features=rustix/use-libc`.
+    #[cfg(not(windows))]
     assert!(
         has_dependency(
             "test-crates/use-default",
