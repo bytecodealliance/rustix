@@ -7,7 +7,7 @@ pub use backend::event::poll_fd::{PollFd, PollFlags};
 /// On macOS, `poll` doesn't work on fds for /dev/tty or /dev/null, however
 /// [`select`] is available and does work on these fds.
 ///
-/// [`select`]: crate::event::select
+/// [`select`]: crate::event::select()
 ///
 /// # References
 ///  - [Beej's Guide to Network Programming]
