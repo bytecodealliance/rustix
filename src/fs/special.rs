@@ -5,7 +5,7 @@
 //!
 //! This file uses `AT_FDCWD`, which is a raw file descriptor, but which is
 //! always valid, and `-EBADF`, which is an undocumented by commonly used
-//! convention for passing a value which will always fail if the accompanying
+//! convention of passing a value which will always fail if the accompanying
 //! path isn't absolute.
 
 #![allow(unsafe_code)]
@@ -35,9 +35,14 @@ pub const CWD: BorrowedFd<'static> =
 ///
 /// This is a file descriptor which refers to no directory, which can be used
 /// as the directory argument in `*at` functions such as [`openat`], which
-/// causes them to fail if the accompanying path is not absolute.
+/// causes them to fail with [`BADF`] if the accompanying path is not absolute.
+///
+/// This corresponds to the undocumentted by commonly used convention of
+/// passing `-EBADF` as the `dirfd` argument, which is ignored if the path
+/// is absolute, and evokes an `EBADF` error otherwise.
 ///
 /// [`openat`]: crate::fs::openat
+/// [`BADF`]: crate::io::Errno::BADF
 // SAFETY: This `-EBADF` convention is commonly used, such as in lxc, so OS's
 // aren't going to break it.
 pub const ABS: BorrowedFd<'static> =
