@@ -60,12 +60,15 @@ fn test_backends() {
         );
     }
 
-    #[cfg(windows)]
-    let libc_dep = "windows-sys";
     #[cfg(any(unix, target_os = "wasi"))]
     let libc_dep = "libc";
 
     // Test the use-libc crate, which enables the "use-libc" cargo feature.
+    //
+    // Disable this test on Windows on the 0.37 branch, because it ends up
+    // depending on multiple versions of windows-sys and cargo-tree prints
+    // different output.
+    #[cfg(not(windows))]
     assert!(
         has_dependency("test-crates/use-libc", &[], &[], &["RUSTFLAGS"], libc_dep),
         "use-libc doesn't depend on {}",
