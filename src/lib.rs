@@ -293,12 +293,6 @@ pub mod time;
 #[cfg_attr(docsrs, doc(cfg(feature = "runtime")))]
 pub mod runtime;
 
-// Temporarily provide some mount functions for use in the fs module for
-// backwards compatibility.
-#[cfg(linux_kernel)]
-#[cfg(all(feature = "fs", not(feature = "mount")))]
-pub(crate) mod mount;
-
 // Declare "fs" as a non-public module if "fs" isn't enabled but we need it for
 // reading procfs.
 #[cfg(not(windows))]
