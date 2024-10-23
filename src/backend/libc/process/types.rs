@@ -1,5 +1,7 @@
 #[cfg(not(any(target_os = "espidf", target_os = "vita")))]
 use crate::backend::c;
+#[cfg(any(freebsdlike, linux_kernel))]
+use bitflags::bitflags;
 
 /// A command for use with [`membarrier`] and [`membarrier_cpu`].
 ///
@@ -170,3 +172,52 @@ pub(crate) fn raw_cpu_set_new() -> RawCpuSet {
 
 #[cfg(any(freebsdlike, linux_kernel, target_os = "fuchsia"))]
 pub(crate) const CPU_SETSIZE: usize = c::CPU_SETSIZE as usize;
+
+#[cfg(any(freebsdlike, linux_kernel))]
+bitflags! {
+    /// `SCHED_*` constants for use with [`sched_getscheduler`] and [`sched_setscheduler`].
+    #[repr(transparent)]
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct SchedPolicy: u32 {
+        /// `SCHED_OTHER`
+        #[cfg(not(target_os = "android"))] // not defined in android
+        const Other = c::SCHED_OTHER as u32;
+        /// `SCHED_FIFO`
+        const FIFO = c::SCHED_FIFO as u32;
+        /// `SCHED_RR`
+        const RoundRobin = c::SCHED_RR as u32;
+        /// `SCHED_BATCH`
+        #[cfg(linux_kernel)]
+        const Batch = c::SCHED_BATCH as u32;
+        /// `SCHED_IDLE`
+        #[cfg(linux_kernel)]
+        const Idle = c::SCHED_IDLE as u32;
+        /// `SCHED_DEADLINE`
+        #[cfg(target_os = "linux")] // not defined in android
+        const Deadline = c::SCHED_DEADLINE as u32;
+        /// `SCHED_RESET_ON_FORK`
+        #[cfg(target_os = "linux")] // not defined in android
+        const ResetOnFork = c::SCHED_RESET_ON_FORK as u32;
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
+        const _ = !0;
+    }
+}
+
+#[cfg(any(freebsdlike, linux_kernel))]
+impl Default for SchedPolicy {
+    fn default() -> Self {
+        #[cfg(not(target_os = "android"))]
+        return Self::Other;
+        #[cfg(target_os = "android")]
+        return Self::from_bits_retain(0);
+    }
+}
+
+/// `sched_param` for use with [`sched_getscheduler`] and [`sched_setscheduler`].
+#[cfg(any(freebsdlike, linux_kernel))]
+#[derive(Clone, Debug, Default)]
+#[repr(C)]
+pub struct SchedParam {
+    /// Scheduling priority.
+    pub sched_priority: i32,
+}

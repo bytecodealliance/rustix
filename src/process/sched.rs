@@ -159,3 +159,46 @@ pub fn sched_getaffinity(pid: Option<Pid>) -> io::Result<CpuSet> {
 pub fn sched_getcpu() -> usize {
     backend::process::syscalls::sched_getcpu()
 }
+
+#[cfg(any(freebsdlike, linux_kernel))]
+pub use backend::process::types::{SchedParam, SchedPolicy};
+
+/// `sched_getscheduler`—Get a thread's current scheduling policy.
+///
+/// `pid` is the thread ID to check. If pid is `None`, then the current thread
+/// is checked.
+///
+/// # References
+///  - [Linux]
+///  - [FreeBSD]
+///
+/// [Linux]: https://www.man7.org/linux/man-pages/man2/sched_setscheduler.2.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=sched_setscheduler
+/// Other *BSD also support `sched_getscheduler`.
+#[cfg(any(freebsdlike, linux_kernel))]
+#[inline]
+pub fn sched_getscheduler(pid: Option<Pid>) -> io::Result<SchedPolicy> {
+    backend::process::syscalls::sched_getscheduler(pid)
+}
+
+/// `sched_setscheduler`—Set a thread's scheduling policy and parameters.
+///
+/// `pid` is the thread ID to set scheduling policy and parameters.
+/// If pid is `None`, then the target is the current thread.
+///
+/// # References
+///  - [Linux]
+///  - [FreeBSD]
+///
+/// [Linux]: https://www.man7.org/linux/man-pages/man2/sched_setscheduler.2.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=sched_setscheduler
+/// Other *BSD also support `sched_setscheduler`.
+#[cfg(any(freebsdlike, linux_kernel))]
+#[inline]
+pub fn sched_setscheduler(
+    pid: Option<Pid>,
+    policy: SchedPolicy,
+    param: &SchedParam,
+) -> io::Result<()> {
+    backend::process::syscalls::sched_setscheduler(pid, policy, param)
+}
