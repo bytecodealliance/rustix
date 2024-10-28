@@ -37,6 +37,12 @@ pub(crate) use linux_raw_sys::general::epoll_event;
         )
     )
 ))]
+#[cfg(any(target_env = "musl", target_env = "gnu"))]
+pub(crate) use linux_raw_sys::general::{
+    AT_FDCWD, NFS_SUPER_MAGIC, O_LARGEFILE, PROC_SUPER_MAGIC, STATX_ATTR_MOUNT_ROOT, UTIME_NOW,
+    UTIME_OMIT, XATTR_CREATE, XATTR_REPLACE,
+};
+#[cfg(not(any(target_env = "musl", target_env = "gnu")))]
 pub(crate) use linux_raw_sys::general::{
     AT_FDCWD, NFS_SUPER_MAGIC, O_LARGEFILE, PROC_SUPER_MAGIC, UTIME_NOW, UTIME_OMIT, XATTR_CREATE,
     XATTR_REPLACE,
