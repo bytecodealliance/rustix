@@ -205,7 +205,6 @@ fn has_feature(feature: &str) -> bool {
 fn can_compile<T: AsRef<str>>(test: T) -> bool {
     use std::process::Stdio;
 
-    let out_dir = var("OUT_DIR").unwrap();
     let rustc = var("RUSTC").unwrap();
     let target = var("TARGET").unwrap();
 
@@ -229,8 +228,9 @@ fn can_compile<T: AsRef<str>>(test: T) -> bool {
         .arg("--emit=metadata") // Do as little as possible but still parse.
         .arg("--target")
         .arg(target)
-        .arg("--out-dir")
-        .arg(out_dir); // Put the output somewhere inconsequential.
+        .arg("-o")
+        .arg("-")
+        .stdout(Stdio::null()); // We don't care about the output (only whether it builds or not)
 
     // If Cargo wants to set RUSTFLAGS, use that.
     if let Ok(rustflags) = var("CARGO_ENCODED_RUSTFLAGS") {
