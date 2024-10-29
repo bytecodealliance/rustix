@@ -229,7 +229,8 @@ fn can_compile<T: AsRef<str>>(test: T) -> bool {
         .arg("--target")
         .arg(target)
         .arg("-o")
-        .arg("/dev/null"); // We don't care about the output (only whether it builds or not)
+        .arg("-")
+        .stdout(Stdio::null()); // We don't care about the output (only whether it builds or not)
 
     // If Cargo wants to set RUSTFLAGS, use that.
     if let Ok(rustflags) = var("CARGO_ENCODED_RUSTFLAGS") {
