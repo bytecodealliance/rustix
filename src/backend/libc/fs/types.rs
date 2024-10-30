@@ -40,7 +40,7 @@ bitflags! {
         const SYMLINK_NOFOLLOW = bitcast!(c::AT_SYMLINK_NOFOLLOW);
 
         /// `AT_EACCESS`
-        #[cfg(not(any(target_os = "emscripten", target_os = "android")))]
+        #[cfg(not(target_os = "android"))]
         const EACCESS = bitcast!(c::AT_EACCESS);
 
         /// `AT_REMOVEDIR`

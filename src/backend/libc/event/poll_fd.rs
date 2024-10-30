@@ -40,10 +40,14 @@ bitflags! {
         #[cfg(not(target_os = "espidf"))]
         const NVAL = c::POLLNVAL;
         /// `POLLRDHUP`
-        #[cfg(all(
-            linux_kernel,
-            not(any(target_arch = "sparc", target_arch = "sparc64"))),
-        )]
+        #[cfg(any(
+            solarish,
+            target_os = "freebsd",
+            all(
+                linux_kernel,
+                not(any(target_arch = "sparc", target_arch = "sparc64"))
+            ),
+        ))]
         const RDHUP = c::POLLRDHUP;
 
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
