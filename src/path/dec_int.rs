@@ -8,7 +8,8 @@
 
 use crate::backend::fd::{AsFd, AsRawFd};
 use crate::ffi::CStr;
-use core::mem::MaybeUninit;
+use core::any::TypeId;
+use core::mem::{self, MaybeUninit};
 use itoa::{Buffer, Integer};
 #[cfg(all(feature = "std", unix))]
 use std::os::unix::ffi::OsStrExt;
@@ -36,25 +37,56 @@ use {core::fmt, std::ffi::OsStr, std::path::Path};
 /// ```
 #[derive(Clone)]
 pub struct DecInt {
-    // 20 `u8`s is enough to hold the decimal ASCII representation of any
-    // `u64`, and we add one for a NUL terminator for `as_c_str`.
-    buf: [MaybeUninit<u8>; 20 + 1],
+    // Enough to hold an i64 and NUL terminator.
+    buf: [MaybeUninit<u8>; "-9223372036854775808\0".len()],
     len: usize,
 }
 
 impl DecInt {
     /// Construct a new path component from an integer.
     #[inline]
-    pub fn new<Int: Integer>(i: Int) -> Self {
-        let mut buf = [MaybeUninit::uninit(); 20 + 1];
+    pub fn new<Int: Integer + 'static>(i: Int) -> Self {
+        let mut buf = [MaybeUninit::uninit(); 21];
 
         let mut str_buf = Buffer::new();
         let str_buf = str_buf.format(i);
-        buf[..str_buf.len()].copy_from_slice(unsafe {
-            // SAFETY: you can always go from init to uninit
-            core::mem::transmute::<&[u8], &[MaybeUninit<u8>]>(str_buf.as_bytes())
-        });
-        buf[str_buf.len()] = MaybeUninit::new(0);
+        {
+            let max_buf_size = {
+                let bits = match TypeId::of::<Int>() {
+                    id if [TypeId::of::<i8>(), TypeId::of::<u8>()].contains(&id) => u8::BITS,
+                    id if [TypeId::of::<i16>(), TypeId::of::<u16>()].contains(&id) => u16::BITS,
+                    id if [TypeId::of::<i32>(), TypeId::of::<u32>()].contains(&id) => u32::BITS,
+                    id if [TypeId::of::<i64>(), TypeId::of::<u64>()].contains(&id) => u64::BITS,
+                    id if [TypeId::of::<i128>(), TypeId::of::<u128>()].contains(&id) => u128::BITS,
+                    id if [TypeId::of::<isize>(), TypeId::of::<usize>()].contains(&id) => {
+                        usize::BITS
+                    }
+                    _ => unreachable!(),
+                };
+                match bits {
+                    8 => "-128".len(),
+                    16 => "-32768".len(),
+                    32 => "-2147483648".len(),
+                    64 => "-9223372036854775808".len(),
+                    128 => "-170141183460469231731687303715884105728".len(),
+                    _ => unreachable!(),
+                }
+            };
+            if str_buf.len() > max_buf_size {
+                unsafe { core::hint::unreachable_unchecked() }
+            }
+            assert!(
+                str_buf.len() < buf.len(),
+                "{str_buf}{} unsupported.",
+                core::any::type_name::<Int>()
+            );
+
+            buf[..str_buf.len()].copy_from_slice(unsafe {
+                // SAFETY: you can always go from init to uninit
+                mem::transmute::<&[u8], &[MaybeUninit<u8>]>(str_buf.as_bytes())
+            });
+            buf[str_buf.len()] = MaybeUninit::new(0);
+        }
 
         Self {
             buf,
@@ -92,7 +124,7 @@ impl DecInt {
     pub fn as_bytes_with_nul(&self) -> &[u8] {
         let init = &self.buf[..=self.len];
         // SAFETY: we're guaranteed to have initialized len+1 bytes.
-        unsafe { core::mem::transmute::<&[MaybeUninit<u8>], &[u8]>(init) }
+        unsafe { mem::transmute::<&[MaybeUninit<u8>], &[u8]>(init) }
     }
 
     /// Return the raw byte buffer.
