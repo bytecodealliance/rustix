@@ -41,8 +41,8 @@ bitflags! {
         const NVAL = c::POLLNVAL;
         /// `POLLRDHUP`
         #[cfg(any(
-            solarish,
             target_os = "freebsd",
+            target_os = "illumos",
             all(
                 linux_kernel,
                 not(any(target_arch = "sparc", target_arch = "sparc64"))
