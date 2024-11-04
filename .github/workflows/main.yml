@@ -410,8 +410,8 @@ jobs:
           - build: macos-latest
             os: macos-latest
             rust: stable
-          - build: macos-12
-            os: macos-12
+          - build: macos-13
+            os: macos-13
             rust: stable
           - build: windows
             os: windows-latest
