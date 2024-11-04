@@ -5,7 +5,7 @@ use crate::backend::c;
 use crate::backend::conv::ret;
 use crate::backend::conv::ret_c_int;
 #[cfg(feature = "alloc")]
-#[cfg(any(linux_kernel, target_os = "redox"))]
+#[cfg(any(linux_kernel, solarish, target_os = "redox"))]
 use crate::backend::conv::ret_u32;
 #[cfg(solarish)]
 use crate::event::port::Event;
@@ -22,7 +22,7 @@ use crate::event::PollFd;
 use crate::io;
 #[cfg(solarish)]
 use crate::utils::as_mut_ptr;
-#[cfg(any(linux_kernel, target_os = "redox"))]
+#[cfg(any(linux_kernel, solarish, target_os = "redox"))]
 use crate::utils::as_ptr;
 #[cfg(any(
     all(feature = "alloc", bsd),
@@ -351,13 +351,13 @@ pub(crate) fn pause() {
 }
 
 #[inline]
-#[cfg(any(linux_kernel, target_os = "redox"))]
+#[cfg(any(linux_kernel, solarish, target_os = "redox"))]
 pub(crate) fn epoll_create(flags: super::epoll::CreateFlags) -> io::Result<OwnedFd> {
     unsafe { ret_owned_fd(c::epoll_create1(bitflags_bits!(flags))) }
 }
 
 #[inline]
-#[cfg(any(linux_kernel, target_os = "redox"))]
+#[cfg(any(linux_kernel, solarish, target_os = "redox"))]
 pub(crate) fn epoll_add(
     epoll: BorrowedFd<'_>,
     source: BorrowedFd<'_>,
@@ -378,7 +378,7 @@ pub(crate) fn epoll_add(
 }
 
 #[inline]
-#[cfg(any(linux_kernel, target_os = "redox"))]
+#[cfg(any(linux_kernel, solarish, target_os = "redox"))]
 pub(crate) fn epoll_mod(
     epoll: BorrowedFd<'_>,
     source: BorrowedFd<'_>,
@@ -396,7 +396,7 @@ pub(crate) fn epoll_mod(
 }
 
 #[inline]
-#[cfg(any(linux_kernel, target_os = "redox"))]
+#[cfg(any(linux_kernel, solarish, target_os = "redox"))]
 pub(crate) fn epoll_del(epoll: BorrowedFd<'_>, source: BorrowedFd<'_>) -> io::Result<()> {
     unsafe {
         ret(c::epoll_ctl(
@@ -410,7 +410,7 @@ pub(crate) fn epoll_del(epoll: BorrowedFd<'_>, source: BorrowedFd<'_>) -> io::Re
 
 #[inline]
 #[cfg(feature = "alloc")]
-#[cfg(any(linux_kernel, target_os = "redox"))]
+#[cfg(any(linux_kernel, solarish, target_os = "redox"))]
 pub(crate) fn epoll_wait(
     epoll: BorrowedFd<'_>,
     events: &mut [MaybeUninit<crate::event::epoll::Event>],

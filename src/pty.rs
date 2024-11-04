@@ -13,7 +13,13 @@ use crate::fs::OFlags;
 use crate::{backend, io};
 #[cfg(all(
     feature = "alloc",
-    any(apple, linux_like, target_os = "freebsd", target_os = "fuchsia")
+    any(
+        apple,
+        linux_like,
+        target_os = "freebsd",
+        target_os = "fuchsia",
+        target_os = "illumos"
+    )
 ))]
 use {crate::ffi::CString, alloc::vec::Vec};
 
@@ -115,7 +121,13 @@ pub fn openpt(flags: OpenptFlags) -> io::Result<OwnedFd> {
 /// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Allocation.html#index-ptsname
 #[cfg(all(
     feature = "alloc",
-    any(apple, linux_like, target_os = "freebsd", target_os = "fuchsia")
+    any(
+        apple,
+        linux_like,
+        target_os = "freebsd",
+        target_os = "fuchsia",
+        target_os = "illumos"
+    )
 ))]
 #[inline]
 #[doc(alias = "ptsname_r")]

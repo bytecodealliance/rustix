@@ -1,6 +1,6 @@
 //! Event operations.
 
-#[cfg(any(linux_kernel, target_os = "redox"))]
+#[cfg(any(linux_kernel, solarish, target_os = "redox"))]
 pub mod epoll;
 #[cfg(any(
     linux_kernel,
