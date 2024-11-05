@@ -92,8 +92,10 @@ use core::slice;
 ///
 /// # References
 ///  - [Linux]
+///  - [illumos]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/epoll_create.2.html
+/// [illumos]: https://www.illumos.org/man/3C/epoll_create
 #[inline]
 #[doc(alias = "epoll_create1")]
 pub fn create(flags: epoll::CreateFlags) -> io::Result<OwnedFd> {
@@ -114,8 +116,10 @@ pub fn create(flags: epoll::CreateFlags) -> io::Result<OwnedFd> {
 ///
 /// # References
 ///  - [Linux]
+///  - [illumos]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/epoll_ctl.2.html
+/// [illumos]: https://www.illumos.org/man/3C/epoll_ctl
 /// [faq]: https://man7.org/linux/man-pages/man7/epoll.7.html#:~:text=Will%20closing%20a%20file%20descriptor%20cause%20it%20to%20be%20removed%20from%20all%0A%20%20%20%20%20%20%20%20%20%20epoll%20interest%20lists%3F
 #[doc(alias = "epoll_ctl")]
 #[inline]
@@ -144,8 +148,10 @@ pub fn add(
 ///
 /// # References
 ///  - [Linux]
+///  - [illumos]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/epoll_ctl.2.html
+/// [illumos]: https://www.illumos.org/man/3C/epoll_ctl
 #[doc(alias = "epoll_ctl")]
 #[inline]
 pub fn modify(
@@ -171,8 +177,10 @@ pub fn modify(
 ///
 /// # References
 ///  - [Linux]
+///  - [illumos]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/epoll_ctl.2.html
+/// [illumos]: https://www.illumos.org/man/3C/epoll_ctl
 #[doc(alias = "epoll_ctl")]
 #[inline]
 pub fn delete(epoll: impl AsFd, source: impl AsFd) -> io::Result<()> {
@@ -187,8 +195,10 @@ pub fn delete(epoll: impl AsFd, source: impl AsFd) -> io::Result<()> {
 ///
 /// # References
 ///  - [Linux]
+///  - [illumos]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/epoll_wait.2.html
+/// [illumos]: https://www.illumos.org/man/3C/epoll_wait
 #[cfg(feature = "alloc")]
 #[cfg_attr(docsrs, doc(cfg(feature = "alloc"), alias = "epoll_wait"))]
 #[inline]
