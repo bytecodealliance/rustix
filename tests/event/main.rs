@@ -4,7 +4,7 @@
 
 #[cfg(not(feature = "rustc-dep-of-std"))] // TODO
 #[cfg(feature = "net")]
-#[cfg(linux_kernel)]
+#[cfg(any(linux_kernel, target_os = "illumos", target_os = "redox"))]
 mod epoll;
 #[cfg(not(windows))]
 #[cfg(not(target_os = "wasi"))]
