@@ -114,10 +114,12 @@ pub fn openpt(flags: OpenptFlags) -> io::Result<OwnedFd> {
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [illumos]
 ///  - [glibc]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/ptsname.html
 /// [Linux]: https://man7.org/linux/man-pages/man3/ptsname.3.html
+/// [illumos]: https://www.illumos.org/man/3C/ptsname
 /// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Allocation.html#index-ptsname
 #[cfg(all(
     feature = "alloc",
