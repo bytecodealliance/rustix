@@ -72,7 +72,7 @@ pub(super) fn ret_c_int(raw: c::c_int) -> io::Result<c::c_int> {
 
 #[cfg(any(
     linux_kernel,
-    all(solarish, feature = "event"),
+    all(target_os = "illumos", feature = "event"),
     all(target_os = "redox", feature = "event")
 ))]
 #[inline]
