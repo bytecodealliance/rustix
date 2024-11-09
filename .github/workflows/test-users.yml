@@ -1618,7 +1618,7 @@ jobs:
         ref: rustix-0.35.6-beta.2
         submodules: true
 
-    - run: rustup target add wasm32-wasi
+    - run: rustup target add wasm32-wasip1
     - run: cd wasmtime && cargo update
     - run: sed -i'.bak' 's/^version = "'`cd wasmtime && cargo tree --edges=normal |head -1 |sed 's/^[[:alnum:]_-]* v\([[:alnum:].-]*\) (.*/\1/'`'"$/version = '`grep -A1 '^name = "rustix"' wasmtime/Cargo.lock |grep ^version |sed 's/^[^"]*//'`'/' Cargo.toml
     - run: cd wasmtime && echo '[patch.crates-io]' >> Cargo.toml
