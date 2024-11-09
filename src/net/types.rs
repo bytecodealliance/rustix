@@ -541,7 +541,7 @@ impl AddressFamily {
     #[cfg(solarish)]
     pub const NBS: Self = Self(c::AF_NBS as _);
     /// `AF_NCA`
-    #[cfg(solarish)]
+    #[cfg(target_os = "illumos")]
     pub const NCA: Self = Self(c::AF_NCA as _);
     /// `AF_NDD`
     #[cfg(target_os = "aix")]
