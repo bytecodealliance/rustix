@@ -1192,11 +1192,11 @@ impl SpecialCodeIndex {
     pub const VDSUSP: Self = Self(c::VDSUSP as usize);
 
     /// `VSTATUS`
-    #[cfg(any(bsd, solarish, target_os = "hurd"))]
+    #[cfg(any(bsd, target_os = "hurd", target_os = "illumos"))]
     pub const VSTATUS: Self = Self(c::VSTATUS as usize);
 
     /// `VERASE2`
-    #[cfg(any(freebsdlike, solarish))]
+    #[cfg(any(freebsdlike, target_os = "illumos"))]
     pub const VERASE2: Self = Self(c::VERASE2 as usize);
 }
 
@@ -1272,9 +1272,9 @@ impl core::fmt::Debug for SpecialCodeIndex {
                 target_os = "nto"
             ))]
             Self::VDSUSP => write!(f, "VDSUSP"),
-            #[cfg(any(bsd, solarish, target_os = "hurd"))]
+            #[cfg(any(bsd, target_os = "hurd", target_os = "illumos"))]
             Self::VSTATUS => write!(f, "VSTATUS"),
-            #[cfg(any(freebsdlike, solarish))]
+            #[cfg(any(freebsdlike, target_os = "illumos"))]
             Self::VERASE2 => write!(f, "VERASE2"),
 
             _ => write!(f, "unknown"),

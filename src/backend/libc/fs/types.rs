@@ -949,7 +949,12 @@ bitflags! {
 ///
 /// [`flock`]: crate::fs::flock
 /// [`fcntl_lock`]: crate::fs::fcntl_lock
-#[cfg(not(any(target_os = "espidf", target_os = "vita", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "espidf",
+    target_os = "solaris",
+    target_os = "vita",
+    target_os = "wasi"
+)))]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(u32)]
 pub enum FlockOperation {
