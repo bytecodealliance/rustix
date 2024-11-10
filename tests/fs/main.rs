@@ -12,6 +12,7 @@ mod fcntl;
     target_os = "emscripten",
     target_os = "fuchsia",
     target_os = "redox",
+    target_os = "solaris",
     target_os = "wasi"
 )))]
 mod fcntl_lock;
