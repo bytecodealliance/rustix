@@ -1,4 +1,4 @@
-//! `read` and `write`, optionally positioned, optionally vectored
+//! `read` and `write`, optionally positioned, optionally vectored.
 
 #![allow(unsafe_code)]
 
@@ -30,7 +30,7 @@ pub use backend::io::types::ReadWriteFlags;
 ///  - [illumos]
 ///  - [glibc]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/read.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/read.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/read.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/read.2.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=read&sektion=2
@@ -38,7 +38,7 @@ pub use backend::io::types::ReadWriteFlags;
 /// [OpenBSD]: https://man.openbsd.org/read.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=read&section=2
 /// [illumos]: https://illumos.org/man/2/read
-/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/I_002fO-Primitives.html#index-reading-from-a-file-descriptor
+/// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/I_002fO-Primitives.html#index-reading-from-a-file-descriptor
 #[inline]
 pub fn read<Fd: AsFd>(fd: Fd, buf: &mut [u8]) -> io::Result<usize> {
     unsafe { backend::io::syscalls::read(fd.as_fd(), buf.as_mut_ptr(), buf.len()) }
@@ -76,7 +76,7 @@ pub fn read_uninit<Fd: AsFd>(
 ///  - [illumos]
 ///  - [glibc]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/write.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/write.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/write.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/write.2.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=write&sektion=2
@@ -84,7 +84,7 @@ pub fn read_uninit<Fd: AsFd>(
 /// [OpenBSD]: https://man.openbsd.org/write.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=write&section=2
 /// [illumos]: https://illumos.org/man/2/write
-/// [glibc]: https://www.gnu.org/software/libc/manual/html_node/I_002fO-Primitives.html#index-writing-to-a-file-descriptor
+/// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/I_002fO-Primitives.html#index-writing-to-a-file-descriptor
 #[inline]
 pub fn write<Fd: AsFd>(fd: Fd, buf: &[u8]) -> io::Result<usize> {
     backend::io::syscalls::write(fd.as_fd(), buf)
@@ -104,8 +104,9 @@ pub fn write<Fd: AsFd>(fd: Fd, buf: &[u8]) -> io::Result<usize> {
 ///  - [OpenBSD]
 ///  - [DragonFly BSD]
 ///  - [illumos]
+///  - [glibc]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/pread.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/pread.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/pread.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/pread.2.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=pread&sektion=2
@@ -113,6 +114,7 @@ pub fn write<Fd: AsFd>(fd: Fd, buf: &[u8]) -> io::Result<usize> {
 /// [OpenBSD]: https://man.openbsd.org/pread.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=pread&section=2
 /// [illumos]: https://illumos.org/man/2/pread
+/// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/I_002fO-Primitives.html#index-pread64
 #[inline]
 pub fn pread<Fd: AsFd>(fd: Fd, buf: &mut [u8], offset: u64) -> io::Result<usize> {
     unsafe { backend::io::syscalls::pread(fd.as_fd(), buf.as_mut_ptr(), buf.len(), offset) }
@@ -150,8 +152,9 @@ pub fn pread_uninit<Fd: AsFd>(
 ///  - [OpenBSD]
 ///  - [DragonFly BSD]
 ///  - [illumos]
+///  - [glibc]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/pwrite.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/pwrite.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/pwrite.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/pwrite.2.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=pwrite&sektion=2
@@ -159,6 +162,7 @@ pub fn pread_uninit<Fd: AsFd>(
 /// [OpenBSD]: https://man.openbsd.org/pwrite.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=pwrite&section=2
 /// [illumos]: https://illumos.org/man/2/pwrite
+/// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/I_002fO-Primitives.html#index-pwrite64
 #[inline]
 pub fn pwrite<Fd: AsFd>(fd: Fd, buf: &[u8], offset: u64) -> io::Result<usize> {
     backend::io::syscalls::pwrite(fd.as_fd(), buf, offset)
@@ -175,8 +179,9 @@ pub fn pwrite<Fd: AsFd>(fd: Fd, buf: &[u8], offset: u64) -> io::Result<usize> {
 ///  - [OpenBSD]
 ///  - [DragonFly BSD]
 ///  - [illumos]
+///  - [glibc]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/readv.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/readv.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/readv.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/readv.2.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=readv&sektion=2
@@ -184,6 +189,7 @@ pub fn pwrite<Fd: AsFd>(fd: Fd, buf: &[u8], offset: u64) -> io::Result<usize> {
 /// [OpenBSD]: https://man.openbsd.org/readv.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=readv&section=2
 /// [illumos]: https://illumos.org/man/2/readv
+/// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Scatter_002dGather.html#index-readv
 #[cfg(not(any(target_os = "espidf", target_os = "horizon")))]
 #[inline]
 pub fn readv<Fd: AsFd>(fd: Fd, bufs: &mut [IoSliceMut<'_>]) -> io::Result<usize> {
@@ -201,8 +207,9 @@ pub fn readv<Fd: AsFd>(fd: Fd, bufs: &mut [IoSliceMut<'_>]) -> io::Result<usize>
 ///  - [OpenBSD]
 ///  - [DragonFly BSD]
 ///  - [illumos]
+///  - [glibc]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/writev.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/writev.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/writev.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/writev.2.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=writev&sektion=2
@@ -210,6 +217,7 @@ pub fn readv<Fd: AsFd>(fd: Fd, bufs: &mut [IoSliceMut<'_>]) -> io::Result<usize>
 /// [OpenBSD]: https://man.openbsd.org/writev.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=writev&section=2
 /// [illumos]: https://illumos.org/man/2/writev
+/// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Scatter_002dGather.html#index-writev
 #[cfg(not(any(target_os = "espidf", target_os = "horizon")))]
 #[inline]
 pub fn writev<Fd: AsFd>(fd: Fd, bufs: &[IoSlice<'_>]) -> io::Result<usize> {
@@ -226,6 +234,7 @@ pub fn writev<Fd: AsFd>(fd: Fd, bufs: &[IoSlice<'_>]) -> io::Result<usize> {
 ///  - [OpenBSD]
 ///  - [DragonFly BSD]
 ///  - [illumos]
+///  - [glibc]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/preadv.2.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=preadv&sektion=2
@@ -233,6 +242,7 @@ pub fn writev<Fd: AsFd>(fd: Fd, bufs: &[IoSlice<'_>]) -> io::Result<usize> {
 /// [OpenBSD]: https://man.openbsd.org/preadv.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=preadv&section=2
 /// [illumos]: https://illumos.org/man/2/preadv
+/// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Scatter_002dGather.html#index-preadv64
 #[cfg(not(any(
     target_os = "espidf",
     target_os = "haiku",
@@ -261,6 +271,7 @@ pub fn preadv<Fd: AsFd>(fd: Fd, bufs: &mut [IoSliceMut<'_>], offset: u64) -> io:
 ///  - [OpenBSD]
 ///  - [DragonFly BSD]
 ///  - [illumos]
+///  - [glibc]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/pwritev.2.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=pwritev&sektion=2
@@ -268,6 +279,7 @@ pub fn preadv<Fd: AsFd>(fd: Fd, bufs: &mut [IoSliceMut<'_>], offset: u64) -> io:
 /// [OpenBSD]: https://man.openbsd.org/pwritev.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=pwritev&section=2
 /// [illumos]: https://illumos.org/man/2/pwritev
+/// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/I_002fO-Primitives.html#index-pwrite64
 #[cfg(not(any(
     target_os = "espidf",
     target_os = "haiku",
@@ -288,8 +300,10 @@ pub fn pwritev<Fd: AsFd>(fd: Fd, bufs: &[IoSlice<'_>], offset: u64) -> io::Resul
 ///
 /// # References
 ///  - [Linux]
+///  - [glibc]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/preadv2.2.html
+/// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Scatter_002dGather.html#index-preadv64v2
 #[cfg(linux_kernel)]
 #[inline]
 pub fn preadv2<Fd: AsFd>(
@@ -307,8 +321,10 @@ pub fn preadv2<Fd: AsFd>(
 ///
 /// # References
 ///  - [Linux]
+///  - [glibc]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/pwritev2.2.html
+/// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Scatter_002dGather.html#index-pwritev64v2
 #[cfg(linux_kernel)]
 #[inline]
 pub fn pwritev2<Fd: AsFd>(

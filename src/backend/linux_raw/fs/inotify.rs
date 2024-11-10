@@ -1,4 +1,4 @@
-//! inotify support for working with inotifies
+//! inotify support for working with inotify objects.
 
 use crate::backend::c;
 use bitflags::bitflags;

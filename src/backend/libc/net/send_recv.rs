@@ -28,12 +28,6 @@ bitflags! {
         /// `MSG_DONTWAIT`
         #[cfg(not(windows))]
         const DONTWAIT = bitcast!(c::MSG_DONTWAIT);
-        /// Deprecated alias for [`EOR`].
-        ///
-        /// [`EOR`]: Self::EOR
-        #[cfg(not(windows))]
-        #[deprecated(note = "`rustix::net::SendFlags::EOT` is renamed to `rustix::net::SendFlags::EOR`.")]
-        const EOT = bitcast!(c::MSG_EOR);
         /// `MSG_EOR`
         #[cfg(not(windows))]
         const EOR = bitcast!(c::MSG_EOR);

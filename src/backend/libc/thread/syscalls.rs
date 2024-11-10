@@ -3,6 +3,18 @@
 use crate::backend::c;
 use crate::backend::conv::ret;
 use crate::io;
+#[cfg(not(any(
+    apple,
+    freebsdlike,
+    target_os = "emscripten",
+    target_os = "espidf",
+    target_os = "haiku",
+    target_os = "openbsd",
+    target_os = "redox",
+    target_os = "vita",
+    target_os = "wasi",
+)))]
+use crate::thread::ClockId;
 #[cfg(not(target_os = "redox"))]
 use crate::thread::{NanosleepRelativeResult, Timespec};
 #[cfg(all(target_env = "gnu", fix_y2038))]
@@ -24,18 +36,6 @@ use {
     crate::thread::futex,
     crate::utils::as_mut_ptr,
 };
-#[cfg(not(any(
-    apple,
-    freebsdlike,
-    target_os = "emscripten",
-    target_os = "espidf",
-    target_os = "haiku",
-    target_os = "openbsd",
-    target_os = "redox",
-    target_os = "vita",
-    target_os = "wasi",
-)))]
-use {crate::thread::ClockId, core::ptr::null_mut};
 
 #[cfg(all(target_env = "gnu", fix_y2038))]
 weak!(fn __clock_nanosleep_time64(c::clockid_t, c::c_int, *const LibcTimespec, *mut LibcTimespec) -> c::c_int);
@@ -173,7 +173,7 @@ pub(crate) fn clock_nanosleep_absolute(id: ClockId, request: &Timespec) -> io::R
                         id as c::clockid_t,
                         flags,
                         &request.clone().into(),
-                        null_mut(),
+                        core::ptr::null_mut(),
                     )
                 } {
                     0 => Ok(()),
@@ -190,7 +190,14 @@ pub(crate) fn clock_nanosleep_absolute(id: ClockId, request: &Timespec) -> io::R
     {
         let flags = c::TIMER_ABSTIME;
 
-        match unsafe { c::clock_nanosleep(id as c::clockid_t, flags as _, request, null_mut()) } {
+        match unsafe {
+            c::clock_nanosleep(
+                id as c::clockid_t,
+                flags as _,
+                request,
+                core::ptr::null_mut(),
+            )
+        } {
             0 => Ok(()),
             err => Err(io::Errno(err)),
         }

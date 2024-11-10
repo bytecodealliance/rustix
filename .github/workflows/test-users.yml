@@ -12,7 +12,7 @@ jobs:
       QEMU_BUILD_VERSION: 7.0.0
     strategy:
       matrix:
-        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, mipsel-linux, mips64el-linux, arm-linux, macos-latest]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, s390x-linux, mipsel-linux, mips64el-linux, arm-linux, macos-latest]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -69,6 +69,15 @@ jobs:
             qemu: qemu-riscv64
             qemu_args: -L /usr/riscv64-linux-gnu
             qemu_target: riscv64-linux-user
+          - build: s390x-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: s390x-unknown-linux-gnu
+            gcc_package: gcc-s390x-linux-gnu
+            gcc: s390x-linux-gnu-gcc
+            qemu: qemu-s390x
+            qemu_args: -L /usr/s390x-linux-gnu
+            qemu_target: s390x-linux-user
           - build: arm-linux
             os: ubuntu-latest
             rust: nightly
@@ -103,7 +112,7 @@ jobs:
         rustup target add ${{ matrix.target }}
       if: matrix.target != ''
 
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       with:
         path: ${{ runner.tool_cache }}/qemu
         key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patched
@@ -177,7 +186,7 @@ jobs:
       QEMU_BUILD_VERSION: 7.0.0
     strategy:
       matrix:
-        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, mipsel-linux, mips64el-linux, arm-linux, macos-latest]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, s390x-linux, mipsel-linux, mips64el-linux, arm-linux, macos-latest]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -234,6 +243,15 @@ jobs:
             qemu: qemu-riscv64
             qemu_args: -L /usr/riscv64-linux-gnu
             qemu_target: riscv64-linux-user
+          - build: s390x-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: s390x-unknown-linux-gnu
+            gcc_package: gcc-s390x-linux-gnu
+            gcc: s390x-linux-gnu-gcc
+            qemu: qemu-s390x
+            qemu_args: -L /usr/s390x-linux-gnu
+            qemu_target: s390x-linux-user
           - build: arm-linux
             os: ubuntu-latest
             rust: nightly
@@ -263,7 +281,7 @@ jobs:
         rustup target add ${{ matrix.target }}
       if: matrix.target != ''
 
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       with:
         path: ${{ runner.tool_cache }}/qemu
         key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patched
@@ -324,7 +342,7 @@ jobs:
       QEMU_BUILD_VERSION: 7.0.0
     strategy:
       matrix:
-        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, mipsel-linux, mips64el-linux, arm-linux, macos-latest]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, s390x-linux, mipsel-linux, mips64el-linux, arm-linux, macos-latest]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -381,6 +399,15 @@ jobs:
             qemu: qemu-riscv64
             qemu_args: -L /usr/riscv64-linux-gnu
             qemu_target: riscv64-linux-user
+          - build: s390x-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: s390x-unknown-linux-gnu
+            gcc_package: gcc-s390x-linux-gnu
+            gcc: s390x-linux-gnu-gcc
+            qemu: qemu-s390x
+            qemu_args: -L /usr/s390x-linux-gnu
+            qemu_target: s390x-linux-user
           - build: arm-linux
             os: ubuntu-latest
             rust: nightly
@@ -410,7 +437,7 @@ jobs:
         rustup target add ${{ matrix.target }}
       if: matrix.target != ''
 
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       with:
         path: ${{ runner.tool_cache }}/qemu
         key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patched
@@ -503,7 +530,7 @@ jobs:
       QEMU_BUILD_VERSION: 7.0.0
     strategy:
       matrix:
-        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, mipsel-linux, mips64el-linux, arm-linux]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, s390x-linux, mipsel-linux, mips64el-linux, arm-linux]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -560,6 +587,15 @@ jobs:
             qemu: qemu-riscv64
             qemu_args: -L /usr/riscv64-linux-gnu
             qemu_target: riscv64-linux-user
+          - build: s390x-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: s390x-unknown-linux-gnu
+            gcc_package: gcc-s390x-linux-gnu
+            gcc: s390x-linux-gnu-gcc
+            qemu: qemu-s390x
+            qemu_args: -L /usr/s390x-linux-gnu
+            qemu_target: s390x-linux-user
           - build: arm-linux
             os: ubuntu-latest
             rust: nightly
@@ -586,7 +622,7 @@ jobs:
         rustup target add ${{ matrix.target }}
       if: matrix.target != ''
 
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       with:
         path: ${{ runner.tool_cache }}/qemu
         key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patched
@@ -647,7 +683,7 @@ jobs:
       QEMU_BUILD_VERSION: 7.0.0
     strategy:
       matrix:
-        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, mipsel-linux, mips64el-linux, arm-linux]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, s390x-linux, mipsel-linux, mips64el-linux, arm-linux]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -702,6 +738,15 @@ jobs:
             qemu: qemu-riscv64
             qemu_args: -L /usr/riscv64-linux-gnu
             qemu_target: riscv64-linux-user
+          - build: s390x-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: s390x-unknown-linux-gnu
+            gcc_package: gcc-s390x-linux-gnu
+            gcc: s390x-linux-gnu-gcc
+            qemu: qemu-s390x
+            qemu_args: -L /usr/s390x-linux-gnu
+            qemu_target: s390x-linux-user
           - build: arm-linux
             os: ubuntu-latest
             rust: nightly
@@ -728,7 +773,7 @@ jobs:
         rustup target add ${{ matrix.target }}
       if: matrix.target != ''
 
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       with:
         path: ${{ runner.tool_cache }}/qemu
         key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patched
@@ -789,7 +834,7 @@ jobs:
       QEMU_BUILD_VERSION: 7.0.0
     strategy:
       matrix:
-        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, mipsel-linux, mips64el-linux, arm-linux]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, s390x-linux, mipsel-linux, mips64el-linux, arm-linux]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -844,6 +889,15 @@ jobs:
             qemu: qemu-riscv64
             qemu_args: -L /usr/riscv64-linux-gnu
             qemu_target: riscv64-linux-user
+          - build: s390x-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: s390x-unknown-linux-gnu
+            gcc_package: gcc-s390x-linux-gnu
+            gcc: s390x-linux-gnu-gcc
+            qemu: qemu-s390x
+            qemu_args: -L /usr/s390x-linux-gnu
+            qemu_target: s390x-linux-user
           - build: arm-linux
             os: ubuntu-latest
             rust: nightly
@@ -870,7 +924,7 @@ jobs:
         rustup target add ${{ matrix.target }}
       if: matrix.target != ''
 
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       with:
         path: ${{ runner.tool_cache }}/qemu
         key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patched
@@ -931,7 +985,7 @@ jobs:
       QEMU_BUILD_VERSION: 7.0.0
     strategy:
       matrix:
-        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, mipsel-linux, mips64el-linux, arm-linux]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, s390x-linux, mipsel-linux, mips64el-linux, arm-linux]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -986,6 +1040,15 @@ jobs:
             qemu: qemu-riscv64
             qemu_args: -L /usr/riscv64-linux-gnu
             qemu_target: riscv64-linux-user
+          - build: s390x-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: s390x-unknown-linux-gnu
+            gcc_package: gcc-s390x-linux-gnu
+            gcc: s390x-linux-gnu-gcc
+            qemu: qemu-s390x
+            qemu_args: -L /usr/s390x-linux-gnu
+            qemu_target: s390x-linux-user
           - build: arm-linux
             os: ubuntu-latest
             rust: nightly
@@ -1012,7 +1075,7 @@ jobs:
         rustup target add ${{ matrix.target }}
       if: matrix.target != ''
 
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       with:
         path: ${{ runner.tool_cache }}/qemu
         key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patched
@@ -1073,7 +1136,7 @@ jobs:
       QEMU_BUILD_VERSION: 7.0.0
     strategy:
       matrix:
-        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, mipsel-linux, mips64el-linux, arm-linux]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, s390x-linux, mipsel-linux, mips64el-linux, arm-linux]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -1128,6 +1191,15 @@ jobs:
             qemu: qemu-riscv64
             qemu_args: -L /usr/riscv64-linux-gnu
             qemu_target: riscv64-linux-user
+          - build: s390x-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: s390x-unknown-linux-gnu
+            gcc_package: gcc-s390x-linux-gnu
+            gcc: s390x-linux-gnu-gcc
+            qemu: qemu-s390x
+            qemu_args: -L /usr/s390x-linux-gnu
+            qemu_target: s390x-linux-user
           - build: arm-linux
             os: ubuntu-latest
             rust: nightly
@@ -1154,7 +1226,7 @@ jobs:
         rustup target add ${{ matrix.target }}
       if: matrix.target != ''
 
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       with:
         path: ${{ runner.tool_cache }}/qemu
         key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patched
@@ -1215,7 +1287,7 @@ jobs:
       QEMU_BUILD_VERSION: 7.0.0
     strategy:
       matrix:
-        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, mipsel-linux, mips64el-linux, arm-linux, macos-latest]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, s390x-linux, mipsel-linux, mips64el-linux, arm-linux, macos-latest]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -1272,6 +1344,15 @@ jobs:
             qemu: qemu-riscv64
             qemu_args: -L /usr/riscv64-linux-gnu
             qemu_target: riscv64-linux-user
+          - build: s390x-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: s390x-unknown-linux-gnu
+            gcc_package: gcc-s390x-linux-gnu
+            gcc: s390x-linux-gnu-gcc
+            qemu: qemu-s390x
+            qemu_args: -L /usr/s390x-linux-gnu
+            qemu_target: s390x-linux-user
           - build: arm-linux
             os: ubuntu-latest
             rust: nightly
@@ -1301,7 +1382,7 @@ jobs:
         rustup target add ${{ matrix.target }}
       if: matrix.target != ''
 
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       with:
         path: ${{ runner.tool_cache }}/qemu
         key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patched
@@ -1362,7 +1443,7 @@ jobs:
       QEMU_BUILD_VERSION: 7.0.0
     strategy:
       matrix:
-        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, mipsel-linux, mips64el-linux, arm-linux, macos-latest]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, s390x-linux, mipsel-linux, mips64el-linux, arm-linux, macos-latest]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -1419,6 +1500,15 @@ jobs:
             qemu: qemu-riscv64
             qemu_args: -L /usr/riscv64-linux-gnu
             qemu_target: riscv64-linux-user
+          - build: s390x-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: s390x-unknown-linux-gnu
+            gcc_package: gcc-s390x-linux-gnu
+            gcc: s390x-linux-gnu-gcc
+            qemu: qemu-s390x
+            qemu_args: -L /usr/s390x-linux-gnu
+            qemu_target: s390x-linux-user
           - build: arm-linux
             os: ubuntu-latest
             rust: nightly
@@ -1448,7 +1538,7 @@ jobs:
         rustup target add ${{ matrix.target }}
       if: matrix.target != ''
 
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       with:
         path: ${{ runner.tool_cache }}/qemu
         key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patched
@@ -1528,7 +1618,7 @@ jobs:
         ref: rustix-0.35.6-beta.2
         submodules: true
 
-    - run: rustup target add wasm32-wasi
+    - run: rustup target add wasm32-wasip1
     - run: cd wasmtime && cargo update
     - run: sed -i'.bak' 's/^version = "'`cd wasmtime && cargo tree --edges=normal |head -1 |sed 's/^[[:alnum:]_-]* v\([[:alnum:].-]*\) (.*/\1/'`'"$/version = '`grep -A1 '^name = "rustix"' wasmtime/Cargo.lock |grep ^version |sed 's/^[^"]*//'`'/' Cargo.toml
     - run: cd wasmtime && echo '[patch.crates-io]' >> Cargo.toml
@@ -1576,7 +1666,7 @@ jobs:
     strategy:
       matrix:
         # cap-std-ext only builds on Linux at the moment.
-        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, mipsel-linux, mips64el-linux, arm-linux]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, s390x-linux, mipsel-linux, mips64el-linux, arm-linux]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -1633,6 +1723,15 @@ jobs:
             qemu: qemu-riscv64
             qemu_args: -L /usr/riscv64-linux-gnu
             qemu_target: riscv64-linux-user
+          - build: s390x-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: s390x-unknown-linux-gnu
+            gcc_package: gcc-s390x-linux-gnu
+            gcc: s390x-linux-gnu-gcc
+            qemu: qemu-s390x
+            qemu_args: -L /usr/s390x-linux-gnu
+            qemu_target: s390x-linux-user
           - build: arm-linux
             os: ubuntu-latest
             rust: nightly
@@ -1660,7 +1759,7 @@ jobs:
         rustup target add ${{ matrix.target }}
       if: matrix.target != ''
 
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       with:
         path: ${{ runner.tool_cache }}/qemu
         key: qemu-${{ matrix.target }}-${{ env.QEMU_BUILD_VERSION }}-patched

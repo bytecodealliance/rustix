@@ -1,3 +1,6 @@
+// TODO: Rename `Arg::as_str` to avoid collisions.
+#![allow(unstable_name_collisions)]
+
 use rustix::ffi::{CStr, CString};
 use rustix::io;
 use rustix::path::Arg;
@@ -13,7 +16,7 @@ fn test_arg() {
     use std::borrow::Borrow;
 
     let t: &str = "hello";
-    assert_eq!("hello", t.as_str().unwrap());
+    assert_eq!("hello", Arg::as_str(&t).unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
     assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
     assert_eq!(cstr!("hello"), Borrow::borrow(&t.into_c_str().unwrap()));

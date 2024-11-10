@@ -112,14 +112,14 @@ pub(crate) fn tee(
 
 #[cfg(linux_kernel)]
 #[inline]
-pub(crate) fn fcntl_getpipe_sz(fd: BorrowedFd<'_>) -> io::Result<usize> {
+pub(crate) fn fcntl_getpipe_size(fd: BorrowedFd<'_>) -> io::Result<usize> {
     unsafe { ret_c_int(c::fcntl(borrowed_fd(fd), c::F_GETPIPE_SZ)).map(|size| size as usize) }
 }
 
 #[cfg(linux_kernel)]
 #[inline]
-pub(crate) fn fcntl_setpipe_sz(fd: BorrowedFd<'_>, size: usize) -> io::Result<()> {
+pub(crate) fn fcntl_setpipe_size(fd: BorrowedFd<'_>, size: usize) -> io::Result<usize> {
     let size: c::c_int = size.try_into().map_err(|_| io::Errno::PERM)?;
 
-    unsafe { ret(c::fcntl(borrowed_fd(fd), c::F_SETPIPE_SZ, size)) }
+    unsafe { ret_c_int(c::fcntl(borrowed_fd(fd), c::F_SETPIPE_SZ, size)).map(|size| size as usize) }
 }

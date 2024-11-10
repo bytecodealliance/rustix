@@ -16,11 +16,6 @@ bitflags! {
         const DONTROUTE = c::MSG_DONTROUTE;
         /// `MSG_DONTWAIT`
         const DONTWAIT = c::MSG_DONTWAIT;
-        /// Deprecated alias for [`EOR`].
-        ///
-        /// [`EOR`]: Self::EOR
-        #[deprecated(note = "`rustix::net::SendFlags::EOT` is renamed to `rustix::net::SendFlags::EOR`.")]
-        const EOT = c::MSG_EOR;
         /// `MSG_EOR`
         const EOR = c::MSG_EOR;
         /// `MSG_MORE`

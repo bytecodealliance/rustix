@@ -593,6 +593,11 @@ impl FusedIterator for AncillaryDrain<'_> {}
 
 /// `sendmsg(msghdr)`—Sends a message on a socket.
 ///
+/// This function is for use on connected sockets, as it doesn't have
+/// a way to specify an address. See the [`sendmsg_v4`], [`sendmsg_v6`]
+/// [`sendmsg_unix`], [`sendmsg_xdp`], and [`sendmsg_any`] to send
+/// messages on unconnected sockets.
+///
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
@@ -603,7 +608,7 @@ impl FusedIterator for AncillaryDrain<'_> {}
 ///  - [DragonFly BSD]
 ///  - [illumos]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/sendmsg.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/sendmsg.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/sendmsg.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/sendmsg.2.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=sendmsg&sektion=2
@@ -633,7 +638,7 @@ pub fn sendmsg(
 ///  - [DragonFly BSD]
 ///  - [illumos]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/sendmsg.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/sendmsg.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/sendmsg.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/sendmsg.2.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=sendmsg&sektion=2
@@ -664,7 +669,7 @@ pub fn sendmsg_v4(
 ///  - [DragonFly BSD]
 ///  - [illumos]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/sendmsg.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/sendmsg.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/sendmsg.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/sendmsg.2.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=sendmsg&sektion=2
@@ -696,7 +701,7 @@ pub fn sendmsg_v6(
 ///  - [DragonFly BSD]
 ///  - [illumos]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/sendmsg.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/sendmsg.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/sendmsg.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/sendmsg.2.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=sendmsg&sektion=2
@@ -746,7 +751,7 @@ pub fn sendmsg_xdp(
 ///  - [DragonFly BSD]
 ///  - [illumos]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/sendmsg.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/sendmsg.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/sendmsg.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/sendmsg.2.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=sendmsg&sektion=2
@@ -793,7 +798,7 @@ pub fn sendmsg_any(
 ///  - [DragonFly BSD]
 ///  - [illumos]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/recvmsg.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/recvmsg.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/recvmsg.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/recvmsg.2.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=recvmsg&sektion=2

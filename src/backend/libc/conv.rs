@@ -70,7 +70,11 @@ pub(super) fn ret_c_int(raw: c::c_int) -> io::Result<c::c_int> {
     }
 }
 
-#[cfg(any(linux_kernel, all(target_os = "redox", feature = "event")))]
+#[cfg(any(
+    linux_kernel,
+    all(target_os = "illumos", feature = "event"),
+    all(target_os = "redox", feature = "event")
+))]
 #[inline]
 pub(super) fn ret_u32(raw: c::c_int) -> io::Result<u32> {
     if raw == -1 {

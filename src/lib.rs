@@ -1,3 +1,6 @@
+// wasip2 conditionally gates stdlib APIs.
+// https://github.com/rust-lang/rust/issues/130323
+#![cfg_attr(all(target_os = "wasi", target_env = "p2"), feature(wasip2))]
 //! `rustix` provides efficient memory-safe and [I/O-safe] wrappers to
 //! POSIX-like, Unix-like, Linux, and Winsock syscall-like APIs, with
 //! configurable backends.
@@ -71,6 +74,7 @@
 //!  - Provide y2038 compatibility, on platforms which support this.
 //!  - Correct selected platform bugs, such as behavioral differences when
 //!    running under seccomp.
+//!  - Use `timespec` for timestamps instead of `timeval`.
 //!
 //! Things they don't do include:
 //!  - Detecting whether functions are supported at runtime, except in specific
@@ -198,7 +202,6 @@ pub mod fd {
 #[cfg(feature = "event")]
 #[cfg_attr(docsrs, doc(cfg(feature = "event")))]
 pub mod event;
-#[cfg(not(windows))]
 pub mod ffi;
 #[cfg(not(windows))]
 #[cfg(feature = "fs")]
@@ -293,12 +296,6 @@ pub mod time;
 #[cfg_attr(docsrs, doc(cfg(feature = "runtime")))]
 pub mod runtime;
 
-// Temporarily provide some mount functions for use in the fs module for
-// backwards compatibility.
-#[cfg(linux_kernel)]
-#[cfg(all(feature = "fs", not(feature = "mount")))]
-pub(crate) mod mount;
-
 // Declare "fs" as a non-public module if "fs" isn't enabled but we need it for
 // reading procfs.
 #[cfg(not(windows))]
@@ -356,13 +353,13 @@ mod prctl;
 #[cfg(not(any(windows, target_os = "espidf", target_os = "wasi")))]
 #[cfg(any(feature = "process", feature = "runtime", all(bsd, feature = "event")))]
 mod signal;
-#[cfg(not(windows))]
 #[cfg(any(
     feature = "fs",
     feature = "process",
     feature = "runtime",
     feature = "thread",
     feature = "time",
+    all(feature = "event", any(bsd, linux_kernel, windows, target_os = "wasi")),
     all(
         linux_raw,
         not(feature = "use-libc-auxv"),

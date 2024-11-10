@@ -8,6 +8,9 @@ use backend::c;
 
 /// `ioctl(fd, TIOCEXCL)`—Enables exclusive mode on a terminal.
 ///
+/// In exclusive mode, subsequent unpriveleged `open` calls on the terminal
+/// device fail with [`io::Errno::BUSY`].
+///
 /// # References
 ///  - [Linux]
 ///  - [FreeBSD]

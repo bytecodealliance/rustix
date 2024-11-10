@@ -5,7 +5,6 @@
 #![cfg_attr(core_c_str, feature(core_c_str))]
 
 mod chmodat;
-mod cwd;
 #[cfg(not(target_os = "redox"))]
 mod dir;
 mod fcntl;
@@ -13,6 +12,7 @@ mod fcntl;
     target_os = "emscripten",
     target_os = "fuchsia",
     target_os = "redox",
+    target_os = "solaris",
     target_os = "wasi"
 )))]
 mod fcntl_lock;
@@ -42,6 +42,7 @@ mod renameat;
 #[cfg(any(linux_kernel, target_os = "freebsd"))]
 mod seals;
 mod seek;
+mod special;
 #[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 mod statfs;
 #[cfg(linux_kernel)]

@@ -1,4 +1,4 @@
-// Sparc lacks `FICLONE`.
+// SPARC lacks `FICLONE`.
 #[cfg(all(linux_kernel, not(any(target_arch = "sparc", target_arch = "sparc64"))))]
 #[test]
 fn test_ioctl_ficlone() {

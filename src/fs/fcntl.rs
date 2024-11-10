@@ -8,6 +8,7 @@
     target_os = "espidf",
     target_os = "fuchsia",
     target_os = "redox",
+    target_os = "solaris",
     target_os = "vita",
     target_os = "wasi"
 )))]
@@ -29,7 +30,7 @@ pub use crate::io::{fcntl_getfd, fcntl_setfd};
 ///  - [POSIX]
 ///  - [Linux]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/fcntl.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/fcntl.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/fcntl.2.html
 #[inline]
 #[doc(alias = "F_GETFL")]
@@ -43,7 +44,7 @@ pub fn fcntl_getfl<Fd: AsFd>(fd: Fd) -> io::Result<OFlags> {
 ///  - [POSIX]
 ///  - [Linux]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/fcntl.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/fcntl.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/fcntl.2.html
 #[inline]
 #[doc(alias = "F_SETFL")]
@@ -94,13 +95,14 @@ pub fn fcntl_add_seals<Fd: AsFd>(fd: Fd, seals: SealFlags) -> io::Result<()> {
 ///  - [POSIX]
 ///  - [Linux]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/fcntl.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/fcntl.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/fcntl.2.html
 #[cfg(not(any(
     target_os = "emscripten",
     target_os = "espidf",
     target_os = "fuchsia",
     target_os = "redox",
+    target_os = "solaris",
     target_os = "vita",
     target_os = "wasi"
 )))]

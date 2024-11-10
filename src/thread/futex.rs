@@ -15,7 +15,7 @@
 //! # Ok(())
 //! # }
 //! ```
-
+//!
 //! # References
 //!  - [Linux `futex` system call]
 //!  - [Linux `futex` feature]
@@ -34,7 +34,7 @@ use crate::fd::{FromRawFd, OwnedFd, RawFd};
 use crate::utils::option_as_ptr;
 use crate::{backend, io};
 
-pub use crate::timespec::Timespec;
+pub use crate::timespec::{Nsecs, Secs, Timespec};
 
 pub use backend::thread::futex::{Flags, OWNER_DIED, WAITERS};
 

@@ -162,7 +162,7 @@ impl<'a, Num: ArgNumber> From<BorrowedFd<'a>> for ArgReg<'a, Num> {
 pub(super) unsafe fn raw_fd<'a, Num: ArgNumber>(fd: RawFd) -> ArgReg<'a, Num> {
     // Use `no_fd` when passing `-1` is intended.
     #[cfg(feature = "fs")]
-    debug_assert!(fd == crate::fs::CWD.as_raw_fd() || fd >= 0);
+    debug_assert!(fd == crate::fs::CWD.as_raw_fd() || fd == crate::fs::ABS.as_raw_fd() || fd >= 0);
 
     // Don't pass the `io_uring_register_files_skip` sentry value this way.
     #[cfg(feature = "io_uring")]
@@ -439,7 +439,7 @@ pub(crate) mod fs {
     }
 }
 
-#[cfg(any(feature = "fs", feature = "mount"))]
+#[cfg(feature = "mount")]
 impl<'a, Num: ArgNumber> From<crate::backend::mount::types::MountFlagsArg> for ArgReg<'a, Num> {
     #[inline]
     fn from(flags: crate::backend::mount::types::MountFlagsArg) -> Self {
@@ -447,9 +447,7 @@ impl<'a, Num: ArgNumber> From<crate::backend::mount::types::MountFlagsArg> for A
     }
 }
 
-// When the deprecated "fs" aliases are removed, we can remove the "fs"
-// here too.
-#[cfg(any(feature = "fs", feature = "mount"))]
+#[cfg(feature = "mount")]
 impl<'a, Num: ArgNumber> From<crate::backend::mount::types::UnmountFlags> for ArgReg<'a, Num> {
     #[inline]
     fn from(flags: crate::backend::mount::types::UnmountFlags) -> Self {

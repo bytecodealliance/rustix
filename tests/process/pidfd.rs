@@ -22,7 +22,7 @@ fn test_pidfd_waitid() {
     let pid = process::Pid::from_child(&child);
     let pidfd = match process::pidfd_open(pid, process::PidfdFlags::empty()) {
         Ok(pidfd) => pidfd,
-        Err(e) if e == io::Errno::NOSYS => {
+        Err(io::Errno::NOSYS) => {
             // The kernel does not support pidfds.
             return;
         }
@@ -59,7 +59,7 @@ fn test_pidfd_poll() {
     let pid = process::Pid::from_child(&child);
     let pidfd = match process::pidfd_open(pid, process::PidfdFlags::NONBLOCK) {
         Ok(pidfd) => pidfd,
-        Err(e) if e == io::Errno::NOSYS || e == io::Errno::INVAL => {
+        Err(io::Errno::NOSYS) | Err(io::Errno::INVAL) => {
             // The kernel does not support non-blocking pidfds.
             return;
         }
@@ -71,8 +71,9 @@ fn test_pidfd_poll() {
         process::WaitId::PidFd(pidfd.as_fd()),
         process::WaitidOptions::EXITED,
     ) {
-        Err(e) if e == io::Errno::AGAIN => (),
-        _ => panic!("unexpected result"),
+        Err(io::Errno::AGAIN) => (),
+        Err(e) => panic!("unexpected result: {:?}", e),
+        Ok(_) => panic!("unexpected success"),
     }
 
     // Wait for the child process to exit.

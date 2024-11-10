@@ -247,7 +247,7 @@ impl WaitidStatus {
         // SAFETY: POSIX [specifies] that the `siginfo_t` returned by a
         // `waitid` call always has a valid `si_status` value.
         //
-        // [specifies]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/signal.h.html
+        // [specifies]: https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/signal.h.html
         unsafe { self.0.si_status() }
     }
 }
@@ -306,12 +306,12 @@ pub enum WaitId<'a> {
 ///  - [POSIX]
 ///  - [Linux]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/wait.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/wait.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/waitpid.2.html
 #[cfg(not(target_os = "wasi"))]
 #[inline]
-pub fn waitpid(pid: Option<Pid>, waitopts: WaitOptions) -> io::Result<Option<WaitStatus>> {
-    Ok(backend::process::syscalls::waitpid(pid, waitopts)?.map(|(_, status)| status))
+pub fn waitpid(pid: Option<Pid>, waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
+    backend::process::syscalls::waitpid(pid, waitopts)
 }
 
 /// `waitpid(-pgid, waitopts)`—Wait for a process in a specific process group
@@ -328,12 +328,12 @@ pub fn waitpid(pid: Option<Pid>, waitopts: WaitOptions) -> io::Result<Option<Wai
 ///  - [POSIX]
 ///  - [Linux]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/wait.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/wait.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/waitpid.2.html
 #[cfg(not(target_os = "wasi"))]
 #[inline]
-pub fn waitpgid(pgid: Pid, waitopts: WaitOptions) -> io::Result<Option<WaitStatus>> {
-    Ok(backend::process::syscalls::waitpgid(pgid, waitopts)?.map(|(_, status)| status))
+pub fn waitpgid(pgid: Pid, waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
+    backend::process::syscalls::waitpgid(pgid, waitopts)
 }
 
 /// `wait(waitopts)`—Wait for any of the children of calling process to
@@ -349,7 +349,7 @@ pub fn waitpgid(pgid: Pid, waitopts: WaitOptions) -> io::Result<Option<WaitStatu
 ///  - [POSIX]
 ///  - [Linux]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/wait.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/wait.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/waitpid.2.html
 #[cfg(not(target_os = "wasi"))]
 #[inline]

@@ -344,6 +344,13 @@ pub(crate) fn set_socket_recv_buffer_size(fd: BorrowedFd<'_>, size: usize) -> io
     setsockopt(fd, c::SOL_SOCKET, c::SO_RCVBUF, size)
 }
 
+#[cfg(any(linux_kernel, target_os = "fuchsia", target_os = "redox"))]
+#[inline]
+pub(crate) fn set_socket_recv_buffer_size_force(fd: BorrowedFd<'_>, size: usize) -> io::Result<()> {
+    let size: c::c_int = size.try_into().map_err(|_| io::Errno::INVAL)?;
+    setsockopt(fd, c::SOL_SOCKET, c::SO_RCVBUFFORCE, size)
+}
+
 #[inline]
 pub(crate) fn get_socket_recv_buffer_size(fd: BorrowedFd<'_>) -> io::Result<usize> {
     getsockopt(fd, c::SOL_SOCKET, c::SO_RCVBUF).map(|size: u32| size as usize)

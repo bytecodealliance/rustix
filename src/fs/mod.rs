@@ -6,16 +6,12 @@ mod at;
 mod constants;
 #[cfg(linux_kernel)]
 mod copy_file_range;
-#[cfg(not(any(target_os = "espidf", target_os = "redox")))]
-#[cfg(not(target_os = "haiku"))]
-// Haiku needs <https://git.haiku-os.org/haiku/commit/?id=b8caef69155fbe87def579305622b9718d7779dc>
-mod cwd;
 #[cfg(all(feature = "alloc", not(any(target_os = "espidf", target_os = "redox"))))]
 mod dir;
 #[cfg(not(any(
     apple,
     netbsdlike,
-    solarish,
+    target_os = "solaris",
     target_os = "dragonfly",
     target_os = "espidf",
     target_os = "haiku",
@@ -48,15 +44,14 @@ mod makedev;
 #[cfg(any(linux_kernel, target_os = "freebsd"))]
 mod memfd_create;
 #[cfg(linux_kernel)]
-#[cfg(feature = "fs")]
-mod mount;
-#[cfg(linux_kernel)]
 mod openat2;
 #[cfg(linux_kernel)]
 mod raw_dir;
 mod seek_from;
 #[cfg(target_os = "linux")]
 mod sendfile;
+#[cfg(not(any(target_os = "espidf", target_os = "redox")))]
+mod special;
 #[cfg(linux_kernel)]
 mod statx;
 #[cfg(not(any(
@@ -75,16 +70,12 @@ pub use at::*;
 pub use constants::*;
 #[cfg(linux_kernel)]
 pub use copy_file_range::copy_file_range;
-#[cfg(not(any(target_os = "espidf", target_os = "redox")))]
-#[cfg(not(target_os = "haiku"))]
-// Haiku needs <https://git.haiku-os.org/haiku/commit/?id=b8caef69155fbe87def579305622b9718d7779dc>
-pub use cwd::*;
 #[cfg(all(feature = "alloc", not(any(target_os = "espidf", target_os = "redox"))))]
 pub use dir::{Dir, DirEntry};
 #[cfg(not(any(
     apple,
     netbsdlike,
-    solarish,
+    target_os = "solaris",
     target_os = "dragonfly",
     target_os = "espidf",
     target_os = "haiku",
@@ -115,15 +106,14 @@ pub use makedev::*;
 #[cfg(any(linux_kernel, target_os = "freebsd"))]
 pub use memfd_create::memfd_create;
 #[cfg(linux_kernel)]
-#[cfg(feature = "fs")]
-pub use mount::*;
-#[cfg(linux_kernel)]
 pub use openat2::openat2;
 #[cfg(linux_kernel)]
 pub use raw_dir::{RawDir, RawDirEntry};
 pub use seek_from::SeekFrom;
 #[cfg(target_os = "linux")]
 pub use sendfile::sendfile;
+#[cfg(not(any(target_os = "espidf", target_os = "redox")))]
+pub use special::*;
 #[cfg(linux_kernel)]
 pub use statx::statx;
 #[cfg(not(any(

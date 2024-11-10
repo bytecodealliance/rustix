@@ -5,7 +5,7 @@
 //! # Safety
 //!
 //! These files performs raw system calls, and sometimes passes them
-//! uninitialized memory buffers. The signatures in this file are currently
+//! uninitialized memory buffers. The signatures in this module are currently
 //! manually maintained and must correspond with the signatures of the actual
 //! Linux syscalls.
 //!
@@ -47,8 +47,6 @@ pub(crate) mod io_uring;
 pub(crate) mod mm;
 #[cfg(feature = "mount")]
 pub(crate) mod mount;
-#[cfg(all(feature = "fs", not(feature = "mount")))]
-pub(crate) mod mount; // for deprecated mount functions in "fs"
 #[cfg(feature = "net")]
 pub(crate) mod net;
 #[cfg(any(

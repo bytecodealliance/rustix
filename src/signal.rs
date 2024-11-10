@@ -1,7 +1,7 @@
 use crate::backend::c;
 
-/// A signal number for use with [`kill_process`], [`kill_process_group`],
-/// and [`kill_current_process_group`].
+/// A signal number for use with [`kill_process`], [`kill_process_group`], and
+/// [`kill_current_process_group`].
 ///
 /// [`kill_process`]: crate::process::kill_process
 /// [`kill_process_group`]: crate::process::kill_process_group

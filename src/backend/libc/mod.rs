@@ -78,7 +78,7 @@ pub(crate) mod fd {
     ///
     /// [`AsFd`]: https://doc.rust-lang.org/stable/std/os/fd/trait.AsFd.html
     pub trait AsFd {
-        /// An `as_fd` function for Winsock, where a `Fd` is a `Socket`.
+        /// An `as_fd` function for Winsock, where an `Fd` is a `Socket`.
         fn as_fd(&self) -> BorrowedFd;
     }
     impl<T: AsSocket> AsFd for T {
@@ -117,9 +117,6 @@ pub(crate) mod mm;
 #[cfg(linux_kernel)]
 #[cfg(feature = "mount")]
 pub(crate) mod mount;
-#[cfg(linux_kernel)]
-#[cfg(all(feature = "fs", not(feature = "mount")))]
-pub(crate) mod mount; // for deprecated mount functions in "fs"
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 #[cfg(feature = "net")]
 pub(crate) mod net;
