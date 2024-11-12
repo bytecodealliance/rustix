@@ -1,10 +1,14 @@
+use std::ptr;
+
 use libc::c_void;
 use rustix::fd::{AsFd, AsRawFd, BorrowedFd};
-use rustix::io::Result;
+use rustix::io::{Errno, Result};
 use rustix::io_uring::{
-    io_uring_params, io_uring_register_with, io_uring_rsrc_update, io_uring_setup,
-    IoringFeatureFlags, IoringRegisterFlags, IoringRegisterOp,
+    io_uring_buf, io_uring_buf_reg, io_uring_buf_ring, io_uring_params, io_uring_register_with,
+    io_uring_rsrc_update, io_uring_setup, IoringFeatureFlags, IoringRegisterFlags,
+    IoringRegisterOp,
 };
+use rustix::mm::{MapFlags, ProtFlags};
 
 fn do_register<FD>(
     fd: FD,
@@ -87,6 +91,19 @@ where
     Ok(())
 }
 
+fn register_buf_ring<FD>(fd: FD, reg: &io_uring_buf_reg) -> Result<()>
+where
+    FD: AsFd,
+{
+    do_register(
+        fd,
+        false,
+        IoringRegisterOp::RegisterPbufRing,
+        reg as *const io_uring_buf_reg as *const c_void,
+        1,
+    )
+}
+
 #[test]
 fn test_io_uring_register_with() {
     let mut params = io_uring_params::default();
@@ -103,4 +120,54 @@ fn test_io_uring_register_with() {
     let register_result = register_iowq_max_workers(ring_fd);
     unregister_ring(ring_fd).unwrap();
     register_result.unwrap();
+}
+
+#[test]
+fn io_uring_buf_ring_can_be_registered() {
+    const ENTRIES: usize = 8;
+    const BGID: u16 = 42;
+
+    let mut params = io_uring_params::default();
+    let ring_fd = io_uring_setup(4, &mut params).unwrap();
+
+    // Test that the kernel version supports IORING_REGISTER_PBUF_RING. If it doesn't, the kernel
+    // will return EINVAL. Not setting a `ring_addr` on `io_uring_buf_reg` will return `EFAULT`.
+    if let Err(e) = register_buf_ring(ring_fd.as_fd(), &io_uring_buf_reg::default()) {
+        if e == Errno::INVAL {
+            // Skip the test, as the current kernel version doesn't support what we need to test.
+            return;
+        }
+    }
+
+    let buf_ring_size = ENTRIES * std::mem::size_of::<io_uring_buf>();
+
+    let br_ptr = unsafe {
+        rustix::mm::mmap_anonymous(
+            ptr::null_mut(),
+            buf_ring_size,
+            ProtFlags::READ | ProtFlags::WRITE,
+            MapFlags::PRIVATE,
+        )
+    }
+    .unwrap() as *mut io_uring_buf_ring;
+
+    let br = unsafe { br_ptr.as_mut() }.expect("A valid io_uring_buf_ring struct");
+
+    let reg = io_uring_buf_reg {
+        ring_addr: br_ptr as u64,
+        ring_entries: ENTRIES as u32,
+        bgid: BGID,
+        pad: 0,
+        resv: [0u64; 3],
+    };
+
+    assert_eq!(register_buf_ring(ring_fd, &reg), Ok(()));
+
+    let tail = unsafe { br.tail_or_bufs.tail.as_mut() };
+    tail.tail = 0;
+    let bufs = unsafe { br.tail_or_bufs.bufs.as_mut().bufs.as_mut_slice(ENTRIES) };
+
+    assert_eq!(bufs[0].bid, 0);
+    bufs[7].bid = 7;
+    assert_eq!(bufs[7].bid, 7);
 }
