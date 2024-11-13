@@ -314,12 +314,15 @@ pub(crate) fn port_getn(
     events: &mut Vec<Event>,
     mut nget: u32,
 ) -> io::Result<()> {
+    if events.capacity() == 0 {
+        return Ok(());
+    }
     let timeout = timeout.map_or(null_mut(), as_mut_ptr);
     unsafe {
         ret(c::port_getn(
             borrowed_fd(port),
             events.as_mut_ptr().cast(),
-            events.len().try_into().unwrap(),
+            events.capacity().try_into().unwrap(),
             &mut nget,
             timeout,
         ))?;
