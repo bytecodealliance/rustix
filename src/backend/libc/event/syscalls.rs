@@ -319,7 +319,7 @@ pub(crate) fn port_getn(
         ret(c::port_getn(
             borrowed_fd(port),
             events.as_mut_ptr().cast(),
-            events.len().try_into().unwrap(),
+            events.capacity().try_into().unwrap(),
             &mut nget,
             timeout,
         ))?;
