@@ -156,7 +156,7 @@ pub fn port_getn(
 ///
 /// [OpenSolaris]: https://www.unix.com/man-page/opensolaris/3C/port_getn/
 /// [illumos]: https://illumos.org/man/3C/port_getn
-pub fn port_getn_query(port: impl AsFd) -> io::Result<()> {
+pub fn port_getn_query(port: impl AsFd) -> io::Result<u32> {
     syscalls::port_getn_query(port.as_fd())
 }
 

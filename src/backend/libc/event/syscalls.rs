@@ -351,7 +351,7 @@ pub(crate) fn port_getn_query(port: BorrowedFd<'_>) -> io::Result<u32> {
             null_mut(),
             0,
             &mut nget,
-            null(),
+            null_mut(),
         ))?;
     }
 
