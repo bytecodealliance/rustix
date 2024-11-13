@@ -37,7 +37,7 @@ use {core::fmt, std::ffi::OsStr, std::path::Path};
 /// ```
 #[derive(Clone)]
 pub struct DecInt {
-    // Enough to hold an i64 and NUL terminator.
+    // Enough to hold an {u,i}64 and NUL terminator.
     buf: [MaybeUninit<u8>; "-9223372036854775808\0".len()],
     len: usize,
 }
@@ -72,6 +72,7 @@ impl DecInt {
                     _ => unreachable!(),
                 }
             };
+            // This optimizes out the assertion and bounds checks.
             if str_buf.len() > max_buf_size {
                 unsafe { core::hint::unreachable_unchecked() }
             }
