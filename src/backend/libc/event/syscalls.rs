@@ -314,9 +314,13 @@ pub(crate) fn port_getn(
     events: &mut Vec<Event>,
     mut nget: u32,
 ) -> io::Result<()> {
+    // `port_getn` special-cases a max value of 0 to be a query that returns
+    // the number of events. We don't want to do the `set_len` in that case, so
+    // so bail out early if needed.
     if events.capacity() == 0 {
         return Ok(());
     }
+
     let timeout = timeout.map_or(null_mut(), as_mut_ptr);
     unsafe {
         ret(c::port_getn(
@@ -334,6 +338,24 @@ pub(crate) fn port_getn(
     }
 
     Ok(())
+}
+
+#[cfg(solarish)]
+pub(crate) fn port_getn_query(port: BorrowedFd<'_>) -> io::Result<u32> {
+    let mut nget: u32 = 0;
+
+    // Pass a `max` of 0 to query the number of available events.
+    unsafe {
+        ret(c::port_getn(
+            borrowed_fd(port),
+            null_mut(),
+            0,
+            &mut nget,
+            null_mut(),
+        ))?;
+    }
+
+    Ok(nget)
 }
 
 #[cfg(solarish)]

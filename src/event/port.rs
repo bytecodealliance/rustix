@@ -110,6 +110,13 @@ pub fn port_get(port: impl AsFd, timeout: Option<Duration>) -> io::Result<Event>
 /// `port_getn(port, events, min_events, timeout)`—Gets multiple events from a
 /// port.
 ///
+/// This requests up to a max of `events.capacity()` events, and then resizes
+/// `events` to the number of events retrieved. If `events.capacity()` is 0,
+/// this does nothing and returns immediately.
+///
+/// To query the number of events without retrieving any, use
+/// [`port_getn_query`].
+///
 /// # References
 ///  - [OpenSolaris]
 ///  - [illumos]
@@ -136,6 +143,21 @@ pub fn port_getn(
         events,
         min_events.try_into().unwrap(),
     )
+}
+
+/// `port_getn(port, NULL, 0, NULL)`—Queries the number of events
+/// available from a port.
+///
+/// To retrieve the events, use [`port_getn`].
+///
+/// # References
+///  - [OpenSolaris]
+///  - [illumos]
+///
+/// [OpenSolaris]: https://www.unix.com/man-page/opensolaris/3C/port_getn/
+/// [illumos]: https://illumos.org/man/3C/port_getn
+pub fn port_getn_query(port: impl AsFd) -> io::Result<u32> {
+    syscalls::port_getn_query(port.as_fd())
 }
 
 /// `port_send(port, events, userdata)`—Sends an event to a port.
