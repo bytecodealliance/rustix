@@ -145,7 +145,7 @@ pub fn port_getn(
     )
 }
 
-/// `port_getn_query(port, NULL, 0, NULL)`—Queries the number of events
+/// `port_getn(port, NULL, 0, NULL)`—Queries the number of events
 /// available from a port.
 ///
 /// To retrieve the events, use [`port_getn`].
