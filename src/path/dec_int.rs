@@ -37,9 +37,10 @@ use {core::fmt, std::ffi::OsStr, std::path::Path};
 #[derive(Clone)]
 pub struct DecInt {
     // Enough to hold an {u,i}64 and NUL terminator.
-    buf: [MaybeUninit<u8>; "-9223372036854775808\0".len()],
+    buf: [MaybeUninit<u8>; u64::MAX_STR_LEN + 1],
     len: usize,
 }
+const _: () = assert!(u64::MAX_STR_LEN == i64::MAX_STR_LEN);
 
 impl DecInt {
     /// Construct a new path component from an integer.
