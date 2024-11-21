@@ -8,7 +8,7 @@
 
 use crate::backend::fd::{AsFd, AsRawFd};
 use crate::ffi::CStr;
-use core::fmt::Write;
+use core::mem::{self, MaybeUninit};
 use itoa::{Buffer, Integer};
 #[cfg(all(feature = "std", unix))]
 use std::os::unix::ffi::OsStrExt;
@@ -36,23 +36,36 @@ use {core::fmt, std::ffi::OsStr, std::path::Path};
 /// ```
 #[derive(Clone)]
 pub struct DecInt {
-    // 20 `u8`s is enough to hold the decimal ASCII representation of any
-    // `u64`, and we add one for a NUL terminator for `as_c_str`.
-    buf: [u8; 20 + 1],
+    // Enough to hold an {u,i}64 and NUL terminator.
+    buf: [MaybeUninit<u8>; u64::MAX_STR_LEN + 1],
     len: usize,
 }
+const _: () = assert!(u64::MAX_STR_LEN == i64::MAX_STR_LEN);
 
 impl DecInt {
     /// Construct a new path component from an integer.
     #[inline]
-    pub fn new<Int: Integer>(i: Int) -> Self {
-        let mut me = DecIntWriter(Self {
-            buf: [0; 20 + 1],
-            len: 0,
+    pub fn new<Int: Integer + 'static>(i: Int) -> Self {
+        let mut buf = [MaybeUninit::uninit(); 21];
+
+        let mut str_buf = Buffer::new();
+        let str_buf = str_buf.format(i);
+        assert!(
+            str_buf.len() < buf.len(),
+            "{str_buf}{} unsupported.",
+            core::any::type_name::<Int>()
+        );
+
+        buf[..str_buf.len()].copy_from_slice(unsafe {
+            // SAFETY: you can always go from init to uninit
+            mem::transmute::<&[u8], &[MaybeUninit<u8>]>(str_buf.as_bytes())
         });
-        let mut buf = Buffer::new();
-        me.write_str(buf.format(i)).unwrap();
-        me.0
+        buf[str_buf.len()] = MaybeUninit::new(0);
+
+        Self {
+            buf,
+            len: str_buf.len(),
+        }
     }
 
     /// Construct a new path component from a file descriptor.
@@ -72,7 +85,7 @@ impl DecInt {
     /// Return the raw byte buffer as a `&CStr`.
     #[inline]
     pub fn as_c_str(&self) -> &CStr {
-        let bytes_with_nul = &self.buf[..=self.len];
+        let bytes_with_nul = self.as_bytes_with_nul();
         debug_assert!(CStr::from_bytes_with_nul(bytes_with_nul).is_ok());
 
         // SAFETY: `self.buf` holds a single decimal ASCII representation and
@@ -80,28 +93,19 @@ impl DecInt {
         unsafe { CStr::from_bytes_with_nul_unchecked(bytes_with_nul) }
     }
 
+    /// Return the raw byte buffer including the NUL byte.
+    #[inline]
+    pub fn as_bytes_with_nul(&self) -> &[u8] {
+        let init = &self.buf[..=self.len];
+        // SAFETY: we're guaranteed to have initialized len+1 bytes.
+        unsafe { mem::transmute::<&[MaybeUninit<u8>], &[u8]>(init) }
+    }
+
     /// Return the raw byte buffer.
     #[inline]
     pub fn as_bytes(&self) -> &[u8] {
-        &self.buf[..self.len]
-    }
-}
-
-/// A wrapper around `DecInt` that implements `Write` without exposing this
-/// implementation to `DecInt`'s public API.
-struct DecIntWriter(DecInt);
-
-impl core::fmt::Write for DecIntWriter {
-    #[inline]
-    fn write_str(&mut self, s: &str) -> core::fmt::Result {
-        match self.0.buf.get_mut(self.0.len..self.0.len + s.len()) {
-            Some(slice) => {
-                slice.copy_from_slice(s.as_bytes());
-                self.0.len += s.len();
-                Ok(())
-            }
-            None => Err(core::fmt::Error),
-        }
+        let bytes = self.as_bytes_with_nul();
+        &bytes[..bytes.len() - 1]
     }
 }
 
@@ -109,7 +113,7 @@ impl core::fmt::Write for DecIntWriter {
 impl AsRef<Path> for DecInt {
     #[inline]
     fn as_ref(&self) -> &Path {
-        let as_os_str: &OsStr = OsStrExt::from_bytes(&self.buf[..self.len]);
+        let as_os_str: &OsStr = OsStrExt::from_bytes(self.as_bytes());
         Path::new(as_os_str)
     }
 }
