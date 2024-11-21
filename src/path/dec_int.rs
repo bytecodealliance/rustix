@@ -50,19 +50,17 @@ impl DecInt {
 
         let mut str_buf = Buffer::new();
         let str_buf = str_buf.format(i);
-        {
-            assert!(
-                str_buf.len() < buf.len(),
-                "{str_buf}{} unsupported.",
-                core::any::type_name::<Int>()
-            );
+        assert!(
+            str_buf.len() < buf.len(),
+            "{str_buf}{} unsupported.",
+            core::any::type_name::<Int>()
+        );
 
-            buf[..str_buf.len()].copy_from_slice(unsafe {
-                // SAFETY: you can always go from init to uninit
-                mem::transmute::<&[u8], &[MaybeUninit<u8>]>(str_buf.as_bytes())
-            });
-            buf[str_buf.len()] = MaybeUninit::new(0);
-        }
+        buf[..str_buf.len()].copy_from_slice(unsafe {
+            // SAFETY: you can always go from init to uninit
+            mem::transmute::<&[u8], &[MaybeUninit<u8>]>(str_buf.as_bytes())
+        });
+        buf[str_buf.len()] = MaybeUninit::new(0);
 
         Self {
             buf,
