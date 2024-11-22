@@ -45,7 +45,7 @@ const _: () = assert!(u64::MAX_STR_LEN == i64::MAX_STR_LEN);
 impl DecInt {
     /// Construct a new path component from an integer.
     #[inline]
-    pub fn new<Int: Integer + 'static>(i: Int) -> Self {
+    pub fn new<Int: Integer>(i: Int) -> Self {
         let mut buf = [MaybeUninit::uninit(); 21];
 
         let mut str_buf = Buffer::new();
