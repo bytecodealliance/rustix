@@ -345,7 +345,7 @@ fn net_dgram_v6_bind_any() {
 }
 
 /// Test `sendto` with calling `connect`, on platforms which support that.
-#[cfg(not(any(bsd, target_os = "illumos")))]
+#[cfg(not(any(bsd, solarish)))]
 #[test]
 fn net_dgram_v4_connect_sendto() {
     crate::init();
@@ -439,7 +439,7 @@ fn net_dgram_v4_sendto() {
 }
 
 /// Similar, but with V6.
-#[cfg(not(any(bsd, target_os = "illumos")))]
+#[cfg(not(any(bsd, solarish)))]
 #[test]
 fn net_dgram_v6_connect_sendto() {
     crate::init();
@@ -533,7 +533,7 @@ fn net_dgram_v6_sendto() {
 }
 
 /// Test `sendto_any` with calling connect, on platforms which support that.
-#[cfg(not(any(bsd, target_os = "illumos")))]
+#[cfg(not(any(bsd, solarish)))]
 #[test]
 fn net_dgram_v4_connect_sendto_any() {
     crate::init();
@@ -621,7 +621,7 @@ fn net_dgram_v4_sendto_any() {
 }
 
 /// Similar, but with V6.
-#[cfg(not(any(bsd, target_os = "illumos")))]
+#[cfg(not(any(bsd, solarish)))]
 #[test]
 fn net_dgram_v6_connect_sendto_any() {
     crate::init();
