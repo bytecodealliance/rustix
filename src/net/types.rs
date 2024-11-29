@@ -1779,6 +1779,19 @@ pub struct UCred {
     pub gid: crate::ugid::Gid,
 }
 
+/// The IPV6_PKTINFO option enables the application to provide the following pieces of information:
+/// [`the source IP address for an outgoing packet`] and
+/// [`the outgoing interface for a packet`].
+#[cfg(linux_kernel)]
+#[derive(Clone, Copy, Eq, PartialEq, Hash)]
+#[repr(C)]
+pub struct Ipv6PktInfo {
+    /// Source address
+    pub ipi6_addr: crate::net::Ipv6Addr,
+    /// Interface index
+    pub if_index: u32,
+}
+
 #[test]
 fn test_sizes() {
     use crate::backend::c;
@@ -1808,6 +1821,8 @@ fn test_sizes() {
 
     #[cfg(linux_kernel)]
     assert_eq_size!(UCred, libc::ucred);
+    #[cfg(linux_kernel)]
+    assert_eq_size!(Ipv6PktInfo, libc::in6_pktinfo);
 
     // Linux added fields to `xdp_umem_reg` so it's bigger now.
     /*
