@@ -13,10 +13,20 @@ fn encode_decode() {
         let decoded = SocketAddrAny::read(encoded.as_ptr(), len).unwrap();
         assert_eq!(decoded, SocketAddrAny::V4(orig));
 
+        let orig = SocketAddrV4::new(Ipv4Addr::new(2, 3, 5, 6), 33);
+        let encoded = SocketAddrAny::V4(orig).to_raw();
+        let decoded = SocketAddrAny::from_raw(encoded).unwrap();
+        assert_eq!(decoded, SocketAddrAny::V4(orig));
+
         let orig = SocketAddrV6::new(Ipv6Addr::new(2, 3, 5, 6, 8, 9, 11, 12), 33, 34, 36);
         let mut encoded = std::mem::MaybeUninit::<SocketAddrStorage>::uninit();
         let len = SocketAddrAny::V6(orig).write(encoded.as_mut_ptr());
         let decoded = SocketAddrAny::read(encoded.as_ptr(), len).unwrap();
+        assert_eq!(decoded, SocketAddrAny::V6(orig));
+
+        let orig = SocketAddrV6::new(Ipv6Addr::new(2, 3, 5, 6, 8, 9, 11, 12), 33, 34, 36);
+        let encoded = SocketAddrAny::V6(orig).to_raw();
+        let decoded = SocketAddrAny::from_raw(encoded).unwrap();
         assert_eq!(decoded, SocketAddrAny::V6(orig));
 
         #[cfg(not(windows))]
@@ -25,6 +35,11 @@ fn encode_decode() {
             let mut encoded = std::mem::MaybeUninit::<SocketAddrStorage>::uninit();
             let len = SocketAddrAny::Unix(orig.clone()).write(encoded.as_mut_ptr());
             let decoded = SocketAddrAny::read(encoded.as_ptr(), len).unwrap();
+            assert_eq!(decoded, SocketAddrAny::Unix(orig));
+
+            let orig = SocketAddrUnix::new("/path/to/socket").unwrap();
+            let encoded = SocketAddrAny::Unix(orig.clone()).to_raw();
+            let decoded = SocketAddrAny::from_raw(encoded).unwrap();
             assert_eq!(decoded, SocketAddrAny::Unix(orig));
         }
     }
