@@ -2,6 +2,8 @@
 
 #[cfg(any(freebsdlike, linux_kernel, target_os = "fuchsia"))]
 use super::types::RawCpuSet;
+#[cfg(any(freebsdlike, linux_kernel))]
+use super::types::{SchedParam, SchedPolicy};
 use crate::backend::c;
 #[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
 use crate::backend::conv::borrowed_fd;
@@ -209,6 +211,29 @@ pub(crate) fn sched_setaffinity(pid: Option<Pid>, cpuset: &RawCpuSet) -> io::Res
             Pid::as_raw(pid) as _,
             core::mem::size_of::<RawCpuSet>(),
             cpuset,
+        ))
+    }
+}
+
+#[cfg(any(freebsdlike, linux_kernel))]
+#[inline]
+pub(crate) fn sched_getscheduler(pid: Option<Pid>) -> io::Result<SchedPolicy> {
+    unsafe { ret_c_int(c::sched_getscheduler(Pid::as_raw(pid) as _)) }
+        .map(|r| SchedPolicy::from_bits_retain(r as _))
+}
+
+#[cfg(any(freebsdlike, linux_kernel))]
+#[inline]
+pub(crate) fn sched_setscheduler(
+    pid: Option<Pid>,
+    policy: SchedPolicy,
+    param: &SchedParam,
+) -> io::Result<()> {
+    unsafe {
+        ret(c::sched_setscheduler(
+            Pid::as_raw(pid) as _,
+            policy.bits() as _,
+            param as *const SchedParam as _,
         ))
     }
 }
