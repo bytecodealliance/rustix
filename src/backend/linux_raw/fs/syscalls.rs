@@ -17,7 +17,7 @@ use crate::backend::conv::fs::oflags_for_open_how;
 ))]
 use crate::backend::conv::zero;
 use crate::backend::conv::{
-    by_ref, c_int, c_uint, dev_t, opt_mut, pass_usize, raw_fd, ret, ret_c_int, ret_c_uint,
+    by_mut, by_ref, c_int, c_uint, dev_t, opt_mut, pass_usize, raw_fd, ret, ret_c_int, ret_c_uint,
     ret_infallible, ret_owned_fd, ret_usize, size_of, slice, slice_mut,
 };
 #[cfg(target_pointer_width = "64")]
@@ -1087,6 +1087,60 @@ pub(crate) fn fcntl_lock(fd: BorrowedFd<'_>, operation: FlockOperation) -> io::R
             c_uint(cmd),
             by_ref(&lock)
         ))
+    }
+}
+
+#[inline]
+pub(crate) fn fcntl_getlk(fd: BorrowedFd<'_>) -> io::Result<bool> {
+    use linux_raw_sys::general::F_WRLCK;
+    #[cfg(target_pointer_width = "64")]
+    use linux_raw_sys::general::{flock, F_GETLK};
+    #[cfg(target_pointer_width = "32")]
+    use linux_raw_sys::general::{flock64 as flock, F_GETLK64 as F_GETLK};
+
+    let mut lock = flock {
+        l_type: F_WRLCK as _,
+
+        // When `l_len` is zero, this locks all the bytes from
+        // `l_whence`/`l_start` to the end of the file, even as the
+        // file grows dynamically.
+        l_whence: SEEK_SET as _,
+        l_start: 0,
+        l_len: 0,
+
+        // Unused.
+        l_pid: 0,
+    };
+
+    #[cfg(target_pointer_width = "32")]
+    let result = unsafe {
+        ret(syscall_readonly!(
+            __NR_fcntl64,
+            fd,
+            c_uint(F_GETLK),
+            by_mut(&mut lock)
+        ))
+    };
+
+    #[cfg(target_pointer_width = "64")]
+    let result = unsafe {
+        ret(syscall_readonly!(
+            __NR_fcntl,
+            fd,
+            c_uint(F_GETLK),
+            by_mut(&mut lock)
+        ))
+    };
+
+    match result {
+        Ok(_) => {
+            if lock.l_type == F_WRLCK as i16 {
+                Ok(true)
+            } else {
+                Ok(false)
+            }
+        }
+        Err(err) => return Err(err),
     }
 }
 
