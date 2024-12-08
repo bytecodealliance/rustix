@@ -114,7 +114,7 @@ fn test_file() {
 
     // Clear `O_LARGEFILE`, which may be set by rustix on 32-bit Linux or
     // automatically by some kernel on 64-bit (Linux and illumos).
-    #[cfg(any(linux_kernel, target_os = "illumos"))]
+    #[cfg(any(linux_kernel, solarish))]
     let fl = fl - rustix::fs::OFlags::LARGEFILE;
 
     assert_eq!(fl, rustix::fs::OFlags::empty());
