@@ -94,7 +94,7 @@ pub(crate) const O_LARGEFILE: c_int = linux_raw_sys::general::O_LARGEFILE as _;
 
 // Gated under `_LARGEFILE_SOURCE` but automatically set by the kernel.
 // <https://github.com/illumos/illumos-gate/blob/fb2cb638e5604b214d8ea8d4f01ad2e77b437c17/usr/src/ucbhead/sys/fcntl.h#L64>
-#[cfg(target_os = "illumos")]
+#[cfg(solarish)]
 pub(crate) const O_LARGEFILE: c_int = 0x2000;
 
 // TODO: This is new in Linux 6.11; remove when linux-raw-sys is updated.
