@@ -742,3 +742,14 @@ pub(crate) fn getgroups(buf: &mut [Gid]) -> io::Result<usize> {
 
     unsafe { ret_usize(c::getgroups(len, buf.as_mut_ptr().cast()) as isize) }
 }
+
+#[inline]
+pub(crate) fn _exit(status: i32) -> ! {
+    unsafe {
+        libc::_exit(status);
+    }
+    #[allow(unreachable_code)]
+    {
+        unreachable!("_exit failed to exit the process")
+    }
+}
