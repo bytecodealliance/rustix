@@ -1,3 +1,4 @@
+#[cfg(feature = "process")]
 #[cfg(not(target_os = "wasi"))]
 #[test]
 fn test_special_fds() {

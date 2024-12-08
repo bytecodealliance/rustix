@@ -82,6 +82,7 @@ fn test_select_with_pipes() {
 }
 
 #[cfg(feature = "pipe")]
+#[cfg(feature = "process")]
 #[cfg(not(windows))]
 #[test]
 #[serial] // for `setrlimit` usage
@@ -271,6 +272,7 @@ fn test_select_with_sockets() {
 // Like `test_select_with_sockets` but test with the maximum permitted
 // fd value.
 #[cfg(feature = "net")]
+#[cfg(feature = "process")]
 #[cfg(not(windows))] // for `dup2` usage
 #[test]
 #[serial] // for `setrlimit` usage, and `crate::init`
