@@ -116,6 +116,8 @@ pub use sendfile::sendfile;
 pub use special::*;
 #[cfg(linux_kernel)]
 pub use statx::statx;
+#[cfg(all(linux_kernel, any(target_env = "musl", target_env = "gnu")))]
+pub use statx::STATX_ATTR_MOUNT_ROOT;
 #[cfg(not(any(
     target_os = "espidf",
     target_os = "redox",
