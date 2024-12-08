@@ -36,12 +36,7 @@ use crate::fs::AtFlags;
     target_os = "vita",
 )))]
 use crate::fs::FallocateFlags;
-#[cfg(not(any(
-    target_os = "espidf",
-    target_os = "solaris",
-    target_os = "vita",
-    target_os = "wasi"
-)))]
+#[cfg(not(any(target_os = "espidf", target_os = "vita", target_os = "wasi")))]
 use crate::fs::FlockOperation;
 #[cfg(any(linux_kernel, target_os = "freebsd"))]
 use crate::fs::MemfdFlags;
@@ -1257,7 +1252,6 @@ pub(crate) fn fcntl_add_seals(fd: BorrowedFd<'_>, seals: SealFlags) -> io::Resul
     target_os = "espidf",
     target_os = "fuchsia",
     target_os = "redox",
-    target_os = "solaris",
     target_os = "vita",
     target_os = "wasi"
 )))]
