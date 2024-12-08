@@ -227,11 +227,12 @@ impl Dir {
     }
 }
 
-/// `Dir` implements `Send` but not `Sync`, because we use `readdir` which is
-/// not guaranteed to be thread-safe. Users can wrap this in a `Mutex` if they
-/// need `Sync`, which is effectively what'd need to do to implement `Sync`
-/// ourselves.
+/// `Dir` is `Send` and `Sync`, because even though it contains internal
+/// state, all methods that modify the state require a `mut &self` and
+/// can therefore not be called concurrently. Calling them from different
+/// threads sequentially is fine.
 unsafe impl Send for Dir {}
+unsafe impl Sync for Dir {}
 
 impl Drop for Dir {
     #[inline]
