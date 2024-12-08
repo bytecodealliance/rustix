@@ -8,6 +8,7 @@ use rustix::io_uring::{
     io_uring_rsrc_update, io_uring_setup, IoringFeatureFlags, IoringRegisterFlags,
     IoringRegisterOp,
 };
+#[cfg(feature = "mm")]
 use rustix::mm::{MapFlags, ProtFlags};
 
 fn do_register<FD>(
@@ -122,6 +123,7 @@ fn test_io_uring_register_with() {
     register_result.unwrap();
 }
 
+#[cfg(feature = "mm")]
 #[test]
 fn io_uring_buf_ring_can_be_registered() {
     const ENTRIES: usize = 8;
