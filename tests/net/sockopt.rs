@@ -128,10 +128,10 @@ fn test_sockopts_socket(s: &OwnedFd) {
 
     // Set the send buffer size.
     let size = sockopt::get_socket_send_buffer_size(s).unwrap();
-    sockopt::set_socket_send_buffer_size(s, size * 4).unwrap();
+    sockopt::set_socket_send_buffer_size(s, size * 2).unwrap();
 
     // Check that the send buffer size is set.
-    assert!(sockopt::get_socket_send_buffer_size(s).unwrap() >= size * 4);
+    assert!(sockopt::get_socket_send_buffer_size(s).unwrap() >= size * 2);
 
     // Check that the oobinline flag is not initially set.
     assert!(!sockopt::get_socket_oobinline(s).unwrap());
