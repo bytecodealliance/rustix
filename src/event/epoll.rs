@@ -259,6 +259,10 @@ impl<'a> Iterator for Iter<'a> {
     repr(packed)
 )]
 #[derive(Copy, Clone, Eq, PartialEq, Hash)]
+#[cfg_attr(
+    all(solarish, any(target_arch = "x86", target_arch = "x86_64")),
+    repr(packed(4))
+)]
 pub struct Event {
     /// Which specific event(s) occurred.
     pub flags: EventFlags,
@@ -451,7 +455,6 @@ mod tests {
 
     #[test]
     fn test_epoll_layouts() {
-        check_renamed_type!(Event, epoll_event);
         check_renamed_type!(Event, epoll_event);
         check_renamed_struct_renamed_field!(Event, epoll_event, flags, events);
         #[cfg(libc)]
