@@ -37,7 +37,25 @@ fn openpty_basic() {
     controller.write_all(b"Hello, world!\n\x04").unwrap();
 
     let mut s = String::new();
-    user.read_to_string(&mut s).unwrap();
+
+    // Read the string back. Our `\x04` above ended the stream, so we can
+    // read to the end of the stream.
+    #[cfg(not(target_os = "illumos"))]
+    {
+        user.read_to_string(&mut s).unwrap();
+    }
+
+    // Except on illumos, where the `\0x04` doesn't seem to translate into an
+    // EOF, so we didn't end the stream, so just the line.
+    #[cfg(target_os = "illumos")]
+    use std::io::{BufRead, BufReader};
+    #[cfg(target_os = "illumos")]
+    let mut user = BufReader::new(user);
+    #[cfg(target_os = "illumos")]
+    {
+        user.read_line(&mut s).unwrap();
+    }
+
 
     assert_eq!(s, "Hello, world!\n");
 }
@@ -70,6 +88,9 @@ fn openpty_get_peer() {
     controller.write_all(b"Hello, world!\n\x04").unwrap();
 
     let mut s = String::new();
+
+    // Read the string back. Our `\x04` above ended the stream, so we can
+    // read to the end of the stream.
     user.read_to_string(&mut s).unwrap();
 
     assert_eq!(s, "Hello, world!\n");
