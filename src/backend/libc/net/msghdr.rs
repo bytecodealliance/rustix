@@ -12,7 +12,9 @@ use crate::backend::net::write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6
 use crate::io::{self, IoSlice, IoSliceMut};
 #[cfg(target_os = "linux")]
 use crate::net::xdp::SocketAddrXdp;
-use crate::net::{RecvAncillaryBuffer, SendAncillaryBuffer, SocketAddrV4, SocketAddrV6};
+use crate::net::{
+    RawSocketAddr, RecvAncillaryBuffer, SendAncillaryBuffer, SocketAddrV4, SocketAddrV6,
+};
 use crate::utils::as_ptr;
 
 use core::mem::{size_of, zeroed, MaybeUninit};
@@ -142,6 +144,25 @@ pub(crate) fn with_xdp_msghdr<R>(
         let mut h = zero_msghdr();
         h.msg_name = as_ptr(&encoded) as _;
         h.msg_namelen = size_of::<SocketAddrXdp>() as _;
+        h.msg_iov = iov.as_ptr() as _;
+        h.msg_iovlen = msg_iov_len(iov.len());
+        h.msg_control = control.as_control_ptr().cast();
+        h.msg_controllen = msg_control_len(control.control_len());
+        h
+    })
+}
+
+/// Create a message header with a pre-encoded address.
+pub(crate) fn with_raw_msghdr<R>(
+    addr: &RawSocketAddr,
+    iov: &[IoSlice<'_>],
+    control: &mut SendAncillaryBuffer<'_, '_, '_>,
+    f: impl FnOnce(c::msghdr) -> R,
+) -> R {
+    f({
+        let mut h = zero_msghdr();
+        h.msg_name = addr.as_ptr() as _;
+        h.msg_namelen = addr.namelen() as _;
         h.msg_iov = iov.as_ptr() as _;
         h.msg_iovlen = msg_iov_len(iov.len());
         h.msg_control = control.as_control_ptr().cast();
