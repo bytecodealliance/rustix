@@ -15,6 +15,13 @@ mod fcntl;
     target_os = "solaris",
     target_os = "wasi"
 )))]
+mod fcntl_getlk;
+#[cfg(not(any(
+    target_os = "emscripten",
+    target_os = "fuchsia",
+    target_os = "redox",
+    target_os = "wasi"
+)))]
 mod fcntl_lock;
 mod file;
 #[cfg(not(target_os = "wasi"))]

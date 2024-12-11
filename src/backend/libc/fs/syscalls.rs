@@ -1283,6 +1283,41 @@ pub(crate) fn fcntl_lock(fd: BorrowedFd<'_>, operation: FlockOperation) -> io::R
     }
 }
 
+#[cfg(not(any(
+    target_os = "emscripten",
+    target_os = "espidf",
+    target_os = "fuchsia",
+    target_os = "redox",
+    target_os = "vita",
+    target_os = "wasi"
+)))]
+#[inline]
+pub(crate) fn fcntl_getlk(fd: BorrowedFd<'_>) -> io::Result<bool> {
+    use c::{flock, EINVAL, F_GETLK, F_RDLCK, F_UNLCK, F_WRLCK, SEEK_SET};
+
+    unsafe {
+        let mut lock: flock = core::mem::zeroed();
+        lock.l_type = F_WRLCK as _;
+
+        // When `l_len` is zero, this locks all the bytes from
+        // `l_whence`/`l_start` to the end of the file, even as the
+        // file grows dynamically.
+        lock.l_whence = SEEK_SET as _;
+        lock.l_start = 0;
+        lock.l_len = 0;
+        let result = c::fcntl(borrowed_fd(fd), F_GETLK, &mut lock);
+        if result == -1 {
+            return Err(io::Errno::last_os_error());
+        }
+
+        if lock.l_type == F_WRLCK {
+            Ok(true)
+        } else {
+            Ok(false)
+        }
+    }
+}
+
 pub(crate) fn seek(fd: BorrowedFd<'_>, pos: SeekFrom) -> io::Result<u64> {
     let (whence, offset) = match pos {
         SeekFrom::Start(pos) => {
