@@ -1,3 +1,4 @@
+use bitflags::bitflags;
 use linux_raw_sys::general::membarrier_cmd;
 
 /// A command for use with [`membarrier`] and [`membarrier_cpu`].
@@ -102,3 +103,35 @@ pub(crate) fn raw_cpu_set_new() -> RawCpuSet {
 }
 
 pub(crate) const CPU_SETSIZE: usize = 8 * core::mem::size_of::<RawCpuSet>();
+
+bitflags! {
+    /// `SCHED_*` constants for use with [`sched_getscheduler`] and [`sched_setscheduler`].
+    #[repr(transparent)]
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Default)]
+    pub struct SchedPolicy: u32 {
+        /// `SCHED_OTHER`
+        const Other = 0; // not defined in linux_raw_sys
+        /// `SCHED_FIFO`
+        const FIFO = linux_raw_sys::general::SCHED_FIFO;
+        /// `SCHED_RR`
+        const RoundRobin = linux_raw_sys::general::SCHED_RR;
+        /// `SCHED_BATCH`
+        const Batch = linux_raw_sys::general::SCHED_BATCH;
+        /// `SCHED_IDLE`
+        const Idle = linux_raw_sys::general::SCHED_IDLE;
+        /// `SCHED_DEADLINE`
+        const Deadline = linux_raw_sys::general::SCHED_DEADLINE;
+        /// `SCHED_RESET_ON_FORK`
+        const ResetOnFork = linux_raw_sys::general::SCHED_RESET_ON_FORK;
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
+        const _ = !0;
+    }
+}
+
+/// `sched_param` for use with [`sched_getscheduler`] and [`sched_setscheduler`].
+#[derive(Clone, Debug, Default)]
+#[repr(C)]
+pub struct SchedParam {
+    /// Scheduling priority.
+    pub sched_priority: i32,
+}
