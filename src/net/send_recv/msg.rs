@@ -2,9 +2,12 @@
 
 #![allow(unsafe_code)]
 
+#[cfg(target_os = "linux")]
+use crate::backend::net::msghdr::{with_noaddr_msghdr, with_raw_msghdr};
 use crate::backend::{self, c};
 use crate::fd::{AsFd, BorrowedFd, OwnedFd};
 use crate::io::{self, IoSlice, IoSliceMut};
+use crate::net::RawSocketAddr;
 #[cfg(linux_kernel)]
 use crate::net::UCred;
 
@@ -591,6 +594,48 @@ impl<'buf> Iterator for AncillaryDrain<'buf> {
 
 impl FusedIterator for AncillaryDrain<'_> {}
 
+/// An ABI-compatible wrapper for `mmsghdr`, for sending multiple messages with
+/// [sendmmsg].
+#[cfg(target_os = "linux")]
+#[repr(transparent)]
+pub struct MMsgHdr<'a> {
+    raw: c::mmsghdr,
+    _phantom: PhantomData<&'a mut ()>,
+}
+
+#[cfg(target_os = "linux")]
+impl<'a> MMsgHdr<'a> {
+    /// Constructs a new message with no destination address.
+    pub fn new(iov: &'a [IoSlice<'_>], control: &'a mut SendAncillaryBuffer<'_, '_, '_>) -> Self {
+        with_noaddr_msghdr(iov, control, Self::wrap)
+    }
+
+    /// Constructs a new message to a specific address.
+    pub fn new_with_addr(
+        addr: &'a RawSocketAddr,
+        iov: &'a [IoSlice<'_>],
+        control: &'a mut SendAncillaryBuffer<'_, '_, '_>,
+    ) -> MMsgHdr<'a> {
+        with_raw_msghdr(addr, iov, control, Self::wrap)
+    }
+
+    fn wrap(msg_hdr: c::msghdr) -> Self {
+        Self {
+            raw: c::mmsghdr {
+                msg_hdr,
+                msg_len: 0,
+            },
+            _phantom: PhantomData,
+        }
+    }
+
+    /// Returns the number of bytes sent. This will return 0 until after a
+    /// successful call to [sendmmsg].
+    pub fn bytes_sent(&self) -> usize {
+        self.raw.msg_len as _
+    }
+}
+
 /// `sendmsg(msghdr)`—Sends a message on a socket.
 ///
 /// This function is for use on connected sockets, as it doesn't have
@@ -784,6 +829,58 @@ pub fn sendmsg_any(
             backend::net::syscalls::sendmsg_xdp(socket.as_fd(), addr, iov, control, flags)
         }
     }
+}
+
+/// `sendmsg(msghdr)`—Sends a message on a socket to a specific address.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///  - [Apple]
+///  - [FreeBSD]
+///  - [NetBSD]
+///  - [OpenBSD]
+///  - [DragonFly BSD]
+///  - [illumos]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/sendmsg.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/sendmsg.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/sendmsg.2.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=sendmsg&sektion=2
+/// [NetBSD]: https://man.netbsd.org/sendmsg.2
+/// [OpenBSD]: https://man.openbsd.org/sendmsg.2
+/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=sendmsg&section=2
+/// [illumos]: https://illumos.org/man/3SOCKET/sendmsg
+#[inline]
+pub fn sendmsg_raw(
+    socket: impl AsFd,
+    addr: Option<&RawSocketAddr>,
+    iov: &[IoSlice<'_>],
+    control: &mut SendAncillaryBuffer<'_, '_, '_>,
+    flags: SendFlags,
+) -> io::Result<usize> {
+    match addr {
+        None => backend::net::syscalls::sendmsg(socket.as_fd(), iov, control, flags),
+        Some(addr) => {
+            backend::net::syscalls::sendmsg_raw(socket.as_fd(), addr, iov, control, flags)
+        }
+    }
+}
+
+/// `sendmmsg(msghdr)`—Sends multiple messages on a socket.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/sendmmsg.2.html
+#[inline]
+#[cfg(target_os = "linux")]
+pub fn sendmmsg(
+    socket: impl AsFd,
+    msgs: &mut [MMsgHdr<'_>],
+    flags: SendFlags,
+) -> io::Result<usize> {
+    backend::net::syscalls::sendmmsg(socket.as_fd(), msgs, flags)
 }
 
 /// `recvmsg(msghdr)`—Receives a message from a socket.
