@@ -14,6 +14,12 @@ pub(crate) const PROC_SUPER_MAGIC: u32 = 0x0000_9fa0;
 #[cfg(all(linux_kernel, target_env = "musl"))]
 pub(crate) const NFS_SUPER_MAGIC: u32 = 0x0000_6969;
 
+/// `STATX_ATTR_MOUNT_ROOT`—Address of the root of a mount
+#[cfg(all(linux_kernel, target_env = "musl"))]
+pub(crate) const STATX_ATTR_MOUNT_ROOT: c_int = 0x2000;
+#[cfg(all(linux_kernel, target_env = "gnu"))]
+pub(crate) const STATX_ATTR_MOUNT_ROOT: c_int = libc::STATX_ATTR_MOUNT_ROOT;
+
 #[cfg(feature = "process")]
 #[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
 pub(crate) const EXIT_SIGNALED_SIGABRT: c_int = 128 + SIGABRT as c_int;
