@@ -170,7 +170,7 @@ pub(super) fn send_recv_len(len: usize) -> i32 {
 /// Convert the return value of a `send` or `recv` call.
 #[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
 #[inline]
-pub(super) fn ret_send_recv(len: isize) -> io::Result<usize> {
+pub(super) fn ret_send_recv(len: c::ssize_t) -> io::Result<usize> {
     ret_usize(len)
 }
 

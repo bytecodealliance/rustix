@@ -7,7 +7,9 @@ use super::msghdr::with_xdp_msghdr;
 #[cfg(target_os = "linux")]
 use super::write_sockaddr::encode_sockaddr_xdp;
 use crate::backend::c;
-use crate::backend::conv::{borrowed_fd, ret, ret_owned_fd, ret_send_recv, send_recv_len};
+use crate::backend::conv::{
+    borrowed_fd, ret, ret_owned_fd, ret_send_recv, ret_usize, send_recv_len,
+};
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io;
 #[cfg(target_os = "linux")]
@@ -329,7 +331,7 @@ pub(crate) fn recvmsg(
 
     with_recv_msghdr(&mut storage, iov, control, |msghdr| {
         let result = unsafe {
-            ret_send_recv(c::recvmsg(
+            ret_usize(c::recvmsg(
                 borrowed_fd(sockfd),
                 msghdr,
                 bitflags_bits!(msg_flags),
@@ -364,7 +366,7 @@ pub(crate) fn sendmsg(
     msg_flags: SendFlags,
 ) -> io::Result<usize> {
     with_noaddr_msghdr(iov, control, |msghdr| unsafe {
-        ret_send_recv(c::sendmsg(
+        ret_usize(c::sendmsg(
             borrowed_fd(sockfd),
             &msghdr,
             bitflags_bits!(msg_flags),
@@ -387,7 +389,7 @@ pub(crate) fn sendmsg_v4(
     msg_flags: SendFlags,
 ) -> io::Result<usize> {
     with_v4_msghdr(addr, iov, control, |msghdr| unsafe {
-        ret_send_recv(c::sendmsg(
+        ret_usize(c::sendmsg(
             borrowed_fd(sockfd),
             &msghdr,
             bitflags_bits!(msg_flags),
@@ -410,7 +412,7 @@ pub(crate) fn sendmsg_v6(
     msg_flags: SendFlags,
 ) -> io::Result<usize> {
     with_v6_msghdr(addr, iov, control, |msghdr| unsafe {
-        ret_send_recv(c::sendmsg(
+        ret_usize(c::sendmsg(
             borrowed_fd(sockfd),
             &msghdr,
             bitflags_bits!(msg_flags),
@@ -430,7 +432,7 @@ pub(crate) fn sendmsg_unix(
     msg_flags: SendFlags,
 ) -> io::Result<usize> {
     super::msghdr::with_unix_msghdr(addr, iov, control, |msghdr| unsafe {
-        ret_send_recv(c::sendmsg(
+        ret_usize(c::sendmsg(
             borrowed_fd(sockfd),
             &msghdr,
             bitflags_bits!(msg_flags),
@@ -447,7 +449,7 @@ pub(crate) fn sendmsg_xdp(
     msg_flags: SendFlags,
 ) -> io::Result<usize> {
     with_xdp_msghdr(addr, iov, control, |msghdr| unsafe {
-        ret_send_recv(c::sendmsg(
+        ret_usize(c::sendmsg(
             borrowed_fd(sockfd),
             &msghdr,
             bitflags_bits!(msg_flags),
