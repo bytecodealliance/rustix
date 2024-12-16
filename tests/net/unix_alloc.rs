@@ -417,6 +417,7 @@ fn test_abstract_unix_msg_unconnected() {
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[cfg(feature = "pipe")]
 #[test]
 fn test_unix_msg_with_scm_rights() {
     crate::init();
@@ -652,6 +653,7 @@ fn test_unix_peercred() {
 /// Like `test_unix_msg_with_scm_rights`, but with multiple file descriptors
 /// over multiple control messages.
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[cfg(feature = "pipe")]
 #[test]
 fn test_unix_msg_with_combo() {
     crate::init();
