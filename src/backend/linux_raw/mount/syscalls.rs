@@ -237,3 +237,23 @@ pub(crate) fn fsconfig_reconfigure(fs_fd: BorrowedFd<'_>) -> io::Result<()> {
         ))
     }
 }
+
+#[cfg(feature = "mount")]
+#[inline]
+pub(crate) fn mount_setattr(
+    dir_fd: BorrowedFd<'_>,
+    path: &CStr,
+    flags: crate::fs::AtFlags,
+    mount_attr: &crate::mount::MountAttr<'_>,
+) -> io::Result<()> {
+    unsafe {
+        ret(syscall_readonly!(
+            __NR_mount_setattr,
+            dir_fd,
+            path,
+            flags,
+            mount_attr as *const crate::mount::MountAttr<'_>,
+            crate::backend::conv::size_of::<crate::mount::MountAttr<'_>, _>()
+        ))
+    }
+}
