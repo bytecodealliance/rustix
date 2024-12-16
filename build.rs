@@ -71,6 +71,7 @@ fn main() {
         use_feature_or_nothing("core_ffi_c");
         use_feature_or_nothing("alloc_c_string");
         use_feature_or_nothing("alloc_ffi");
+        use_feature_or_nothing("error_in_core");
     }
 
     // Feature needed for testing.

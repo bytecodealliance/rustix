@@ -259,6 +259,7 @@ check-cfg = [
     'cfg(core_intrinsics)',
     'cfg(criterion)',
     'cfg(document_experimental_runtime_api)',
+    'cfg(error_in_core)',
     'cfg(fix_y2038)',
     'cfg(freebsdlike)',
     'cfg(libc)',
