@@ -62,6 +62,26 @@ impl SocketAddrUnix {
         }
     }
 
+    /// Construct a new unnamed address.
+    ///
+    /// The kernel will assign an abstract Unix-domain address to the socket when you call
+    /// [`bind_unix()`][crate::net::bind_unix]. You can inspect the assigned name with
+    /// [`getsockname`][crate::net::getsockname].
+    ///
+    /// # References
+    ///  - [Linux]
+    ///
+    /// [Linux]: https://www.man7.org/linux/man-pages/man7/unix.7.html
+    #[cfg(linux_kernel)]
+    #[inline]
+    pub fn new_unnamed() -> Self {
+        Self {
+            unix: Self::init(),
+            #[cfg(not(any(bsd, target_os = "haiku")))]
+            len: offsetof_sun_path() as _,
+        }
+    }
+
     const fn init() -> c::sockaddr_un {
         c::sockaddr_un {
             sun_family: c::AF_UNIX as _,
@@ -91,18 +111,21 @@ impl SocketAddrUnix {
     /// For an abstract address, return the identifier.
     #[inline]
     pub fn abstract_name(&self) -> Option<&[u8]> {
-        let len = self.len();
-        if len != 0 && self.unix.sun_path[0] as u8 == b'\0' {
-            let end = len as usize - offsetof_sun_path();
+        let end = self.len().saturating_sub(offsetof_sun_path());
+        if end > 0 && self.unix.sun_path[0] as u8 == b'\0' {
             let bytes = &self.unix.sun_path[1..end];
-
             // SAFETY: Convert `&[c_char]` to `&[u8]`.
-            let bytes = unsafe { slice::from_raw_parts(bytes.as_ptr().cast::<u8>(), bytes.len()) };
-
-            Some(bytes)
+            Some(unsafe { slice::from_raw_parts(bytes.as_ptr().cast::<u8>(), bytes.len()) })
         } else {
             None
         }
+    }
+
+    /// `true` if the socket address is unnamed.
+    #[cfg(linux_kernel)]
+    #[inline]
+    pub fn is_unnamed(&self) -> bool {
+        self.len() == offsetof_sun_path()
     }
 
     #[inline]
