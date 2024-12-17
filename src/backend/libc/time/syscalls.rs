@@ -60,7 +60,7 @@ pub(crate) fn clock_getres(id: ClockId) -> Timespec {
     #[cfg(not(fix_y2038))]
     unsafe {
         let mut timespec = MaybeUninit::<Timespec>::uninit();
-        let _ = c::clock_getres(id as c::clockid_t, timespec.as_mut_ptr());
+        let _ = c::clock_getres(id as c::clockid_t, timespec.as_mut_ptr().cast());
         timespec.assume_init()
     }
 }
@@ -116,7 +116,11 @@ pub(crate) fn clock_gettime(id: ClockId) -> Timespec {
     #[cfg(not(fix_y2038))]
     unsafe {
         let mut timespec = MaybeUninit::<Timespec>::uninit();
-        ret(c::clock_gettime(id as c::clockid_t, timespec.as_mut_ptr())).unwrap();
+        ret(c::clock_gettime(
+            id as c::clockid_t,
+            timespec.as_mut_ptr().cast(),
+        ))
+        .unwrap();
         timespec.assume_init()
     }
 }
@@ -203,7 +207,10 @@ pub(crate) fn clock_gettime_dynamic(id: DynamicClockId<'_>) -> io::Result<Timesp
     unsafe {
         let mut timespec = MaybeUninit::<Timespec>::uninit();
 
-        ret(c::clock_gettime(id as c::clockid_t, timespec.as_mut_ptr()))?;
+        ret(c::clock_gettime(
+            id as c::clockid_t,
+            timespec.as_mut_ptr().cast(),
+        ))?;
 
         Ok(timespec.assume_init())
     }
@@ -256,7 +263,10 @@ pub(crate) fn clock_settime(id: ClockId, timespec: Timespec) -> io::Result<()> {
     // Main version: libc is y2038 safe and has `clock_settime`.
     #[cfg(not(fix_y2038))]
     unsafe {
-        ret(c::clock_settime(id as c::clockid_t, &timespec))
+        ret(c::clock_settime(
+            id as c::clockid_t,
+            &timespec as *const Timespec as *const libc::timespec,
+        ))
     }
 }
 
@@ -318,8 +328,8 @@ pub(crate) fn timerfd_settime(
         ret(c::timerfd_settime(
             borrowed_fd(fd),
             bitflags_bits!(flags),
-            new_value,
-            result.as_mut_ptr(),
+            new_value as *const Itimerspec as *const libc::itimerspec,
+            result.as_mut_ptr().cast(),
         ))?;
         Ok(result.assume_init())
     }
@@ -415,7 +425,10 @@ pub(crate) fn timerfd_gettime(fd: BorrowedFd<'_>) -> io::Result<Itimerspec> {
     #[cfg(not(fix_y2038))]
     unsafe {
         let mut result = MaybeUninit::<LibcItimerspec>::uninit();
-        ret(c::timerfd_gettime(borrowed_fd(fd), result.as_mut_ptr()))?;
+        ret(c::timerfd_gettime(
+            borrowed_fd(fd),
+            result.as_mut_ptr().cast(),
+        ))?;
         Ok(result.assume_init())
     }
 }

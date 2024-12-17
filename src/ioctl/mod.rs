@@ -14,8 +14,8 @@
 
 #![allow(unsafe_code)]
 
-use crate::backend::c;
 use crate::fd::{AsFd, BorrowedFd};
+use crate::ffi as c;
 use crate::io::Result;
 
 #[cfg(any(linux_kernel, bsd))]
