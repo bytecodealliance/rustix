@@ -67,8 +67,10 @@ pub(crate) fn sethostname(name: &[u8]) -> io::Result<()> {
     target_os = "android",
     target_os = "emscripten",
     target_os = "espidf",
+    target_os = "illumos",
     target_os = "haiku",
     target_os = "redox",
+    target_os = "solaris",
     target_os = "vita",
     target_os = "wasi"
 )))]
