@@ -40,6 +40,12 @@ pub(crate) fn sethostname(name: &[u8]) -> io::Result<()> {
 }
 
 #[inline]
+pub(crate) fn setdomainname(name: &[u8]) -> io::Result<()> {
+    let (ptr, len) = slice(name);
+    unsafe { ret(syscall_readonly!(__NR_setdomainname, ptr, len)) }
+}
+
+#[inline]
 pub(crate) fn reboot(cmd: RebootCommand) -> io::Result<()> {
     unsafe {
         ret(syscall_readonly!(
