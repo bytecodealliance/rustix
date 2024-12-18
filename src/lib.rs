@@ -108,6 +108,7 @@
 #![cfg_attr(all(wasi_ext, target_os = "wasi", feature = "std"), feature(wasi_ext))]
 #![cfg_attr(core_ffi_c, feature(core_ffi_c))]
 #![cfg_attr(core_c_str, feature(core_c_str))]
+#![cfg_attr(error_in_core, feature(error_in_core))]
 #![cfg_attr(all(feature = "alloc", alloc_c_string), feature(alloc_c_string))]
 #![cfg_attr(all(feature = "alloc", alloc_ffi), feature(alloc_ffi))]
 #![cfg_attr(not(feature = "std"), no_std)]
