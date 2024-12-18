@@ -7,12 +7,16 @@ use super::msghdr::with_xdp_msghdr;
 #[cfg(target_os = "linux")]
 use super::write_sockaddr::encode_sockaddr_xdp;
 use crate::backend::c;
+#[cfg(target_os = "linux")]
+use crate::backend::conv::ret_u32;
 use crate::backend::conv::{borrowed_fd, ret, ret_owned_fd, ret_send_recv, send_recv_len};
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io;
 #[cfg(target_os = "linux")]
 use crate::net::xdp::SocketAddrXdp;
-use crate::net::{SocketAddrAny, SocketAddrV4, SocketAddrV6};
+#[cfg(target_os = "linux")]
+use crate::net::MMsgHdr;
+use crate::net::{RawSocketAddr, SocketAddrAny, SocketAddrV4, SocketAddrV6};
 use crate::utils::as_ptr;
 use core::mem::{size_of, MaybeUninit};
 #[cfg(not(any(
@@ -23,7 +27,9 @@ use core::mem::{size_of, MaybeUninit};
     target_os = "wasi"
 )))]
 use {
-    super::msghdr::{with_noaddr_msghdr, with_recv_msghdr, with_v4_msghdr, with_v6_msghdr},
+    super::msghdr::{
+        with_noaddr_msghdr, with_raw_msghdr, with_recv_msghdr, with_v4_msghdr, with_v6_msghdr,
+    },
     crate::io::{IoSlice, IoSliceMut},
     crate::net::{RecvAncillaryBuffer, RecvMsgReturn, SendAncillaryBuffer},
 };
@@ -453,6 +459,46 @@ pub(crate) fn sendmsg_xdp(
             bitflags_bits!(msg_flags),
         ))
     })
+}
+
+#[cfg(not(any(
+    windows,
+    target_os = "espidf",
+    target_os = "redox",
+    target_os = "vita",
+    target_os = "wasi"
+)))]
+pub(crate) fn sendmsg_raw(
+    sockfd: BorrowedFd<'_>,
+    addr: &RawSocketAddr,
+    iov: &[IoSlice<'_>],
+    control: &mut SendAncillaryBuffer<'_, '_, '_>,
+    msg_flags: SendFlags,
+) -> io::Result<usize> {
+    with_raw_msghdr(addr, iov, control, |msghdr| unsafe {
+        ret_send_recv(c::sendmsg(
+            borrowed_fd(sockfd),
+            &msghdr,
+            bitflags_bits!(msg_flags),
+        ))
+    })
+}
+
+#[cfg(target_os = "linux")]
+pub(crate) fn sendmmsg(
+    sockfd: BorrowedFd<'_>,
+    msgs: &mut [MMsgHdr<'_>],
+    flags: SendFlags,
+) -> io::Result<usize> {
+    unsafe {
+        ret_u32(c::sendmmsg(
+            borrowed_fd(sockfd),
+            msgs.as_mut_ptr() as _,
+            msgs.len().try_into().unwrap_or(c::c_uint::MAX),
+            bitflags_bits!(flags),
+        ))
+        .map(|ret| ret as usize)
+    }
 }
 
 #[cfg(not(any(
