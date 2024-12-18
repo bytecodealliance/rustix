@@ -64,6 +64,7 @@ pub(crate) fn sethostname(name: &[u8]) -> io::Result<()> {
 }
 
 #[cfg(not(any(
+    target_os = "android",
     target_os = "emscripten",
     target_os = "espidf",
     target_os = "haiku",
@@ -71,6 +72,17 @@ pub(crate) fn sethostname(name: &[u8]) -> io::Result<()> {
     target_os = "vita",
     target_os = "wasi"
 )))]
+pub(crate) fn setdomainname(name: &[u8]) -> io::Result<()> {
+    unsafe {
+        ret(c::setdomainname(
+            name.as_ptr().cast(),
+            name.len().try_into().map_err(|_| io::Errno::INVAL)?,
+        ))
+    }
+}
+
+// https://github.com/rust-lang/libc/pull/4212
+#[cfg(target_os = "android")]
 pub(crate) fn setdomainname(name: &[u8]) -> io::Result<()> {
     syscall! {
         fn setdomainname(
