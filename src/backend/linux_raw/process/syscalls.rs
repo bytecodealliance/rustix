@@ -5,7 +5,7 @@
 //! See the `rustix::backend` module documentation for details.
 #![allow(unsafe_code, clippy::undocumented_unsafe_blocks)]
 
-use super::types::RawCpuSet;
+use super::types::{RawCpuSet, SchedParam, SchedPolicy};
 use crate::backend::c;
 #[cfg(all(feature = "alloc", feature = "fs"))]
 use crate::backend::conv::slice_mut;
@@ -202,6 +202,33 @@ pub(crate) fn sched_yield() {
         // See the documentation for [`crate::process::sched_yield`] for why
         // errors are ignored.
         syscall_readonly!(__NR_sched_yield).decode_void();
+    }
+}
+
+#[inline]
+pub(crate) fn sched_getscheduler(pid: Option<Pid>) -> io::Result<SchedPolicy> {
+    unsafe {
+        ret_c_int(syscall_readonly!(
+            __NR_sched_getscheduler,
+            c_int(Pid::as_raw(pid))
+        ))
+    }
+    .map(|policy| SchedPolicy::from_bits_retain(bitcast!(policy)))
+}
+
+#[inline]
+pub(crate) fn sched_setscheduler(
+    pid: Option<Pid>,
+    policy: SchedPolicy,
+    param: &SchedParam,
+) -> io::Result<()> {
+    unsafe {
+        ret(syscall_readonly!(
+            __NR_sched_setscheduler,
+            c_int(Pid::as_raw(pid)),
+            c_uint(policy.bits()),
+            param as *const SchedParam
+        ))
     }
 }
 
