@@ -554,7 +554,7 @@ fn init() {
             #[cfg(target_arch = "x86")]
             let ptr = vdso.sym(cstr!("LINUX_2.6"), cstr!("__vdso_getcpu"));
             #[cfg(target_arch = "riscv64")]
-            let ptr = vdso.sym(cstr!("LINUX_4.15"), cstr!("__kernel_getcpu"));
+            let ptr = vdso.sym(cstr!("LINUX_4.15"), cstr!("__vdso_getcpu"));
             #[cfg(target_arch = "powerpc64")]
             let ptr = vdso.sym(cstr!("LINUX_2.6.15"), cstr!("__kernel_getcpu"));
 
