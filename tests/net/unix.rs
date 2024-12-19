@@ -419,6 +419,7 @@ fn test_abstract_unix_msg_unconnected() {
 }
 
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[cfg(feature = "pipe")]
 #[test]
 fn test_unix_msg_with_scm_rights() {
     crate::init();
@@ -649,7 +650,7 @@ fn test_unix_peercred_explicit() {
 /// Like `test_unix_peercred_explicit`, but relies on the fact that
 /// `set_socket_passcred` enables passing of the credentials implicitly
 /// instead of passing an explicit message to `sendmsg`.
-#[cfg(all(feature = "process", linux_kernel))]
+#[cfg(all(feature = "pipe", feature = "process", linux_kernel))]
 #[test]
 fn test_unix_peercred_implicit() {
     crate::init();
@@ -707,6 +708,7 @@ fn test_unix_peercred_implicit() {
 /// Like `test_unix_msg_with_scm_rights`, but with multiple file descriptors
 /// over multiple control messages.
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[cfg(feature = "pipe")]
 #[test]
 fn test_unix_msg_with_combo() {
     crate::init();
@@ -914,4 +916,26 @@ fn test_unix_msg_with_combo() {
 
     client.join().unwrap();
     server.join().unwrap();
+}
+
+/// Bind socket to an unnamed Unix-domain address, and assert that an abstract Unix-domain name was
+/// assigned by the kernel.
+#[cfg(linux_kernel)]
+#[test]
+fn test_bind_unnamed_address() {
+    let address = SocketAddrUnix::new_unnamed();
+    assert!(address.is_unnamed());
+    assert_eq!(address.abstract_name(), None);
+    assert_eq!(address.path(), None);
+    let sock = socket(AddressFamily::UNIX, SocketType::DGRAM, None).unwrap();
+    bind_unix(&sock, &address).unwrap();
+
+    let address = rustix::net::getsockname(&sock).unwrap();
+    let address = match address {
+        rustix::net::SocketAddrAny::Unix(address) => address,
+        address => panic!("expected Unix address, got {address:?}"),
+    };
+    assert!(!address.is_unnamed());
+    assert_ne!(address.abstract_name(), None);
+    assert_eq!(address.path(), None);
 }
