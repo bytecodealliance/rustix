@@ -8,10 +8,9 @@
 
 use crate::ffi::CStr;
 use crate::io;
-#[cfg(feature = "itoa")]
 use crate::path::DecInt;
 use crate::path::SMALL_PATH_BUFFER_SIZE;
-#[cfg(all(feature = "alloc", feature = "itoa"))]
+#[cfg(feature = "alloc")]
 use alloc::borrow::ToOwned;
 use core::mem::MaybeUninit;
 use core::{ptr, slice, str};
@@ -982,7 +981,6 @@ impl Arg for Vec<u8> {
     }
 }
 
-#[cfg(feature = "itoa")]
 impl Arg for DecInt {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
