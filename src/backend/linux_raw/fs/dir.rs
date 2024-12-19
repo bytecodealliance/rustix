@@ -79,6 +79,23 @@ impl Dir {
         self.pos = self.buf.len();
     }
 
+    /// `seekdir(self, offset)`
+    #[inline]
+    pub fn seekdir(&mut self, offset: i64) -> io::Result<()> {
+        self.any_errors = false;
+        self.rewind = false;
+        self.pos = self.buf.len();
+        match io::retry_on_intr(|| {
+            crate::backend::fs::syscalls::_seek(self.fd.as_fd(), offset, SEEK_SET)
+        }) {
+            Ok(_) => Ok(()),
+            Err(err) => {
+                self.any_errors = true;
+                Err(err)
+            }
+        }
+    }
+
     /// `readdir(self)`, where `None` means the end of the directory.
     pub fn read(&mut self) -> Option<io::Result<DirEntry>> {
         // If we've seen errors, don't continue to try to read anything further.
@@ -112,6 +129,7 @@ impl Dir {
         let offsetof_d_reclen = (as_ptr(&z.d_reclen) as usize) - base;
         let offsetof_d_name = (as_ptr(&z.d_name) as usize) - base;
         let offsetof_d_ino = (as_ptr(&z.d_ino) as usize) - base;
+        let offsetof_d_off = (as_ptr(&z.d_off) as usize) - base;
         let offsetof_d_type = (as_ptr(&z.d_type) as usize) - base;
 
         // Test if we need more entries, and if so, read more.
@@ -145,7 +163,7 @@ impl Dir {
         let name = name.to_owned();
         assert!(name.as_bytes().len() <= self.buf.len() - name_start);
 
-        // Do an unaligned u64 load.
+        // Do an unaligned u64 load for `d_ino`.
         let d_ino = u64::from_ne_bytes([
             self.buf[pos + offsetof_d_ino],
             self.buf[pos + offsetof_d_ino + 1],
@@ -157,12 +175,24 @@ impl Dir {
             self.buf[pos + offsetof_d_ino + 7],
         ]);
 
+        // Do an unaligned i64 load for `d_off`
+        let d_off = i64::from_ne_bytes([
+            self.buf[pos + offsetof_d_off],
+            self.buf[pos + offsetof_d_off + 1],
+            self.buf[pos + offsetof_d_off + 2],
+            self.buf[pos + offsetof_d_off + 3],
+            self.buf[pos + offsetof_d_off + 4],
+            self.buf[pos + offsetof_d_off + 5],
+            self.buf[pos + offsetof_d_off + 6],
+            self.buf[pos + offsetof_d_off + 7],
+        ]);
+
         let d_type = self.buf[pos + offsetof_d_type];
 
         // Check that our types correspond to the `linux_dirent64` types.
         let _ = linux_dirent64 {
             d_ino,
-            d_off: 0,
+            d_off,
             d_type,
             d_reclen,
             d_name: Default::default(),
@@ -170,6 +200,7 @@ impl Dir {
 
         Some(Ok(DirEntry {
             d_ino,
+            d_off,
             d_type,
             name,
         }))
@@ -261,6 +292,7 @@ impl fmt::Debug for Dir {
 pub struct DirEntry {
     d_ino: u64,
     d_type: u8,
+    d_off: i64,
     name: CString,
 }
 
@@ -269,6 +301,14 @@ impl DirEntry {
     #[inline]
     pub fn file_name(&self) -> &CStr {
         &self.name
+    }
+
+    /// Returns the "offset" of this directory entry. Note that this is not
+    /// a true numerical offset but an opaque cookie that identifies a
+    /// position in the given stream.
+    #[inline]
+    pub fn offset(&self) -> i64 {
+        self.d_off
     }
 
     /// Returns the type of this directory entry.
