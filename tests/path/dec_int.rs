@@ -31,15 +31,3 @@ fn test_dec_int() {
         check!(isize::MIN);
     }
 }
-
-#[test]
-#[should_panic]
-fn test_unsupported_max_u128_dec_int() {
-    check!(u128::MAX);
-}
-
-#[test]
-#[should_panic]
-fn test_unsupported_min_u128_dec_int() {
-    check!(i128::MIN);
-}

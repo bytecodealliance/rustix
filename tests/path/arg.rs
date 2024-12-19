@@ -4,7 +4,6 @@
 use rustix::ffi::{CStr, CString};
 use rustix::io;
 use rustix::path::Arg;
-#[cfg(feature = "itoa")]
 use rustix::path::DecInt;
 use std::borrow::Cow;
 use std::ffi::{OsStr, OsString};
@@ -132,15 +131,12 @@ fn test_arg() {
     assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
     assert_eq!(cstr!("hello"), Borrow::borrow(&t.into_c_str().unwrap()));
 
-    #[cfg(feature = "itoa")]
-    {
-        let t: DecInt = DecInt::new(43110);
-        assert_eq!("43110", t.as_str());
-        assert_eq!("43110".to_owned(), Arg::to_string_lossy(&t));
-        assert_eq!(cstr!("43110"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
-        assert_eq!(cstr!("43110"), t.as_c_str());
-        assert_eq!(cstr!("43110"), Borrow::borrow(&t.into_c_str().unwrap()));
-    }
+    let t: DecInt = DecInt::new(43110);
+    assert_eq!("43110", t.as_str());
+    assert_eq!("43110".to_owned(), Arg::to_string_lossy(&t));
+    assert_eq!(cstr!("43110"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
+    assert_eq!(cstr!("43110"), t.as_c_str());
+    assert_eq!(cstr!("43110"), Borrow::borrow(&t.into_c_str().unwrap()));
 }
 
 #[test]
