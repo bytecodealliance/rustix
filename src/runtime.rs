@@ -434,6 +434,23 @@ pub unsafe fn tkill(tid: Pid, sig: Signal) -> io::Result<()> {
     backend::runtime::syscalls::tkill(tid, sig)
 }
 
+/// `tgkill(tid, sig)`—Send a signal to a thread group.
+///
+/// # Safety
+///
+/// You're on your own. And on top of all the troubles with signal handlers,
+/// this implementation is highly experimental.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/tgkill.2.html
+#[inline]
+pub unsafe fn tgkill(tid: Pid, sig: Signal) -> io::Result<()> {
+    backend::runtime::syscalls::tgkill(tid, sig)
+}
+
+
 /// `rt_sigprocmask(how, set, oldset)`—Adjust the process signal mask.
 ///
 /// # Safety
