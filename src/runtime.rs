@@ -450,6 +450,17 @@ pub unsafe fn tgkill(tid: Pid, sig: Signal) -> io::Result<()> {
     backend::runtime::syscalls::tgkill(tid, sig)
 }
 
+/// `raise(sig)`—Send a signal to the current thread.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man3/raise.3.html
+#[inline]
+pub fn raise(sig: Signal) -> io::Result<()> {
+    // SAFETY: This sends a signal to the current thread, and our own thread ID can't be recycled.
+    unsafe { backend::runtime::syscalls::tkill(backend::thread::syscalls::gettid(), sig) }
+}
 
 /// `rt_sigprocmask(how, set, oldset)`—Adjust the process signal mask.
 ///
