@@ -69,11 +69,10 @@ jobs:
         sparcv9-sun-solaris
         aarch64-linux-android
         aarch64-apple-ios
-        wasm32-wasi
     - if: matrix.rust != '1.48'
-      run: rustup target add x86_64-unknown-fuchsia
+      run: rustup target add x86_64-unknown-fuchsia wasm32-wasip1
     - if: matrix.rust == '1.48'
-      run: rustup target add x86_64-fuchsia
+      run: rustup target add x86_64-fuchsia wasm32-wasi
 
     - name: Install cross-compilation tools
       run: |
@@ -125,7 +124,7 @@ jobs:
     # Omit --all-targets for WASI until all the dev-dependencies support WASI
     # on stable.
     - if: matrix.rust != '1.48'
-      run: cargo check --workspace --release -vv --target=wasm32-wasi --features=all-apis
+      run: cargo check --workspace --release -vv --target=wasm32-wasip1 --features=all-apis
 
   check_no_default_features:
     name: Check --no-default-features
@@ -175,10 +174,10 @@ jobs:
     - run: >
         rustup target add
         x86_64-unknown-redox
-        wasm32-wasi
+        wasm32-wasip1
         thumbv7neon-unknown-linux-gnueabihf
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-redox --features=all-apis
-    - run: cargo check --workspace --release -vv --target=wasm32-wasi --features=all-apis
+    - run: cargo check --workspace --release -vv --target=wasm32-wasip1 --features=all-apis
     - run: cargo check --workspace --release -vv --target=thumbv7neon-unknown-linux-gnueabihf --features=all-apis
 
   check_tier3:
