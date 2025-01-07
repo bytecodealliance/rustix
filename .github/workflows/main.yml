@@ -428,7 +428,7 @@ jobs:
       run: |
         set -ex
         sudo apt-get update
-        sudo apt-get install -y ${{ matrix.gcc_package }} ninja-build
+        sudo apt-get install -y ${{ matrix.gcc_package }} ninja-build libglib2.0-dev
         upcase=$(echo ${{ matrix.target }} | awk '{ print toupper($0) }' | sed 's/-/_/g')
         echo CARGO_TARGET_${upcase}_LINKER=${{ matrix.gcc }} >> $GITHUB_ENV
       if: matrix.gcc_package != '' && matrix.os == 'ubuntu-latest'
@@ -593,7 +593,7 @@ jobs:
       run: |
         set -ex
         sudo apt-get update
-        sudo apt-get install -y ${{ matrix.gcc_package }} ninja-build
+        sudo apt-get install -y ${{ matrix.gcc_package }} ninja-build libglib2.0-dev
         upcase=$(echo ${{ matrix.target }} | awk '{ print toupper($0) }' | sed 's/-/_/g')
         echo CARGO_TARGET_${upcase}_LINKER=${{ matrix.gcc }} >> $GITHUB_ENV
       if: matrix.gcc_package != '' && matrix.os == 'ubuntu-latest'
@@ -681,7 +681,7 @@ jobs:
       run: |
         set -ex
         sudo apt-get update
-        sudo apt-get install -y ${{ matrix.gcc_package }} ninja-build
+        sudo apt-get install -y ${{ matrix.gcc_package }} ninja-build libglib2.0-dev
         upcase=$(echo ${{ matrix.target }} | awk '{ print toupper($0) }' | sed 's/-/_/g')
         echo CARGO_TARGET_${upcase}_LINKER=${{ matrix.gcc }} >> $GITHUB_ENV
       if: matrix.gcc_package != '' && matrix.os == 'ubuntu-latest'
