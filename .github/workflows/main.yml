@@ -235,7 +235,7 @@ jobs:
     name: Test
     runs-on: ${{ matrix.os }}
     env:
-      QEMU_BUILD_VERSION: 8.1.2
+      QEMU_BUILD_VERSION: 9.2.0
       # Enabling testing of experimental features.
       RUSTFLAGS: --cfg rustix_use_experimental_features
     strategy:
@@ -450,7 +450,7 @@ jobs:
       run: |
         set -ex
         sudo apt-get update
-        sudo apt-get install -y ${{ matrix.gcc_package }} ninja-build
+        sudo apt-get install -y ${{ matrix.gcc_package }} ninja-build libglib2.0-dev
         upcase=$(echo ${{ matrix.target }} | awk '{ print toupper($0) }' | sed 's/-/_/g')
         echo CARGO_TARGET_${upcase}_LINKER=${{ matrix.gcc }} >> $GITHUB_ENV
       if: matrix.gcc_package != '' && matrix.os == 'ubuntu-latest'
@@ -573,7 +573,7 @@ jobs:
     env:
       # -D warnings is commented out in our install-rust action; re-add it here.
       RUSTFLAGS: -D warnings -D elided-lifetimes-in-paths
-      QEMU_BUILD_VERSION: 8.1.2
+      QEMU_BUILD_VERSION: 9.2.0
     steps:
     - uses: actions/checkout@v4
       with:
@@ -598,7 +598,7 @@ jobs:
       run: |
         set -ex
         sudo apt-get update
-        sudo apt-get install -y ${{ matrix.gcc_package }} ninja-build
+        sudo apt-get install -y ${{ matrix.gcc_package }} ninja-build libglib2.0-dev
         upcase=$(echo ${{ matrix.target }} | awk '{ print toupper($0) }' | sed 's/-/_/g')
         echo CARGO_TARGET_${upcase}_LINKER=${{ matrix.gcc }} >> $GITHUB_ENV
       if: matrix.gcc_package != '' && matrix.os == 'ubuntu-latest'
@@ -678,7 +678,7 @@ jobs:
       RUSTDOCFLAGS: --cfg rustix_use_experimental_asm
       CARGO_TARGET_POWERPC64LE_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rustix_use_experimental_asm
       CARGO_TARGET_S390X_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rustix_use_experimental_asm
-      QEMU_BUILD_VERSION: 8.1.2
+      QEMU_BUILD_VERSION: 9.2.0
     steps:
     - uses: actions/checkout@v4
       with:
@@ -703,7 +703,7 @@ jobs:
       run: |
         set -ex
         sudo apt-get update
-        sudo apt-get install -y ${{ matrix.gcc_package }} ninja-build
+        sudo apt-get install -y ${{ matrix.gcc_package }} ninja-build libglib2.0-dev
         upcase=$(echo ${{ matrix.target }} | awk '{ print toupper($0) }' | sed 's/-/_/g')
         echo CARGO_TARGET_${upcase}_LINKER=${{ matrix.gcc }} >> $GITHUB_ENV
       if: matrix.gcc_package != '' && matrix.os == 'ubuntu-latest'

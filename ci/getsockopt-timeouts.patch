@@ -55,10 +55,10 @@ diff --git a/linux-user/syscall.c b/linux-user/syscall.c
 index a8eae3c4ac..8326e03a19 100644
 --- a/linux-user/syscall.c
 +++ b/linux-user/syscall.c
-@@ -2348,6 +2348,9 @@ set_timeout:
-         case TARGET_SO_SNDTIMEO:
-                 optname = SO_SNDTIMEO;
-                 goto set_timeout;
+@@ -2348,6 +2348,9 @@
+                                 &tv, sizeof(tv)));
+                 return ret;
+         }
 +        case TARGET_SO_RCVTIMEO_NEW:
 +        case TARGET_SO_SNDTIMEO_NEW:
 +                return -TARGET_ENOPROTOOPT;

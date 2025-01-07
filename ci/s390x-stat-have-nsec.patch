@@ -17,8 +17,8 @@ It's not yet known why upstream qemu doesn't define this.
 diff -ur a/linux-user/syscall_defs.h b/linux-user/syscall_defs.h
 --- a/linux-user/syscall_defs.h	2021-08-24 10:35:41.000000000 -0700
 +++ b/linux-user/syscall_defs.h	2022-04-12 13:23:25.291064887 -0700
-@@ -2040,6 +2040,7 @@
- 	abi_long	__unused[3];
+@@ -1885,6 +1885,7 @@
+     abi_long        __unused[3];
  };
  #elif defined(TARGET_S390X)
 +#define TARGET_STAT_HAVE_NSEC
