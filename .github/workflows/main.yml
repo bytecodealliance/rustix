@@ -83,9 +83,9 @@ jobs:
     - name: Use specific dependency versions for Rust 1.48 compatibility.
       if: matrix.rust == '1.48'
       run: |
+        cargo update --package=tempfile --precise=3.6.0
         cargo update --package=once_cell --precise 1.14.0
         cargo update --package=flate2 --precise=1.0.25
-        cargo update --package=tempfile --precise=3.6.0
         cargo update --package=cc --precise=1.0.68
 
     - run: cargo check --workspace --release -vv --all-targets
