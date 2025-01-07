@@ -273,9 +273,11 @@ impl Vdso {
 
         // SAFETY: The pointers in `self` must be valid.
         unsafe {
-            let mut chain = *self.bucket.add((name_hash % self.nbucket) as usize);
+            let mut chain = *self
+                .bucket
+                .add((ElfHashEntry::from(name_hash) % self.nbucket) as usize);
 
-            while chain != STN_UNDEF {
+            while chain != ElfHashEntry::from(STN_UNDEF) {
                 let sym = &*self.symtab.add(chain as usize);
 
                 // Check for a defined global or weak function w/ right name.
