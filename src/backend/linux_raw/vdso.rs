@@ -98,11 +98,6 @@ fn init_from_sysinfo_ehdr() -> Option<Vdso> {
         let mut found_vaddr = false;
         for i in 0..hdr.e_phnum {
             let phdr = &*pt.add(i as usize);
-            if phdr.p_flags & PF_W != 0 {
-                // Don't trust any vDSO that claims to be loading writable
-                // segments into memory.
-                return None;
-            }
             if phdr.p_type == PT_LOAD && !found_vaddr {
                 // The segment should be readable and executable, because it
                 // contains the symbol table and the function bodies.
