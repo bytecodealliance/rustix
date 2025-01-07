@@ -74,7 +74,7 @@ diff -ur a/linux-user/ppc/termbits.h b/linux-user/ppc/termbits.h
 diff -ur a/linux-user/strace.c b/linux-user/strace.c
 --- a/linux-user/strace.c
 +++ b/linux-user/strace.c
-@@ -1821,13 +1821,16 @@
+@@ -1908,13 +1908,16 @@
      }
  
      qemu_log("c_cflag = ");
@@ -92,7 +92,7 @@ diff -ur a/linux-user/strace.c b/linux-user/strace.c
      print_flags(termios_cflags, cflags_clean, 0);
  
      qemu_log("c_lflag = ");
-@@ -1841,6 +1844,73 @@
+@@ -1928,6 +1844,73 @@
  
      qemu_log("}");
  }
@@ -166,7 +166,7 @@ diff -ur a/linux-user/strace.c b/linux-user/strace.c
  
  #undef UNUSED
  
-@@ -4161,7 +4161,7 @@
+@@ -4258,7 +4161,7 @@
      int target_size;
  
      for (ie = ioctl_entries; ie->target_cmd != 0; ie++) {
@@ -178,7 +178,7 @@ diff -ur a/linux-user/strace.c b/linux-user/strace.c
 diff -ur a/linux-user/syscall.c b/linux-user/syscall.c
 --- a/linux-user/syscall.c
 +++ b/linux-user/syscall.c
-@@ -84,6 +84,7 @@
+@@ -85,6 +85,7 @@
  #endif
  
  #define termios host_termios
@@ -186,7 +186,7 @@ diff -ur a/linux-user/syscall.c b/linux-user/syscall.c
  #define winsize host_winsize
  #define termio host_termio
  #define sgttyb host_sgttyb /* same as target */
-@@ -5871,6 +5872,28 @@
+@@ -5758,6 +5759,28 @@
  	{ TARGET_CBAUD, TARGET_B115200, CBAUD, B115200 },
  	{ TARGET_CBAUD, TARGET_B230400, CBAUD, B230400 },
  	{ TARGET_CBAUD, TARGET_B460800, CBAUD, B460800 },
@@ -215,7 +215,7 @@ diff -ur a/linux-user/syscall.c b/linux-user/syscall.c
  	{ TARGET_CSIZE, TARGET_CS5, CSIZE, CS5 },
  	{ TARGET_CSIZE, TARGET_CS6, CSIZE, CS6 },
  	{ TARGET_CSIZE, TARGET_CS7, CSIZE, CS7 },
-@@ -5938,6 +5961,43 @@
+@@ -5825,6 +5848,43 @@
      host->c_cc[VEOL2] = target->c_cc[TARGET_VEOL2];
  }
  
@@ -259,7 +259,7 @@ diff -ur a/linux-user/syscall.c b/linux-user/syscall.c
  static void host_to_target_termios (void *dst, const void *src)
  {
      struct target_termios *target = dst;
-@@ -5971,6 +6031,50 @@
+@@ -5858,6 +5918,50 @@
      target->c_cc[TARGET_VWERASE] = host->c_cc[VWERASE];
      target->c_cc[TARGET_VLNEXT] = host->c_cc[VLNEXT];
      target->c_cc[TARGET_VEOL2] = host->c_cc[VEOL2];
@@ -310,7 +310,7 @@ diff -ur a/linux-user/syscall.c b/linux-user/syscall.c
  }
  
  static const StructEntry struct_termios_def = {
-@@ -5980,6 +6084,13 @@
+@@ -5867,6 +5971,13 @@
      .print = print_termios,
  };
  
@@ -336,7 +336,7 @@ diff -ur a/linux-user/syscall_types.h b/linux-user/syscall_types.h
 diff -ur a/linux-user/user-internals.h b/linux-user/user-internals.h
 --- a/linux-user/user-internals.h
 +++ b/linux-user/user-internals.h
-@@ -131,6 +131,7 @@
+@@ -130,6 +130,7 @@
  #endif /* TARGET_ABI_BITS != 32 */
  
  void print_termios(void *arg);

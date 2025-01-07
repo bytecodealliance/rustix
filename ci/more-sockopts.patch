@@ -34,7 +34,7 @@ diff -ur -x roms -x build a/linux-user/mips/sockbits.h b/linux-user/mips/sockbit
 diff -ur -x roms -x build a/linux-user/syscall.c b/linux-user/syscall.c
 --- a/linux-user/syscall.c
 +++ b/linux-user/syscall.c
-@@ -2476,6 +2476,9 @@
+@@ -2498,6 +2498,9 @@
          case TARGET_SO_RCVLOWAT:
  		optname = SO_RCVLOWAT;
  		break;
@@ -44,7 +44,7 @@ diff -ur -x roms -x build a/linux-user/syscall.c b/linux-user/syscall.c
          default:
              goto unimplemented;
          }
-@@ -2534,6 +2537,7 @@
+@@ -2556,6 +2559,7 @@
  {
      abi_long ret;
      int len, val;
@@ -52,7 +52,7 @@ diff -ur -x roms -x build a/linux-user/syscall.c b/linux-user/syscall.c
      socklen_t lv;
  
      switch(level) {
-@@ -2733,6 +2737,27 @@
+@@ -2755,6 +2759,27 @@
          case TARGET_SO_DOMAIN:
              optname = SO_DOMAIN;
              goto int_case;
@@ -80,7 +80,7 @@ diff -ur -x roms -x build a/linux-user/syscall.c b/linux-user/syscall.c
          default:
              goto int_case;
          }
-@@ -2756,6 +2781,9 @@
+@@ -2778,6 +2803,9 @@
          case SO_ERROR:
              val = host_to_target_errno(val);
              break;

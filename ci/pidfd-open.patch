@@ -7,7 +7,7 @@ so we use the `fcntl_flags_tbl` to translate it.
 
 --- a/linux-user/syscall.c
 +++ b/linux-user/syscall.c
-@@ -9477,7 +9477,8 @@
+@@ -9464,7 +9464,8 @@
  #endif
  #if defined(__NR_pidfd_open) && defined(TARGET_NR_pidfd_open)
      case TARGET_NR_pidfd_open:

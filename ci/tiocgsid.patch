@@ -6,7 +6,7 @@ This corrects the value of `TIOCGSID`.
 diff -ur a/linux-user/ioctls.h b/linux-user/ioctls.h
 --- a/linux-user/ioctls.h
 +++ b/linux-user/ioctls.h
-@@ -22,7 +28,7 @@
+@@ -30,7 +36,7 @@
       IOCTL(TIOCSCTTY, 0, TYPE_INT)
       IOCTL(TIOCGPGRP, IOC_R, MK_PTR(TYPE_INT))
       IOCTL(TIOCSPGRP, IOC_W, MK_PTR(TYPE_INT))
