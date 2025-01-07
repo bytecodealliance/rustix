@@ -69,11 +69,10 @@ jobs:
         sparcv9-sun-solaris
         aarch64-linux-android
         aarch64-apple-ios
-        wasm32-wasi
     - if: matrix.rust != '1.48'
-      run: rustup target add x86_64-unknown-fuchsia
+      run: rustup target add x86_64-unknown-fuchsia wasm32-wasip1
     - if: matrix.rust == '1.48'
-      run: rustup target add x86_64-fuchsia
+      run: rustup target add x86_64-fuchsia wasm32-wasi
 
     - name: Install cross-compilation tools
       run: |
@@ -81,13 +80,20 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y gcc-i686-linux-gnu gcc-aarch64-linux-gnu gcc-riscv64-linux-gnu gcc-arm-linux-gnueabi musl-tools
 
+    - name: Use specific dependency versions for rustix 0.37 compatibility.
+      run: |
+        cargo update --package=tempfile --precise=3.6.0
+
     - name: Use specific dependency versions for Rust 1.48 compatibility.
       if: matrix.rust == '1.48'
       run: |
         cargo update --package=once_cell --precise 1.14.0
         cargo update --package=flate2 --precise=1.0.25
-        cargo update --package=tempfile --precise=3.6.0
         cargo update --package=cc --precise=1.0.68
+
+    - name: Use specific dependency versions for rustix 0.37 compatibility.
+      run: |
+        cargo update --package=libc --precise=0.2.151
 
     - run: cargo check --workspace --release -vv --all-targets
     - run: cargo check --workspace --release -vv --features=all-apis --all-targets
@@ -125,7 +131,7 @@ jobs:
     # Omit --all-targets for WASI until all the dev-dependencies support WASI
     # on stable.
     - if: matrix.rust != '1.48'
-      run: cargo check --workspace --release -vv --target=wasm32-wasi --features=all-apis
+      run: cargo check --workspace --release -vv --target=wasm32-wasip1 --features=all-apis
 
   check_no_default_features:
     name: Check --no-default-features
@@ -175,10 +181,10 @@ jobs:
     - run: >
         rustup target add
         x86_64-unknown-redox
-        wasm32-wasi
+        wasm32-wasip1
         thumbv7neon-unknown-linux-gnueabihf
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-redox --features=all-apis
-    - run: cargo check --workspace --release -vv --target=wasm32-wasi --features=all-apis
+    - run: cargo check --workspace --release -vv --target=wasm32-wasip1 --features=all-apis
     - run: cargo check --workspace --release -vv --target=thumbv7neon-unknown-linux-gnueabihf --features=all-apis
 
   check_tier3:
@@ -222,7 +228,7 @@ jobs:
       QEMU_BUILD_VERSION: 7.0.0
     strategy:
       matrix:
-        build: [ubuntu, ubuntu-20.04, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, s390x-linux, arm-linux, ubuntu-stable, ubuntu-1.48, i686-linux-stable, aarch64-linux-stable, riscv64-linux-stable, s390x-linux-stable, powerpc64le-linux-stable, arm-linux-stable, ubuntu-1.48, i686-linux-1.48, aarch64-linux-1.48, riscv64-linux-1.48, s390x-linux-1.48, powerpc64le-linux-1.48, arm-linux-1.48, macos-latest, macos-12, windows, windows-2019]
+        build: [ubuntu, ubuntu-20.04, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, s390x-linux, arm-linux, ubuntu-stable, ubuntu-1.48, i686-linux-stable, aarch64-linux-stable, riscv64-linux-stable, s390x-linux-stable, powerpc64le-linux-stable, arm-linux-stable, ubuntu-1.48, i686-linux-1.48, aarch64-linux-1.48, riscv64-linux-1.48, s390x-linux-1.48, powerpc64le-linux-1.48, arm-linux-1.48, macos-latest, macos-13, windows, windows-2019]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -395,8 +401,8 @@ jobs:
           - build: macos-latest
             os: macos-latest
             rust: stable
-          - build: macos-12
-            os: macos-12
+          - build: macos-13
+            os: macos-13
             rust: stable
           - build: windows
             os: windows-latest
@@ -428,7 +434,7 @@ jobs:
       run: |
         set -ex
         sudo apt-get update
-        sudo apt-get install -y ${{ matrix.gcc_package }} ninja-build
+        sudo apt-get install -y ${{ matrix.gcc_package }} ninja-build libglib2.0-dev
         upcase=$(echo ${{ matrix.target }} | awk '{ print toupper($0) }' | sed 's/-/_/g')
         echo CARGO_TARGET_${upcase}_LINKER=${{ matrix.gcc }} >> $GITHUB_ENV
       if: matrix.gcc_package != '' && matrix.os == 'ubuntu-latest'
@@ -466,13 +472,20 @@ jobs:
         ninja -C build install
       if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'
 
+    - name: Use specific dependency versions for rustix 0.37 compatibility.
+      run: |
+        cargo update --package=tempfile --precise=3.6.0
+
     - name: Use specific dependency versions for Rust 1.48 compatibility.
       if: matrix.rust == '1.48'
       run: |
         cargo update --package=once_cell --precise 1.14.0
         cargo update --package=flate2 --precise=1.0.25
-        cargo update --package=tempfile --precise=3.6.0
         cargo update --package=cc --precise=1.0.68
+
+    - name: Use specific dependency versions for rustix 0.37 compatibility.
+      run: |
+        cargo update --package=libc --precise=0.2.151
 
     - run: |
         # Run the tests, and check the prebuilt release libraries.
@@ -593,7 +606,7 @@ jobs:
       run: |
         set -ex
         sudo apt-get update
-        sudo apt-get install -y ${{ matrix.gcc_package }} ninja-build
+        sudo apt-get install -y ${{ matrix.gcc_package }} ninja-build libglib2.0-dev
         upcase=$(echo ${{ matrix.target }} | awk '{ print toupper($0) }' | sed 's/-/_/g')
         echo CARGO_TARGET_${upcase}_LINKER=${{ matrix.gcc }} >> $GITHUB_ENV
       if: matrix.gcc_package != '' && matrix.os == 'ubuntu-latest'
@@ -681,7 +694,7 @@ jobs:
       run: |
         set -ex
         sudo apt-get update
-        sudo apt-get install -y ${{ matrix.gcc_package }} ninja-build
+        sudo apt-get install -y ${{ matrix.gcc_package }} ninja-build libglib2.0-dev
         upcase=$(echo ${{ matrix.target }} | awk '{ print toupper($0) }' | sed 's/-/_/g')
         echo CARGO_TARGET_${upcase}_LINKER=${{ matrix.gcc }} >> $GITHUB_ENV
       if: matrix.gcc_package != '' && matrix.os == 'ubuntu-latest'
