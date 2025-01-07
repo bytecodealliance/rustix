@@ -80,13 +80,20 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y gcc-i686-linux-gnu gcc-aarch64-linux-gnu gcc-riscv64-linux-gnu gcc-arm-linux-gnueabi musl-tools
 
+    - name: Use specific dependency versions for rustix 0.37 compatibility.
+      run: |
+        cargo update --package=tempfile --precise=3.6.0
+
     - name: Use specific dependency versions for Rust 1.48 compatibility.
       if: matrix.rust == '1.48'
       run: |
-        cargo update --package=tempfile --precise=3.6.0
         cargo update --package=once_cell --precise 1.14.0
         cargo update --package=flate2 --precise=1.0.25
         cargo update --package=cc --precise=1.0.68
+
+    - name: Use specific dependency versions for rustix 0.37 compatibility.
+      run: |
+        cargo update --package=libc --precise=0.2.151
 
     - run: cargo check --workspace --release -vv --all-targets
     - run: cargo check --workspace --release -vv --features=all-apis --all-targets
@@ -465,13 +472,20 @@ jobs:
         ninja -C build install
       if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'
 
+    - name: Use specific dependency versions for rustix 0.37 compatibility.
+      run: |
+        cargo update --package=tempfile --precise=3.6.0
+
     - name: Use specific dependency versions for Rust 1.48 compatibility.
       if: matrix.rust == '1.48'
       run: |
         cargo update --package=once_cell --precise 1.14.0
         cargo update --package=flate2 --precise=1.0.25
-        cargo update --package=tempfile --precise=3.6.0
         cargo update --package=cc --precise=1.0.68
+
+    - name: Use specific dependency versions for rustix 0.37 compatibility.
+      run: |
+        cargo update --package=libc --precise=0.2.151
 
     - run: |
         # Run the tests, and check the prebuilt release libraries.
