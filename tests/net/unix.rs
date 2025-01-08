@@ -5,8 +5,6 @@
 // This test uses `AF_UNIX` with `SOCK_SEQPACKET` which is unsupported on
 // macOS.
 #![cfg(not(any(apple, target_os = "espidf", target_os = "redox", target_os = "wasi")))]
-// This test uses `DecInt`.
-#![cfg(feature = "itoa")]
 #![cfg(feature = "fs")]
 
 use rustix::fs::{unlinkat, AtFlags, CWD};

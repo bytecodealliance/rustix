@@ -7,5 +7,4 @@
 
 #[cfg(not(feature = "rustc-dep-of-std"))]
 mod arg;
-#[cfg(feature = "itoa")]
 mod dec_int;
