@@ -343,6 +343,7 @@ impl Vdso {
 
                 let mut i = *self
                     .bucket
+                    .cast::<u32>()
                     .add((ElfHashEntry::from(h1) % self.nbucket) as usize);
                 if i == 0 {
                     return null_mut();
@@ -350,14 +351,15 @@ impl Vdso {
                 h1 |= 1;
                 let mut hashval = self
                     .bucket
+                    .cast::<u32>()
                     .add(self.nbucket as usize)
-                    .add((i - ElfHashEntry::from(*self.gnu_hash.add(1))) as usize);
+                    .add((i - *self.gnu_hash.add(1)) as usize);
                 loop {
                     let sym: &Elf_Sym = &*self.symtab.add(i as usize);
                     let h2 = *hashval;
                     hashval = hashval.add(1);
-                    if ElfHashEntry::from(h1) == (h2 | 1)
-                        && self.check_sym(sym, i, name, version, ver_hash)
+                    if h1 == (h2 | 1)
+                        && self.check_sym(sym, ElfHashEntry::from(i), name, version, ver_hash)
                     {
                         let sum = self.addr_from_elf(sym.st_value).unwrap();
                         assert!(
