@@ -5,6 +5,10 @@
 //! with Creative Commons Zero License, version 1.0,
 //! available at <https://creativecommons.org/publicdomain/zero/1.0/legalcode>
 //!
+//! It also incorporates the patch at:
+//! <https://git.kernel.org/pub/scm/linux/kernel/git/shuah/linux-kselftest.git/commit/tools/testing/selftests/vDSO?h=next&id=01587d80b04f29747b6fd6d766c3bfa632f14eb0>,
+//! with changes to fix the pointer arithmetic on s390x.
+//!
 //! # Safety
 //!
 //! Parsing the vDSO involves a lot of raw pointer manipulation. This
@@ -341,6 +345,10 @@ impl Vdso {
             if !self.gnu_hash.is_null() {
                 let mut h1: u32 = gnu_hash(name);
 
+                // Changes to fix the pointer arithmetic on s390x: cast
+                // `self.bucket` to `*const u32` here, because even though
+                // s390x's `ElfHashEntry` is 64-bit for `DT_HASH` tables,
+                // it uses 32-bit entries for `DT_GNU_HASH` tables.
                 let mut i = *self
                     .bucket
                     .cast::<u32>()
@@ -349,6 +357,8 @@ impl Vdso {
                     return null_mut();
                 }
                 h1 |= 1;
+                // Changes to fix the pointer arithmetic on s390x: As above,
+                // cast `self.bucket` to `*const u32`.
                 let mut hashval = self
                     .bucket
                     .cast::<u32>()
