@@ -34,6 +34,7 @@ pub(super) struct Vdso {
     // Symbol table
     symtab: *const Elf_Sym,
     symstrings: *const u8,
+    gnu_hash: *const u32,
     bucket: *const ElfHashEntry,
     chain: *const ElfHashEntry,
     nbucket: ElfHashEntry,
@@ -60,6 +61,16 @@ fn elf_hash(name: &CStr) -> u32 {
     h
 }
 
+fn gnu_hash(name: &CStr) -> u32 {
+    let mut h: u32 = 5381;
+    for s in name.to_bytes() {
+        h = h
+            .wrapping_add(h.wrapping_mul(32))
+            .wrapping_add(u32::from(*s));
+    }
+    h
+}
+
 /// Create a `Vdso` value by parsing the vDSO at the `sysinfo_ehdr` address.
 fn init_from_sysinfo_ehdr() -> Option<Vdso> {
     // SAFETY: The auxv initialization code does extensive checks to ensure
@@ -80,6 +91,7 @@ fn init_from_sysinfo_ehdr() -> Option<Vdso> {
             pv_offset: 0,
             symtab: null(),
             symstrings: null(),
+            gnu_hash: null(),
             bucket: null(),
             chain: null(),
             nbucket: 0,
@@ -159,6 +171,11 @@ fn init_from_sysinfo_ehdr() -> Option<Vdso> {
                     )?
                     .as_ptr();
                 }
+                DT_GNU_HASH => {
+                    vdso.gnu_hash =
+                        check_raw_pointer::<u32>(vdso.addr_from_elf(d.d_un.d_ptr)? as *mut _)?
+                            .as_ptr()
+                }
                 DT_VERSYM => {
                     vdso.versym =
                         check_raw_pointer::<u16>(vdso.addr_from_elf(d.d_un.d_ptr)? as *mut _)?
@@ -183,7 +200,10 @@ fn init_from_sysinfo_ehdr() -> Option<Vdso> {
         // `check_raw_pointer` will have checked these pointers for null,
         // however they could still be null if the expected dynamic table
         // entries are absent.
-        if vdso.symstrings.is_null() || vdso.symtab.is_null() || hash.is_null() {
+        if vdso.symstrings.is_null()
+            || vdso.symtab.is_null()
+            || (hash.is_null() && vdso.gnu_hash.is_null())
+        {
             return None; // Failed
         }
 
@@ -192,10 +212,20 @@ fn init_from_sysinfo_ehdr() -> Option<Vdso> {
         }
 
         // Parse the hash table header.
-        vdso.nbucket = *hash.add(0);
-        //vdso.nchain = *hash.add(1);
-        vdso.bucket = hash.add(2);
-        vdso.chain = hash.add(vdso.nbucket as usize + 2);
+        if !vdso.gnu_hash.is_null() {
+            vdso.nbucket = *vdso.gnu_hash;
+            // The bucket array is located after the header (4 uint32) and the bloom
+            // filter (size_t array of gnu_hash[2] elements).
+            vdso.bucket = vdso
+                .gnu_hash
+                .add(4)
+                .add(size_of::<c::size_t>() / 4 * *vdso.gnu_hash.add(2) as usize);
+        } else {
+            vdso.nbucket = *hash.add(0);
+            //vdso.nchain = *hash.add(1);
+            vdso.bucket = hash.add(2);
+            vdso.chain = hash.add(vdso.nbucket as usize + 2);
+        }
 
         // That's all we need.
         Some(vdso)
@@ -261,49 +291,96 @@ impl Vdso {
             && (name == CStr::from_ptr(self.symstrings.add(aux.vda_name as usize).cast()))
     }
 
+    /// Check to see if the symbol is the one we're looking for.
+    ///
+    /// # Safety
+    ///
+    /// The raw pointers inside `self` must be valid.
+    unsafe fn check_sym(
+        &self,
+        sym: &Elf_Sym,
+        i: u32,
+        name: &CStr,
+        version: &CStr,
+        ver_hash: u32,
+    ) -> bool {
+        // Check for a defined global or weak function w/ right name.
+        //
+        // Accept `STT_NOTYPE` in addition to `STT_FUNC` for the symbol
+        // type, for compatibility with some versions of Linux on
+        // PowerPC64. See [this commit] in Linux for more background.
+        //
+        // [this commit]: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/tools/testing/selftests/vDSO/parse_vdso.c?id=0161bd38c24312853ed5ae9a425a1c41c4ac674a
+        if ELF_ST_TYPE(sym.st_info) != STT_FUNC && ELF_ST_TYPE(sym.st_info) != STT_NOTYPE {
+            return false;
+        }
+        if ELF_ST_BIND(sym.st_info) != STB_GLOBAL && ELF_ST_BIND(sym.st_info) != STB_WEAK {
+            return false;
+        }
+        if name != CStr::from_ptr(self.symstrings.add(sym.st_name as usize).cast()) {
+            return false;
+        }
+
+        // Check symbol version.
+        if !self.versym.is_null()
+            && !self.match_version(*self.versym.add(i as usize), version, ver_hash)
+        {
+            return false;
+        }
+
+        true
+    }
+
     /// Look up a symbol in the vDSO.
     pub(super) fn sym(&self, version: &CStr, name: &CStr) -> *mut c::c_void {
         let ver_hash = elf_hash(version);
-        let name_hash = elf_hash(name);
 
         // SAFETY: The pointers in `self` must be valid.
         unsafe {
-            let mut chain = *self
-                .bucket
-                .add((ElfHashEntry::from(name_hash) % self.nbucket) as usize);
+            if !self.gnu_hash.is_null() {
+                let mut h1: u32 = gnu_hash(name);
 
-            while chain != ElfHashEntry::from(STN_UNDEF) {
-                let sym = &*self.symtab.add(chain as usize);
-
-                // Check for a defined global or weak function w/ right name.
-                //
-                // Accept `STT_NOTYPE` in addition to `STT_FUNC` for the symbol
-                // type, for compatibility with some versions of Linux on
-                // PowerPC64. See [this commit] in Linux for more background.
-                //
-                // [this commit]: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/tools/testing/selftests/vDSO/parse_vdso.c?id=0161bd38c24312853ed5ae9a425a1c41c4ac674a
-                if (ELF_ST_TYPE(sym.st_info) != STT_FUNC &&
-                        ELF_ST_TYPE(sym.st_info) != STT_NOTYPE)
-                    || (ELF_ST_BIND(sym.st_info) != STB_GLOBAL
-                        && ELF_ST_BIND(sym.st_info) != STB_WEAK)
-                    || sym.st_shndx == SHN_UNDEF
-                    || sym.st_shndx == SHN_ABS
-                    || ELF_ST_VISIBILITY(sym.st_other) != STV_DEFAULT
-                    || (name != CStr::from_ptr(self.symstrings.add(sym.st_name as usize).cast()))
-                    // Check symbol version.
-                    || (!self.versym.is_null()
-                        && !self.match_version(*self.versym.add(chain as usize), version, ver_hash))
-                {
-                    chain = *self.chain.add(chain as usize);
-                    continue;
+                let mut i = *self.bucket.add((h1 % self.nbucket) as usize);
+                if i == 0 {
+                    return null_mut();
                 }
-
-                let sum = self.addr_from_elf(sym.st_value).unwrap();
-                assert!(
-                    sum as usize >= self.load_addr as usize
-                        && sum as usize <= self.load_end as usize
-                );
-                return sum as *mut c::c_void;
+                h1 |= 1;
+                let mut hashval = self
+                    .bucket
+                    .add(self.nbucket as usize)
+                    .add((i - *self.gnu_hash.add(1)) as usize);
+                loop {
+                    let sym: &Elf_Sym = &*self.symtab.add(i as usize);
+                    let h2 = *hashval;
+                    hashval = hashval.add(1);
+                    if h1 == (h2 | 1) && self.check_sym(sym, i, name, version, ver_hash) {
+                        let sum = self.addr_from_elf(sym.st_value).unwrap();
+                        assert!(
+                            sum as usize >= self.load_addr as usize
+                                && sum as usize <= self.load_end as usize
+                        );
+                        return sum as *mut c::c_void;
+                    }
+                    if (h2 & 1) != 0 {
+                        break;
+                    }
+                    i += 1;
+                }
+            } else {
+                let mut i = *self.bucket.add((elf_hash(name) % self.nbucket) as usize);
+                while i != 0 {
+                    let sym: &Elf_Sym = &*self.symtab.add(i as usize);
+                    if sym.st_shndx != SHN_UNDEF && self.check_sym(sym, i, name, version, ver_hash)
+                    {
+                        let sum = self.addr_from_elf(sym.st_value).unwrap();
+                        assert!(
+                            sum as usize >= self.load_addr as usize
+                                && sum as usize <= self.load_end as usize
+                        );
+                        return sum as *mut c::c_void;
+                    }
+                    i = *self.chain.add(i as usize);
+                }
             }
         }
 
@@ -326,7 +403,6 @@ impl Vdso {
 
 #[cfg(linux_raw)]
 #[test]
-#[ignore] // Until rustix is updated to the new vDSO format.
 fn test_vdso() {
     let vdso = Vdso::new().unwrap();
     assert!(!vdso.symtab.is_null());
