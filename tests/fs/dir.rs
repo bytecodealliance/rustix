@@ -62,6 +62,61 @@ fn test_dir_read_from() {
     assert!(saw_cargo_toml);
 }
 
+#[cfg(any(linux_like))]
+#[test]
+fn test_dir_seek() {
+    use std::io::Write;
+
+    let tempdir = tempfile::tempdir().unwrap();
+
+    // Create many files so that we exhaust the readdir buffer at least once.
+    let count = 500;
+    let prefix = "file_with_a_very_long_name_to_make_sure_that_we_fill_up_the_buffer";
+    let test_string = "This is a test string.";
+    let mut filenames = Vec::<String>::with_capacity(count);
+    for i in 0..count {
+        let filename = format!("{}-{}.txt", prefix, i);
+        let mut file = std::fs::File::create(&tempdir.path().join(&filename)).unwrap();
+        filenames.push(filename);
+        file.write_all(test_string.as_bytes()).unwrap();
+    }
+
+    let t = rustix::fs::open(
+        tempdir.path(),
+        rustix::fs::OFlags::RDONLY | rustix::fs::OFlags::CLOEXEC,
+        rustix::fs::Mode::empty(),
+    )
+    .unwrap();
+
+    let mut dir = rustix::fs::Dir::read_from(&t).unwrap();
+
+    // Read the first half of directory entries and record offset
+    for _ in 0..count / 2 {
+        dir.read().unwrap().unwrap();
+    }
+    let offset = dir.read().unwrap().unwrap().offset();
+
+    // Read the rest of the directory entries and record the names
+    let mut entries = Vec::new();
+    while let Some(entry) = dir.read() {
+        let entry = entry.unwrap();
+        entries.push(entry.file_name().to_string_lossy().into_owned());
+    }
+    assert!(entries.len() >= count / 2);
+
+    // Seek to the stored position
+    dir.seekdir(offset).unwrap();
+
+    // Confirm that we're getting the same results as before
+    let mut entries2 = Vec::new();
+    while let Some(entry) = dir.read() {
+        let entry = entry.unwrap();
+        entries2.push(entry.file_name().to_string_lossy().into_owned());
+    }
+
+    assert_eq!(entries, entries2);
+}
+
 #[test]
 fn test_dir_new() {
     let t = rustix::fs::openat(

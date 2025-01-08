@@ -129,6 +129,14 @@ impl Dir {
         unsafe { c::rewinddir(self.libc_dir.as_ptr()) }
     }
 
+    /// `seekdir(self, offset)`
+    #[inline]
+    pub fn seekdir(&mut self, offset: i64) -> io::Result<()> {
+        self.any_errors = false;
+        unsafe { c::seekdir(self.libc_dir.as_ptr(), offset as c::c_long) }
+        Ok(())
+    }
+
     /// `readdir(self)`, where `None` means the end of the directory.
     pub fn read(&mut self) -> Option<io::Result<DirEntry>> {
         // If we've seen errors, don't continue to try to read anything further.
@@ -170,6 +178,9 @@ impl Dir {
 
                     #[cfg(not(any(freebsdlike, netbsdlike, target_os = "vita")))]
                     d_ino: dirent.d_ino,
+
+                    #[cfg(any(linux_like))]
+                    d_off: dirent.d_off,
 
                     #[cfg(any(freebsdlike, netbsdlike))]
                     d_fileno: dirent.d_fileno,
@@ -278,6 +289,9 @@ pub struct DirEntry {
     d_fileno: c::ino_t,
 
     name: CString,
+
+    #[cfg(any(linux_like))]
+    d_off: c::off_t,
 }
 
 impl DirEntry {
@@ -285,6 +299,15 @@ impl DirEntry {
     #[inline]
     pub fn file_name(&self) -> &CStr {
         &self.name
+    }
+
+    /// Returns the "offset" of this directory entry. Note that this is not
+    /// a true numerical offset but an opaque cookie that identifies a
+    /// position in the given stream.
+    #[cfg(any(linux_like))]
+    #[inline]
+    pub fn offset(&self) -> i64 {
+        self.d_off as i64
     }
 
     /// Returns the type of this directory entry.
