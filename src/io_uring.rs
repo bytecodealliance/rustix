@@ -205,85 +205,82 @@ bitflags::bitflags! {
 #[non_exhaustive]
 pub enum IoringRegisterOp {
     /// `IORING_REGISTER_BUFFERS`
-    RegisterBuffers = sys::IORING_REGISTER_BUFFERS as _,
+    RegisterBuffers = sys::io_uring_register_op::IORING_REGISTER_BUFFERS as _,
 
     /// `IORING_UNREGISTER_BUFFERS`
-    UnregisterBuffers = sys::IORING_UNREGISTER_BUFFERS as _,
+    UnregisterBuffers = sys::io_uring_register_op::IORING_UNREGISTER_BUFFERS as _,
 
     /// `IORING_REGISTER_FILES`
-    RegisterFiles = sys::IORING_REGISTER_FILES as _,
+    RegisterFiles = sys::io_uring_register_op::IORING_REGISTER_FILES as _,
 
     /// `IORING_UNREGISTER_FILES`
-    UnregisterFiles = sys::IORING_UNREGISTER_FILES as _,
+    UnregisterFiles = sys::io_uring_register_op::IORING_UNREGISTER_FILES as _,
 
     /// `IORING_REGISTER_EVENTFD`
-    RegisterEventfd = sys::IORING_REGISTER_EVENTFD as _,
+    RegisterEventfd = sys::io_uring_register_op::IORING_REGISTER_EVENTFD as _,
 
     /// `IORING_UNREGISTER_EVENTFD`
-    UnregisterEventfd = sys::IORING_UNREGISTER_EVENTFD as _,
+    UnregisterEventfd = sys::io_uring_register_op::IORING_UNREGISTER_EVENTFD as _,
 
     /// `IORING_REGISTER_FILES_UPDATE`
-    RegisterFilesUpdate = sys::IORING_REGISTER_FILES_UPDATE as _,
+    RegisterFilesUpdate = sys::io_uring_register_op::IORING_REGISTER_FILES_UPDATE as _,
 
     /// `IORING_REGISTER_EVENTFD_ASYNC`
-    RegisterEventfdAsync = sys::IORING_REGISTER_EVENTFD_ASYNC as _,
+    RegisterEventfdAsync = sys::io_uring_register_op::IORING_REGISTER_EVENTFD_ASYNC as _,
 
     /// `IORING_REGISTER_PROBE`
-    RegisterProbe = sys::IORING_REGISTER_PROBE as _,
+    RegisterProbe = sys::io_uring_register_op::IORING_REGISTER_PROBE as _,
 
     /// `IORING_REGISTER_PERSONALITY`
-    RegisterPersonality = sys::IORING_REGISTER_PERSONALITY as _,
+    RegisterPersonality = sys::io_uring_register_op::IORING_REGISTER_PERSONALITY as _,
 
     /// `IORING_UNREGISTER_PERSONALITY`
-    UnregisterPersonality = sys::IORING_UNREGISTER_PERSONALITY as _,
+    UnregisterPersonality = sys::io_uring_register_op::IORING_UNREGISTER_PERSONALITY as _,
 
     /// `IORING_REGISTER_RESTRICTIONS`
-    RegisterRestrictions = sys::IORING_REGISTER_RESTRICTIONS as _,
+    RegisterRestrictions = sys::io_uring_register_op::IORING_REGISTER_RESTRICTIONS as _,
 
     /// `IORING_REGISTER_ENABLE_RINGS`
-    RegisterEnableRings = sys::IORING_REGISTER_ENABLE_RINGS as _,
+    RegisterEnableRings = sys::io_uring_register_op::IORING_REGISTER_ENABLE_RINGS as _,
 
     /// `IORING_REGISTER_BUFFERS2`
-    RegisterBuffers2 = sys::IORING_REGISTER_BUFFERS2 as _,
+    RegisterBuffers2 = sys::io_uring_register_op::IORING_REGISTER_BUFFERS2 as _,
 
     /// `IORING_REGISTER_BUFFERS_UPDATE`
-    RegisterBuffersUpdate = sys::IORING_REGISTER_BUFFERS_UPDATE as _,
+    RegisterBuffersUpdate = sys::io_uring_register_op::IORING_REGISTER_BUFFERS_UPDATE as _,
 
     /// `IORING_REGISTER_FILES2`
-    RegisterFiles2 = sys::IORING_REGISTER_FILES2 as _,
-
-    /// `IORING_REGISTER_FILES_SKIP`
-    RegisterFilesSkip = sys::IORING_REGISTER_FILES_SKIP as _,
+    RegisterFiles2 = sys::io_uring_register_op::IORING_REGISTER_FILES2 as _,
 
     /// `IORING_REGISTER_FILES_UPDATE2`
-    RegisterFilesUpdate2 = sys::IORING_REGISTER_FILES_UPDATE2 as _,
+    RegisterFilesUpdate2 = sys::io_uring_register_op::IORING_REGISTER_FILES_UPDATE2 as _,
 
     /// `IORING_REGISTER_IOWQ_AFF`
-    RegisterIowqAff = sys::IORING_REGISTER_IOWQ_AFF as _,
+    RegisterIowqAff = sys::io_uring_register_op::IORING_REGISTER_IOWQ_AFF as _,
 
     /// `IORING_UNREGISTER_IOWQ_AFF`
-    UnregisterIowqAff = sys::IORING_UNREGISTER_IOWQ_AFF as _,
+    UnregisterIowqAff = sys::io_uring_register_op::IORING_UNREGISTER_IOWQ_AFF as _,
 
     /// `IORING_REGISTER_IOWQ_MAX_WORKERS`
-    RegisterIowqMaxWorkers = sys::IORING_REGISTER_IOWQ_MAX_WORKERS as _,
+    RegisterIowqMaxWorkers = sys::io_uring_register_op::IORING_REGISTER_IOWQ_MAX_WORKERS as _,
 
     /// `IORING_REGISTER_RING_FDS`
-    RegisterRingFds = sys::IORING_REGISTER_RING_FDS as _,
+    RegisterRingFds = sys::io_uring_register_op::IORING_REGISTER_RING_FDS as _,
 
     /// `IORING_UNREGISTER_RING_FDS`
-    UnregisterRingFds = sys::IORING_UNREGISTER_RING_FDS as _,
+    UnregisterRingFds = sys::io_uring_register_op::IORING_UNREGISTER_RING_FDS as _,
 
     /// `IORING_REGISTER_PBUF_RING`
-    RegisterPbufRing = sys::IORING_REGISTER_PBUF_RING as _,
+    RegisterPbufRing = sys::io_uring_register_op::IORING_REGISTER_PBUF_RING as _,
 
     /// `IORING_UNREGISTER_PBUF_RING`
-    UnregisterPbufRing = sys::IORING_UNREGISTER_PBUF_RING as _,
+    UnregisterPbufRing = sys::io_uring_register_op::IORING_UNREGISTER_PBUF_RING as _,
 
     /// `IORING_REGISTER_SYNC_CANCEL`
-    RegisterSyncCancel = sys::IORING_REGISTER_SYNC_CANCEL as _,
+    RegisterSyncCancel = sys::io_uring_register_op::IORING_REGISTER_SYNC_CANCEL as _,
 
     /// `IORING_REGISTER_FILE_ALLOC_RANGE`
-    RegisterFileAllocRange = sys::IORING_REGISTER_FILE_ALLOC_RANGE as _,
+    RegisterFileAllocRange = sys::io_uring_register_op::IORING_REGISTER_FILE_ALLOC_RANGE as _,
 }
 
 bitflags::bitflags! {
@@ -292,7 +289,7 @@ bitflags::bitflags! {
     #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct IoringRegisterFlags: u32 {
         /// `IORING_REGISTER_USE_REGISTERED_RING`
-        const USE_REGISTERED_RING = sys::IORING_REGISTER_USE_REGISTERED_RING as u32;
+        const USE_REGISTERED_RING = sys::io_uring_register_op::IORING_REGISTER_USE_REGISTERED_RING as u32;
 
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
@@ -465,16 +462,18 @@ impl Default for IoringOp {
 #[non_exhaustive]
 pub enum IoringRestrictionOp {
     /// `IORING_RESTRICTION_REGISTER_OP`
-    RegisterOp = sys::IORING_RESTRICTION_REGISTER_OP as _,
+    RegisterOp = sys::io_uring_register_restriction_op::IORING_RESTRICTION_REGISTER_OP as _,
 
     /// `IORING_RESTRICTION_SQE_FLAGS_ALLOWED`
-    SqeFlagsAllowed = sys::IORING_RESTRICTION_SQE_FLAGS_ALLOWED as _,
+    SqeFlagsAllowed =
+        sys::io_uring_register_restriction_op::IORING_RESTRICTION_SQE_FLAGS_ALLOWED as _,
 
     /// `IORING_RESTRICTION_SQE_FLAGS_REQUIRED`
-    SqeFlagsRequired = sys::IORING_RESTRICTION_SQE_FLAGS_REQUIRED as _,
+    SqeFlagsRequired =
+        sys::io_uring_register_restriction_op::IORING_RESTRICTION_SQE_FLAGS_REQUIRED as _,
 
     /// `IORING_RESTRICTION_SQE_OP`
-    SqeOp = sys::IORING_RESTRICTION_SQE_OP as _,
+    SqeOp = sys::io_uring_register_restriction_op::IORING_RESTRICTION_SQE_OP as _,
 }
 
 impl Default for IoringRestrictionOp {
@@ -491,10 +490,10 @@ impl Default for IoringRestrictionOp {
 #[non_exhaustive]
 pub enum IoringMsgringCmds {
     /// `IORING_MSG_DATA`
-    Data = sys::IORING_MSG_DATA as _,
+    Data = sys::io_uring_msg_ring_flags::IORING_MSG_DATA as _,
 
     /// `IORING_MSG_SEND_FD`
-    SendFd = sys::IORING_MSG_SEND_FD as _,
+    SendFd = sys::io_uring_msg_ring_flags::IORING_MSG_SEND_FD as _,
 }
 
 bitflags::bitflags! {
@@ -564,25 +563,25 @@ bitflags::bitflags! {
     #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct IoringSqeFlags: u8 {
         /// `1 << IOSQE_ASYNC_BIT`
-        const ASYNC = 1 << sys::IOSQE_ASYNC_BIT as u8;
+        const ASYNC = 1 << sys::io_uring_sqe_flags_bit::IOSQE_ASYNC_BIT as u8;
 
         /// `1 << IOSQE_BUFFER_SELECT_BIT`
-        const BUFFER_SELECT = 1 << sys::IOSQE_BUFFER_SELECT_BIT as u8;
+        const BUFFER_SELECT = 1 << sys::io_uring_sqe_flags_bit::IOSQE_BUFFER_SELECT_BIT as u8;
 
         /// `1 << IOSQE_FIXED_FILE_BIT`
-        const FIXED_FILE = 1 << sys::IOSQE_FIXED_FILE_BIT as u8;
+        const FIXED_FILE = 1 << sys::io_uring_sqe_flags_bit::IOSQE_FIXED_FILE_BIT as u8;
 
         /// 1 << `IOSQE_IO_DRAIN_BIT`
-        const IO_DRAIN = 1 << sys::IOSQE_IO_DRAIN_BIT as u8;
+        const IO_DRAIN = 1 << sys::io_uring_sqe_flags_bit::IOSQE_IO_DRAIN_BIT as u8;
 
         /// `1 << IOSQE_IO_HARDLINK_BIT`
-        const IO_HARDLINK = 1 << sys::IOSQE_IO_HARDLINK_BIT as u8;
+        const IO_HARDLINK = 1 << sys::io_uring_sqe_flags_bit::IOSQE_IO_HARDLINK_BIT as u8;
 
         /// `1 << IOSQE_IO_LINK_BIT`
-        const IO_LINK = 1 << sys::IOSQE_IO_LINK_BIT as u8;
+        const IO_LINK = 1 << sys::io_uring_sqe_flags_bit::IOSQE_IO_LINK_BIT as u8;
 
         /// `1 << IOSQE_CQE_SKIP_SUCCESS_BIT`
-        const CQE_SKIP_SUCCESS = 1 << sys::IOSQE_CQE_SKIP_SUCCESS_BIT as u8;
+        const CQE_SKIP_SUCCESS = 1 << sys::io_uring_sqe_flags_bit::IOSQE_CQE_SKIP_SUCCESS_BIT as u8;
 
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
@@ -1381,7 +1380,7 @@ pub struct io_uring_rsrc_update2 {
 pub struct io_uring_getevents_arg {
     pub sigmask: u64,
     pub sigmask_sz: u32,
-    pub pad: u32,
+    pub min_wait_usec: u32,
     pub ts: u64,
 }
 
@@ -1630,7 +1629,13 @@ mod tests {
         check_struct!(io_uring_rsrc_register, nr, flags, resv2, data, tags);
         check_struct!(io_uring_rsrc_update, offset, resv, data);
         check_struct!(io_uring_rsrc_update2, offset, resv, data, tags, nr, resv2);
-        check_struct!(io_uring_getevents_arg, sigmask, sigmask_sz, pad, ts);
+        check_struct!(
+            io_uring_getevents_arg,
+            sigmask,
+            sigmask_sz,
+            min_wait_usec,
+            ts
+        );
         check_struct!(iovec, iov_base, iov_len);
         check_struct!(open_how, flags, mode, resolve);
         check_struct!(io_uring_buf_reg, ring_addr, ring_entries, bgid, flags, resv);
