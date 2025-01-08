@@ -213,13 +213,14 @@ fn init_from_sysinfo_ehdr() -> Option<Vdso> {
 
         // Parse the hash table header.
         if !vdso.gnu_hash.is_null() {
-            vdso.nbucket = *vdso.gnu_hash;
+            vdso.nbucket = ElfHashEntry::from(*vdso.gnu_hash);
             // The bucket array is located after the header (4 uint32) and the bloom
             // filter (size_t array of gnu_hash[2] elements).
             vdso.bucket = vdso
                 .gnu_hash
                 .add(4)
-                .add(size_of::<c::size_t>() / 4 * *vdso.gnu_hash.add(2) as usize);
+                .add(size_of::<c::size_t>() / 4 * *vdso.gnu_hash.add(2) as usize)
+                .cast();
         } else {
             vdso.nbucket = *hash.add(0);
             //vdso.nchain = *hash.add(1);
@@ -299,7 +300,7 @@ impl Vdso {
     unsafe fn check_sym(
         &self,
         sym: &Elf_Sym,
-        i: u32,
+        i: ElfHashEntry,
         name: &CStr,
         version: &CStr,
         ver_hash: u32,
@@ -340,7 +341,9 @@ impl Vdso {
             if !self.gnu_hash.is_null() {
                 let mut h1: u32 = gnu_hash(name);
 
-                let mut i = *self.bucket.add((h1 % self.nbucket) as usize);
+                let mut i = *self
+                    .bucket
+                    .add((ElfHashEntry::from(h1) % self.nbucket) as usize);
                 if i == 0 {
                     return null_mut();
                 }
@@ -348,12 +351,14 @@ impl Vdso {
                 let mut hashval = self
                     .bucket
                     .add(self.nbucket as usize)
-                    .add((i - *self.gnu_hash.add(1)) as usize);
+                    .add((i - ElfHashEntry::from(*self.gnu_hash.add(1))) as usize);
                 loop {
                     let sym: &Elf_Sym = &*self.symtab.add(i as usize);
                     let h2 = *hashval;
                     hashval = hashval.add(1);
-                    if h1 == (h2 | 1) && self.check_sym(sym, i, name, version, ver_hash) {
+                    if ElfHashEntry::from(h1) == (h2 | 1)
+                        && self.check_sym(sym, i, name, version, ver_hash)
+                    {
                         let sum = self.addr_from_elf(sym.st_value).unwrap();
                         assert!(
                             sum as usize >= self.load_addr as usize
@@ -367,7 +372,9 @@ impl Vdso {
                     i += 1;
                 }
             } else {
-                let mut i = *self.bucket.add((elf_hash(name) % self.nbucket) as usize);
+                let mut i = *self
+                    .bucket
+                    .add((ElfHashEntry::from(elf_hash(name)) % self.nbucket) as usize);
                 while i != 0 {
                     let sym: &Elf_Sym = &*self.symtab.add(i as usize);
                     if sym.st_shndx != SHN_UNDEF && self.check_sym(sym, i, name, version, ver_hash)
