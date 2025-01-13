@@ -18,8 +18,10 @@ use {
     rustix::stdio::{stderr, stdin, stdout},
 };
 
+#[cfg(feature = "termios")]
 struct DebugWinsize(rustix::termios::Winsize);
 
+#[cfg(feature = "termios")]
 impl core::fmt::Debug for DebugWinsize {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("Winsize");
