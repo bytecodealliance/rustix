@@ -93,7 +93,7 @@ impl Event {
     /// Get the user data for this event.
     pub fn udata(&self) -> *mut c::c_void {
         // On NetBSD, udata is an isize and not a pointer.
-        self.inner.udata
+        self.inner.udata as _
     }
 
     /// Get the raw data for this event.
