@@ -19,6 +19,8 @@ use {
 };
 
 #[cfg(feature = "termios")]
+#[cfg(all(not(windows), feature = "stdio"))]
+#[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
 struct DebugWinsize(rustix::termios::Winsize);
 
 #[cfg(feature = "termios")]
