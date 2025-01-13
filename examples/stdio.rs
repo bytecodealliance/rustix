@@ -24,6 +24,8 @@ use {
 struct DebugWinsize(rustix::termios::Winsize);
 
 #[cfg(feature = "termios")]
+#[cfg(all(not(windows), feature = "stdio"))]
+#[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
 impl core::fmt::Debug for DebugWinsize {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("Winsize");
