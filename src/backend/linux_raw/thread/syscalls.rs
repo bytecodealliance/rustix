@@ -5,18 +5,23 @@
 //! See the `rustix::backend` module documentation for details.
 #![allow(unsafe_code, clippy::undocumented_unsafe_blocks)]
 
+use super::types::RawCpuSet;
 use crate::backend::c;
 use crate::backend::conv::{
-    by_mut, by_ref, c_int, c_uint, ret, ret_c_int, ret_c_int_infallible, ret_usize, slice,
-    slice_just_addr, slice_just_addr_mut, zero,
+    by_mut, by_ref, c_int, c_uint, ret, ret_c_int, ret_c_int_infallible, ret_c_uint, ret_usize,
+    size_of, slice, slice_just_addr, slice_just_addr_mut, zero,
 };
 use crate::fd::BorrowedFd;
 use crate::io;
 use crate::pid::Pid;
-use crate::thread::{futex, ClockId, NanosleepRelativeResult, Timespec};
+use crate::thread::{
+    futex, ClockId, Cpuid, MembarrierCommand, MembarrierQuery, NanosleepRelativeResult, Timespec,
+};
+use crate::utils::as_mut_ptr;
 use core::mem::MaybeUninit;
 use core::sync::atomic::AtomicU32;
 use linux_raw_sys::general::{__kernel_timespec, TIMER_ABSTIME};
+use linux_raw_sys::general::{membarrier_cmd, membarrier_cmd_flag};
 #[cfg(target_pointer_width = "32")]
 use {crate::utils::option_as_ptr, linux_raw_sys::general::timespec as __kernel_old_timespec};
 
@@ -407,4 +412,104 @@ pub(crate) fn setresgid_thread(
 pub(crate) fn setgroups_thread(gids: &[crate::ugid::Gid]) -> io::Result<()> {
     let (addr, len) = slice(gids);
     unsafe { ret(syscall_readonly!(__NR_setgroups, len, addr)) }
+}
+
+// `sched_getcpu` has special optimizations via the vDSO on some architectures.
+#[cfg(any(
+    target_arch = "x86_64",
+    target_arch = "x86",
+    target_arch = "riscv64",
+    target_arch = "powerpc64",
+    target_arch = "s390x"
+))]
+pub(crate) use crate::backend::vdso_wrappers::sched_getcpu;
+
+// `sched_getcpu` on platforms without a vDSO entry for it.
+#[cfg(not(any(
+    target_arch = "x86_64",
+    target_arch = "x86",
+    target_arch = "riscv64",
+    target_arch = "powerpc64",
+    target_arch = "s390x"
+)))]
+#[inline]
+pub(crate) fn sched_getcpu() -> usize {
+    let mut cpu = MaybeUninit::<u32>::uninit();
+    unsafe {
+        let r = ret(syscall!(__NR_getcpu, &mut cpu, zero(), zero()));
+        debug_assert!(r.is_ok());
+        cpu.assume_init() as usize
+    }
+}
+
+#[inline]
+pub(crate) fn sched_getaffinity(pid: Option<Pid>, cpuset: &mut RawCpuSet) -> io::Result<()> {
+    unsafe {
+        // The raw Linux syscall returns the size (in bytes) of the `cpumask_t`
+        // data type that is used internally by the kernel to represent the CPU
+        // set bit mask.
+        let size = ret_usize(syscall!(
+            __NR_sched_getaffinity,
+            c_int(Pid::as_raw(pid)),
+            size_of::<RawCpuSet, _>(),
+            by_mut(&mut cpuset.bits)
+        ))?;
+        let bytes = as_mut_ptr(cpuset).cast::<u8>();
+        let rest = bytes.wrapping_add(size);
+        // Zero every byte in the cpuset not set by the kernel.
+        rest.write_bytes(0, core::mem::size_of::<RawCpuSet>() - size);
+        Ok(())
+    }
+}
+
+#[inline]
+pub(crate) fn sched_setaffinity(pid: Option<Pid>, cpuset: &RawCpuSet) -> io::Result<()> {
+    unsafe {
+        ret(syscall_readonly!(
+            __NR_sched_setaffinity,
+            c_int(Pid::as_raw(pid)),
+            size_of::<RawCpuSet, _>(),
+            slice_just_addr(&cpuset.bits)
+        ))
+    }
+}
+
+#[inline]
+pub(crate) fn sched_yield() {
+    unsafe {
+        // See the documentation for [`crate::thread::sched_yield`] for why
+        // errors are ignored.
+        syscall_readonly!(__NR_sched_yield).decode_void();
+    }
+}
+
+#[inline]
+pub(crate) fn membarrier_query() -> MembarrierQuery {
+    unsafe {
+        match ret_c_uint(syscall!(
+            __NR_membarrier,
+            c_int(membarrier_cmd::MEMBARRIER_CMD_QUERY as _),
+            c_uint(0)
+        )) {
+            Ok(query) => MembarrierQuery::from_bits_retain(query),
+            Err(_) => MembarrierQuery::empty(),
+        }
+    }
+}
+
+#[inline]
+pub(crate) fn membarrier(cmd: MembarrierCommand) -> io::Result<()> {
+    unsafe { ret(syscall!(__NR_membarrier, cmd, c_uint(0))) }
+}
+
+#[inline]
+pub(crate) fn membarrier_cpu(cmd: MembarrierCommand, cpu: Cpuid) -> io::Result<()> {
+    unsafe {
+        ret(syscall!(
+            __NR_membarrier,
+            cmd,
+            c_uint(membarrier_cmd_flag::MEMBARRIER_CMD_FLAG_CPU as _),
+            cpu
+        ))
+    }
 }

@@ -1,7 +1,5 @@
 //! libc syscalls supporting `rustix::process`.
 
-#[cfg(any(freebsdlike, linux_kernel, target_os = "fuchsia"))]
-use super::types::RawCpuSet;
 use crate::backend::c;
 #[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
 use crate::backend::conv::borrowed_fd;
@@ -19,8 +17,6 @@ use crate::backend::conv::ret_discarded_char_ptr;
 use crate::backend::conv::ret_infallible;
 #[cfg(not(target_os = "wasi"))]
 use crate::backend::conv::ret_pid_t;
-#[cfg(linux_kernel)]
-use crate::backend::conv::ret_u32;
 #[cfg(all(feature = "alloc", not(target_os = "wasi")))]
 use crate::backend::conv::ret_usize;
 use crate::backend::conv::{ret, ret_c_int};
@@ -46,8 +42,6 @@ use crate::process::Signal;
     target_os = "wasi"
 )))]
 use crate::process::Uid;
-#[cfg(linux_kernel)]
-use crate::process::{Cpuid, MembarrierCommand, MembarrierQuery};
 #[cfg(not(any(target_os = "espidf", target_os = "vita", target_os = "wasi")))]
 use crate::process::{RawPid, WaitOptions, WaitStatus};
 #[cfg(not(any(
@@ -72,14 +66,6 @@ use {
     super::super::conv::ret_owned_fd, crate::process::PidfdFlags, crate::process::PidfdGetfdFlags,
 };
 
-#[cfg(any(linux_kernel, target_os = "dragonfly"))]
-#[inline]
-pub(crate) fn sched_getcpu() -> usize {
-    let r = unsafe { libc::sched_getcpu() };
-    debug_assert!(r >= 0);
-    r as usize
-}
-
 #[cfg(feature = "fs")]
 #[cfg(not(target_os = "wasi"))]
 pub(crate) fn chdir(path: &CStr) -> io::Result<()> {
@@ -101,57 +87,6 @@ pub(crate) fn chroot(path: &CStr) -> io::Result<()> {
 #[cfg(not(target_os = "wasi"))]
 pub(crate) fn getcwd(buf: &mut [MaybeUninit<u8>]) -> io::Result<()> {
     unsafe { ret_discarded_char_ptr(c::getcwd(buf.as_mut_ptr().cast(), buf.len())) }
-}
-
-// The `membarrier` syscall has a third argument, but it's only used when
-// the `flags` argument is `MEMBARRIER_CMD_FLAG_CPU`.
-#[cfg(linux_kernel)]
-syscall! {
-    fn membarrier_all(
-        cmd: c::c_int,
-        flags: c::c_uint
-    ) via SYS_membarrier -> c::c_int
-}
-
-#[cfg(linux_kernel)]
-pub(crate) fn membarrier_query() -> MembarrierQuery {
-    // glibc does not have a wrapper for `membarrier`; [the documentation]
-    // says to use `syscall`.
-    //
-    // [the documentation]: https://man7.org/linux/man-pages/man2/membarrier.2.html#NOTES
-    const MEMBARRIER_CMD_QUERY: u32 = 0;
-    unsafe {
-        match ret_u32(membarrier_all(MEMBARRIER_CMD_QUERY as i32, 0)) {
-            Ok(query) => MembarrierQuery::from_bits_retain(query),
-            Err(_) => MembarrierQuery::empty(),
-        }
-    }
-}
-
-#[cfg(linux_kernel)]
-pub(crate) fn membarrier(cmd: MembarrierCommand) -> io::Result<()> {
-    unsafe { ret(membarrier_all(cmd as i32, 0)) }
-}
-
-#[cfg(linux_kernel)]
-pub(crate) fn membarrier_cpu(cmd: MembarrierCommand, cpu: Cpuid) -> io::Result<()> {
-    const MEMBARRIER_CMD_FLAG_CPU: u32 = 1;
-
-    syscall! {
-        fn membarrier_cpu(
-            cmd: c::c_int,
-            flags: c::c_uint,
-            cpu_id: c::c_int
-        ) via SYS_membarrier -> c::c_int
-    }
-
-    unsafe {
-        ret(membarrier_cpu(
-            cmd as i32,
-            MEMBARRIER_CMD_FLAG_CPU,
-            bitcast!(cpu.as_raw()),
-        ))
-    }
 }
 
 #[cfg(not(target_os = "wasi"))]
@@ -186,37 +121,6 @@ pub(crate) fn getpgrp() -> Pid {
     unsafe {
         let pgid = c::getpgrp();
         Pid::from_raw_unchecked(pgid)
-    }
-}
-
-#[cfg(any(freebsdlike, linux_kernel, target_os = "fuchsia"))]
-#[inline]
-pub(crate) fn sched_getaffinity(pid: Option<Pid>, cpuset: &mut RawCpuSet) -> io::Result<()> {
-    unsafe {
-        ret(c::sched_getaffinity(
-            Pid::as_raw(pid) as _,
-            core::mem::size_of::<RawCpuSet>(),
-            cpuset,
-        ))
-    }
-}
-
-#[cfg(any(freebsdlike, linux_kernel, target_os = "fuchsia"))]
-#[inline]
-pub(crate) fn sched_setaffinity(pid: Option<Pid>, cpuset: &RawCpuSet) -> io::Result<()> {
-    unsafe {
-        ret(c::sched_setaffinity(
-            Pid::as_raw(pid) as _,
-            core::mem::size_of::<RawCpuSet>(),
-            cpuset,
-        ))
-    }
-}
-
-#[inline]
-pub(crate) fn sched_yield() {
-    unsafe {
-        let _ = c::sched_yield();
     }
 }
 

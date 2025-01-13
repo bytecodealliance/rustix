@@ -1,6 +1,6 @@
 #[test]
 fn test_membarrier() {
-    use rustix::process::{membarrier, membarrier_query, MembarrierCommand, MembarrierQuery};
+    use rustix::thread::{membarrier, membarrier_query, MembarrierCommand, MembarrierQuery};
 
     let query: MembarrierQuery = membarrier_query();
 

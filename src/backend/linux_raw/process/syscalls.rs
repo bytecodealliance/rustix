@@ -5,14 +5,12 @@
 //! See the `rustix::backend` module documentation for details.
 #![allow(unsafe_code, clippy::undocumented_unsafe_blocks)]
 
-use super::types::RawCpuSet;
 use crate::backend::c;
 #[cfg(all(feature = "alloc", feature = "fs"))]
 use crate::backend::conv::slice_mut;
 use crate::backend::conv::{
     by_mut, by_ref, c_int, c_uint, negative_pid, pass_usize, raw_fd, ret, ret_c_int,
-    ret_c_int_infallible, ret_c_uint, ret_infallible, ret_owned_fd, ret_usize, size_of,
-    slice_just_addr, zero,
+    ret_c_int_infallible, ret_infallible, ret_owned_fd, zero,
 };
 use crate::fd::{AsRawFd, BorrowedFd, OwnedFd, RawFd};
 #[cfg(feature = "fs")]
@@ -20,49 +18,20 @@ use crate::ffi::CStr;
 use crate::io;
 use crate::pid::RawPid;
 use crate::process::{
-    Cpuid, MembarrierCommand, MembarrierQuery, Pid, PidfdFlags, PidfdGetfdFlags, Resource, Rlimit,
-    Uid, WaitId, WaitIdOptions, WaitIdStatus, WaitOptions, WaitStatus,
+    Pid, PidfdFlags, PidfdGetfdFlags, Resource, Rlimit, Uid, WaitId, WaitIdOptions, WaitIdStatus,
+    WaitOptions, WaitStatus,
 };
 use crate::signal::Signal;
-use crate::utils::as_mut_ptr;
 use core::mem::MaybeUninit;
 use core::ptr::{null, null_mut};
-use linux_raw_sys::general::{
-    membarrier_cmd, membarrier_cmd_flag, rlimit64, PRIO_PGRP, PRIO_PROCESS, PRIO_USER,
-    RLIM64_INFINITY,
-};
+use linux_raw_sys::general::{rlimit64, PRIO_PGRP, PRIO_PROCESS, PRIO_USER, RLIM64_INFINITY};
 #[cfg(feature = "fs")]
 use {crate::backend::conv::ret_c_uint_infallible, crate::fs::Mode};
 #[cfg(feature = "alloc")]
-use {crate::backend::conv::slice_just_addr_mut, crate::process::Gid};
-
-// `sched_getcpu` has special optimizations via the vDSO on some architectures.
-#[cfg(any(
-    target_arch = "x86_64",
-    target_arch = "x86",
-    target_arch = "riscv64",
-    target_arch = "powerpc64",
-    target_arch = "s390x"
-))]
-pub(crate) use crate::backend::vdso_wrappers::sched_getcpu;
-
-// `sched_getcpu` on platforms without a vDSO entry for it.
-#[cfg(not(any(
-    target_arch = "x86_64",
-    target_arch = "x86",
-    target_arch = "riscv64",
-    target_arch = "powerpc64",
-    target_arch = "s390x"
-)))]
-#[inline]
-pub(crate) fn sched_getcpu() -> usize {
-    let mut cpu = MaybeUninit::<u32>::uninit();
-    unsafe {
-        let r = ret(syscall!(__NR_getcpu, &mut cpu, zero(), zero()));
-        debug_assert!(r.is_ok());
-        cpu.assume_init() as usize
-    }
-}
+use {
+    crate::backend::conv::{ret_usize, slice_just_addr_mut},
+    crate::process::Gid,
+};
 
 #[cfg(feature = "fs")]
 #[inline]
@@ -86,37 +55,6 @@ pub(crate) fn chroot(filename: &CStr) -> io::Result<()> {
 pub(crate) fn getcwd(buf: &mut [MaybeUninit<u8>]) -> io::Result<usize> {
     let (buf_addr_mut, buf_len) = slice_mut(buf);
     unsafe { ret_usize(syscall!(__NR_getcwd, buf_addr_mut, buf_len)) }
-}
-
-#[inline]
-pub(crate) fn membarrier_query() -> MembarrierQuery {
-    unsafe {
-        match ret_c_uint(syscall!(
-            __NR_membarrier,
-            c_int(membarrier_cmd::MEMBARRIER_CMD_QUERY as _),
-            c_uint(0)
-        )) {
-            Ok(query) => MembarrierQuery::from_bits_retain(query),
-            Err(_) => MembarrierQuery::empty(),
-        }
-    }
-}
-
-#[inline]
-pub(crate) fn membarrier(cmd: MembarrierCommand) -> io::Result<()> {
-    unsafe { ret(syscall!(__NR_membarrier, cmd, c_uint(0))) }
-}
-
-#[inline]
-pub(crate) fn membarrier_cpu(cmd: MembarrierCommand, cpu: Cpuid) -> io::Result<()> {
-    unsafe {
-        ret(syscall!(
-            __NR_membarrier,
-            cmd,
-            c_uint(membarrier_cmd_flag::MEMBARRIER_CMD_FLAG_CPU as _),
-            cpu
-        ))
-    }
 }
 
 #[inline]
@@ -163,47 +101,6 @@ pub(crate) fn getpgrp() -> Pid {
         let pgid = ret_c_int_infallible(syscall_readonly!(__NR_getpgid, c_uint(0)));
         debug_assert!(pgid > 0);
         Pid::from_raw_unchecked(pgid)
-    }
-}
-
-#[inline]
-pub(crate) fn sched_getaffinity(pid: Option<Pid>, cpuset: &mut RawCpuSet) -> io::Result<()> {
-    unsafe {
-        // The raw Linux syscall returns the size (in bytes) of the `cpumask_t`
-        // data type that is used internally by the kernel to represent the CPU
-        // set bit mask.
-        let size = ret_usize(syscall!(
-            __NR_sched_getaffinity,
-            c_int(Pid::as_raw(pid)),
-            size_of::<RawCpuSet, _>(),
-            by_mut(&mut cpuset.bits)
-        ))?;
-        let bytes = as_mut_ptr(cpuset).cast::<u8>();
-        let rest = bytes.wrapping_add(size);
-        // Zero every byte in the cpuset not set by the kernel.
-        rest.write_bytes(0, core::mem::size_of::<RawCpuSet>() - size);
-        Ok(())
-    }
-}
-
-#[inline]
-pub(crate) fn sched_setaffinity(pid: Option<Pid>, cpuset: &RawCpuSet) -> io::Result<()> {
-    unsafe {
-        ret(syscall_readonly!(
-            __NR_sched_setaffinity,
-            c_int(Pid::as_raw(pid)),
-            size_of::<RawCpuSet, _>(),
-            slice_just_addr(&cpuset.bits)
-        ))
-    }
-}
-
-#[inline]
-pub(crate) fn sched_yield() {
-    unsafe {
-        // See the documentation for [`crate::process::sched_yield`] for why
-        // errors are ignored.
-        syscall_readonly!(__NR_sched_yield).decode_void();
     }
 }
 

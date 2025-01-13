@@ -652,20 +652,20 @@ impl<'a, Num: ArgNumber> From<crate::backend::mm::types::UserfaultfdFlags> for A
     }
 }
 
-#[cfg(feature = "process")]
-impl<'a, Num: ArgNumber> From<crate::backend::process::types::MembarrierCommand>
+#[cfg(feature = "thread")]
+impl<'a, Num: ArgNumber> From<crate::backend::thread::types::MembarrierCommand>
     for ArgReg<'a, Num>
 {
     #[inline]
-    fn from(cmd: crate::backend::process::types::MembarrierCommand) -> Self {
+    fn from(cmd: crate::backend::thread::types::MembarrierCommand) -> Self {
         c_uint(cmd as u32)
     }
 }
 
-#[cfg(feature = "process")]
-impl<'a, Num: ArgNumber> From<crate::process::Cpuid> for ArgReg<'a, Num> {
+#[cfg(feature = "thread")]
+impl<'a, Num: ArgNumber> From<crate::thread::Cpuid> for ArgReg<'a, Num> {
     #[inline]
-    fn from(cpuid: crate::process::Cpuid) -> Self {
+    fn from(cpuid: crate::thread::Cpuid) -> Self {
         c_uint(cpuid.as_raw())
     }
 }
