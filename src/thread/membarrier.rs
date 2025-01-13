@@ -1,9 +1,9 @@
 //! The Linux `membarrier` syscall.
 
-use crate::process::Cpuid;
+use crate::thread::Cpuid;
 use crate::{backend, io};
 
-pub use backend::process::types::MembarrierCommand;
+pub use backend::thread::types::MembarrierCommand;
 
 #[cfg(linux_kernel)]
 bitflags::bitflags! {
@@ -65,7 +65,7 @@ impl MembarrierQuery {
 #[inline]
 #[doc(alias = "MEMBARRIER_CMD_QUERY")]
 pub fn membarrier_query() -> MembarrierQuery {
-    backend::process::syscalls::membarrier_query()
+    backend::thread::syscalls::membarrier_query()
 }
 
 /// `membarrier(cmd, 0, 0)`—Perform a memory barrier.
@@ -76,7 +76,7 @@ pub fn membarrier_query() -> MembarrierQuery {
 /// [Linux]: https://man7.org/linux/man-pages/man2/membarrier.2.html
 #[inline]
 pub fn membarrier(cmd: MembarrierCommand) -> io::Result<()> {
-    backend::process::syscalls::membarrier(cmd)
+    backend::thread::syscalls::membarrier(cmd)
 }
 
 /// `membarrier(cmd, MEMBARRIER_CMD_FLAG_CPU, cpu)`—Perform a memory barrier
@@ -88,5 +88,5 @@ pub fn membarrier(cmd: MembarrierCommand) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/membarrier.2.html
 #[inline]
 pub fn membarrier_cpu(cmd: MembarrierCommand, cpu: Cpuid) -> io::Result<()> {
-    backend::process::syscalls::membarrier_cpu(cmd, cpu)
+    backend::thread::syscalls::membarrier_cpu(cmd, cpu)
 }

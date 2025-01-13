@@ -10,36 +10,9 @@
 use crate::{backend, io};
 #[cfg(feature = "alloc")]
 use alloc::vec::Vec;
-#[cfg(linux_kernel)]
-use backend::process::types::RawCpuid;
 
 pub use crate::pid::{Pid, RawPid};
 pub use crate::ugid::{Gid, RawGid, RawUid, Uid};
-
-/// A Linux CPU ID.
-#[cfg(linux_kernel)]
-#[repr(transparent)]
-#[derive(Copy, Clone, Eq, PartialEq, Debug, Hash)]
-pub struct Cpuid(RawCpuid);
-
-#[cfg(linux_kernel)]
-impl Cpuid {
-    /// Converts a `RawCpuid` into a `Cpuid`.
-    ///
-    /// # Safety
-    ///
-    /// `raw` must be the value of a valid Linux CPU ID.
-    #[inline]
-    pub const unsafe fn from_raw(raw: RawCpuid) -> Self {
-        Self(raw)
-    }
-
-    /// Converts a `Cpuid` into a `RawCpuid`.
-    #[inline]
-    pub const fn as_raw(self) -> RawCpuid {
-        self.0
-    }
-}
 
 /// `getuid()`—Returns the process' real user ID.
 ///

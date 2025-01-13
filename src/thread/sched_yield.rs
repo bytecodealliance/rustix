@@ -12,5 +12,5 @@ use crate::backend;
 /// [Linux]: https://man7.org/linux/man-pages/man2/sched_yield.2.html
 #[inline]
 pub fn sched_yield() {
-    backend::process::syscalls::sched_yield()
+    backend::thread::syscalls::sched_yield()
 }

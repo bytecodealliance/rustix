@@ -1,4 +1,4 @@
-use rustix::process::sched_yield;
+use rustix::thread::sched_yield;
 
 #[test]
 fn test_sched_yield() {
@@ -9,6 +9,6 @@ fn test_sched_yield() {
 #[cfg(any(linux_kernel, target_os = "dragonfly"))]
 #[test]
 fn test_sched_getcpu() {
-    let n = rustix::process::sched_getcpu();
-    assert!(n < rustix::process::CpuSet::MAX_CPU);
+    let n = rustix::thread::sched_getcpu();
+    assert!(n < rustix::thread::CpuSet::MAX_CPU);
 }

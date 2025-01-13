@@ -1,5 +1,7 @@
 //! libc syscalls supporting `rustix::thread`.
 
+#[cfg(any(freebsdlike, linux_kernel, target_os = "fuchsia"))]
+use super::types::RawCpuSet;
 use crate::backend::c;
 use crate::backend::conv::ret;
 use crate::io;
@@ -15,6 +17,8 @@ use crate::io;
     target_os = "wasi",
 )))]
 use crate::thread::ClockId;
+#[cfg(linux_kernel)]
+use crate::thread::{Cpuid, MembarrierCommand, MembarrierQuery};
 #[cfg(not(target_os = "redox"))]
 use crate::thread::{NanosleepRelativeResult, Timespec};
 #[cfg(all(target_env = "gnu", fix_y2038))]
@@ -30,7 +34,7 @@ use core::mem::MaybeUninit;
 use core::sync::atomic::AtomicU32;
 #[cfg(linux_kernel)]
 use {
-    crate::backend::conv::{borrowed_fd, ret_c_int, ret_usize},
+    crate::backend::conv::{borrowed_fd, ret_c_int, ret_u32, ret_usize},
     crate::fd::BorrowedFd,
     crate::pid::Pid,
     crate::thread::futex,
@@ -645,4 +649,94 @@ pub(crate) fn setgroups_thread(groups: &[crate::ugid::Gid]) -> io::Result<()> {
         fn setgroups(size: c::size_t, list: *const c::gid_t) via SYS_setgroups -> c::c_int
     }
     ret(unsafe { setgroups(groups.len(), groups.as_ptr().cast()) })
+}
+
+#[cfg(any(linux_kernel, target_os = "dragonfly"))]
+#[inline]
+pub(crate) fn sched_getcpu() -> usize {
+    let r = unsafe { libc::sched_getcpu() };
+    debug_assert!(r >= 0);
+    r as usize
+}
+
+#[cfg(any(freebsdlike, linux_kernel, target_os = "fuchsia"))]
+#[inline]
+pub(crate) fn sched_getaffinity(pid: Option<Pid>, cpuset: &mut RawCpuSet) -> io::Result<()> {
+    unsafe {
+        ret(c::sched_getaffinity(
+            Pid::as_raw(pid) as _,
+            core::mem::size_of::<RawCpuSet>(),
+            cpuset,
+        ))
+    }
+}
+
+#[cfg(any(freebsdlike, linux_kernel, target_os = "fuchsia"))]
+#[inline]
+pub(crate) fn sched_setaffinity(pid: Option<Pid>, cpuset: &RawCpuSet) -> io::Result<()> {
+    unsafe {
+        ret(c::sched_setaffinity(
+            Pid::as_raw(pid) as _,
+            core::mem::size_of::<RawCpuSet>(),
+            cpuset,
+        ))
+    }
+}
+
+#[inline]
+pub(crate) fn sched_yield() {
+    unsafe {
+        let _ = c::sched_yield();
+    }
+}
+
+// The `membarrier` syscall has a third argument, but it's only used when
+// the `flags` argument is `MEMBARRIER_CMD_FLAG_CPU`.
+#[cfg(linux_kernel)]
+syscall! {
+    fn membarrier_all(
+        cmd: c::c_int,
+        flags: c::c_uint
+    ) via SYS_membarrier -> c::c_int
+}
+
+#[cfg(linux_kernel)]
+pub(crate) fn membarrier_query() -> MembarrierQuery {
+    // glibc does not have a wrapper for `membarrier`; [the documentation]
+    // says to use `syscall`.
+    //
+    // [the documentation]: https://man7.org/linux/man-pages/man2/membarrier.2.html#NOTES
+    const MEMBARRIER_CMD_QUERY: u32 = 0;
+    unsafe {
+        match ret_u32(membarrier_all(MEMBARRIER_CMD_QUERY as i32, 0)) {
+            Ok(query) => MembarrierQuery::from_bits_retain(query),
+            Err(_) => MembarrierQuery::empty(),
+        }
+    }
+}
+
+#[cfg(linux_kernel)]
+pub(crate) fn membarrier(cmd: MembarrierCommand) -> io::Result<()> {
+    unsafe { ret(membarrier_all(cmd as i32, 0)) }
+}
+
+#[cfg(linux_kernel)]
+pub(crate) fn membarrier_cpu(cmd: MembarrierCommand, cpu: Cpuid) -> io::Result<()> {
+    const MEMBARRIER_CMD_FLAG_CPU: u32 = 1;
+
+    syscall! {
+        fn membarrier_cpu(
+            cmd: c::c_int,
+            flags: c::c_uint,
+            cpu_id: c::c_int
+        ) via SYS_membarrier -> c::c_int
+    }
+
+    unsafe {
+        ret(membarrier_cpu(
+            cmd as i32,
+            MEMBARRIER_CMD_FLAG_CPU,
+            bitcast!(cpu.as_raw()),
+        ))
+    }
 }
