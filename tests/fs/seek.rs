@@ -43,18 +43,15 @@ fn test_seek_holes() {
     assert_eq!(seek(&file, SeekFrom::Start(0)), Ok(0));
     assert_eq!(seek(&file, SeekFrom::Current(0)), Ok(0));
     assert_eq!(seek(&file, SeekFrom::Hole(0)), Ok(hole_size));
-    assert_eq!(seek(&file, SeekFrom::Hole(hole_size as i64)), Ok(hole_size));
+    assert_eq!(seek(&file, SeekFrom::Hole(hole_size)), Ok(hole_size));
     assert_eq!(
-        seek(&file, SeekFrom::Hole(hole_size as i64 * 2)),
+        seek(&file, SeekFrom::Hole(hole_size * 2)),
         Ok(hole_size * 2 + 6)
     );
     assert_eq!(seek(&file, SeekFrom::Data(0)), Ok(0));
+    assert_eq!(seek(&file, SeekFrom::Data(hole_size)), Ok(hole_size * 2));
     assert_eq!(
-        seek(&file, SeekFrom::Data(hole_size as i64)),
-        Ok(hole_size * 2)
-    );
-    assert_eq!(
-        seek(&file, SeekFrom::Data(hole_size as i64 * 2)),
+        seek(&file, SeekFrom::Data(hole_size * 2)),
         Ok(hole_size * 2)
     );
 }
