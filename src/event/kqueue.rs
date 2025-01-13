@@ -24,7 +24,7 @@ pub struct Event {
 impl Event {
     /// Create a new `Event`.
     #[allow(clippy::needless_update)]
-    pub fn new(filter: EventFilter, flags: EventFlags, udata: isize) -> Event {
+    pub fn new(filter: EventFilter, flags: EventFlags, udata: *mut c::c_void) -> Event {
         let (ident, data, filter, fflags) = match filter {
             EventFilter::Read(fd) => (fd as uintptr_t, 0, c::EVFILT_READ, 0),
             EventFilter::Write(fd) => (fd as _, 0, c::EVFILT_WRITE, 0),
@@ -78,7 +78,6 @@ impl Event {
                 },
                 udata: {
                     // On NetBSD, udata is an `isize` and not a pointer.
-                    // TODO: Strict provenance, prevent int-to-ptr cast.
                     udata as _
                 },
                 ..unsafe { zeroed() }
@@ -92,10 +91,8 @@ impl Event {
     }
 
     /// Get the user data for this event.
-    pub fn udata(&self) -> isize {
+    pub fn udata(&self) -> *mut c::c_void {
         // On NetBSD, udata is an isize and not a pointer.
-        // TODO: Strict provenance, prevent ptr-to-int cast.
-
         self.inner.udata as _
     }
 

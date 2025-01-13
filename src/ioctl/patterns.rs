@@ -200,14 +200,16 @@ unsafe impl<'a, Opcode: CompileTimeOpcode, T> Ioctl for Updater<'a, Opcode, T> {
 /// Implements an `ioctl` that passes an integer into the `ioctl`.
 pub struct IntegerSetter<Opcode> {
     /// The value to pass in.
-    value: usize,
+    ///
+    /// For strict provenance preservation, this is a pointer.
+    value: *mut c::c_void,
 
     /// The opcode.
     _opcode: PhantomData<Opcode>,
 }
 
 impl<Opcode: CompileTimeOpcode> IntegerSetter<Opcode> {
-    /// Create a new integer `Ioctl` helper.
+    /// Create a new integer `Ioctl` helper containing a `usize`.
     ///
     /// # Safety
     ///
@@ -215,7 +217,22 @@ impl<Opcode: CompileTimeOpcode> IntegerSetter<Opcode> {
     /// - For this opcode, it must expect an integer.
     /// - The integer is in the valid range for this opcode.
     #[inline]
-    pub unsafe fn new(value: usize) -> Self {
+    pub unsafe fn new_usize(value: usize) -> Self {
+        Self {
+            value: value as _,
+            _opcode: PhantomData,
+        }
+    }
+
+    /// Create a new integer `Ioctl` helper containing a `*mut c_void`.
+    ///
+    /// # Safety
+    ///
+    /// - `Opcode` must provide a valid opcode.
+    /// - For this opcode, it must expect an integer.
+    /// - The integer is in the valid range for this opcode.
+    #[inline]
+    pub unsafe fn new_pointer(value: &mut c::c_void) -> Self {
         Self {
             value,
             _opcode: PhantomData,
@@ -230,8 +247,7 @@ unsafe impl<Opcode: CompileTimeOpcode> Ioctl for IntegerSetter<Opcode> {
     const OPCODE: self::Opcode = Opcode::OPCODE;
 
     fn as_ptr(&mut self) -> *mut c::c_void {
-        // TODO: strict provenance
-        self.value as *mut c::c_void
+        self.value
     }
 
     unsafe fn output_from_ptr(
