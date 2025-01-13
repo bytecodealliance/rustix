@@ -612,7 +612,7 @@ fn test_unix_peercred_explicit() {
 
     sockopt::set_socket_passcred(&recv_sock, true).unwrap();
 
-    let ucred = sockopt::get_socket_peercred(&send_sock).unwrap();
+    let ucred = sockopt::socket_peercred(&send_sock).unwrap();
     let msg = SendAncillaryMessage::ScmCredentials(ucred);
     let mut space = [0; rustix::cmsg_space!(ScmCredentials(1))];
     let mut cmsg_buffer = SendAncillaryBuffer::new(&mut space);
@@ -669,7 +669,7 @@ fn test_unix_peercred_implicit() {
 
     sockopt::set_socket_passcred(&recv_sock, true).unwrap();
 
-    let ucred = sockopt::get_socket_peercred(&send_sock).unwrap();
+    let ucred = sockopt::socket_peercred(&send_sock).unwrap();
     assert_eq!(ucred.pid, getpid());
     assert_eq!(ucred.uid, getuid());
     assert_eq!(ucred.gid, getgid());

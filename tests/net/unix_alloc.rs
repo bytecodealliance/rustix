@@ -611,7 +611,7 @@ fn test_unix_peercred() {
 
     sockopt::set_socket_passcred(&recv_sock, true).unwrap();
 
-    let ucred = sockopt::get_socket_peercred(&send_sock).unwrap();
+    let ucred = sockopt::socket_peercred(&send_sock).unwrap();
     assert_eq!(ucred.pid, getpid());
     assert_eq!(ucred.uid, getuid());
     assert_eq!(ucred.gid, getgid());
