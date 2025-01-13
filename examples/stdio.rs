@@ -18,6 +18,25 @@ use {
     rustix::stdio::{stderr, stdin, stdout},
 };
 
+#[cfg(feature = "termios")]
+#[cfg(all(not(windows), feature = "stdio"))]
+#[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
+struct DebugWinsize(rustix::termios::Winsize);
+
+#[cfg(feature = "termios")]
+#[cfg(all(not(windows), feature = "stdio"))]
+#[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
+impl core::fmt::Debug for DebugWinsize {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("Winsize");
+        d.field("ws_row", &self.0.ws_row);
+        d.field("ws_col", &self.0.ws_col);
+        d.field("ws_xpixel", &self.0.ws_xpixel);
+        d.field("ws_ypixel", &self.0.ws_ypixel);
+        d.finish()
+    }
+}
+
 #[cfg(all(not(windows), feature = "stdio"))]
 fn main() -> io::Result<()> {
     let (stdin, stdout, stderr) = (stdin(), stdout(), stderr());
@@ -54,7 +73,10 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
         println!(" - process group: {:?}", rustix::termios::tcgetpgrp(fd)?);
 
         #[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
-        println!(" - winsize: {:?}", rustix::termios::tcgetwinsize(fd)?);
+        println!(
+            " - winsize: {:?}",
+            DebugWinsize(rustix::termios::tcgetwinsize(fd)?)
+        );
 
         #[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
         {

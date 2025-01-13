@@ -12,8 +12,10 @@ the functions in the `rustix::thread::futex` module instead.
 The `SLAVE` flag in `rustix::mount::MountPropagationFlags` is renamed
 to `DOWNSTREAM`.
 
-The "cc" feature is removed. It hasn't had any effect for several
-major releases.
+The "cc" and "libc-extra-traits" features are removed. The "cc" feature hasn't
+had any effect for several major releases. If you need the traits provided
+by "libc-extra-traits", you should instead depend on libc directly and enable
+its "extra_traits" feature.
 
 All explicitly deprecated functions and types have been removed. Their
 deprecation messages will have identified alternatives.

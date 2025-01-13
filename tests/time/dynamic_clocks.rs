@@ -10,7 +10,7 @@ fn test_known_clocks() {
 #[test]
 fn test_dynamic_clocks() {
     let file = std::fs::File::open("Cargo.toml").unwrap();
-    clock_gettime_dynamic(DynamicClockId::Dynamic(file.as_fd())).unwrap_err();
+    assert!(clock_gettime_dynamic(DynamicClockId::Dynamic(file.as_fd())).is_err());
 }
 
 #[cfg(linux_kernel)]

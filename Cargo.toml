@@ -118,14 +118,10 @@ default = ["std", "use-libc-auxv"]
 
 # This enables use of std. Disabling this enables `#![no_std]`, and requires
 # Rust 1.64 or newer.
-std = ["bitflags/std", "alloc", "libc?/std", "libc_errno?/std", "libc-extra-traits"]
+std = ["bitflags/std", "alloc", "libc?/std", "libc_errno?/std"]
 
 # Enable this to request the libc backend.
-use-libc = ["libc_errno", "libc", "libc-extra-traits"]
-
-# Enable `extra_traits` in libc types, to provide `Debug`, `Hash`, and other
-# trait impls for libc types.
-libc-extra-traits = ["libc?/extra_traits"]
+use-libc = ["libc_errno", "libc"]
 
 # Enable `rustix::event::*`.
 event = []

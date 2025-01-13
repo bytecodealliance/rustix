@@ -3,11 +3,32 @@
 
 #[cfg(not(any(windows, target_os = "espidf")))]
 #[cfg(feature = "time")]
+struct DebugTimespec(rustix::time::Timespec);
+
+#[cfg(not(any(windows, target_os = "espidf")))]
+#[cfg(feature = "time")]
+impl core::fmt::Debug for DebugTimespec {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        let mut d = f.debug_struct("Timespec");
+        d.field("tv_sec", &self.0.tv_sec);
+        d.field("tv_nsec", &self.0.tv_nsec);
+        d.finish()
+    }
+}
+
+#[cfg(not(any(windows, target_os = "espidf")))]
+#[cfg(feature = "time")]
 fn main() {
     use rustix::time::{clock_gettime, ClockId};
 
-    println!("Real time: {:?}", clock_gettime(ClockId::Realtime));
-    println!("Monotonic time: {:?}", clock_gettime(ClockId::Monotonic));
+    println!(
+        "Real time: {:?}",
+        DebugTimespec(clock_gettime(ClockId::Realtime))
+    );
+    println!(
+        "Monotonic time: {:?}",
+        DebugTimespec(clock_gettime(ClockId::Monotonic))
+    );
 
     #[cfg(any(freebsdlike, target_os = "openbsd"))]
     println!("Uptime: {:?}", clock_gettime(ClockId::Uptime));
@@ -15,31 +36,31 @@ fn main() {
     #[cfg(not(any(solarish, target_os = "netbsd", target_os = "redox")))]
     println!(
         "Process CPU time: {:?}",
-        clock_gettime(ClockId::ProcessCPUTime)
+        DebugTimespec(clock_gettime(ClockId::ProcessCPUTime))
     );
 
     #[cfg(not(any(solarish, target_os = "netbsd", target_os = "redox")))]
     println!(
         "Thread CPU time: {:?}",
-        clock_gettime(ClockId::ThreadCPUTime)
+        DebugTimespec(clock_gettime(ClockId::ThreadCPUTime))
     );
 
     #[cfg(any(linux_kernel, target_os = "freebsd"))]
     println!(
         "Realtime (coarse): {:?}",
-        clock_gettime(ClockId::RealtimeCoarse)
+        DebugTimespec(clock_gettime(ClockId::RealtimeCoarse))
     );
 
     #[cfg(any(linux_kernel, target_os = "freebsd"))]
     println!(
         "Monotonic (coarse): {:?}",
-        clock_gettime(ClockId::MonotonicCoarse)
+        DebugTimespec(clock_gettime(ClockId::MonotonicCoarse))
     );
 
     #[cfg(linux_kernel)]
     println!(
         "Monotonic (raw): {:?}",
-        clock_gettime(ClockId::MonotonicRaw)
+        DebugTimespec(clock_gettime(ClockId::MonotonicRaw))
     );
 }
 
