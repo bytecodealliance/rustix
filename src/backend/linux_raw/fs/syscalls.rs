@@ -238,8 +238,16 @@ pub(crate) fn seek(fd: BorrowedFd<'_>, pos: SeekFrom) -> io::Result<u64> {
         }
         SeekFrom::End(offset) => (SEEK_END, offset),
         SeekFrom::Current(offset) => (SEEK_CUR, offset),
-        SeekFrom::Data(offset) => (SEEK_DATA, offset),
-        SeekFrom::Hole(offset) => (SEEK_HOLE, offset),
+        SeekFrom::Data(pos) => {
+            let pos: u64 = pos;
+            // Silently cast; we'll get `EINVAL` if the value is negative.
+            (SEEK_DATA, pos as i64)
+        }
+        SeekFrom::Hole(pos) => {
+            let pos: u64 = pos;
+            // Silently cast; we'll get `EINVAL` if the value is negative.
+            (SEEK_HOLE, pos as i64)
+        }
     };
     _seek(fd, offset, whence)
 }

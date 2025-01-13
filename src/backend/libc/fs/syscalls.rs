@@ -1293,9 +1293,17 @@ pub(crate) fn seek(fd: BorrowedFd<'_>, pos: SeekFrom) -> io::Result<u64> {
         SeekFrom::End(offset) => (c::SEEK_END, offset),
         SeekFrom::Current(offset) => (c::SEEK_CUR, offset),
         #[cfg(any(apple, freebsdlike, linux_kernel, solarish))]
-        SeekFrom::Data(offset) => (c::SEEK_DATA, offset),
+        SeekFrom::Data(pos) => {
+            let pos: u64 = pos;
+            // Silently cast; we'll get `EINVAL` if the value is negative.
+            (c::SEEK_DATA, pos as i64)
+        }
         #[cfg(any(apple, freebsdlike, linux_kernel, solarish))]
-        SeekFrom::Hole(offset) => (c::SEEK_HOLE, offset),
+        SeekFrom::Hole(pos) => {
+            let pos: u64 = pos;
+            // Silently cast; we'll get `EINVAL` if the value is negative.
+            (c::SEEK_HOLE, pos as i64)
+        }
     };
 
     // ESP-IDF and Vita don't support 64-bit offsets.
