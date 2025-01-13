@@ -20,7 +20,8 @@ use core::arch::global_asm;
     target_arch = "x86_64",
     target_arch = "x86",
     target_arch = "riscv64",
-    target_arch = "powerpc64"
+    target_arch = "powerpc64",
+    target_arch = "s390x",
 ))]
 use core::ffi::c_void;
 use core::mem::transmute;
@@ -37,7 +38,8 @@ use linux_raw_sys::general::timespec as __kernel_old_timespec;
             target_arch = "x86_64",
             target_arch = "x86",
             target_arch = "riscv64",
-            target_arch = "powerpc64"
+            target_arch = "powerpc64",
+            target_arch = "s390x"
         )
     ),
     feature = "time"
@@ -117,7 +119,8 @@ pub(crate) fn clock_gettime_dynamic(which_clock: DynamicClockId<'_>) -> io::Resu
     target_arch = "x86_64",
     target_arch = "x86",
     target_arch = "riscv64",
-    target_arch = "powerpc64"
+    target_arch = "powerpc64",
+    target_arch = "s390x",
 ))]
 #[inline]
 pub(crate) fn sched_getcpu() -> usize {
@@ -268,7 +271,8 @@ type ClockGettimeType = unsafe extern "C" fn(c::c_int, *mut Timespec) -> c::c_in
     target_arch = "x86_64",
     target_arch = "x86",
     target_arch = "riscv64",
-    target_arch = "powerpc64"
+    target_arch = "powerpc64",
+    target_arch = "s390x",
 ))]
 type GetcpuType = unsafe extern "C" fn(*mut u32, *mut u32, *mut c_void) -> c::c_int;
 
@@ -294,7 +298,8 @@ fn init_clock_gettime() -> ClockGettimeType {
     target_arch = "x86_64",
     target_arch = "x86",
     target_arch = "riscv64",
-    target_arch = "powerpc64"
+    target_arch = "powerpc64",
+    target_arch = "s390x",
 ))]
 #[cold]
 fn init_getcpu() -> GetcpuType {
@@ -324,7 +329,8 @@ static CLOCK_GETTIME: AtomicPtr<Function> = AtomicPtr::new(null_mut());
     target_arch = "x86_64",
     target_arch = "x86",
     target_arch = "riscv64",
-    target_arch = "powerpc64"
+    target_arch = "powerpc64",
+    target_arch = "s390x",
 ))]
 static GETCPU: AtomicPtr<Function> = AtomicPtr::new(null_mut());
 #[cfg(target_arch = "x86")]
@@ -393,7 +399,8 @@ unsafe fn _rustix_clock_gettime_via_syscall(
     target_arch = "x86_64",
     target_arch = "x86",
     target_arch = "riscv64",
-    target_arch = "powerpc64"
+    target_arch = "powerpc64",
+    target_arch = "s390x",
 ))]
 unsafe extern "C" fn rustix_getcpu_via_syscall(
     cpu: *mut u32,
@@ -456,7 +463,8 @@ fn minimal_init() {
         target_arch = "x86_64",
         target_arch = "x86",
         target_arch = "riscv64",
-        target_arch = "powerpc64"
+        target_arch = "powerpc64",
+        target_arch = "s390x",
     ))]
     {
         GETCPU
@@ -542,7 +550,8 @@ fn init() {
             target_arch = "x86_64",
             target_arch = "x86",
             target_arch = "riscv64",
-            target_arch = "powerpc64"
+            target_arch = "powerpc64",
+            target_arch = "s390x",
         ))]
         {
             // Look up the platform-specific `getcpu` symbol as documented
@@ -557,11 +566,14 @@ fn init() {
             let ptr = vdso.sym(cstr!("LINUX_4.15"), cstr!("__vdso_getcpu"));
             #[cfg(target_arch = "powerpc64")]
             let ptr = vdso.sym(cstr!("LINUX_2.6.15"), cstr!("__kernel_getcpu"));
+            #[cfg(target_arch = "s390x")]
+            let ptr = vdso.sym(cstr!("LINUX_2.6.29"), cstr!("__kernel_getcpu"));
 
             #[cfg(any(
                 target_arch = "x86_64",
                 target_arch = "riscv64",
-                target_arch = "powerpc64"
+                target_arch = "powerpc64",
+                target_arch = "s390x"
             ))]
             let ok = true;
 
@@ -576,7 +588,6 @@ fn init() {
                 target_arch = "mips32r6",
                 target_arch = "mips64",
                 target_arch = "mips64r6",
-                target_arch = "s390x",
             ))]
             let ok = false;
 

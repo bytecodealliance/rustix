@@ -41,7 +41,8 @@ use {crate::backend::conv::slice_just_addr_mut, crate::process::Gid};
     target_arch = "x86_64",
     target_arch = "x86",
     target_arch = "riscv64",
-    target_arch = "powerpc64"
+    target_arch = "powerpc64",
+    target_arch = "s390x"
 ))]
 pub(crate) use crate::backend::vdso_wrappers::sched_getcpu;
 
@@ -50,7 +51,8 @@ pub(crate) use crate::backend::vdso_wrappers::sched_getcpu;
     target_arch = "x86_64",
     target_arch = "x86",
     target_arch = "riscv64",
-    target_arch = "powerpc64"
+    target_arch = "powerpc64",
+    target_arch = "s390x"
 )))]
 #[inline]
 pub(crate) fn sched_getcpu() -> usize {
