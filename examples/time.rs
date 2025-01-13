@@ -1,8 +1,12 @@
 //! A command which prints the current values of the realtime and monotonic
 //! clocks it's given.
 
+#[cfg(not(any(windows, target_os = "espidf")))]
+#[cfg(feature = "time")]
 struct DebugTimespec(rustix::time::Timespec);
 
+#[cfg(not(any(windows, target_os = "espidf")))]
+#[cfg(feature = "time")]
 impl core::fmt::Debug for DebugTimespec {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         let mut d = f.debug_struct("Timespec");
