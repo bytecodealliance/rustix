@@ -1,4 +1,10 @@
-#[cfg(not(any(target_os = "espidf", target_os = "vita")))]
+#[cfg(not(any(
+    target_os = "espidf",
+    target_os = "fuchsia",
+    target_os = "redox",
+    target_os = "vita",
+    target_os = "wasi"
+)))]
 use crate::backend::c;
 
 /// A resource value for use with [`getrlimit`], [`setrlimit`], and
