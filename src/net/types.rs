@@ -1442,7 +1442,7 @@ pub enum Shutdown {
     /// `SHUT_WR`—Disable further write operations.
     Write = c::SHUT_WR as _,
     /// `SHUT_RDWR`—Disable further read and write operations.
-    ReadWrite = c::SHUT_RDWR as _,
+    Both = c::SHUT_RDWR as _,
 }
 
 bitflags! {
