@@ -26,7 +26,7 @@ fn test_int_setter() {
 
     // SAFETY: TUNSETOFFLOAD is defined for TUN.
     unsafe {
-        let code = IntegerSetter::<BadOpcode<{ TUNSETOFFLOAD }>>::new(0);
+        let code = IntegerSetter::<BadOpcode<{ TUNSETOFFLOAD }>>::new_usize(0);
         assert!(ioctl(&tun, code).is_err());
     }
 }

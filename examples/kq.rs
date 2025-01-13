@@ -5,6 +5,7 @@ fn main() -> std::io::Result<()> {
     use rustix::event::kqueue::*;
     #[cfg(feature = "fs")]
     use rustix::{fd::AsRawFd, fs};
+    use std::ptr::null_mut;
 
     let kq = kqueue()?;
     let mut out = Vec::with_capacity(10);
@@ -25,7 +26,7 @@ fn main() -> std::io::Result<()> {
                 times: 0,
             },
             EventFlags::ADD,
-            0,
+            null_mut(),
         ),
         #[cfg(feature = "fs")]
         Event::new(
@@ -34,7 +35,7 @@ fn main() -> std::io::Result<()> {
                 flags: VnodeEvents::WRITE | VnodeEvents::LINK | VnodeEvents::EXTEND,
             },
             EventFlags::ADD | EventFlags::CLEAR,
-            0,
+            null_mut(),
         ),
         Event::new(
             EventFilter::Timer {
@@ -42,7 +43,7 @@ fn main() -> std::io::Result<()> {
                 timer: Some(core::time::Duration::from_secs(1)),
             },
             EventFlags::ADD,
-            0,
+            null_mut(),
         ),
         Event::new(
             EventFilter::Timer {
@@ -50,7 +51,7 @@ fn main() -> std::io::Result<()> {
                 timer: Some(core::time::Duration::from_secs(2)),
             },
             EventFlags::ADD | EventFlags::ONESHOT,
-            0,
+            null_mut(),
         ),
     ];
 
