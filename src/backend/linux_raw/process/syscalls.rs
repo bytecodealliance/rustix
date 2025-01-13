@@ -10,7 +10,7 @@ use crate::backend::c;
 use crate::backend::conv::slice_mut;
 use crate::backend::conv::{
     by_mut, by_ref, c_int, c_uint, negative_pid, pass_usize, raw_fd, ret, ret_c_int,
-    ret_c_int_infallible, ret_infallible, ret_owned_fd, ret_usize, zero,
+    ret_c_int_infallible, ret_infallible, ret_owned_fd, zero,
 };
 use crate::fd::{AsRawFd, BorrowedFd, OwnedFd, RawFd};
 #[cfg(feature = "fs")]
@@ -28,7 +28,10 @@ use linux_raw_sys::general::{rlimit64, PRIO_PGRP, PRIO_PROCESS, PRIO_USER, RLIM6
 #[cfg(feature = "fs")]
 use {crate::backend::conv::ret_c_uint_infallible, crate::fs::Mode};
 #[cfg(feature = "alloc")]
-use {crate::backend::conv::slice_just_addr_mut, crate::process::Gid};
+use {
+    crate::backend::conv::{ret_usize, slice_just_addr_mut},
+    crate::process::Gid,
+};
 
 #[cfg(feature = "fs")]
 #[inline]
