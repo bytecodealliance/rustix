@@ -5,6 +5,8 @@ use super::types::RawCpuSet;
 use crate::backend::c;
 use crate::backend::conv::ret;
 use crate::io;
+#[cfg(any(freebsdlike, linux_kernel, target_os = "fuchsia"))]
+use crate::pid::Pid;
 #[cfg(not(any(
     apple,
     freebsdlike,
@@ -36,7 +38,6 @@ use core::sync::atomic::AtomicU32;
 use {
     crate::backend::conv::{borrowed_fd, ret_c_int, ret_u32, ret_usize},
     crate::fd::BorrowedFd,
-    crate::pid::Pid,
     crate::thread::futex,
     crate::utils::as_mut_ptr,
 };
