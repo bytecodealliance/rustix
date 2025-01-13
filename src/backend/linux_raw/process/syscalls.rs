@@ -21,7 +21,7 @@ use crate::io;
 use crate::pid::RawPid;
 use crate::process::{
     Cpuid, MembarrierCommand, MembarrierQuery, Pid, PidfdFlags, PidfdGetfdFlags, Resource, Rlimit,
-    Uid, WaitId, WaitOptions, WaitStatus, WaitidOptions, WaitidStatus,
+    Uid, WaitId, WaitIdOptions, WaitIdStatus, WaitOptions, WaitStatus,
 };
 use crate::signal::Signal;
 use crate::utils::as_mut_ptr;
@@ -414,7 +414,7 @@ pub(crate) fn _waitpid(
 }
 
 #[inline]
-pub(crate) fn waitid(id: WaitId<'_>, options: WaitidOptions) -> io::Result<Option<WaitidStatus>> {
+pub(crate) fn waitid(id: WaitId<'_>, options: WaitIdOptions) -> io::Result<Option<WaitIdStatus>> {
     // Get the id to wait on.
     match id {
         WaitId::All => _waitid_all(options),
@@ -425,7 +425,7 @@ pub(crate) fn waitid(id: WaitId<'_>, options: WaitidOptions) -> io::Result<Optio
 }
 
 #[inline]
-fn _waitid_all(options: WaitidOptions) -> io::Result<Option<WaitidStatus>> {
+fn _waitid_all(options: WaitIdOptions) -> io::Result<Option<WaitIdStatus>> {
     // `waitid` can return successfully without initializing the struct (no
     // children found when using `WNOHANG`)
     let mut status = MaybeUninit::<c::siginfo_t>::zeroed();
@@ -444,7 +444,7 @@ fn _waitid_all(options: WaitidOptions) -> io::Result<Option<WaitidStatus>> {
 }
 
 #[inline]
-fn _waitid_pid(pid: Pid, options: WaitidOptions) -> io::Result<Option<WaitidStatus>> {
+fn _waitid_pid(pid: Pid, options: WaitIdOptions) -> io::Result<Option<WaitIdStatus>> {
     // `waitid` can return successfully without initializing the struct (no
     // children found when using `WNOHANG`)
     let mut status = MaybeUninit::<c::siginfo_t>::zeroed();
@@ -463,7 +463,7 @@ fn _waitid_pid(pid: Pid, options: WaitidOptions) -> io::Result<Option<WaitidStat
 }
 
 #[inline]
-fn _waitid_pgid(pgid: Option<Pid>, options: WaitidOptions) -> io::Result<Option<WaitidStatus>> {
+fn _waitid_pgid(pgid: Option<Pid>, options: WaitIdOptions) -> io::Result<Option<WaitIdStatus>> {
     // `waitid` can return successfully without initializing the struct (no
     // children found when using `WNOHANG`)
     let mut status = MaybeUninit::<c::siginfo_t>::zeroed();
@@ -482,7 +482,7 @@ fn _waitid_pgid(pgid: Option<Pid>, options: WaitidOptions) -> io::Result<Option<
 }
 
 #[inline]
-fn _waitid_pidfd(fd: BorrowedFd<'_>, options: WaitidOptions) -> io::Result<Option<WaitidStatus>> {
+fn _waitid_pidfd(fd: BorrowedFd<'_>, options: WaitIdOptions) -> io::Result<Option<WaitIdStatus>> {
     // `waitid` can return successfully without initializing the struct (no
     // children found when using `WNOHANG`)
     let mut status = MaybeUninit::<c::siginfo_t>::zeroed();
@@ -500,7 +500,7 @@ fn _waitid_pidfd(fd: BorrowedFd<'_>, options: WaitidOptions) -> io::Result<Optio
     Ok(unsafe { cvt_waitid_status(status) })
 }
 
-/// Convert a `siginfo_t` to a `WaitidStatus`.
+/// Convert a `siginfo_t` to a `WaitIdStatus`.
 ///
 /// # Safety
 ///
@@ -508,12 +508,12 @@ fn _waitid_pidfd(fd: BorrowedFd<'_>, options: WaitidOptions) -> io::Result<Optio
 /// returned successfully.
 #[inline]
 #[rustfmt::skip]
-unsafe fn cvt_waitid_status(status: MaybeUninit<c::siginfo_t>) -> Option<WaitidStatus> {
+unsafe fn cvt_waitid_status(status: MaybeUninit<c::siginfo_t>) -> Option<WaitIdStatus> {
     let status = status.assume_init();
     if status.__bindgen_anon_1.__bindgen_anon_1._sifields._sigchld._pid == 0 {
         None
     } else {
-        Some(WaitidStatus(status))
+        Some(WaitIdStatus(status))
     }
 }
 

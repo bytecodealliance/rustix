@@ -35,7 +35,7 @@ bitflags! {
     /// Options for modifying the behavior of [`waitid`].
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct WaitidOptions: u32 {
+    pub struct WaitIdOptions: u32 {
         /// Return immediately if no child has exited.
         const NOHANG = bitcast!(backend::process::wait::WNOHANG);
         /// Return if a stopped child has been resumed by delivery of
@@ -135,10 +135,10 @@ impl WaitStatus {
 #[derive(Clone, Copy)]
 #[repr(transparent)]
 #[cfg(not(any(target_os = "openbsd", target_os = "redox", target_os = "wasi")))]
-pub struct WaitidStatus(pub(crate) backend::c::siginfo_t);
+pub struct WaitIdStatus(pub(crate) backend::c::siginfo_t);
 
 #[cfg(not(any(target_os = "openbsd", target_os = "redox", target_os = "wasi")))]
-impl WaitidStatus {
+impl WaitIdStatus {
     /// Returns whether the process is currently stopped.
     #[inline]
     pub fn stopped(&self) -> bool {
@@ -363,7 +363,7 @@ pub fn wait(waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
 #[inline]
 pub fn waitid<'a>(
     id: impl Into<WaitId<'a>>,
-    options: WaitidOptions,
-) -> io::Result<Option<WaitidStatus>> {
+    options: WaitIdOptions,
+) -> io::Result<Option<WaitIdStatus>> {
     backend::process::syscalls::waitid(id.into(), options)
 }

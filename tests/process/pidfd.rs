@@ -34,7 +34,7 @@ fn test_pidfd_waitid() {
 
     let status = process::waitid(
         process::WaitId::PidFd(pidfd.as_fd()),
-        process::WaitidOptions::STOPPED,
+        process::WaitIdOptions::STOPPED,
     )
     .expect("failed to wait")
     .unwrap();
@@ -69,7 +69,7 @@ fn test_pidfd_poll() {
     // The child process should not have exited yet.
     match process::waitid(
         process::WaitId::PidFd(pidfd.as_fd()),
-        process::WaitidOptions::EXITED,
+        process::WaitIdOptions::EXITED,
     ) {
         Err(io::Errno::AGAIN) => (),
         Err(e) => panic!("unexpected result: {:?}", e),
@@ -83,7 +83,7 @@ fn test_pidfd_poll() {
     // The child process should have exited.
     let status = process::waitid(
         process::WaitId::PidFd(pidfd.as_fd()),
-        process::WaitidOptions::EXITED,
+        process::WaitIdOptions::EXITED,
     )
     .expect("failed to wait")
     .unwrap();

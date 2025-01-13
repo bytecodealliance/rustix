@@ -109,7 +109,7 @@ fn test_waitid() {
 
     unsafe { kill(child.id() as _, SIGSTOP) };
 
-    let status = process::waitid(process::WaitId::Pid(pid), process::WaitidOptions::STOPPED)
+    let status = process::waitid(process::WaitId::Pid(pid), process::WaitIdOptions::STOPPED)
         .expect("failed to wait")
         .unwrap();
 
@@ -119,7 +119,7 @@ fn test_waitid() {
 
     unsafe { kill(child.id() as _, SIGCONT) };
 
-    let status = process::waitid(process::WaitId::Pid(pid), process::WaitidOptions::CONTINUED)
+    let status = process::waitid(process::WaitId::Pid(pid), process::WaitIdOptions::CONTINUED)
         .expect("failed to wait")
         .unwrap();
 
@@ -131,7 +131,7 @@ fn test_waitid() {
 
     let status = process::waitid(
         process::WaitId::Pgid(Some(pgid)),
-        process::WaitidOptions::STOPPED,
+        process::WaitIdOptions::STOPPED,
     )
     .expect("failed to wait")
     .unwrap();
@@ -144,7 +144,7 @@ fn test_waitid() {
 
     let status = process::waitid(
         process::WaitId::Pgid(Some(pgid)),
-        process::WaitidOptions::CONTINUED,
+        process::WaitIdOptions::CONTINUED,
     )
     .expect("failed to wait")
     .unwrap();
@@ -153,7 +153,7 @@ fn test_waitid() {
 
     let status = process::waitid(
         process::WaitId::All,
-        process::WaitidOptions::EXITED | process::WaitidOptions::NOHANG,
+        process::WaitIdOptions::EXITED | process::WaitIdOptions::NOHANG,
     )
     .expect("failed to wait");
 
@@ -163,7 +163,7 @@ fn test_waitid() {
 
     let status = process::waitid(
         process::WaitId::Pid(pid),
-        process::WaitidOptions::EXITED | process::WaitidOptions::NOWAIT,
+        process::WaitIdOptions::EXITED | process::WaitIdOptions::NOWAIT,
     )
     .expect("failed to wait")
     .unwrap();
@@ -172,7 +172,7 @@ fn test_waitid() {
     #[cfg(not(any(target_os = "fuchsia", target_os = "netbsd")))]
     assert_eq!(status.terminating_signal(), Some(SIGKILL as _));
 
-    let status = process::waitid(process::WaitId::Pid(pid), process::WaitidOptions::EXITED)
+    let status = process::waitid(process::WaitId::Pid(pid), process::WaitIdOptions::EXITED)
         .expect("failed to wait")
         .unwrap();
 
