@@ -21,12 +21,10 @@ pub mod os {
     pub mod fd {
         // Change  to use `std::os::fd` when MSRV becomes 1.66 or higher.
 
+        #[cfg(target_os = "wasi")]
+        pub use std::os::fd::{AsFd, AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, OwnedFd, RawFd};
         #[cfg(unix)]
         pub use std::os::unix::io::{
-            AsFd, AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, OwnedFd, RawFd,
-        };
-        #[cfg(target_os = "wasi")]
-        pub use std::os::wasi::io::{
             AsFd, AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, OwnedFd, RawFd,
         };
     }

@@ -44,7 +44,7 @@ const INVALID: *mut c_void = 1 as *mut c_void;
 macro_rules! weak {
     ($vis:vis fn $name:ident($($t:ty),*) -> $ret:ty) => (
         #[allow(non_upper_case_globals)]
-        $vis static $name: $crate::weak::Weak<unsafe extern fn($($t),*) -> $ret> =
+        $vis static $name: $crate::weak::Weak<unsafe extern "C" fn($($t),*) -> $ret> =
             $crate::weak::Weak::new(concat!(stringify!($name), '\0'));
     )
 }
