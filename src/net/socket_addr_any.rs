@@ -103,7 +103,7 @@ impl SocketAddrAny {
     /// `storage` must point to valid memory for decoding a socket
     /// address.
     pub unsafe fn read(storage: *const SocketAddrStorage, len: usize) -> io::Result<Self> {
-        backend::net::read_sockaddr::read_sockaddr(storage, len)
+        backend::net::read_sockaddr::read_sockaddr(storage.cast(), len)
     }
 }
 

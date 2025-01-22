@@ -21,6 +21,16 @@ pub(crate) use linux_raw_sys::general::{
 #[cfg(feature = "system")]
 pub(crate) use linux_raw_sys::system::sysinfo;
 
+#[cfg(feature = "fs")]
+#[cfg(target_arch = "x86")]
+#[cfg(test)]
+pub(crate) use linux_raw_sys::general::stat64;
+#[cfg(feature = "fs")]
+#[cfg(test)]
+pub(crate) use linux_raw_sys::general::{
+    __kernel_fsid_t as fsid_t, stat, statfs64, statx, statx_timestamp,
+};
+
 #[cfg(feature = "event")]
 #[cfg(test)]
 pub(crate) use linux_raw_sys::general::epoll_event;
@@ -316,3 +326,48 @@ pub(crate) const MAP_DROPPABLE: u32 = 0x8;
 
 // TODO: This is new in Linux 6.5; remove when linux-raw-sys is updated.
 pub(crate) const MOVE_MOUNT_BENEATH: u32 = 0x200;
+
+#[cfg(any(
+    feature = "fs",
+    all(
+        linux_raw,
+        not(feature = "use-libc-auxv"),
+        not(feature = "use-explicitly-provided-auxv"),
+        any(
+            feature = "param",
+            feature = "runtime",
+            feature = "thread",
+            feature = "time",
+            target_arch = "x86",
+        )
+    )
+))]
+mod statx_flags {
+    pub(crate) use linux_raw_sys::general::{
+        STATX_ALL, STATX_ATIME, STATX_BASIC_STATS, STATX_BLOCKS, STATX_BTIME, STATX_CTIME,
+        STATX_DIOALIGN, STATX_GID, STATX_INO, STATX_MNT_ID, STATX_MODE, STATX_MTIME, STATX_NLINK,
+        STATX_SIZE, STATX_TYPE, STATX_UID,
+    };
+
+    pub(crate) use linux_raw_sys::general::{
+        STATX_ATTR_APPEND, STATX_ATTR_AUTOMOUNT, STATX_ATTR_COMPRESSED, STATX_ATTR_DAX,
+        STATX_ATTR_ENCRYPTED, STATX_ATTR_IMMUTABLE, STATX_ATTR_MOUNT_ROOT, STATX_ATTR_NODUMP,
+        STATX_ATTR_VERITY,
+    };
+}
+#[cfg(any(
+    feature = "fs",
+    all(
+        linux_raw,
+        not(feature = "use-libc-auxv"),
+        not(feature = "use-explicitly-provided-auxv"),
+        any(
+            feature = "param",
+            feature = "runtime",
+            feature = "thread",
+            feature = "time",
+            target_arch = "x86",
+        )
+    )
+))]
+pub(crate) use statx_flags::*;

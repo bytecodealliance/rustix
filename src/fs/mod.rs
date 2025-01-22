@@ -115,7 +115,7 @@ pub use sendfile::sendfile;
 #[cfg(not(any(target_os = "espidf", target_os = "redox")))]
 pub use special::*;
 #[cfg(linux_kernel)]
-pub use statx::statx;
+pub use statx::*;
 #[cfg(not(any(
     target_os = "espidf",
     target_os = "redox",
