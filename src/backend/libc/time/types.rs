@@ -48,6 +48,7 @@ impl From<Itimerspec> for LibcItimerspec {
     }
 }
 
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
 #[cfg(not(fix_y2038))]
 pub(crate) fn as_libc_itimerspec_ptr(itimerspec: &Itimerspec) -> *const libc::itimerspec {
     #[cfg(test)]
