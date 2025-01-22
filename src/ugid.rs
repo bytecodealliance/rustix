@@ -2,6 +2,7 @@
 
 #![allow(unsafe_code)]
 
+use crate::backend::c;
 use crate::ffi;
 
 /// A group identifier as a raw integer.
@@ -77,7 +78,10 @@ impl Gid {
 
 // Return the raw value of the IDs. In case of `None` it returns `!0` since it
 // has the same bit pattern as `-1` indicating no change to the owner/group ID.
-pub(crate) fn translate_fchown_args(owner: Option<Uid>, group: Option<Gid>) -> (RawUid, RawGid) {
+pub(crate) fn translate_fchown_args(
+    owner: Option<Uid>,
+    group: Option<Gid>,
+) -> (c::uid_t, c::gid_t) {
     let ow = match owner {
         Some(o) => o.as_raw(),
         None => !0,
@@ -88,7 +92,7 @@ pub(crate) fn translate_fchown_args(owner: Option<Uid>, group: Option<Gid>) -> (
         None => !0,
     };
 
-    (ow, gr)
+    (ow as c::uid_t, gr as c::gid_t)
 }
 
 #[test]

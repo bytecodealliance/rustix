@@ -1,4 +1,6 @@
 use crate::backend::{c, termios::types};
+#[cfg(target_os = "nto")]
+use crate::ffi;
 use crate::{backend, io};
 use bitflags::bitflags;
 
