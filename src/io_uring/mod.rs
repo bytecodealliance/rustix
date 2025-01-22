@@ -929,6 +929,7 @@ pub const IORING_NOTIF_USAGE_ZC_COPIED: i32 = sys::IORING_NOTIF_USAGE_ZC_COPIED 
 /// pointers are narrower than 64 bits, this requires additional padding.
 #[repr(C)]
 #[derive(Copy, Clone)]
+#[non_exhaustive]
 pub struct io_uring_ptr {
     #[cfg(all(target_pointer_width = "32", target_endian = "big"))]
     #[doc(hidden)]
@@ -1083,8 +1084,10 @@ pub union addr3_or_cmd_union {
 #[allow(missing_docs)]
 #[repr(C)]
 #[derive(Copy, Clone, Default)]
+#[non_exhaustive]
 pub struct addr3_struct {
     pub addr3: u64,
+    #[doc(hidden)]
     pub __pad2: [u64; 1],
 }
 
@@ -1101,8 +1104,10 @@ pub union off_or_addr2_union {
 #[allow(missing_docs)]
 #[repr(C)]
 #[derive(Copy, Clone)]
+#[non_exhaustive]
 pub struct cmd_op_struct {
     pub cmd_op: u32,
+    #[doc(hidden)]
     pub __pad1: u32,
 }
 
@@ -1166,21 +1171,26 @@ pub union splice_fd_in_or_file_index_union {
 #[allow(missing_docs)]
 #[repr(C)]
 #[derive(Copy, Clone)]
+#[non_exhaustive]
 pub struct addr_len_struct {
     pub addr_len: u16,
+    #[doc(hidden)]
     pub __pad3: [u16; 1],
 }
 
 #[allow(missing_docs)]
 #[repr(C)]
 #[derive(Copy, Clone)]
+#[non_exhaustive]
 pub struct io_uring_sync_cancel_reg {
     pub addr: u64,
     pub fd: i32,
     pub flags: IoringAsyncCancelFlags,
     pub timeout: Timespec,
     pub opcode: u8,
+    #[doc(hidden)]
     pub pad: [u8; 7],
+    #[doc(hidden)]
     pub pad2: [u64; 3],
 }
 
