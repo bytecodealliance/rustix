@@ -186,7 +186,7 @@ use backend::fd::AsFd;
 use core::time::Duration;
 
 /// Timeout identifier for use with [`set_socket_timeout`] and
-/// [`get_socket_timeout`].
+/// [`socket_timeout`].
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[repr(u32)]
 pub enum Timeout {

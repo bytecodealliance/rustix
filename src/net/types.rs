@@ -1769,7 +1769,7 @@ pub mod xdp {
 /// [`SendAncillaryMessage::ScmCredentials`] and
 /// [`RecvAncillaryMessage::ScmCredentials`].
 ///
-/// [`get_socket_peercred`]: crate::net::sockopt::get_socket_peercred
+/// [`get_socket_peercred`]: crate::net::sockopt::socket_peercred
 /// [`SendAncillaryMessage::ScmCredentials`]: crate::net::SendAncillaryMessage::ScmCredentials
 /// [`RecvAncillaryMessage::ScmCredentials`]: crate::net::RecvAncillaryMessage::ScmCredentials
 #[cfg(linux_kernel)]
