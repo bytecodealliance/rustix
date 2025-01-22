@@ -133,7 +133,7 @@ pub fn mount_bind<Source: path::Arg, Target: path::Arg>(
 #[inline]
 #[doc(alias = "mount")]
 #[doc(alias = "MS_REC")]
-pub fn mount_recursive_bind<Source: path::Arg, Target: path::Arg>(
+pub fn mount_bind_recursive<Source: path::Arg, Target: path::Arg>(
     source: Source,
     target: Target,
 ) -> io::Result<()> {
