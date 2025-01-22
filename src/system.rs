@@ -20,7 +20,7 @@ pub use backend::system::types::Sysinfo;
 #[cfg(linux_kernel)]
 use crate::fd::AsFd;
 #[cfg(linux_kernel)]
-use c::c_int;
+use crate::ffi::c_int;
 
 /// `uname()`—Returns high-level information about the runtime OS and
 /// hardware.
