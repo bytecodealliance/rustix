@@ -1,5 +1,7 @@
 //! libc syscalls supporting `rustix::time`.
 
+#[cfg(not(fix_y2038))]
+use crate::utils::as_ptr;
 use crate::backend::c;
 use crate::backend::conv::ret;
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
@@ -265,7 +267,7 @@ pub(crate) fn clock_settime(id: ClockId, timespec: Timespec) -> io::Result<()> {
     unsafe {
         ret(c::clock_settime(
             id as c::clockid_t,
-            &timespec as *const Timespec as *const libc::timespec,
+            as_ptr(&timespec).cast::<libc::timespec>(),
         ))
     }
 }
@@ -328,7 +330,7 @@ pub(crate) fn timerfd_settime(
         ret(c::timerfd_settime(
             borrowed_fd(fd),
             bitflags_bits!(flags),
-            new_value as *const Itimerspec as *const libc::itimerspec,
+            as_ptr(new_value).cast::<libc::itimerspec>(),
             result.as_mut_ptr().cast(),
         ))?;
         Ok(result.assume_init())

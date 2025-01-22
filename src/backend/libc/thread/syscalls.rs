@@ -31,6 +31,8 @@ use crate::timespec::LibcTimespec;
     not(any(target_arch = "aarch64", target_arch = "x86_64"))
 ))]
 use crate::utils::option_as_ptr;
+#[cfg(not(fix_y2038))]
+use crate::utils::as_ptr;
 use core::mem::MaybeUninit;
 #[cfg(linux_kernel)]
 use core::sync::atomic::AtomicU32;
@@ -98,7 +100,7 @@ pub(crate) fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> Nanos
         match c::clock_nanosleep(
             id as c::clockid_t,
             flags,
-            request as *const Timespec as *const libc::timespec,
+            as_ptr(request).cast::<libc::timespec>(),
             remain.as_mut_ptr().cast(),
         ) {
             0 => NanosleepRelativeResult::Ok,
@@ -204,7 +206,7 @@ pub(crate) fn clock_nanosleep_absolute(id: ClockId, request: &Timespec) -> io::R
             c::clock_nanosleep(
                 id as c::clockid_t,
                 flags as _,
-                request as *const Timespec as *const libc::timespec,
+                as_ptr(request).cast::<libc::timespec>(),
                 core::ptr::null_mut(),
             )
         } {
@@ -273,7 +275,7 @@ pub(crate) fn nanosleep(request: &Timespec) -> NanosleepRelativeResult {
         let mut remain = MaybeUninit::<Timespec>::uninit();
 
         match ret(c::nanosleep(
-            request as *const Timespec as *const libc::timespec,
+            as_ptr(request).cast::<libc::timespec>(),
             remain.as_mut_ptr().cast(),
         )) {
             Ok(()) => NanosleepRelativeResult::Ok,
