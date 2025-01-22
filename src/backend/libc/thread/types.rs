@@ -8,9 +8,9 @@ use crate::backend::c;
 ///
 /// For `MEMBARRIER_CMD_QUERY`, see [`membarrier_query`].
 ///
-/// [`membarrier`]: crate::process::membarrier
-/// [`membarrier_cpu`]: crate::process::membarrier_cpu
-/// [`membarrier_query`]: crate::process::membarrier_query
+/// [`membarrier`]: crate::thread::membarrier
+/// [`membarrier_cpu`]: crate::thread::membarrier_cpu
+/// [`membarrier_query`]: crate::thread::membarrier_query
 #[cfg(linux_kernel)]
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 #[repr(u32)]
