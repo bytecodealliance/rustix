@@ -23,10 +23,10 @@ use crate::thread::ClockId;
 use crate::thread::{Cpuid, MembarrierCommand, MembarrierQuery};
 #[cfg(not(target_os = "redox"))]
 use crate::thread::{NanosleepRelativeResult, Timespec};
-#[cfg(not(fix_y2038))]
-use crate::timespec::as_libc_timespec_ptr;
 #[cfg(all(target_env = "gnu", fix_y2038))]
 use crate::timespec::LibcTimespec;
+#[cfg(not(fix_y2038))]
+use crate::timespec::{as_libc_timespec_mut_ptr, as_libc_timespec_ptr};
 #[cfg(all(
     linux_kernel,
     target_pointer_width = "32",
@@ -101,7 +101,7 @@ pub(crate) fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> Nanos
             id as c::clockid_t,
             flags,
             as_libc_timespec_ptr(request),
-            remain.as_mut_ptr().cast(),
+            as_libc_timespec_mut_ptr(&mut remain),
         ) {
             0 => NanosleepRelativeResult::Ok,
             err if err == io::Errno::INTR.0 => {
@@ -276,7 +276,7 @@ pub(crate) fn nanosleep(request: &Timespec) -> NanosleepRelativeResult {
 
         match ret(c::nanosleep(
             as_libc_timespec_ptr(request),
-            remain.as_mut_ptr().cast(),
+            as_libc_timespec_mut_ptr(&mut remain),
         )) {
             Ok(()) => NanosleepRelativeResult::Ok,
             Err(io::Errno::INTR) => NanosleepRelativeResult::Interrupted(remain.assume_init()),

@@ -9,11 +9,18 @@ use crate::backend::time::types::LibcItimerspec;
 #[cfg(not(target_os = "wasi"))]
 use crate::clockid::{ClockId, DynamicClockId};
 use crate::io;
+#[cfg(not(fix_y2038))]
+use crate::timespec::as_libc_timespec_mut_ptr;
+#[cfg(not(fix_y2038))]
+#[cfg(not(any(
+    target_os = "redox",
+    target_os = "wasi",
+    all(apple, not(target_os = "macos"))
+)))]
+use crate::timespec::as_libc_timespec_ptr;
 #[cfg(all(target_env = "gnu", fix_y2038))]
 use crate::timespec::LibcTimespec;
 use crate::timespec::Timespec;
-#[cfg(not(fix_y2038))]
-use crate::timespec::{as_libc_timespec_mut_ptr, as_libc_timespec_ptr};
 use core::mem::MaybeUninit;
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
 #[cfg(feature = "time")]
@@ -326,14 +333,14 @@ pub(crate) fn timerfd_settime(
 
     #[cfg(not(fix_y2038))]
     unsafe {
-        use crate::backend::time::types::as_libc_itimerspec_ptr;
+        use crate::backend::time::types::{as_libc_itimerspec_mut_ptr, as_libc_itimerspec_ptr};
 
         let mut result = MaybeUninit::<LibcItimerspec>::uninit();
         ret(c::timerfd_settime(
             borrowed_fd(fd),
             bitflags_bits!(flags),
             as_libc_itimerspec_ptr(new_value),
-            result.as_mut_ptr().cast(),
+            as_libc_itimerspec_mut_ptr(&mut result),
         ))?;
         Ok(result.assume_init())
     }
@@ -428,10 +435,12 @@ pub(crate) fn timerfd_gettime(fd: BorrowedFd<'_>) -> io::Result<Itimerspec> {
 
     #[cfg(not(fix_y2038))]
     unsafe {
+        use crate::backend::time::types::as_libc_itimerspec_mut_ptr;
+
         let mut result = MaybeUninit::<LibcItimerspec>::uninit();
         ret(c::timerfd_gettime(
             borrowed_fd(fd),
-            result.as_mut_ptr().cast(),
+            as_libc_itimerspec_mut_ptr(&mut result),
         ))?;
         Ok(result.assume_init())
     }
