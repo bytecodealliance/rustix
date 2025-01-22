@@ -95,4 +95,6 @@ pub(crate) fn translate_fchown_args(owner: Option<Uid>, group: Option<Gid>) -> (
 fn test_sizes() {
     assert_eq_size!(RawUid, u32);
     assert_eq_size!(RawGid, u32);
+    assert_eq_size!(RawUid, libc::uid_t);
+    assert_eq_size!(RawGid, libc::gid_t);
 }
