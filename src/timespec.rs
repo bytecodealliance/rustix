@@ -16,12 +16,6 @@ pub struct Timespec {
 }
 
 /// A type for the `tv_sec` field of [`Timespec`].
-#[cfg(target_pointer_width = "64")]
-#[allow(deprecated)]
-pub type Secs = ffi::c_long;
-
-/// A type for the `tv_sec` field of [`Timespec`].
-#[cfg(not(target_pointer_width = "64"))]
 pub type Secs = i64;
 
 /// A type for the `tv_sec` field of [`Timespec`].
