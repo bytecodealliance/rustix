@@ -1,15 +1,14 @@
 //! `Timespec` and related types, which are used by multiple public API
 //! modules.
 
+#![allow(dead_code)]
+
 #[cfg(not(fix_y2038))]
 use crate::backend::c;
+#[allow(unused)]
+use crate::ffi;
 
 /// `struct timespec`
-#[cfg(not(fix_y2038))]
-pub type Timespec = c::timespec;
-
-/// `struct timespec`
-#[cfg(fix_y2038)]
 #[derive(Debug, Clone, Copy)]
 #[repr(C)]
 pub struct Timespec {
@@ -21,12 +20,6 @@ pub struct Timespec {
 }
 
 /// A type for the `tv_sec` field of [`Timespec`].
-#[cfg(not(fix_y2038))]
-#[allow(deprecated)]
-pub type Secs = c::time_t;
-
-/// A type for the `tv_sec` field of [`Timespec`].
-#[cfg(fix_y2038)]
 pub type Secs = i64;
 
 /// A type for the `tv_sec` field of [`Timespec`].
@@ -43,7 +36,7 @@ pub type Nsecs = i64;
     libc,
     not(all(target_arch = "x86_64", target_pointer_width = "32"))
 ))]
-pub type Nsecs = c::c_long;
+pub type Nsecs = ffi::c_long;
 
 /// On 32-bit glibc platforms, `timespec` has anonymous padding fields, which
 /// Rust doesn't support yet (see `unnamed_fields`), so we define our own
@@ -86,6 +79,26 @@ impl From<Timespec> for LibcTimespec {
     }
 }
 
+#[cfg(not(fix_y2038))]
+pub(crate) fn as_libc_timespec_ptr(timespec: &Timespec) -> *const c::timespec {
+    #[cfg(test)]
+    {
+        assert_eq_size!(Timespec, c::timespec);
+    }
+    crate::utils::as_ptr(timespec).cast::<c::timespec>()
+}
+
+#[cfg(not(fix_y2038))]
+pub(crate) fn as_libc_timespec_mut_ptr(
+    timespec: &mut core::mem::MaybeUninit<Timespec>,
+) -> *mut c::timespec {
+    #[cfg(test)]
+    {
+        assert_eq_size!(Timespec, c::timespec);
+    }
+    timespec.as_mut_ptr().cast::<c::timespec>()
+}
+
 #[test]
 fn test_sizes() {
     assert_eq_size!(Secs, u64);
@@ -112,4 +125,13 @@ fn test_sizes() {
 #[allow(deprecated)]
 fn test_fix_y2038() {
     assert_eq_size!(libc::time_t, u32);
+}
+
+#[cfg(not(fix_y2038))]
+#[test]
+fn timespec_layouts() {
+    use crate::backend::c;
+    check_renamed_type!(Timespec, timespec);
+    #[cfg(linux_raw)]
+    assert_eq_size!(Timespec, linux_raw_sys::general::__kernel_timespec);
 }

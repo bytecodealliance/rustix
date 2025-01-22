@@ -31,7 +31,7 @@ use crate::backend::conv::{loff_t, loff_t_from_u64, ret_u64};
 ))]
 use crate::fd::AsFd;
 use crate::fd::{BorrowedFd, OwnedFd};
-use crate::ffi::CStr;
+use crate::ffi::{self, CStr};
 #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
 use crate::fs::CWD;
 use crate::fs::{
@@ -1627,19 +1627,19 @@ pub(crate) fn fsetxattr(
 }
 
 #[inline]
-pub(crate) fn listxattr(path: &CStr, list: &mut [c::c_char]) -> io::Result<usize> {
+pub(crate) fn listxattr(path: &CStr, list: &mut [ffi::c_char]) -> io::Result<usize> {
     let (list_addr_mut, list_len) = slice_mut(list);
     unsafe { ret_usize(syscall!(__NR_listxattr, path, list_addr_mut, list_len)) }
 }
 
 #[inline]
-pub(crate) fn llistxattr(path: &CStr, list: &mut [c::c_char]) -> io::Result<usize> {
+pub(crate) fn llistxattr(path: &CStr, list: &mut [ffi::c_char]) -> io::Result<usize> {
     let (list_addr_mut, list_len) = slice_mut(list);
     unsafe { ret_usize(syscall!(__NR_llistxattr, path, list_addr_mut, list_len)) }
 }
 
 #[inline]
-pub(crate) fn flistxattr(fd: BorrowedFd<'_>, list: &mut [c::c_char]) -> io::Result<usize> {
+pub(crate) fn flistxattr(fd: BorrowedFd<'_>, list: &mut [ffi::c_char]) -> io::Result<usize> {
     let (list_addr_mut, list_len) = slice_mut(list);
     unsafe { ret_usize(syscall!(__NR_flistxattr, fd, list_addr_mut, list_len)) }
 }

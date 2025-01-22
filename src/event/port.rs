@@ -3,6 +3,7 @@
 use crate::backend::c;
 use crate::backend::event::syscalls;
 use crate::fd::{AsFd, AsRawFd, OwnedFd};
+use crate::ffi;
 use crate::io;
 
 use super::PollFlags;
@@ -25,7 +26,7 @@ impl Event {
     }
 
     /// Get the userdata associated with this event.
-    pub fn userdata(&self) -> *mut c::c_void {
+    pub fn userdata(&self) -> *mut ffi::c_void {
         self.0.portev_user
     }
 }
@@ -61,7 +62,7 @@ pub unsafe fn port_associate_fd(
     port: impl AsFd,
     object: impl AsRawFd,
     events: PollFlags,
-    userdata: *mut c::c_void,
+    userdata: *mut ffi::c_void,
 ) -> io::Result<()> {
     syscalls::port_associate(
         port.as_fd(),
@@ -168,6 +169,6 @@ pub fn port_getn_query(port: impl AsFd) -> io::Result<u32> {
 ///
 /// [OpenSolaris]: https://www.unix.com/man-page/opensolaris/3C/port_send/
 /// [illumos]: https://illumos.org/man/3C/port_send
-pub fn port_send(port: impl AsFd, events: i32, userdata: *mut c::c_void) -> io::Result<()> {
+pub fn port_send(port: impl AsFd, events: i32, userdata: *mut ffi::c_void) -> io::Result<()> {
     syscalls::port_send(port.as_fd(), events, userdata.cast())
 }

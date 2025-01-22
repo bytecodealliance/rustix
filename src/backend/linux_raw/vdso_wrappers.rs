@@ -51,17 +51,17 @@ use {
     crate::clockid::{ClockId, DynamicClockId},
     crate::io,
     crate::timespec::Timespec,
-    linux_raw_sys::general::{__kernel_clockid_t, __kernel_timespec},
+    linux_raw_sys::general::__kernel_clockid_t,
 };
 
 #[cfg(feature = "time")]
 #[inline]
-pub(crate) fn clock_gettime(which_clock: ClockId) -> __kernel_timespec {
+pub(crate) fn clock_gettime(which_clock: ClockId) -> Timespec {
     // SAFETY: `CLOCK_GETTIME` contains either null or the address of a
     // function with an ABI like libc `clock_gettime`, and calling it has the
     // side effect of writing to the result buffer, and no others.
     unsafe {
-        let mut result = MaybeUninit::<__kernel_timespec>::uninit();
+        let mut result = MaybeUninit::<Timespec>::uninit();
         let callee = match transmute(CLOCK_GETTIME.load(Relaxed)) {
             Some(callee) => callee,
             None => init_clock_gettime(),

@@ -1,4 +1,6 @@
-use crate::backend::c;
+use crate::backend::{c, termios::types};
+#[cfg(target_os = "nto")]
+use crate::ffi;
 use crate::{backend, io};
 use bitflags::bitflags;
 
@@ -35,7 +37,7 @@ pub struct Termios {
         target_os = "haiku",
         target_os = "redox"
     ))]
-    pub line_discipline: c::cc_t,
+    pub line_discipline: u8,
 
     /// How are various special control codes handled?
     #[doc(alias = "c_cc")]
@@ -43,7 +45,7 @@ pub struct Termios {
     pub special_codes: SpecialCodes,
 
     #[cfg(target_os = "nto")]
-    pub(crate) __reserved: [c::c_uint; 3],
+    pub(crate) __reserved: [ffi::c_uint; 3],
 
     /// Line discipline.
     // On PowerPC, this field comes after `c_cc`.
@@ -235,7 +237,7 @@ bitflags! {
     /// Flags controlling terminal input.
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct InputModes: c::tcflag_t {
+    pub struct InputModes: types::tcflag_t {
         /// `IGNBRK`
         const IGNBRK = c::IGNBRK;
 
@@ -303,7 +305,7 @@ bitflags! {
     /// Flags controlling terminal output.
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct OutputModes: c::tcflag_t {
+    pub struct OutputModes: types::tcflag_t {
         /// `OPOST`
         const OPOST = c::OPOST;
 
@@ -522,7 +524,7 @@ bitflags! {
     /// related functions.
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct ControlModes: c::tcflag_t {
+    pub struct ControlModes: types::tcflag_t {
         /// `CSIZE`
         const CSIZE = c::CSIZE;
 
@@ -582,7 +584,7 @@ bitflags! {
     /// Flags controlling “local” terminal modes.
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct LocalModes: c::tcflag_t {
+    pub struct LocalModes: types::tcflag_t {
         /// `XCASE`
         #[cfg(any(linux_kernel, target_arch = "s390x", target_os = "haiku"))]
         const XCASE = c::XCASE;
@@ -1101,7 +1103,7 @@ pub mod speed {
 pub struct SpecialCodes(pub(crate) [c::cc_t; c::NCCS as usize]);
 
 impl core::ops::Index<SpecialCodeIndex> for SpecialCodes {
-    type Output = c::cc_t;
+    type Output = u8;
 
     fn index(&self, index: SpecialCodeIndex) -> &Self::Output {
         &self.0[index.0]
@@ -1356,6 +1358,8 @@ fn termios_layouts() {
     check_renamed_type!(OutputModes, tcflag_t);
     check_renamed_type!(ControlModes, tcflag_t);
     check_renamed_type!(LocalModes, tcflag_t);
+    assert_eq_size!(u8, libc::cc_t);
+    assert_eq_size!(types::tcflag_t, libc::tcflag_t);
 
     // On platforms with a termios/termios2 split, check `termios`.
     #[cfg(linux_raw)]

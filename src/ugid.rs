@@ -3,13 +3,14 @@
 #![allow(unsafe_code)]
 
 use crate::backend::c;
+use crate::ffi;
 
 /// A group identifier as a raw integer.
 #[cfg(not(target_os = "wasi"))]
-pub type RawGid = c::gid_t;
+pub type RawGid = ffi::c_uint;
 /// A user identifier as a raw integer.
 #[cfg(not(target_os = "wasi"))]
-pub type RawUid = c::uid_t;
+pub type RawUid = ffi::c_uint;
 
 /// `uid_t`—A Unix user ID.
 #[repr(transparent)]
@@ -77,7 +78,10 @@ impl Gid {
 
 // Return the raw value of the IDs. In case of `None` it returns `!0` since it
 // has the same bit pattern as `-1` indicating no change to the owner/group ID.
-pub(crate) fn translate_fchown_args(owner: Option<Uid>, group: Option<Gid>) -> (RawUid, RawGid) {
+pub(crate) fn translate_fchown_args(
+    owner: Option<Uid>,
+    group: Option<Gid>,
+) -> (c::uid_t, c::gid_t) {
     let ow = match owner {
         Some(o) => o.as_raw(),
         None => !0,
@@ -88,11 +92,13 @@ pub(crate) fn translate_fchown_args(owner: Option<Uid>, group: Option<Gid>) -> (
         None => !0,
     };
 
-    (ow, gr)
+    (ow as c::uid_t, gr as c::gid_t)
 }
 
 #[test]
 fn test_sizes() {
     assert_eq_size!(RawUid, u32);
     assert_eq_size!(RawGid, u32);
+    assert_eq_size!(RawUid, libc::uid_t);
+    assert_eq_size!(RawGid, libc::gid_t);
 }
