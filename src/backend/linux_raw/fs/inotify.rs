@@ -1,6 +1,5 @@
 //! inotify support for working with inotify objects.
 
-use crate::backend::c;
 use crate::ffi;
 use bitflags::bitflags;
 
@@ -84,7 +83,7 @@ bitflags! {
     /// [`inotify::Reader`]: crate::fs::inotify::InotifyReader
     #[repr(transparent)]
     #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct ReadFlags: c::c_uint {
+    pub struct ReadFlags: ffi::c_uint {
         /// `IN_ACCESS`
         const ACCESS = linux_raw_sys::general::IN_ACCESS;
         /// `IN_ATTRIB`

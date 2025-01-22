@@ -1350,7 +1350,15 @@ pub enum Action {
 ///
 /// [`tcgetwinsize`]: crate::termios::tcgetwinsize
 #[doc(alias = "winsize")]
-pub type Winsize = c::winsize;
+#[repr(C)]
+#[derive(Debug, Copy, Clone, Eq, Hash, PartialEq)]
+#[allow(missing_docs)]
+pub struct Winsize {
+    pub ws_row: u16,
+    pub ws_col: u16,
+    pub ws_xpixel: u16,
+    pub ws_ypixel: u16,
+}
 
 #[test]
 fn termios_layouts() {
@@ -1360,6 +1368,12 @@ fn termios_layouts() {
     check_renamed_type!(LocalModes, tcflag_t);
     assert_eq_size!(u8, libc::cc_t);
     assert_eq_size!(types::tcflag_t, libc::tcflag_t);
+
+    check_renamed_type!(Winsize, winsize);
+    check_renamed_struct_field!(Winsize, winsize, ws_row);
+    check_renamed_struct_field!(Winsize, winsize, ws_col);
+    check_renamed_struct_field!(Winsize, winsize, ws_xpixel);
+    check_renamed_struct_field!(Winsize, winsize, ws_ypixel);
 
     // On platforms with a termios/termios2 split, check `termios`.
     #[cfg(linux_raw)]
