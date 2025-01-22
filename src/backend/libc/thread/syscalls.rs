@@ -25,14 +25,14 @@ use crate::thread::{Cpuid, MembarrierCommand, MembarrierQuery};
 use crate::thread::{NanosleepRelativeResult, Timespec};
 #[cfg(all(target_env = "gnu", fix_y2038))]
 use crate::timespec::LibcTimespec;
+#[cfg(not(fix_y2038))]
+use crate::utils::as_ptr;
 #[cfg(all(
     linux_kernel,
     target_pointer_width = "32",
     not(any(target_arch = "aarch64", target_arch = "x86_64"))
 ))]
 use crate::utils::option_as_ptr;
-#[cfg(not(fix_y2038))]
-use crate::utils::as_ptr;
 use core::mem::MaybeUninit;
 #[cfg(linux_kernel)]
 use core::sync::atomic::AtomicU32;

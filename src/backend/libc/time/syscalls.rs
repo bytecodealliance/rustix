@@ -1,7 +1,5 @@
 //! libc syscalls supporting `rustix::time`.
 
-#[cfg(not(fix_y2038))]
-use crate::utils::as_ptr;
 use crate::backend::c;
 use crate::backend::conv::ret;
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
@@ -14,6 +12,8 @@ use crate::io;
 #[cfg(all(target_env = "gnu", fix_y2038))]
 use crate::timespec::LibcTimespec;
 use crate::timespec::Timespec;
+#[cfg(not(fix_y2038))]
+use crate::utils::as_ptr;
 use core::mem::MaybeUninit;
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
 #[cfg(feature = "time")]
