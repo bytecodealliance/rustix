@@ -1359,7 +1359,7 @@ fn termios_layouts() {
     check_renamed_type!(ControlModes, tcflag_t);
     check_renamed_type!(LocalModes, tcflag_t);
     assert_eq_size!(u8, libc::cc_t);
-    assert_eq_size!(tcflag_t, libc::tcflag_t);
+    assert_eq_size!(types::tcflag_t, libc::tcflag_t);
 
     // On platforms with a termios/termios2 split, check `termios`.
     #[cfg(linux_raw)]
