@@ -23,10 +23,10 @@ use crate::thread::ClockId;
 use crate::thread::{Cpuid, MembarrierCommand, MembarrierQuery};
 #[cfg(not(target_os = "redox"))]
 use crate::thread::{NanosleepRelativeResult, Timespec};
+#[cfg(not(fix_y2038))]
+use crate::timespec::as_libc_timespec_ptr;
 #[cfg(all(target_env = "gnu", fix_y2038))]
 use crate::timespec::LibcTimespec;
-#[cfg(not(fix_y2038))]
-use crate::utils::as_ptr;
 #[cfg(all(
     linux_kernel,
     target_pointer_width = "32",
@@ -100,7 +100,7 @@ pub(crate) fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> Nanos
         match c::clock_nanosleep(
             id as c::clockid_t,
             flags,
-            as_ptr(request).cast::<libc::timespec>(),
+            as_libc_timespec_ptr(request),
             remain.as_mut_ptr().cast(),
         ) {
             0 => NanosleepRelativeResult::Ok,
@@ -206,7 +206,7 @@ pub(crate) fn clock_nanosleep_absolute(id: ClockId, request: &Timespec) -> io::R
             c::clock_nanosleep(
                 id as c::clockid_t,
                 flags as _,
-                as_ptr(request).cast::<libc::timespec>(),
+                as_libc_timespec_ptr(request),
                 core::ptr::null_mut(),
             )
         } {
@@ -275,7 +275,7 @@ pub(crate) fn nanosleep(request: &Timespec) -> NanosleepRelativeResult {
         let mut remain = MaybeUninit::<Timespec>::uninit();
 
         match ret(c::nanosleep(
-            as_ptr(request).cast::<libc::timespec>(),
+            as_libc_timespec_ptr(request),
             remain.as_mut_ptr().cast(),
         )) {
             Ok(()) => NanosleepRelativeResult::Ok,

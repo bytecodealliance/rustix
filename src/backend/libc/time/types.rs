@@ -48,6 +48,15 @@ impl From<Itimerspec> for LibcItimerspec {
     }
 }
 
+#[cfg(not(fix_y2038))]
+pub(crate) fn as_libc_itimerspec_ptr(itimerspec: &Itimerspec) -> *const libc::itimerspec {
+    #[cfg(test)]
+    {
+        assert_eq_size!(Itimerspec, libc::itimerspec);
+    }
+    crate::utils::as_ptr(itimerspec).cast::<libc::itimerspec>()
+}
+
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
 bitflags! {
     /// `TFD_*` flags for use with [`timerfd_create`].

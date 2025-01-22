@@ -13,7 +13,7 @@ use crate::io;
 use crate::timespec::LibcTimespec;
 use crate::timespec::Timespec;
 #[cfg(not(fix_y2038))]
-use crate::utils::as_ptr;
+use crate::timespec::{as_libc_timespec_mut_ptr, as_libc_timespec_ptr};
 use core::mem::MaybeUninit;
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
 #[cfg(feature = "time")]
@@ -62,7 +62,7 @@ pub(crate) fn clock_getres(id: ClockId) -> Timespec {
     #[cfg(not(fix_y2038))]
     unsafe {
         let mut timespec = MaybeUninit::<Timespec>::uninit();
-        let _ = c::clock_getres(id as c::clockid_t, timespec.as_mut_ptr().cast());
+        let _ = c::clock_getres(id as c::clockid_t, as_libc_timespec_mut_ptr(&mut timespec));
         timespec.assume_init()
     }
 }
@@ -120,7 +120,7 @@ pub(crate) fn clock_gettime(id: ClockId) -> Timespec {
         let mut timespec = MaybeUninit::<Timespec>::uninit();
         ret(c::clock_gettime(
             id as c::clockid_t,
-            timespec.as_mut_ptr().cast(),
+            as_libc_timespec_mut_ptr(&mut timespec),
         ))
         .unwrap();
         timespec.assume_init()
@@ -211,7 +211,7 @@ pub(crate) fn clock_gettime_dynamic(id: DynamicClockId<'_>) -> io::Result<Timesp
 
         ret(c::clock_gettime(
             id as c::clockid_t,
-            timespec.as_mut_ptr().cast(),
+            as_libc_timespec_mut_ptr(&mut timespec),
         ))?;
 
         Ok(timespec.assume_init())
@@ -267,7 +267,7 @@ pub(crate) fn clock_settime(id: ClockId, timespec: Timespec) -> io::Result<()> {
     unsafe {
         ret(c::clock_settime(
             id as c::clockid_t,
-            as_ptr(&timespec).cast::<libc::timespec>(),
+            as_libc_timespec_ptr(&timespec),
         ))
     }
 }
@@ -326,11 +326,13 @@ pub(crate) fn timerfd_settime(
 
     #[cfg(not(fix_y2038))]
     unsafe {
+        use crate::backend::time::types::as_libc_itimerspec_ptr;
+
         let mut result = MaybeUninit::<LibcItimerspec>::uninit();
         ret(c::timerfd_settime(
             borrowed_fd(fd),
             bitflags_bits!(flags),
-            as_ptr(new_value).cast::<libc::itimerspec>(),
+            as_libc_itimerspec_ptr(new_value),
             result.as_mut_ptr().cast(),
         ))?;
         Ok(result.assume_init())
