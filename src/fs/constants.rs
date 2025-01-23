@@ -76,9 +76,12 @@ mod tests {
             check_renamed_struct_field!(Stat, stat, __unused5);
         }
 
-        check_renamed_type!(Fsid, fsid_t);
-        #[cfg(not(libc))] // libc hides the `val` field
-        check_renamed_struct_field!(Fsid, fsid_t, val);
+        #[cfg(not(any(target_os = "illumos", target_os = "redox")))]
+        {
+            check_renamed_type!(Fsid, fsid_t);
+            #[cfg(not(libc))] // libc hides the `val` field
+            check_renamed_struct_field!(Fsid, fsid_t, val);
+        }
 
         #[cfg(linux_like)]
         {

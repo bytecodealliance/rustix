@@ -947,7 +947,7 @@ pub type StatFs = c::statfs;
 pub type StatFs = c::statfs64;
 
 /// `fsid_t` for use with `StatFs`.
-#[cfg(not(target_os = "illumos"))]
+#[cfg(not(any(target_os = "illumos", target_os = "redox")))]
 pub type Fsid = c::fsid_t;
 
 /// `struct statvfs` for use with [`statvfs`] and [`fstatvfs`].
