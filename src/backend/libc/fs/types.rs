@@ -948,8 +948,8 @@ pub type StatFs = c::statfs64;
 
 /// `fsid_t` for use with `StatFs`.
 #[cfg(not(any(
+    solarish,
     target_os = "haiku",
-    target_os = "illumos",
     target_os = "nto",
     target_os = "redox",
     target_os = "wasi"
