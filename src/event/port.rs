@@ -39,7 +39,7 @@ impl Event {
 ///
 /// [OpenSolaris]: https://www.unix.com/man-page/opensolaris/3C/port_create/
 /// [illumos]: https://illumos.org/man/3C/port_create
-pub fn port_create() -> io::Result<OwnedFd> {
+pub fn create() -> io::Result<OwnedFd> {
     syscalls::port_create()
 }
 
@@ -50,7 +50,7 @@ pub fn port_create() -> io::Result<OwnedFd> {
 ///
 /// Any `object`s passed into the `port` must be valid for the lifetime of the
 /// `port`. Logically, `port` keeps a borrowed reference to the `object` until
-/// it is removed via `port_dissociate_fd`.
+/// it is removed via [`dissociate_fd`].
 ///
 /// # References
 ///  - [OpenSolaris]
@@ -58,7 +58,7 @@ pub fn port_create() -> io::Result<OwnedFd> {
 ///
 /// [OpenSolaris]: https://www.unix.com/man-page/opensolaris/3C/port_associate/
 /// [illumos]: https://illumos.org/man/3C/port_associate
-pub unsafe fn port_associate_fd<Fd: AsFd, RawFd: AsRawFd>(
+pub unsafe fn associate_fd<Fd: AsFd, RawFd: AsRawFd>(
     port: Fd,
     object: RawFd,
     events: PollFlags,
@@ -79,7 +79,7 @@ pub unsafe fn port_associate_fd<Fd: AsFd, RawFd: AsRawFd>(
 /// # Safety
 ///
 /// The file descriptor passed into this function must have been previously
-/// associated with the port via [`port_associate_fd`].
+/// associated with the port via [`associate_fd`].
 ///
 /// # References
 ///  - [OpenSolaris]
@@ -87,10 +87,7 @@ pub unsafe fn port_associate_fd<Fd: AsFd, RawFd: AsRawFd>(
 ///
 /// [OpenSolaris]: https://www.unix.com/man-page/opensolaris/3C/port_dissociate
 /// [illumos]: https://illumos.org/man/3C/port_dissociate
-pub unsafe fn port_dissociate_fd<Fd: AsFd, RawFd: AsRawFd>(
-    port: Fd,
-    object: RawFd,
-) -> io::Result<()> {
+pub unsafe fn dissociate_fd<Fd: AsFd, RawFd: AsRawFd>(port: Fd, object: RawFd) -> io::Result<()> {
     syscalls::port_dissociate(port.as_fd(), c::PORT_SOURCE_FD, object.as_raw_fd() as _)
 }
 
@@ -102,7 +99,7 @@ pub unsafe fn port_dissociate_fd<Fd: AsFd, RawFd: AsRawFd>(
 ///
 /// [OpenSolaris]: https://www.unix.com/man-page/opensolaris/3C/port_get/
 /// [illumos]: https://illumos.org/man/3C/port_get
-pub fn port_get<Fd: AsFd>(port: Fd, timeout: Option<Duration>) -> io::Result<Event> {
+pub fn get<Fd: AsFd>(port: Fd, timeout: Option<Duration>) -> io::Result<Event> {
     let mut timeout = timeout.map(|timeout| c::timespec {
         tv_sec: timeout.as_secs().try_into().unwrap(),
         tv_nsec: timeout.subsec_nanos() as _,
@@ -119,7 +116,7 @@ pub fn port_get<Fd: AsFd>(port: Fd, timeout: Option<Duration>) -> io::Result<Eve
 /// this does nothing and returns immediately.
 ///
 /// To query the number of events without retrieving any, use
-/// [`port_getn_query`].
+/// [`getn_query`].
 ///
 /// # References
 ///  - [OpenSolaris]
@@ -128,7 +125,7 @@ pub fn port_get<Fd: AsFd>(port: Fd, timeout: Option<Duration>) -> io::Result<Eve
 /// [OpenSolaris]: https://www.unix.com/man-page/opensolaris/3C/port_getn/
 /// [illumos]: https://illumos.org/man/3C/port_getn
 #[cfg(feature = "alloc")]
-pub fn port_getn<Fd: AsFd>(
+pub fn getn<Fd: AsFd>(
     port: Fd,
     events: &mut Vec<Event>,
     min_events: usize,
@@ -152,7 +149,7 @@ pub fn port_getn<Fd: AsFd>(
 /// `port_getn(port, NULL, 0, NULL)`—Queries the number of events
 /// available from a port.
 ///
-/// To retrieve the events, use [`port_getn`].
+/// To retrieve the events, use [`getn`].
 ///
 /// # References
 ///  - [OpenSolaris]
@@ -160,7 +157,7 @@ pub fn port_getn<Fd: AsFd>(
 ///
 /// [OpenSolaris]: https://www.unix.com/man-page/opensolaris/3C/port_getn/
 /// [illumos]: https://illumos.org/man/3C/port_getn
-pub fn port_getn_query<Fd: AsFd>(port: Fd) -> io::Result<u32> {
+pub fn getn_query<Fd: AsFd>(port: Fd) -> io::Result<u32> {
     syscalls::port_getn_query(port.as_fd())
 }
 
@@ -172,6 +169,6 @@ pub fn port_getn_query<Fd: AsFd>(port: Fd) -> io::Result<u32> {
 ///
 /// [OpenSolaris]: https://www.unix.com/man-page/opensolaris/3C/port_send/
 /// [illumos]: https://illumos.org/man/3C/port_send
-pub fn port_send<Fd: AsFd>(port: Fd, events: i32, userdata: *mut ffi::c_void) -> io::Result<()> {
+pub fn send<Fd: AsFd>(port: Fd, events: i32, userdata: *mut ffi::c_void) -> io::Result<()> {
     syscalls::port_send(port.as_fd(), events, userdata.cast())
 }

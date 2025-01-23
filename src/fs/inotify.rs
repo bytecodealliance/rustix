@@ -123,14 +123,14 @@ impl<'buf, Fd: AsFd> Reader<'buf, Fd> {
 
 /// An inotify event.
 #[derive(Debug)]
-pub struct InotifyEvent<'a> {
+pub struct Event<'a> {
     wd: i32,
     events: ReadFlags,
     cookie: u32,
     file_name: Option<&'a CStr>,
 }
 
-impl<'a> InotifyEvent<'a> {
+impl<'a> Event<'a> {
     /// Returns the watch for which this event occurs.
     #[inline]
     pub fn wd(&self) -> i32 {
@@ -172,7 +172,7 @@ impl<'buf, Fd: AsFd> Reader<'buf, Fd> {
     ///    error occurs.
     #[allow(unsafe_code)]
     #[allow(clippy::should_implement_trait)]
-    pub fn next(&mut self) -> io::Result<InotifyEvent<'_>> {
+    pub fn next(&mut self) -> io::Result<Event<'_>> {
         if self.is_buffer_empty() {
             match read_uninit(self.fd.as_fd(), self.buf).map(|(init, _)| init.len()) {
                 Ok(0) => return Err(Errno::INVAL),
@@ -195,7 +195,7 @@ impl<'buf, Fd: AsFd> Reader<'buf, Fd> {
 
         self.offset += size_of::<inotify_event>() + usize::try_from(event.len).unwrap();
 
-        Ok(InotifyEvent {
+        Ok(Event {
             wd: event.wd,
             events: ReadFlags::from_bits_retain(event.mask),
             cookie: event.cookie,
