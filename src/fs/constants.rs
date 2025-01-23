@@ -52,14 +52,29 @@ mod tests {
             check_renamed_struct_field!(Stat, stat, st_mode);
             check_renamed_struct_field!(Stat, stat, st_uid);
             check_renamed_struct_field!(Stat, stat, st_gid);
-            #[cfg(all(linux_raw, not(any(target_arch = "aarch64", target_arch = "riscv64"))))]
+            #[cfg(all(
+                linux_raw,
+                not(any(
+                    target_arch = "aarch64",
+                    target_arch = "powerpc64",
+                    target_arch = "riscv64",
+                    target_arch = "s390x"
+                ))
+            ))]
             check_renamed_struct_field!(Stat, stat, __pad0);
             check_renamed_struct_field!(Stat, stat, st_rdev);
-            #[cfg(all(linux_raw, not(target_arch = "x86_64")))]
+            #[cfg(all(linux_raw, not(any(target_arch = "powerpc64", target_arch = "x86_64"))))]
             check_renamed_struct_field!(Stat, stat, __pad1);
             check_renamed_struct_field!(Stat, stat, st_size);
             check_renamed_struct_field!(Stat, stat, st_blksize);
-            #[cfg(all(linux_raw, not(target_arch = "x86_64")))]
+            #[cfg(all(
+                linux_raw,
+                not(any(
+                    target_arch = "powerpc64",
+                    target_arch = "s390x",
+                    target_arch = "x86_64"
+                ))
+            ))]
             check_renamed_struct_field!(Stat, stat, __pad2);
             check_renamed_struct_field!(Stat, stat, st_blocks);
             check_renamed_struct_field!(Stat, stat, st_atime);
@@ -68,12 +83,29 @@ mod tests {
             check_renamed_struct_field!(Stat, stat, st_mtime_nsec);
             check_renamed_struct_field!(Stat, stat, st_ctime);
             check_renamed_struct_field!(Stat, stat, st_ctime_nsec);
-            #[cfg(all(linux_raw, not(any(target_arch = "aarch64", target_arch = "riscv64"))))]
+            #[cfg(all(
+                linux_raw,
+                not(any(
+                    target_arch = "aarch64",
+                    target_arch = "powerpc64",
+                    target_arch = "riscv64"
+                ))
+            ))]
             check_renamed_struct_field!(Stat, stat, __unused);
-            #[cfg(all(linux_raw, not(target_arch = "x86_64")))]
+            #[cfg(all(linux_raw, not(any(target_arch = "s390x", target_arch = "x86_64"))))]
             check_renamed_struct_field!(Stat, stat, __unused4);
-            #[cfg(all(linux_raw, not(target_arch = "x86_64")))]
+            #[cfg(all(linux_raw, not(any(target_arch = "s390x", target_arch = "x86_64"))))]
             check_renamed_struct_field!(Stat, stat, __unused5);
+            #[cfg(all(
+                linux_raw,
+                not(any(
+                    target_arch = "aarch64",
+                    target_arch = "riscv64",
+                    target_arch = "s390x",
+                    target_arch = "x86_64"
+                ))
+            ))]
+            check_renamed_struct_field!(Stat, stat, __unused6);
         }
 
         #[cfg(not(any(target_os = "illumos", target_os = "redox")))]

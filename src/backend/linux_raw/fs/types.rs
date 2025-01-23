@@ -619,37 +619,22 @@ pub struct Stat {
 ///
 /// [`statat`]: crate::fs::statat
 /// [`fstat`]: crate::fs::fstat
-#[cfg(all(
-    target_pointer_width = "64",
-    not(target_arch = "mips64"),
-    not(target_arch = "mips64r6")
-))]
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 #[allow(missing_docs)]
 #[non_exhaustive]
+#[cfg(target_arch = "x86_64")]
 pub struct Stat {
     pub st_dev: ffi::c_ulong,
     pub st_ino: ffi::c_ulong,
-    #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
     pub st_nlink: ffi::c_ulong,
     pub st_mode: ffi::c_uint,
-    #[cfg(not(target_arch = "x86_64"))]
-    pub st_nlink: ffi::c_uint,
     pub st_uid: ffi::c_uint,
     pub st_gid: ffi::c_uint,
-    #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
     pub(crate) __pad0: ffi::c_uint,
     pub st_rdev: ffi::c_ulong,
-    #[cfg(not(target_arch = "x86_64"))]
-    pub(crate) __pad1: ffi::c_ulong,
     pub st_size: ffi::c_long,
-    #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
     pub st_blksize: ffi::c_long,
-    #[cfg(not(target_arch = "x86_64"))]
-    pub st_blksize: ffi::c_int,
-    #[cfg(not(target_arch = "x86_64"))]
-    pub(crate) __pad2: ffi::c_int,
     pub st_blocks: ffi::c_long,
     pub st_atime: ffi::c_ulong,
     pub st_atime_nsec: ffi::c_ulong,
@@ -657,12 +642,113 @@ pub struct Stat {
     pub st_mtime_nsec: ffi::c_ulong,
     pub st_ctime: ffi::c_ulong,
     pub st_ctime_nsec: ffi::c_ulong,
-    #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
     pub(crate) __unused: [ffi::c_long; 3],
-    #[cfg(not(target_arch = "x86_64"))]
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+#[allow(missing_docs)]
+#[non_exhaustive]
+#[cfg(target_arch = "aarch64")]
+pub struct Stat {
+    pub st_dev: ffi::c_ulong,
+    pub st_ino: ffi::c_ulong,
+    pub st_mode: ffi::c_uint,
+    pub st_nlink: ffi::c_uint,
+    pub st_uid: ffi::c_uint,
+    pub st_gid: ffi::c_uint,
+    pub st_rdev: ffi::c_ulong,
+    pub(crate) __pad1: ffi::c_ulong,
+    pub st_size: ffi::c_long,
+    pub st_blksize: ffi::c_int,
+    pub(crate) __pad2: ffi::c_int,
+    pub st_blocks: ffi::c_long,
+    pub st_atime: ffi::c_long,
+    pub st_atime_nsec: ffi::c_ulong,
+    pub st_mtime: ffi::c_long,
+    pub st_mtime_nsec: ffi::c_ulong,
+    pub st_ctime: ffi::c_long,
+    pub st_ctime_nsec: ffi::c_ulong,
     pub(crate) __unused4: ffi::c_uint,
-    #[cfg(not(target_arch = "x86_64"))]
     pub(crate) __unused5: ffi::c_uint,
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+#[allow(missing_docs)]
+#[non_exhaustive]
+#[cfg(target_arch = "riscv64")]
+pub struct Stat {
+    pub st_dev: ffi::c_ulong,
+    pub st_ino: ffi::c_ulong,
+    pub st_mode: ffi::c_uint,
+    pub st_nlink: ffi::c_uint,
+    pub st_uid: ffi::c_uint,
+    pub st_gid: ffi::c_uint,
+    pub st_rdev: ffi::c_ulong,
+    pub(crate) __pad1: ffi::c_ulong,
+    pub st_size: ffi::c_long,
+    pub st_blksize: ffi::c_int,
+    pub(crate) __pad2: ffi::c_int,
+    pub st_blocks: ffi::c_long,
+    pub st_atime: ffi::c_long,
+    pub st_atime_nsec: ffi::c_ulong,
+    pub st_mtime: ffi::c_long,
+    pub st_mtime_nsec: ffi::c_ulong,
+    pub st_ctime: ffi::c_long,
+    pub st_ctime_nsec: ffi::c_ulong,
+    pub(crate) __unused4: ffi::c_uint,
+    pub(crate) __unused5: ffi::c_uint,
+}
+// This follows `stat64`.
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+#[allow(missing_docs)]
+#[non_exhaustive]
+#[cfg(target_arch = "powerpc64")]
+pub struct Stat {
+    pub st_dev: ffi::c_ulong,
+    pub st_ino: ffi::c_ulong,
+    pub st_nlink: ffi::c_ulong,
+    pub st_mode: ffi::c_uint,
+    pub st_uid: ffi::c_uint,
+    pub st_gid: ffi::c_uint,
+    pub st_rdev: ffi::c_ulong,
+    pub st_size: ffi::c_long,
+    pub st_blksize: ffi::c_ulong,
+    pub st_blocks: ffi::c_ulong,
+    pub st_atime: ffi::c_ulong,
+    pub st_atime_nsec: ffi::c_ulong,
+    pub st_mtime: ffi::c_ulong,
+    pub st_mtime_nsec: ffi::c_ulong,
+    pub st_ctime: ffi::c_ulong,
+    pub st_ctime_nsec: ffi::c_ulong,
+    pub(crate) __unused4: ffi::c_ulong,
+    pub(crate) __unused5: ffi::c_ulong,
+    pub(crate) __unused6: ffi::c_ulong,
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+#[allow(missing_docs)]
+#[non_exhaustive]
+#[cfg(target_arch = "s390x")]
+pub struct Stat {
+    pub st_dev: ffi::c_ulong,
+    pub st_ino: ffi::c_ulong,
+    pub st_nlink: ffi::c_ulong,
+    pub st_mode: ffi::c_uint,
+    pub st_uid: ffi::c_uint,
+    pub st_gid: ffi::c_uint,
+    pub(crate) __pad1: ffi::c_uint,
+    pub st_rdev: ffi::c_ulong,
+    pub st_size: ffi::c_ulong,
+    pub st_atime: ffi::c_ulong,
+    pub st_atime_nsec: ffi::c_ulong,
+    pub st_mtime: ffi::c_ulong,
+    pub st_mtime_nsec: ffi::c_ulong,
+    pub st_ctime: ffi::c_ulong,
+    pub st_ctime_nsec: ffi::c_ulong,
+    pub st_blksize: ffi::c_ulong,
+    pub st_blocks: ffi::c_long,
+    pub(crate) __unused: [ffi::c_ulong; 3],
 }
 
 /// `struct statfs` for use with [`statfs`] and [`fstatfs`].
@@ -675,18 +761,33 @@ pub struct Stat {
 #[allow(missing_docs)]
 #[non_exhaustive]
 pub struct StatFs {
-    pub f_type: ffi::c_long,
+    pub f_type: FsWord,
+    #[cfg(not(target_arch = "s390x"))]
     pub f_bsize: ffi::c_long,
+    #[cfg(target_arch = "s390x")]
+    pub f_bsize: ffi::c_uint,
     pub f_blocks: u64,
     pub f_bfree: u64,
     pub f_bavail: u64,
     pub f_files: u64,
     pub f_ffree: u64,
     pub f_fsid: Fsid,
+    #[cfg(not(target_arch = "s390x"))]
     pub f_namelen: ffi::c_long,
+    #[cfg(target_arch = "s390x")]
+    pub f_namelen: ffi::c_uint,
+    #[cfg(not(target_arch = "s390x"))]
     pub f_frsize: ffi::c_long,
+    #[cfg(target_arch = "s390x")]
+    pub f_frsize: ffi::c_uint,
+    #[cfg(not(target_arch = "s390x"))]
     pub f_flags: ffi::c_long,
+    #[cfg(target_arch = "s390x")]
+    pub f_flags: ffi::c_uint,
+    #[cfg(not(target_arch = "s390x"))]
     pub(crate) f_spare: [ffi::c_long; 4],
+    #[cfg(target_arch = "s390x")]
+    pub(crate) f_spare: [ffi::c_uint; 5],
 }
 
 /// `fsid_t` for use with [`StatFs`].
@@ -724,9 +825,17 @@ pub type RawMode = ffi::c_uint;
 pub type Dev = u64;
 
 /// `__fsword_t`
-#[cfg(not(any(target_arch = "mips64", target_arch = "mips64r6")))]
+#[cfg(not(any(
+    target_arch = "mips64",
+    target_arch = "mips64r6",
+    target_arch = "s390x"
+)))]
 pub type FsWord = ffi::c_long;
 
 /// `__fsword_t`
 #[cfg(any(target_arch = "mips64", target_arch = "mips64r6"))]
 pub type FsWord = i64;
+
+/// `__fsword_t`
+#[cfg(target_arch = "s390x")]
+pub type FsWord = u32;
