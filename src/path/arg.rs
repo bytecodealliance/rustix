@@ -8,8 +8,7 @@
 
 use crate::ffi::CStr;
 use crate::io;
-use crate::path::DecInt;
-use crate::path::SMALL_PATH_BUFFER_SIZE;
+use crate::path::{DecInt, SMALL_PATH_BUFFER_SIZE};
 #[cfg(feature = "alloc")]
 use alloc::borrow::ToOwned;
 use core::mem::MaybeUninit;

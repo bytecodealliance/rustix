@@ -1,7 +1,7 @@
 use rustix::event::{
-    fd_set_bound, fd_set_insert, fd_set_num_elements, fd_set_remove, FdSetElement, FdSetIter,
+    fd_set_bound, fd_set_insert, fd_set_num_elements, fd_set_remove, select, FdSetElement,
+    FdSetIter, Timespec,
 };
-use rustix::event::{select, Timespec};
 use rustix::fd::{AsRawFd, RawFd};
 #[cfg(feature = "pipe")]
 #[cfg(not(windows))]

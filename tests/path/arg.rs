@@ -3,8 +3,7 @@
 
 use rustix::ffi::{CStr, CString};
 use rustix::io;
-use rustix::path::Arg;
-use rustix::path::DecInt;
+use rustix::path::{Arg, DecInt};
 use std::borrow::Cow;
 use std::ffi::{OsStr, OsString};
 use std::path::{Component, Components, Iter, Path, PathBuf};
