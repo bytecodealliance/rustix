@@ -486,7 +486,7 @@ pub(super) use readwrite_pv64v2::{preadv64v2 as preadv2, pwritev64v2 as pwritev2
 
 // Rust's libc crate lacks statx for Non-glibc targets.
 #[cfg(feature = "fs")]
-#[cfg(all(linux_like, not(target_env = "gnu")))]
+#[cfg(all(linux_like, not(any(target_os = "android", target_env = "gnu"))))]
 mod statx_flags {
     pub(crate) use linux_raw_sys::general::{
         STATX_ALL, STATX_ATIME, STATX_BASIC_STATS, STATX_BLOCKS, STATX_BTIME, STATX_CTIME,
@@ -501,5 +501,9 @@ mod statx_flags {
     };
 }
 #[cfg(feature = "fs")]
-#[cfg(all(linux_like, not(target_env = "gnu")))]
+#[cfg(all(linux_like, not(any(target_os = "android", target_env = "gnu"))))]
 pub(crate) use statx_flags::*;
+
+#[cfg(feature = "fs")]
+#[cfg(target_os = "android")]
+pub(crate) use libc::__fsid_t as fsid_t;
