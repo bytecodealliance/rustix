@@ -1,6 +1,6 @@
 //! POSIX shared memory
 //!
-//! # Example
+//! # Examples
 //!
 //! ```
 //! use rustix::fs::{ftruncate, Mode};
