@@ -361,8 +361,8 @@ pub fn wait(waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
 /// state.
 #[cfg(not(any(target_os = "openbsd", target_os = "redox", target_os = "wasi")))]
 #[inline]
-pub fn waitid<'a>(
-    id: impl Into<WaitId<'a>>,
+pub fn waitid<'a, Id: Into<WaitId<'a>>>(
+    id: Id,
     options: WaitIdOptions,
 ) -> io::Result<Option<WaitIdStatus>> {
     backend::process::syscalls::waitid(id.into(), options)

@@ -123,9 +123,9 @@ pub fn create(flags: epoll::CreateFlags) -> io::Result<OwnedFd> {
 /// [faq]: https://man7.org/linux/man-pages/man7/epoll.7.html#:~:text=Will%20closing%20a%20file%20descriptor%20cause%20it%20to%20be%20removed%20from%20all%0A%20%20%20%20%20%20%20%20%20%20epoll%20interest%20lists%3F
 #[doc(alias = "epoll_ctl")]
 #[inline]
-pub fn add(
-    epoll: impl AsFd,
-    source: impl AsFd,
+pub fn add<EpollFd: AsFd, SourceFd: AsFd>(
+    epoll: EpollFd,
+    source: SourceFd,
     data: epoll::EventData,
     event_flags: epoll::EventFlags,
 ) -> io::Result<()> {
@@ -154,9 +154,9 @@ pub fn add(
 /// [illumos]: https://www.illumos.org/man/3C/epoll_ctl
 #[doc(alias = "epoll_ctl")]
 #[inline]
-pub fn modify(
-    epoll: impl AsFd,
-    source: impl AsFd,
+pub fn modify<EpollFd: AsFd, SourceFd: AsFd>(
+    epoll: EpollFd,
+    source: SourceFd,
     data: epoll::EventData,
     event_flags: epoll::EventFlags,
 ) -> io::Result<()> {
@@ -183,7 +183,7 @@ pub fn modify(
 /// [illumos]: https://www.illumos.org/man/3C/epoll_ctl
 #[doc(alias = "epoll_ctl")]
 #[inline]
-pub fn delete(epoll: impl AsFd, source: impl AsFd) -> io::Result<()> {
+pub fn delete<EpollFd: AsFd, SourceFd: AsFd>(epoll: EpollFd, source: SourceFd) -> io::Result<()> {
     syscalls::epoll_del(epoll.as_fd(), source.as_fd())
 }
 
@@ -202,7 +202,11 @@ pub fn delete(epoll: impl AsFd, source: impl AsFd) -> io::Result<()> {
 #[cfg(feature = "alloc")]
 #[cfg_attr(docsrs, doc(cfg(feature = "alloc"), alias = "epoll_wait"))]
 #[inline]
-pub fn wait(epoll: impl AsFd, event_list: &mut EventVec, timeout: c::c_int) -> io::Result<()> {
+pub fn wait<EpollFd: AsFd>(
+    epoll: EpollFd,
+    event_list: &mut EventVec,
+    timeout: c::c_int,
+) -> io::Result<()> {
     // SAFETY: We're calling `epoll_wait` via FFI and we know how it
     // behaves.
     unsafe {

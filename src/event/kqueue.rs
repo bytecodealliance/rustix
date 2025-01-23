@@ -415,8 +415,8 @@ pub fn kqueue() -> io::Result<OwnedFd> {
 /// [OpenBSD]: https://man.openbsd.org/kevent.2
 /// [NetBSD]: https://man.netbsd.org/kevent.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=kevent&section=2
-pub unsafe fn kevent(
-    kqueue: impl AsFd,
+pub unsafe fn kevent<Fd: AsFd>(
+    kqueue: Fd,
     changelist: &[Event],
     eventlist: &mut Vec<Event>,
     timeout: Option<Duration>,
