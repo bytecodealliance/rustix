@@ -187,7 +187,9 @@ pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: Option<&Timespec>) -> io::Re
                     return Err(io::Errno::INVAL);
                 }
                 secs.checked_mul(1000)
-                    .and_then(|millis| millis.checked_add((timeout.tv_nsec + 999_999) / 1_000_000))
+                    .and_then(|millis| {
+                        millis.checked_add((i64::from(timeout.tv_nsec) + 999_999) / 1_000_000)
+                    })
                     .and_then(|millis| c::c_int::try_from(millis).ok())
                     .ok_or(io::Errno::OVERFLOW)?
             }
