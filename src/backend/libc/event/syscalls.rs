@@ -191,7 +191,7 @@ pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: Option<&Timespec>) -> io::Re
                         millis.checked_add((i64::from(timeout.tv_nsec) + 999_999) / 1_000_000)
                     })
                     .and_then(|millis| c::c_int::try_from(millis).ok())
-                    .ok_or(io::Errno::OVERFLOW)?
+                    .ok_or(io::Errno::INVAL)?
             }
         };
         ret_c_int(unsafe { c::poll(fds.as_mut_ptr().cast(), nfds, timeout) })

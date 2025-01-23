@@ -2,14 +2,31 @@
 
 use crate::backend::c;
 use crate::backend::conv::ret_c_int;
-use crate::event::{FdSetElement, PollFd};
+use crate::event::{FdSetElement, PollFd, Timespec};
 use crate::io;
 
-pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: c::c_int) -> io::Result<usize> {
+pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: Option<&Timespec>) -> io::Result<usize> {
     let nfds = fds
         .len()
         .try_into()
         .map_err(|_convert_err| io::Errno::INVAL)?;
+
+    let timeout = match timeout {
+        None => -1,
+        Some(timeout) => {
+            // Convert from `Timespec` to `c_int` milliseconds.
+            let secs = timeout.tv_sec;
+            if secs < 0 {
+                return Err(io::Errno::INVAL);
+            }
+            secs.checked_mul(1000)
+                .and_then(|millis| {
+                    millis.checked_add((i64::from(timeout.tv_nsec) + 999_999) / 1_000_000)
+                })
+                .and_then(|millis| c::c_int::try_from(millis).ok())
+                .ok_or(io::Errno::INVAL)?
+        }
+    };
 
     ret_c_int(unsafe { c::poll(fds.as_mut_ptr().cast(), nfds, timeout) })
         .map(|nready| nready as usize)

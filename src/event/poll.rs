@@ -6,10 +6,8 @@ pub use backend::event::poll_fd::{PollFd, PollFlags};
 /// `poll(self.fds, timeout)`—Wait for events on lists of file descriptors.
 ///
 /// Some platforms (those that don't support `ppoll`) don't support timeouts
-/// greater than `c_int::MAX` milliseconds, and some (those that aren't fully
-/// y2038-ready) don't support timeouts with a seconds value greater than
-/// `i32::MAX`; if an unsupported timeout is passed, this function fails with
-/// [`io::Errno::OVERFLOW`].
+/// greater than `c_int::MAX` milliseconds; if an unsupported timeout is
+/// passed, this function fails with [`io::Errno::INVAL`].
 ///
 /// On macOS, `poll` doesn't work on fds for /dev/tty or /dev/null, however
 /// [`select`] is available and does work on these fds.
