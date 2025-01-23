@@ -41,7 +41,7 @@ fn test_inotify_iter() {
     }
 
     let expected = format!(
-        r#"inotify::Event {{
+        r#"Event {{
     wd: 1,
     events: ReadFlags(
         CREATE,
@@ -51,7 +51,7 @@ fn test_inotify_iter() {
         "foo",
     ),
 }}
-inotify::Event {{
+Event {{
     wd: 1,
     events: ReadFlags(
         OPEN,
@@ -61,7 +61,7 @@ inotify::Event {{
         "foo",
     ),
 }}
-inotify::Event {{
+Event {{
     wd: 1,
     events: ReadFlags(
         CLOSE_WRITE,
@@ -71,7 +71,7 @@ inotify::Event {{
         "foo",
     ),
 }}
-inotify::Event {{
+Event {{
     wd: 1,
     events: ReadFlags(
         MOVED_FROM,
@@ -81,7 +81,7 @@ inotify::Event {{
         "foo",
     ),
 }}
-inotify::Event {{
+Event {{
     wd: 1,
     events: ReadFlags(
         MOVED_TO,
@@ -91,7 +91,7 @@ inotify::Event {{
         "bar",
     ),
 }}
-inotify::Event {{
+Event {{
     wd: 1,
     events: ReadFlags(
         DELETE,
