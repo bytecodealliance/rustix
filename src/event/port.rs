@@ -1,4 +1,32 @@
 //! Solaris/illumos event ports.
+//!
+//! # Examples
+//!
+//! ```
+//! # fn test() -> io::Result<()> {
+//! use rustix::event::port;
+//! use rustix::stdio::stdout;
+//! use std::io;
+//! use std::ptr::without_provenance_mut;
+//!
+//! let some_fd = stdout();
+//! let some_userdata = without_provenance_mut(7);
+//!
+//! // Create a port.
+//! let port = port::create()?;
+//!
+//! // Associate `some_fd` with the port.
+//! unsafe {
+//!     port::associate_fd(&port, some_fd, port::PollFlags::IN, some_userdata)?;
+//! }
+//!
+//! // Get a single event.
+//! let event = port::get(&port, None);
+//!
+//! assert_eq!(event.userdata(), some_userdata);
+//! # Ok(())
+//! # }
+//! ```
 
 use crate::backend::c;
 use crate::backend::event::syscalls;
@@ -6,9 +34,9 @@ use crate::fd::{AsFd, AsRawFd, OwnedFd};
 use crate::ffi;
 use crate::io;
 
-use super::PollFlags;
-
 use core::time::Duration;
+
+pub use super::PollFlags;
 
 /// The structure representing a port event.
 #[repr(transparent)]
