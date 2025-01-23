@@ -950,6 +950,7 @@ pub type StatFs = c::statfs64;
 #[cfg(not(any(
     target_os = "haiku",
     target_os = "illumos",
+    target_os = "nto",
     target_os = "redox",
     target_os = "wasi"
 )))]

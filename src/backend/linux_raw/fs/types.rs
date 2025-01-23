@@ -757,14 +757,15 @@ pub struct Stat {
 /// [`fstatfs`]: crate::fs::fstatfs
 #[allow(clippy::module_name_repetitions)]
 #[repr(C)]
+#[cfg_attr(target_arch = "arm", repr(packed(4)))]
 #[derive(Debug, Copy, Clone)]
 #[allow(missing_docs)]
 #[non_exhaustive]
 pub struct StatFs {
     pub f_type: FsWord,
-    #[cfg(not(target_arch = "s390x"))]
+    #[cfg(not(any(target_arch = "arm", target_arch = "s390x")))]
     pub f_bsize: ffi::c_long,
-    #[cfg(target_arch = "s390x")]
+    #[cfg(any(target_arch = "arm", target_arch = "s390x"))]
     pub f_bsize: ffi::c_uint,
     pub f_blocks: u64,
     pub f_bfree: u64,
@@ -772,17 +773,17 @@ pub struct StatFs {
     pub f_files: u64,
     pub f_ffree: u64,
     pub f_fsid: Fsid,
-    #[cfg(not(target_arch = "s390x"))]
+    #[cfg(not(any(target_arch = "arm", target_arch = "s390x")))]
     pub f_namelen: ffi::c_long,
-    #[cfg(target_arch = "s390x")]
+    #[cfg(any(target_arch = "arm", target_arch = "s390x"))]
     pub f_namelen: ffi::c_uint,
-    #[cfg(not(target_arch = "s390x"))]
+    #[cfg(not(any(target_arch = "arm", target_arch = "s390x")))]
     pub f_frsize: ffi::c_long,
-    #[cfg(target_arch = "s390x")]
+    #[cfg(any(target_arch = "arm", target_arch = "s390x"))]
     pub f_frsize: ffi::c_uint,
-    #[cfg(not(target_arch = "s390x"))]
+    #[cfg(not(any(target_arch = "arm", target_arch = "s390x")))]
     pub f_flags: ffi::c_long,
-    #[cfg(target_arch = "s390x")]
+    #[cfg(any(target_arch = "arm", target_arch = "s390x"))]
     pub f_flags: ffi::c_uint,
     #[cfg(not(target_arch = "s390x"))]
     pub(crate) f_spare: [ffi::c_long; 4],

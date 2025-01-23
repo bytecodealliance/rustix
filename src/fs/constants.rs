@@ -7,6 +7,7 @@ pub use crate::timespec::{Nsecs, Secs, Timespec};
 pub use backend::fs::types::*;
 
 #[cfg(test)]
+#[allow(unused_imports)]
 mod tests {
     use super::*;
     use crate::backend::c;
