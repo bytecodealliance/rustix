@@ -18,7 +18,7 @@ use crate::event::port::Event;
 use crate::event::EventfdFlags;
 #[cfg(any(bsd, linux_kernel, target_os = "wasi"))]
 use crate::event::FdSetElement;
-use crate::event::PollFd;
+use crate::event::{PollFd, Timespec};
 use crate::io;
 #[cfg(solarish)]
 use crate::utils::as_mut_ptr;
@@ -30,7 +30,15 @@ use crate::utils::as_ptr;
     all(feature = "alloc", any(linux_kernel, target_os = "redox")),
 ))]
 use core::mem::MaybeUninit;
-#[cfg(any(bsd, linux_kernel, target_os = "wasi"))]
+#[cfg(any(
+    bsd,
+    linux_kernel,
+    target_os = "fuchsia",
+    target_os = "haiku",
+    target_os = "hurd",
+    target_os = "netbsd",
+    target_os = "wasi"
+))]
 use core::ptr::null;
 #[cfg(any(bsd, linux_kernel, solarish, target_os = "redox", target_os = "wasi"))]
 use core::ptr::null_mut;
@@ -119,14 +127,74 @@ pub(crate) unsafe fn kevent(
 }
 
 #[inline]
-pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: c::c_int) -> io::Result<usize> {
+pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: Option<&Timespec>) -> io::Result<usize> {
     let nfds = fds
         .len()
         .try_into()
         .map_err(|_convert_err| io::Errno::INVAL)?;
 
-    ret_c_int(unsafe { c::poll(fds.as_mut_ptr().cast(), nfds, timeout) })
-        .map(|nready| nready as usize)
+    // If we have `ppoll`, it supports a `timespec` timeout, so use it.
+    #[cfg(any(
+        linux_kernel,
+        freebsdlike,
+        target_os = "fuchsia",
+        target_os = "haiku",
+        target_os = "hurd",
+        target_os = "netbsd"
+    ))]
+    {
+        // If we don't have to fix y2038 on this platform, `Timespec` is
+        // the same as `c::timespec` and it's easy.
+        #[cfg(not(fix_y2038))]
+        let timeout = crate::timespec::option_as_libc_timespec_ptr(timeout);
+
+        // If we do have to fix y2038 on this platform, convert to
+        // `c::timespec`.
+        #[cfg(fix_y2038)]
+        let converted_timeout;
+        #[cfg(fix_y2038)]
+        let timeout = match timeout {
+            None => null(),
+            Some(timeout) => {
+                converted_timeout = c::timespec {
+                    tv_sec: timeout.tv_sec.try_into().map_err(|_| io::Errno::OVERFLOW)?,
+                    tv_nsec: timeout.tv_nsec as _,
+                };
+                &converted_timeout
+            }
+        };
+
+        ret_c_int(unsafe { c::ppoll(fds.as_mut_ptr().cast(), nfds, timeout, null()) })
+            .map(|nready| nready as usize)
+    }
+
+    // If we don't have `ppoll`, convert the timeout to `c_int` and use `poll`.
+    #[cfg(not(any(
+        linux_kernel,
+        freebsdlike,
+        target_os = "fuchsia",
+        target_os = "haiku",
+        target_os = "hurd",
+        target_os = "netbsd"
+    )))]
+    {
+        let timeout = match timeout {
+            None => -1,
+            Some(timeout) => {
+                // Convert from `Timespec` to `c_int` milliseconds.
+                let secs = timeout.tv_sec;
+                if secs < 0 {
+                    return Err(io::Errno::INVAL);
+                }
+                secs.checked_mul(1000)
+                    .and_then(|millis| millis.checked_add((timeout.tv_nsec + 999_999) / 1_000_000))
+                    .and_then(|millis| c::c_int::try_from(millis).ok())
+                    .ok_or(io::Errno::OVERFLOW)?
+            }
+        };
+        ret_c_int(unsafe { c::poll(fds.as_mut_ptr().cast(), nfds, timeout) })
+            .map(|nready| nready as usize)
+    }
 }
 
 #[cfg(any(bsd, linux_kernel))]
@@ -135,7 +203,7 @@ pub(crate) unsafe fn select(
     readfds: Option<&mut [FdSetElement]>,
     writefds: Option<&mut [FdSetElement]>,
     exceptfds: Option<&mut [FdSetElement]>,
-    timeout: Option<&crate::timespec::Timespec>,
+    timeout: Option<&Timespec>,
 ) -> io::Result<i32> {
     let len = crate::event::fd_set_num_elements_for_bitvector(nfds);
 
@@ -212,7 +280,7 @@ pub(crate) unsafe fn select(
     readfds: Option<&mut [FdSetElement]>,
     writefds: Option<&mut [FdSetElement]>,
     exceptfds: Option<&mut [FdSetElement]>,
-    timeout: Option<&crate::timespec::Timespec>,
+    timeout: Option<&Timespec>,
 ) -> io::Result<i32> {
     let len = crate::event::fd_set_num_elements_for_fd_array(nfds as usize);
 

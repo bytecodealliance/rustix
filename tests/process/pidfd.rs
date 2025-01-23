@@ -78,7 +78,7 @@ fn test_pidfd_poll() {
 
     // Wait for the child process to exit.
     let pfd = event::PollFd::new(&pidfd, event::PollFlags::IN);
-    event::poll(&mut [pfd], -1).unwrap();
+    event::poll(&mut [pfd], None).unwrap();
 
     // The child process should have exited.
     let status = process::waitid(

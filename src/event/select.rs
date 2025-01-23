@@ -7,14 +7,13 @@
 
 #[cfg(any(linux_like, target_os = "wasi"))]
 use crate::backend::c;
+use crate::event::Timespec;
 use crate::fd::RawFd;
 use crate::{backend, io};
 #[cfg(any(windows, target_os = "wasi"))]
 use core::mem::{align_of, size_of};
 #[cfg(any(windows, target_os = "wasi"))]
 use core::slice;
-
-pub use crate::timespec::{Nsecs, Secs, Timespec};
 
 /// wasi-libc's `fd_set` type. The libc bindings for it have private fields,
 /// so we redeclare it for ourselves so that we can access the fields. They're

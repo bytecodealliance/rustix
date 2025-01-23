@@ -1,8 +1,15 @@
+use crate::event::Timespec;
 use crate::{backend, io};
 
 pub use backend::event::poll_fd::{PollFd, PollFlags};
 
 /// `poll(self.fds, timeout)`—Wait for events on lists of file descriptors.
+///
+/// Some platforms (those that don't support `ppoll`) don't support timeouts
+/// greater than `c_int::MAX` milliseconds, and some (those that aren't fully
+/// y2038-ready) don't support timeouts with a seconds value greater than
+/// `i32::MAX`; if an unsupported timeout is passed, this function fails with
+/// [`io::Errno::OVERFLOW`].
 ///
 /// On macOS, `poll` doesn't work on fds for /dev/tty or /dev/null, however
 /// [`select`] is available and does work on these fds.
@@ -32,6 +39,6 @@ pub use backend::event::poll_fd::{PollFd, PollFlags};
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=poll&section=2
 /// [illumos]: https://illumos.org/man/2/poll
 #[inline]
-pub fn poll(fds: &mut [PollFd<'_>], timeout: i32) -> io::Result<usize> {
+pub fn poll(fds: &mut [PollFd<'_>], timeout: Option<&Timespec>) -> io::Result<usize> {
     backend::event::syscalls::poll(fds, timeout)
 }
