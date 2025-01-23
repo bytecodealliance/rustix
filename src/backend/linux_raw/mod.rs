@@ -18,9 +18,9 @@
 mod arch;
 mod conv;
 mod reg;
-#[cfg(any(feature = "time", feature = "process", target_arch = "x86"))]
+#[cfg(any(feature = "time", feature = "thread", target_arch = "x86"))]
 mod vdso;
-#[cfg(any(feature = "time", feature = "process", target_arch = "x86"))]
+#[cfg(any(feature = "time", feature = "thread", target_arch = "x86"))]
 mod vdso_wrappers;
 
 #[cfg(feature = "event")]
@@ -32,8 +32,8 @@ pub(crate) mod event;
         not(feature = "use-explicitly-provided-auxv"),
         any(
             feature = "param",
-            feature = "process",
             feature = "runtime",
+            feature = "thread",
             feature = "time",
             target_arch = "x86",
         )
@@ -51,8 +51,8 @@ pub(crate) mod mount;
 pub(crate) mod net;
 #[cfg(any(
     feature = "param",
-    feature = "process",
     feature = "runtime",
+    feature = "thread",
     feature = "time",
     target_arch = "x86",
 ))]

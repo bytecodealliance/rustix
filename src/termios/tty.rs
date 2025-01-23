@@ -1,13 +1,14 @@
 //! Functions which operate on file descriptors which might be terminals.
 
 use crate::backend;
+#[cfg(feature = "alloc")]
+#[cfg(feature = "fs")]
+#[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
+use crate::path::SMALL_PATH_BUFFER_SIZE;
 use backend::fd::AsFd;
 #[cfg(feature = "alloc")]
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
-use {
-    crate::ffi::CString, crate::io, crate::path::SMALL_PATH_BUFFER_SIZE, alloc::vec::Vec,
-    backend::fd::BorrowedFd,
-};
+use {crate::ffi::CString, crate::io, alloc::vec::Vec, backend::fd::BorrowedFd};
 
 /// `isatty(fd)`—Tests whether a file descriptor refers to a terminal.
 ///
@@ -34,7 +35,10 @@ pub fn isatty<Fd: AsFd>(fd: Fd) -> bool {
 /// [Linux]: https://man7.org/linux/man-pages/man3/ttyname.3.html
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 #[cfg(feature = "alloc")]
+#[cfg(feature = "fs")]
 #[doc(alias = "ttyname_r")]
+#[cfg_attr(docsrs, doc(cfg(feature = "fs")))]
+#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
 #[inline]
 pub fn ttyname<Fd: AsFd, B: Into<Vec<u8>>>(dirfd: Fd, reuse: B) -> io::Result<CString> {
     _ttyname(dirfd.as_fd(), reuse.into())
@@ -42,6 +46,7 @@ pub fn ttyname<Fd: AsFd, B: Into<Vec<u8>>>(dirfd: Fd, reuse: B) -> io::Result<CS
 
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 #[cfg(feature = "alloc")]
+#[cfg(feature = "fs")]
 #[allow(unsafe_code)]
 fn _ttyname(dirfd: BorrowedFd<'_>, mut buffer: Vec<u8>) -> io::Result<CString> {
     buffer.clear();

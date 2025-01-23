@@ -10,5 +10,6 @@ mod pgrp;
 mod sid;
 #[cfg(all(not(windows), feature = "pty"))]
 mod termios;
+#[cfg(feature = "fs")]
 #[cfg(not(any(windows, target_os = "fuchsia")))]
 mod ttyname;

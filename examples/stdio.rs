@@ -6,6 +6,7 @@
 use rustix::termios::isatty;
 #[cfg(all(
     not(any(windows, target_os = "fuchsia")),
+    feature = "fs",
     feature = "termios",
     feature = "alloc"
 ))]
@@ -62,6 +63,7 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
     #[cfg(feature = "termios")]
     if isatty(fd) {
         #[cfg(feature = "alloc")]
+        #[cfg(feature = "fs")]
         #[cfg(not(target_os = "fuchsia"))]
         println!(" - ttyname: {}", ttyname(fd, Vec::new())?.to_string_lossy());
 

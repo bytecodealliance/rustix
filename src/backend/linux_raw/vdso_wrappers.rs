@@ -15,7 +15,7 @@ use super::reg::{ArgReg, RetReg, SyscallNumber, A0, A1, A2, A3, A4, A5, R0};
 use super::vdso;
 #[cfg(target_arch = "x86")]
 use core::arch::global_asm;
-#[cfg(feature = "process")]
+#[cfg(feature = "thread")]
 #[cfg(any(
     target_arch = "x86_64",
     target_arch = "x86",
@@ -33,7 +33,7 @@ use core::sync::atomic::Ordering::Relaxed;
 use linux_raw_sys::general::timespec as __kernel_old_timespec;
 #[cfg(any(
     all(
-        feature = "process",
+        feature = "thread",
         any(
             target_arch = "x86_64",
             target_arch = "x86",
@@ -114,7 +114,7 @@ pub(crate) fn clock_gettime_dynamic(which_clock: DynamicClockId<'_>) -> io::Resu
     }
 }
 
-#[cfg(feature = "process")]
+#[cfg(feature = "thread")]
 #[cfg(any(
     target_arch = "x86_64",
     target_arch = "x86",
@@ -266,7 +266,7 @@ pub(super) mod x86_via_vdso {
 #[cfg(feature = "time")]
 type ClockGettimeType = unsafe extern "C" fn(c::c_int, *mut Timespec) -> c::c_int;
 
-#[cfg(feature = "process")]
+#[cfg(feature = "thread")]
 #[cfg(any(
     target_arch = "x86_64",
     target_arch = "x86",
@@ -293,7 +293,7 @@ fn init_clock_gettime() -> ClockGettimeType {
 }
 
 /// Initialize `GETCPU` and return its value.
-#[cfg(feature = "process")]
+#[cfg(feature = "thread")]
 #[cfg(any(
     target_arch = "x86_64",
     target_arch = "x86",
@@ -324,7 +324,7 @@ fn init_syscall() -> SyscallType {
 struct Function;
 #[cfg(feature = "time")]
 static CLOCK_GETTIME: AtomicPtr<Function> = AtomicPtr::new(null_mut());
-#[cfg(feature = "process")]
+#[cfg(feature = "thread")]
 #[cfg(any(
     target_arch = "x86_64",
     target_arch = "x86",
@@ -394,7 +394,7 @@ unsafe fn _rustix_clock_gettime_via_syscall(
     ret(syscall!(__NR_clock_gettime, c_int(clockid), res))
 }
 
-#[cfg(feature = "process")]
+#[cfg(feature = "thread")]
 #[cfg(any(
     target_arch = "x86_64",
     target_arch = "x86",
@@ -458,7 +458,7 @@ fn minimal_init() {
             .ok();
     }
 
-    #[cfg(feature = "process")]
+    #[cfg(feature = "thread")]
     #[cfg(any(
         target_arch = "x86_64",
         target_arch = "x86",
@@ -545,7 +545,7 @@ fn init() {
             }
         }
 
-        #[cfg(feature = "process")]
+        #[cfg(feature = "thread")]
         #[cfg(any(
             target_arch = "x86_64",
             target_arch = "x86",
