@@ -85,7 +85,7 @@ use bsd as platform;
 #[inline]
 pub unsafe fn ioctl<F: AsFd, I: Ioctl>(fd: F, mut ioctl: I) -> Result<I::Output> {
     let fd = fd.as_fd();
-    let request = I::OPCODE.raw();
+    let request = ioctl.opcode().raw();
     let arg = ioctl.as_ptr();
 
     // SAFETY: The variant of `Ioctl` asserts that this is a valid IOCTL call
@@ -138,7 +138,7 @@ unsafe fn _ioctl_readonly(
 ///   output as indicated by `output`.
 /// - That `output_from_ptr` can safely take the pointer from `as_ptr` and cast
 ///   it to the correct type, *only* after the `ioctl` call.
-/// - That `OPCODE` uniquely identifies the `ioctl` call.
+/// - That the return value of `opcode` uniquely identifies the `ioctl` call.
 /// - That, for whatever platforms you are targeting, the `ioctl` call is safe
 ///   to make.
 /// - If `IS_MUTATING` is false, that no userspace data will be modified by the
@@ -149,12 +149,6 @@ pub unsafe trait Ioctl {
     /// Given a pointer, one should be able to construct an instance of this
     /// type.
     type Output;
-
-    /// The opcode used by this `ioctl` command.
-    ///
-    /// There are different types of opcode depending on the operation. See
-    /// documentation for the [`Opcode`] struct for more information.
-    const OPCODE: Opcode;
 
     /// Does the `ioctl` mutate any data in the userspace?
     ///
@@ -168,6 +162,12 @@ pub unsafe trait Ioctl {
     /// any data in the userspace. Undefined behavior may occur if this is set
     /// to `false` when it should be `true`.
     const IS_MUTATING: bool;
+
+    /// Get the opcode used by this `ioctl` command.
+    ///
+    /// There are different types of opcode depending on the operation. See
+    /// documentation for the [`Opcode`] struct for more information.
+    fn opcode(&self) -> Opcode;
 
     /// Get a pointer to the data to be passed to the `ioctl` command.
     ///

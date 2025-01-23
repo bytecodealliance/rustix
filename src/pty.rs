@@ -206,7 +206,10 @@ unsafe impl ioctl::Ioctl for Tiocgptpeer {
     type Output = OwnedFd;
 
     const IS_MUTATING: bool = false;
-    const OPCODE: ioctl::Opcode = ioctl::Opcode::old(c::TIOCGPTPEER as ioctl::RawOpcode);
+
+    fn opcode(&self) -> ioctl::Opcode {
+        ioctl::Opcode::old(c::TIOCGPTPEER as ioctl::RawOpcode)
+    }
 
     fn as_ptr(&mut self) -> *mut c::c_void {
         self.0.bits() as *mut c::c_void
