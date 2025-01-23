@@ -175,7 +175,7 @@ pub(crate) fn if_glibc_is_less_than_2_25() -> bool {
 }
 
 // Private modules used by multiple public modules.
-#[cfg(any(feature = "procfs", feature = "process", feature = "runtime"))]
+#[cfg(any(feature = "process", feature = "runtime"))]
 #[cfg(not(any(windows, target_os = "wasi")))]
 pub(crate) mod pid;
 #[cfg(any(feature = "process", feature = "thread"))]

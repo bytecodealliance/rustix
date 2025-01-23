@@ -25,7 +25,7 @@ fn test_changing_working_directory() {
 
     #[cfg(not(target_os = "fuchsia"))]
     let orig_fd_cwd = rustix::fs::openat(rustix::fs::CWD, ".", OFlags::RDONLY, Mode::empty())
-        .expect("get a fd for the current directory");
+        .expect("get an fd for the current directory");
 
     rustix::process::chdir(tmpdir.path()).expect("changing dir to the tmp");
     let ch1_cwd = rustix::process::getcwd(Vec::new()).expect("get the cwd");

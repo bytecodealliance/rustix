@@ -10,13 +10,11 @@ use crate::backend::conv::{by_ref, c_uint, ret};
 use crate::fd::BorrowedFd;
 use crate::io;
 use crate::pid::Pid;
-#[cfg(all(feature = "alloc", feature = "procfs"))]
-use crate::procfs;
 use crate::termios::{
     speed, Action, ControlModes, InputModes, LocalModes, OptionalActions, OutputModes,
     QueueSelector, SpecialCodeIndex, Termios, Winsize,
 };
-#[cfg(all(feature = "alloc", feature = "procfs"))]
+#[cfg(feature = "alloc")]
 use crate::{ffi::CStr, fs::FileType, path::DecInt};
 use core::mem::MaybeUninit;
 
@@ -366,7 +364,7 @@ pub(crate) fn isatty(fd: BorrowedFd<'_>) -> bool {
     tcgetwinsize(fd).is_ok()
 }
 
-#[cfg(all(feature = "alloc", feature = "procfs"))]
+#[cfg(feature = "alloc")]
 pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [MaybeUninit<u8>]) -> io::Result<usize> {
     let fd_stat = crate::backend::fs::syscalls::fstat(fd)?;
 
@@ -378,15 +376,18 @@ pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [MaybeUninit<u8>]) -> io::Re
     // Check that `fd` is really a tty.
     tcgetwinsize(fd)?;
 
-    // Get a fd to "/proc/self/fd".
-    let proc_self_fd = procfs::proc_self_fd()?;
+    // Create the "/proc/self/fd/<fd>" string.
+    let mut proc_self_fd_buf: [u8; 25] = *b"/proc/self/fd/\0\0\0\0\0\0\0\0\0\0\0";
+    let dec_int = DecInt::from_fd(fd);
+    let bytes_with_nul = dec_int.as_bytes_with_nul();
+    proc_self_fd_buf[b"/proc/self/fd/".len()..][..bytes_with_nul.len()]
+        .copy_from_slice(bytes_with_nul);
+
+    // SAFETY: We just wrote a valid C String.
+    let proc_self_fd_path = unsafe { CStr::from_ptr(proc_self_fd_buf.as_ptr().cast()) };
 
     // Gather the ttyname by reading the "fd" file inside `proc_self_fd`.
-    let r = crate::backend::fs::syscalls::readlinkat(
-        proc_self_fd,
-        DecInt::from_fd(fd).as_c_str(),
-        buf,
-    )?;
+    let r = crate::backend::fs::syscalls::readlinkat(crate::fs::CWD, proc_self_fd_path, buf)?;
 
     // If the number of bytes is equal to the buffer length, truncation may
     // have occurred. This check also ensures that we have enough space for

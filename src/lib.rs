@@ -252,10 +252,6 @@ pub mod pipe;
 #[cfg(feature = "process")]
 #[cfg_attr(docsrs, doc(cfg(feature = "process")))]
 pub mod process;
-#[cfg(feature = "procfs")]
-#[cfg(linux_kernel)]
-#[cfg_attr(docsrs, doc(cfg(feature = "procfs")))]
-pub mod procfs;
 #[cfg(not(windows))]
 #[cfg(not(target_os = "wasi"))]
 #[cfg(feature = "pty")]
@@ -346,7 +342,6 @@ pub(crate) mod path;
 mod clockid;
 #[cfg(not(any(windows, target_os = "wasi")))]
 #[cfg(any(
-    feature = "procfs",
     feature = "process",
     feature = "runtime",
     feature = "termios",
