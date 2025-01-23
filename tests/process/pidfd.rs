@@ -24,6 +24,7 @@ fn test_pidfd_waitid() {
         Ok(pidfd) => pidfd,
         Err(io::Errno::NOSYS) => {
             // The kernel does not support pidfds.
+            unsafe { kill(child.id() as _, SIGSTOP) };
             return;
         }
         Err(e) => panic!("failed to open pidfd: {}", e),
