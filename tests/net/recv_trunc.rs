@@ -23,8 +23,9 @@ fn net_recv_uninit_trunc() {
     #[cfg(not(any(apple, solarish, target_os = "netbsd")))]
     {
         let mut response = [MaybeUninit::<u8>::zeroed(); 5];
-        let (init, uninit) = rustix::net::recv_uninit(&receiver, &mut response, RecvFlags::TRUNC)
-            .expect("recv_uninit");
+        let (init, uninit, length) =
+            rustix::net::recv_uninit(&receiver, &mut response, RecvFlags::TRUNC)
+                .expect("recv_uninit");
 
         // We used the `TRUNC` flag, so we should have only gotten 5 bytes.
         assert_eq!(init, b"Hello");
@@ -34,17 +35,23 @@ fn net_recv_uninit_trunc() {
         let n =
             rustix::net::sendto_unix(&sender, request, SendFlags::empty(), &name).expect("send");
         assert_eq!(n, request.len());
+
+        // Check the `length`.
+        assert_eq!(length, 15);
     }
 
     // This time receive it without `TRUNC`. This should fail.
     let mut response = [MaybeUninit::<u8>::zeroed(); 5];
-    let (init, uninit) = rustix::net::recv_uninit(&receiver, &mut response, RecvFlags::empty())
-        .expect("recv_uninit");
+    let (init, uninit, length) =
+        rustix::net::recv_uninit(&receiver, &mut response, RecvFlags::empty())
+            .expect("recv_uninit");
 
     // We didn't use the `TRUNC` flag, so we should have received 15 bytes,
     // truncated to 5 bytes.
     assert_eq!(init, b"Hello");
     assert!(uninit.is_empty());
+
+    assert_eq!(length, 5);
 }
 
 /// Test `recvmsg` with the `RecvFlags::Trunc` flag.

@@ -70,26 +70,23 @@ pub fn recv<Fd: AsFd>(fd: Fd, buf: &mut [u8], flags: RecvFlags) -> io::Result<us
 /// `recv(fd, buf, flags)`—Reads data from a socket.
 ///
 /// This is equivalent to [`recv`], except that it can read into uninitialized
-/// memory. It returns the slice that was initialized by this function and the
-/// slice that remains uninitialized.
-///
-/// Because this interface returns the length via the returned slice, it's
-/// unsable to return the untruncated length that would be returned when the
-/// `RecvFlags::TRUNC` flag is used. If you need the untruncated length, use
-/// [`recv`].
+/// memory. It returns the slice that was initialized by this function, the
+/// slice that remains uninitialized, and the number of bytes received before
+/// any truncation due to the `RecvFlags::TRUNC` flag.
 #[inline]
 pub fn recv_uninit<Fd: AsFd>(
     fd: Fd,
     buf: &mut [MaybeUninit<u8>],
     flags: RecvFlags,
-) -> io::Result<(&mut [u8], &mut [MaybeUninit<u8>])> {
+) -> io::Result<(&mut [u8], &mut [MaybeUninit<u8>], usize)> {
     let length = unsafe {
         backend::net::syscalls::recv(fd.as_fd(), buf.as_mut_ptr().cast::<u8>(), buf.len(), flags)?
     };
 
     // If the `TRUNC` flag is set, the returned `length` may be longer than the
     // buffer length.
-    Ok(unsafe { split_init(buf, min(length, buf.len())) })
+    let (init, uninit) = unsafe { split_init(buf, min(length, buf.len())) };
+    Ok((init, uninit, length))
 }
 
 /// `send(fd, buf, flags)`—Writes data to a socket.
@@ -167,19 +164,21 @@ pub fn recvfrom<Fd: AsFd>(
 ///
 /// This is equivalent to [`recvfrom`], except that it can read into
 /// uninitialized memory. It returns the slice that was initialized by this
-/// function and the slice that remains uninitialized.
-///
-/// Because this interface returns the length via the returned slice, it's
-/// unsable to return the untruncated length that would be returned when the
-/// `RecvFlags::TRUNC` flag is used. If you need the untruncated length, use
-/// [`recvfrom`].
+/// function, the slice that remains uninitialized, the number of bytes
+/// received before any truncation due to the `RecvFlags::TRUNC` flag, and
+/// the address of the sender if known.
 #[allow(clippy::type_complexity)]
 #[inline]
 pub fn recvfrom_uninit<Fd: AsFd>(
     fd: Fd,
     buf: &mut [MaybeUninit<u8>],
     flags: RecvFlags,
-) -> io::Result<(&mut [u8], &mut [MaybeUninit<u8>], Option<SocketAddrAny>)> {
+) -> io::Result<(
+    &mut [u8],
+    &mut [MaybeUninit<u8>],
+    usize,
+    Option<SocketAddrAny>,
+)> {
     let (length, addr) = unsafe {
         backend::net::syscalls::recvfrom(
             fd.as_fd(),
@@ -192,7 +191,7 @@ pub fn recvfrom_uninit<Fd: AsFd>(
     // If the `TRUNC` flag is set, the returned `length` may be longer than the
     // buffer length.
     let (init, uninit) = unsafe { split_init(buf, min(length, buf.len())) };
-    Ok((init, uninit, addr))
+    Ok((init, uninit, length, addr))
 }
 
 /// `sendto(fd, buf, flags, addr)`—Writes data to a socket to a specific IP
