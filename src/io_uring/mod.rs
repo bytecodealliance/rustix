@@ -912,11 +912,10 @@ pub const IORING_OFF_CQ_RING: u64 = sys::IORING_OFF_CQ_RING as _;
 pub const IORING_OFF_SQES: u64 = sys::IORING_OFF_SQES as _;
 
 /// `IORING_REGISTER_FILES_SKIP`
-#[doc(alias = "IORING_REGISTER_FILES_SKIP")]
 // SAFETY: `IORING_REGISTER_FILES_SKIP` is a reserved value that is never
 // dynamically allocated, so it'll remain valid for the duration of
 // `'static`.
-pub const IO_URING_REGISTER_FILES_SKIP: BorrowedFd<'static> =
+pub const IORING_REGISTER_FILES_SKIP: BorrowedFd<'static> =
     unsafe { BorrowedFd::<'static>::borrow_raw(sys::IORING_REGISTER_FILES_SKIP as RawFd) };
 
 /// `IORING_NOTIF_USAGE_ZC_COPIED` (since Linux 6.2)

@@ -164,12 +164,9 @@ pub(super) unsafe fn raw_fd<'a, Num: ArgNumber>(fd: RawFd) -> ArgReg<'a, Num> {
     #[cfg(feature = "fs")]
     debug_assert!(fd == crate::fs::CWD.as_raw_fd() || fd == crate::fs::ABS.as_raw_fd() || fd >= 0);
 
-    // Don't pass the `IO_URING_REGISTER_FILES_SKIP` sentry value this way.
+    // Don't pass the `IORING_REGISTER_FILES_SKIP` sentry value this way.
     #[cfg(feature = "io_uring")]
-    debug_assert_ne!(
-        fd,
-        crate::io_uring::IO_URING_REGISTER_FILES_SKIP.as_raw_fd()
-    );
+    debug_assert_ne!(fd, crate::io_uring::IORING_REGISTER_FILES_SKIP.as_raw_fd());
 
     // Linux doesn't look at the high bits beyond the `c_int`, so use
     // zero-extension rather than sign-extension because it's a smaller
