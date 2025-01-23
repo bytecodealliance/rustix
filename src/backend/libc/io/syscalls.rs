@@ -18,8 +18,6 @@ use crate::io::ReadWriteFlags;
 use crate::io::{self, FdFlags};
 use crate::ioctl::{IoctlOutput, RawOpcode};
 use core::cmp::min;
-#[cfg(all(feature = "fs", feature = "net"))]
-use libc_errno::errno;
 #[cfg(not(any(target_os = "espidf", target_os = "horizon")))]
 use {
     crate::backend::MAX_IOV,
@@ -222,60 +220,6 @@ pub(crate) unsafe fn ioctl_readonly(
     arg: *mut c::c_void,
 ) -> io::Result<IoctlOutput> {
     ioctl(fd, request, arg)
-}
-
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-#[cfg(all(feature = "fs", feature = "net"))]
-pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
-    use core::mem::MaybeUninit;
-
-    let (mut read, mut write) = crate::fs::fd::_is_file_read_write(fd)?;
-    let mut not_socket = false;
-    if read {
-        // Do a `recv` with `PEEK` and `DONTWAIT` for 1 byte. A 0 indicates
-        // the read side is shut down; an `EWOULDBLOCK` indicates the read
-        // side is still open.
-        match unsafe {
-            c::recv(
-                borrowed_fd(fd),
-                MaybeUninit::<[u8; 1]>::uninit()
-                    .as_mut_ptr()
-                    .cast::<c::c_void>(),
-                1,
-                c::MSG_PEEK | c::MSG_DONTWAIT,
-            )
-        } {
-            0 => read = false,
-            -1 => {
-                #[allow(unreachable_patterns)] // `EAGAIN` may equal `EWOULDBLOCK`
-                match errno().0 {
-                    c::EAGAIN | c::EWOULDBLOCK => (),
-                    c::ENOTSOCK => not_socket = true,
-                    err => return Err(io::Errno(err)),
-                }
-            }
-            _ => (),
-        }
-    }
-    if write && !not_socket {
-        // Do a `send` with `DONTWAIT` for 0 bytes. An `EPIPE` indicates
-        // the write side is shut down.
-        if unsafe { c::send(borrowed_fd(fd), [].as_ptr(), 0, c::MSG_DONTWAIT) } == -1 {
-            #[allow(unreachable_patterns)] // `EAGAIN` may equal `EWOULDBLOCK`
-            match errno().0 {
-                c::EAGAIN | c::EWOULDBLOCK | c::ENOTSOCK => (),
-                c::EPIPE => write = false,
-                err => return Err(io::Errno(err)),
-            }
-        }
-    }
-    Ok((read, write))
-}
-
-#[cfg(target_os = "wasi")]
-#[cfg(all(feature = "fs", feature = "net"))]
-pub(crate) fn is_read_write(_fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
-    todo!("Implement is_read_write for WASI in terms of fd_fdstat_get");
 }
 
 pub(crate) fn fcntl_getfd(fd: BorrowedFd<'_>) -> io::Result<FdFlags> {

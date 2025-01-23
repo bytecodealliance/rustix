@@ -4,9 +4,9 @@
 use crate::fs::Mode;
 #[cfg(not(target_os = "wasi"))]
 use crate::fs::{Gid, Uid};
-use crate::fs::{OFlags, SeekFrom, Timespec};
+use crate::fs::{SeekFrom, Timespec};
 use crate::{backend, io};
-use backend::fd::{AsFd, BorrowedFd};
+use backend::fd::AsFd;
 #[cfg(not(any(
     netbsdlike,
     target_os = "dragonfly",
@@ -127,6 +127,7 @@ pub fn tell<Fd: AsFd>(fd: Fd) -> io::Result<u64> {
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/fchmod.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/fchmod.2.html
+/// [`OFlags::PATH`]: crate::fs::OFlags::PATH
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 pub fn fchmod<Fd: AsFd>(fd: Fd, mode: Mode) -> io::Result<()> {
@@ -250,36 +251,6 @@ pub fn futimens<Fd: AsFd>(fd: Fd, times: &Timestamps) -> io::Result<()> {
 #[doc(alias = "posix_fallocate")]
 pub fn fallocate<Fd: AsFd>(fd: Fd, mode: FallocateFlags, offset: u64, len: u64) -> io::Result<()> {
     backend::fs::syscalls::fallocate(fd.as_fd(), mode, offset, len)
-}
-
-/// `fcntl(fd, F_GETFL) & O_ACCMODE`
-///
-/// Returns a pair of booleans indicating whether the file descriptor is
-/// readable and/or writable, respectively. This is only reliable on files; for
-/// example, it doesn't reflect whether sockets have been shut down; for
-/// general I/O handle support, use [`io::is_read_write`].
-#[inline]
-pub fn is_file_read_write<Fd: AsFd>(fd: Fd) -> io::Result<(bool, bool)> {
-    _is_file_read_write(fd.as_fd())
-}
-
-pub(crate) fn _is_file_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
-    let mode = backend::fs::syscalls::fcntl_getfl(fd)?;
-
-    // Check for `O_PATH`.
-    #[cfg(any(linux_kernel, target_os = "emscripten", target_os = "fuchsia"))]
-    if mode.contains(OFlags::PATH) {
-        return Ok((false, false));
-    }
-
-    // Use `RWMODE` rather than `ACCMODE` as `ACCMODE` may include `O_PATH`.
-    // We handled `O_PATH` above.
-    match mode & OFlags::RWMODE {
-        OFlags::RDONLY => Ok((true, false)),
-        OFlags::RDWR => Ok((true, true)),
-        OFlags::WRONLY => Ok((false, true)),
-        _ => unreachable!(),
-    }
 }
 
 /// `fsync(fd)`—Ensures that file data and metadata is written to the

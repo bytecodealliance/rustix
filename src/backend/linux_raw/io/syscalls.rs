@@ -23,8 +23,6 @@ use crate::backend::{c, MAX_IOV};
 use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
 use crate::io::{self, DupFlags, FdFlags, IoSlice, IoSliceMut, ReadWriteFlags};
 use crate::ioctl::{IoctlOutput, RawOpcode};
-#[cfg(all(feature = "fs", feature = "net"))]
-use crate::net::{RecvFlags, SendFlags};
 use core::cmp;
 use linux_raw_sys::general::{F_DUPFD_CLOEXEC, F_GETFD, F_SETFD};
 
@@ -263,49 +261,6 @@ pub(crate) unsafe fn ioctl_readonly(
     arg: *mut c::c_void,
 ) -> io::Result<IoctlOutput> {
     ret_c_int(syscall_readonly!(__NR_ioctl, fd, c_uint(request), arg))
-}
-
-#[cfg(all(feature = "fs", feature = "net"))]
-pub(crate) fn is_read_write(fd: BorrowedFd<'_>) -> io::Result<(bool, bool)> {
-    let (mut read, mut write) = crate::fs::fd::_is_file_read_write(fd)?;
-    let mut not_socket = false;
-    if read {
-        // Do a `recv` with `PEEK` and `DONTWAIT` for 1 byte. A 0 indicates
-        // the read side is shut down; an `EWOULDBLOCK` indicates the read
-        // side is still open.
-        let mut buf = [core::mem::MaybeUninit::<u8>::uninit()];
-        match unsafe {
-            crate::backend::net::syscalls::recv(
-                fd,
-                buf.as_mut_ptr().cast::<u8>(),
-                1,
-                RecvFlags::PEEK | RecvFlags::DONTWAIT,
-            )
-        } {
-            Ok(0) => read = false,
-            Err(err) => {
-                #[allow(unreachable_patterns)] // `EAGAIN` may equal `EWOULDBLOCK`
-                match err {
-                    io::Errno::AGAIN | io::Errno::WOULDBLOCK => (),
-                    io::Errno::NOTSOCK => not_socket = true,
-                    _ => return Err(err),
-                }
-            }
-            Ok(_) => (),
-        }
-    }
-    if write && !not_socket {
-        // Do a `send` with `DONTWAIT` for 0 bytes. An `EPIPE` indicates
-        // the write side is shut down.
-        #[allow(unreachable_patterns)] // `EAGAIN` equals `EWOULDBLOCK`
-        match crate::backend::net::syscalls::send(fd, &[], SendFlags::DONTWAIT) {
-            Err(io::Errno::AGAIN | io::Errno::WOULDBLOCK | io::Errno::NOTSOCK) => (),
-            Err(io::Errno::PIPE) => write = false,
-            Err(err) => return Err(err),
-            Ok(_) => (),
-        }
-    }
-    Ok((read, write))
 }
 
 #[inline]
