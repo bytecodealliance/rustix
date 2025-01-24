@@ -2,7 +2,7 @@
 
 #![allow(unsafe_code)]
 
-use crate::buffer::split_init;
+use crate::buffer::{split_init, Buffer};
 use crate::{backend, io};
 use backend::fd::AsFd;
 use core::mem::MaybeUninit;
@@ -15,9 +15,6 @@ pub use crate::maybe_polyfill::io::{IoSlice, IoSliceMut};
 pub use backend::io::types::ReadWriteFlags;
 
 /// `read(fd, buf)`—Reads from a stream.
-///
-/// This takes a `&mut [u8]` which Rust requires to contain initialized memory.
-/// To use an uninitialized buffer, use [`read_uninit`].
 ///
 /// # References
 ///  - [POSIX]
@@ -40,27 +37,10 @@ pub use backend::io::types::ReadWriteFlags;
 /// [illumos]: https://illumos.org/man/2/read
 /// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/I_002fO-Primitives.html#index-reading-from-a-file-descriptor
 #[inline]
-pub fn read<Fd: AsFd>(fd: Fd, buf: &mut [u8]) -> io::Result<usize> {
-    unsafe { backend::io::syscalls::read(fd.as_fd(), buf.as_mut_ptr(), buf.len()) }
-}
-
-/// `read(fd, buf)`—Reads from a stream.
-///
-/// This is equivalent to [`read`], except that it can read into uninitialized
-/// memory. It returns the slice that was initialized by this function and the
-/// slice that remains uninitialized.
-#[inline]
-pub fn read_uninit<Fd: AsFd>(
-    fd: Fd,
-    buf: &mut [MaybeUninit<u8>],
-) -> io::Result<(&mut [u8], &mut [MaybeUninit<u8>])> {
-    // Get number of initialized bytes.
-    let length = unsafe {
-        backend::io::syscalls::read(fd.as_fd(), buf.as_mut_ptr().cast::<u8>(), buf.len())
-    };
-
-    // Split into the initialized and uninitialized portions.
-    Ok(unsafe { split_init(buf, length?) })
+pub fn read<Fd: AsFd, Buf: Buffer<u8>>(fd: Fd, mut buf: Buf) -> io::Result<Buf::Result> {
+    let len = backend::io::syscalls::read(fd.as_fd(), buf.as_maybe_uninitialized())?;
+    // SAFETY: `read` works.
+    unsafe { Ok(buf.finish(len)) }
 }
 
 /// `write(fd, buf)`—Writes to a stream.

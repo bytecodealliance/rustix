@@ -24,11 +24,19 @@ use crate::fd::{AsFd as _, BorrowedFd, OwnedFd, RawFd};
 use crate::io::{self, DupFlags, FdFlags, IoSlice, IoSliceMut, ReadWriteFlags};
 use crate::ioctl::{IoctlOutput, RawOpcode};
 use core::cmp;
+use core::mem::MaybeUninit;
 use linux_raw_sys::general::{F_DUPFD_CLOEXEC, F_GETFD, F_SETFD};
 
 #[inline]
-pub(crate) unsafe fn read(fd: BorrowedFd<'_>, buf: *mut u8, len: usize) -> io::Result<usize> {
-    ret_usize(syscall!(__NR_read, fd, buf, pass_usize(len)))
+pub(crate) fn read(fd: BorrowedFd<'_>, buf: &mut [MaybeUninit<u8>]) -> io::Result<usize> {
+    unsafe {
+        ret_usize(syscall!(
+            __NR_read,
+            fd,
+            buf.as_mut_ptr(),
+            pass_usize(buf.len())
+        ))
+    }
 }
 
 #[inline]
