@@ -817,7 +817,6 @@ pub fn recvmsg<Fd: AsFd>(
 }
 
 /// The result of a successful [`recvmsg`] call.
-#[derive(Debug)]
 pub struct RecvMsgReturn {
     /// The number of bytes received.
     ///
@@ -831,6 +830,17 @@ pub struct RecvMsgReturn {
 
     /// The address of the socket we received from, if any.
     pub address: Option<SocketAddrAny>,
+}
+
+#[cfg(feature = "std")]
+impl fmt::Debug for RecvMsgReturn {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("RecvMsgReturn")
+            .field("bytes", &self.bytes)
+            .field("flags", &self.flags)
+            .field("address", &self.address)
+            .finish()
+    }
 }
 
 /// An iterator over data in an ancillary buffer.
