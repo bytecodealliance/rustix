@@ -62,7 +62,14 @@ fn test_dir_read_from() {
     assert!(saw_cargo_toml);
 }
 
-#[cfg(any(linux_like))]
+#[cfg(any(
+    linux_like,
+    solarish,
+    target_os = "fuchsia",
+    target_os = "hermit",
+    target_os = "openbsd",
+    target_os = "redox"
+))]
 #[test]
 fn test_dir_seek() {
     use std::io::Write;
@@ -94,7 +101,7 @@ fn test_dir_seek() {
     for _ in 0..count / 2 {
         dir.read().unwrap().unwrap();
     }
-    let offset = dir.read().unwrap().unwrap().offset();
+    let offset: i64 = dir.read().unwrap().unwrap().offset();
 
     // Read the rest of the directory entries and record the names
     let mut entries = Vec::new();
@@ -104,8 +111,22 @@ fn test_dir_seek() {
     }
     assert!(entries.len() >= count / 2);
 
-    // Seek to the stored position
-    dir.seekdir(offset).unwrap();
+    // Seek to the stored position. On 64-bit platforms we can `seek`.
+    // On 32-bit platforms, `seek` isn't supported so rewind and scan.
+    #[cfg(target_pointer_width = "64")]
+    {
+        dir.seek(offset).unwrap();
+    }
+    #[cfg(target_pointer_width = "32")]
+    {
+        dir.rewind();
+        while let Some(entry) = dir.read() {
+            let entry = entry.unwrap();
+            if entry.offset() == offset {
+                break;
+            }
+        }
+    }
 
     // Confirm that we're getting the same results as before
     let mut entries2 = Vec::new();
