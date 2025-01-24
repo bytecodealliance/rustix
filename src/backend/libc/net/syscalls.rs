@@ -30,7 +30,7 @@ use {
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 use {
     super::read_sockaddr::{initialize_family_to_unspec, maybe_read_sockaddr_os, read_sockaddr_os},
-    super::send_recv::{RecvFlags, SendFlags},
+    super::send_recv::{RecvFlags, ReturnFlags, SendFlags},
     super::write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6},
     crate::net::{AddressFamily, Protocol, Shutdown, SocketFlags, SocketType},
     core::ptr::null_mut,
@@ -344,7 +344,7 @@ pub(crate) fn recvmsg(
             RecvMsgReturn {
                 bytes,
                 address: addr,
-                flags: RecvFlags::from_bits_retain(bitcast!(msghdr.msg_flags)),
+                flags: ReturnFlags::from_bits_retain(bitcast!(msghdr.msg_flags)),
             }
         })
     })

@@ -6,7 +6,7 @@
 
 use rustix::net::{
     accept, bind_v6, connect_v6, getsockname, listen, recv, send, socket, AddressFamily, Ipv6Addr,
-    RecvFlags, SendFlags, SocketAddrAny, SocketAddrV6, SocketType,
+    RecvFlags, ReturnFlags, SendFlags, SocketAddrAny, SocketAddrV6, SocketType,
 };
 use std::sync::{Arc, Condvar, Mutex};
 use std::thread;
@@ -127,6 +127,7 @@ fn test_v6_msg() {
             String::from_utf8_lossy(&buffer[..result.bytes]),
             "hello, world"
         );
+        assert_eq!(result.flags, ReturnFlags::empty());
 
         sendmsg(
             &data_socket,
@@ -172,6 +173,7 @@ fn test_v6_msg() {
             String::from_utf8_lossy(&buffer[..nread.bytes]),
             "goodnight, moon"
         );
+        assert_eq!(nread.flags, ReturnFlags::empty());
     }
 
     let ready = Arc::new((Mutex::new(0_u16), Condvar::new()));
