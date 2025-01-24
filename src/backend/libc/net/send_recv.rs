@@ -117,6 +117,7 @@ bitflags! {
         /// `MSG_OOB`
         const OOB = bitcast!(c::MSG_OOB);
         /// `MSG_EOR`
+        #[cfg(not(windows))]
         const EOR = bitcast!(c::MSG_EOR);
         /// `MSG_TRUNC`
         const TRUNC = bitcast!(c::MSG_TRUNC);
