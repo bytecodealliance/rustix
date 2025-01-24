@@ -48,7 +48,7 @@ fn net_recvmsg_trunc() {
     crate::init();
 
     let tmpdir = tempfile::tempdir().unwrap();
-    let path = tmpdir.path().join("recv_uninit_trunc");
+    let path = tmpdir.path().join("recvmsg_trunc");
     let name = SocketAddrUnix::new(&path).unwrap();
 
     let receiver = rustix::net::socket(AddressFamily::UNIX, SocketType::DGRAM, None).unwrap();
