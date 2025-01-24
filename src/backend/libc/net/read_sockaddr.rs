@@ -93,6 +93,18 @@ unsafe fn read_ss_family(storage: *const c::sockaddr_storage) -> u16 {
     (*storage.cast::<sockaddr_header>()).ss_family.into()
 }
 
+/// Read the first byte of the `sun_path` field, assuming we have an `AF_UNIX`
+/// socket address.
+#[cfg(apple)]
+#[inline]
+unsafe fn read_sun_path0(storage: *const c::sockaddr_storage) -> u8 {
+    // In `read_ss_family` we assert that we know the layout of `sockaddr`.
+    storage
+        .cast::<u8>()
+        .add(super::addr::offsetof_sun_path())
+        .read()
+}
+
 /// Set the `ss_family` field of a socket address to `AF_UNSPEC`, so that we
 /// can test for `AF_UNSPEC` to test whether it was stored to.
 pub(crate) unsafe fn initialize_family_to_unspec(storage: *mut c::sockaddr_storage) {
@@ -233,10 +245,17 @@ pub(crate) unsafe fn maybe_read_sockaddr_os(
     assert!(len >= size_of::<c::sa_family_t>());
     let family = read_ss_family(storage).into();
     if family == c::AF_UNSPEC {
-        None
-    } else {
-        Some(inner_read_sockaddr_os(family, storage, len))
+        return None;
     }
+
+    // On macOS, if we get an `AF_UNIX` with an empty path, treat it as
+    // an absent address.
+    #[cfg(apple)]
+    if family == c::AF_UNIX && read_sun_path0(storage) == 0 {
+        return None;
+    }
+
+    Some(inner_read_sockaddr_os(family, storage, len))
 }
 
 /// Read a socket address returned from the OS.

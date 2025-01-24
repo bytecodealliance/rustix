@@ -96,6 +96,9 @@ bitflags! {
         /// `MSG_PEEK`
         const PEEK = bitcast!(c::MSG_PEEK);
         /// `MSG_TRUNC`
+        // Apple has `MSG_TRUNC` but it's not documented for use with
+        // `recv` and friends, and in practice appears to be ignored.
+        #[cfg(not(apple))]
         const TRUNC = bitcast!(c::MSG_TRUNC);
         /// `MSG_WAITALL`
         const WAITALL = bitcast!(c::MSG_WAITALL);

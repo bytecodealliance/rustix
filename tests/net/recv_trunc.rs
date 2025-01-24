@@ -19,17 +19,22 @@ fn net_recv_uninit_trunc() {
     let n = rustix::net::sendto_unix(&sender, request, SendFlags::empty(), &name).expect("send");
     assert_eq!(n, request.len());
 
-    let mut response = [MaybeUninit::<u8>::zeroed(); 5];
-    let (init, uninit) =
-        rustix::net::recv_uninit(&receiver, &mut response, RecvFlags::TRUNC).expect("recv_uninit");
+    // Test with `RecvFlags::TRUNC`, which is not supported on Apple.
+    #[cfg(not(apple))]
+    {
+        let mut response = [MaybeUninit::<u8>::zeroed(); 5];
+        let (init, uninit) = rustix::net::recv_uninit(&receiver, &mut response, RecvFlags::TRUNC)
+            .expect("recv_uninit");
 
-    // We used the `TRUNC` flag, so we should have only gotten 5 bytes.
-    assert_eq!(init, b"Hello");
-    assert!(uninit.is_empty());
+        // We used the `TRUNC` flag, so we should have only gotten 5 bytes.
+        assert_eq!(init, b"Hello");
+        assert!(uninit.is_empty());
 
-    // Send the message again.
-    let n = rustix::net::sendto_unix(&sender, request, SendFlags::empty(), &name).expect("send");
-    assert_eq!(n, request.len());
+        // Send the message again.
+        let n =
+            rustix::net::sendto_unix(&sender, request, SendFlags::empty(), &name).expect("send");
+        assert_eq!(n, request.len());
+    }
 
     // This time receive it without `TRUNC`. This should fail.
     let mut response = [MaybeUninit::<u8>::zeroed(); 5];
@@ -56,43 +61,50 @@ fn net_recvmsg_trunc() {
 
     let sender = rustix::net::socket(AddressFamily::UNIX, SocketType::DGRAM, None).unwrap();
     let request = b"Hello, World!!!";
-    let n = rustix::net::sendto_unix(&sender, request, SendFlags::empty(), &name).expect("send");
-    assert_eq!(n, request.len());
 
-    let mut response = [0_u8; 5];
-    let result = rustix::net::recvmsg(
-        &receiver,
-        &mut [IoSliceMut::new(&mut response)],
-        &mut Default::default(),
-        RecvFlags::TRUNC,
-    )
-    .expect("recvmsg");
+    // Test with `RecvFlags::TRUNC`, which is not supported on Apple.
+    #[cfg(not(apple))]
+    {
+        let n =
+            rustix::net::sendto_unix(&sender, request, SendFlags::empty(), &name).expect("send");
+        assert_eq!(n, request.len());
 
-    // We used the `TRUNC` flag, so we should have received 15 bytes,
-    // truncated to 5 bytes, and the `TRUNC` flag should have been returned.
-    assert_eq!(&response, b"Hello");
-    assert_eq!(result.bytes, 15);
-    assert_eq!(result.flags, ReturnFlags::TRUNC);
+        let mut response = [0_u8; 5];
+        let result = rustix::net::recvmsg(
+            &receiver,
+            &mut [IoSliceMut::new(&mut response)],
+            &mut Default::default(),
+            RecvFlags::TRUNC,
+        )
+        .expect("recvmsg");
 
-    // Send the message again.
-    let n = rustix::net::sendto_unix(&sender, request, SendFlags::empty(), &name).expect("send");
-    assert_eq!(n, request.len());
+        // We used the `TRUNC` flag, so we should have received 15 bytes,
+        // truncated to 5 bytes, and the `TRUNC` flag should have been returned.
+        assert_eq!(&response, b"Hello");
+        assert_eq!(result.bytes, 15);
+        assert_eq!(result.flags, ReturnFlags::TRUNC);
 
-    // This time receive it with `TRUNC` and a big enough buffer.
-    let mut response = [0_u8; 30];
-    let result = rustix::net::recvmsg(
-        &receiver,
-        &mut [IoSliceMut::new(&mut response)],
-        &mut Default::default(),
-        RecvFlags::TRUNC,
-    )
-    .expect("recvmsg");
+        // Send the message again.
+        let n =
+            rustix::net::sendto_unix(&sender, request, SendFlags::empty(), &name).expect("send");
+        assert_eq!(n, request.len());
 
-    // We used the `TRUNC` flag, so we should have received 15 bytes
-    // and the buffer was big enough so the `TRUNC` flag should not have
-    // been returned.
-    assert_eq!(&response[..result.bytes], request);
-    assert_eq!(result.flags, ReturnFlags::empty());
+        // This time receive it with `TRUNC` and a big enough buffer.
+        let mut response = [0_u8; 30];
+        let result = rustix::net::recvmsg(
+            &receiver,
+            &mut [IoSliceMut::new(&mut response)],
+            &mut Default::default(),
+            RecvFlags::TRUNC,
+        )
+        .expect("recvmsg");
+
+        // We used the `TRUNC` flag, so we should have received 15 bytes
+        // and the buffer was big enough so the `TRUNC` flag should not have
+        // been returned.
+        assert_eq!(&response[..result.bytes], request);
+        assert_eq!(result.flags, ReturnFlags::empty());
+    }
 
     // Send the message again.
     let n = rustix::net::sendto_unix(&sender, request, SendFlags::empty(), &name).expect("send");
@@ -108,8 +120,9 @@ fn net_recvmsg_trunc() {
     )
     .expect("recvmsg");
 
-    // We used the `TRUNC` flag, so we should have received 15 bytes,
-    // truncated to 5 bytes, and the `TRUNC` flag should have been returned.
+    // We didn't use the `TRUNC` flag, but the buffer was big enough,
+    // so we should have received 15 bytes, and the `TRUNC` flag should
+    // have been returned.
     assert_eq!(&response[..result.bytes], request);
     assert_eq!(result.flags, ReturnFlags::empty());
 
