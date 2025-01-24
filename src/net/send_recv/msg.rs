@@ -7,7 +7,8 @@ use crate::fd::{AsFd, BorrowedFd, OwnedFd};
 use crate::io::{self, IoSlice, IoSliceMut};
 #[cfg(linux_kernel)]
 use crate::net::UCred;
-
+#[cfg(feature = "std")]
+use core::fmt;
 use core::iter::FusedIterator;
 use core::marker::PhantomData;
 use core::mem::{align_of, size_of, size_of_val, take};
