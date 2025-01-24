@@ -1,3 +1,6 @@
+#![allow(unsafe_code)]
+
+use crate::buffer::Buffer;
 use crate::{backend, ffi, io, path};
 use backend::c;
 use backend::fd::AsFd;
@@ -20,21 +23,25 @@ bitflags! {
     }
 }
 
-/// `getxattr(path, name, value.as_ptr(), value.len())`—Get extended
-/// filesystem attributes.
+/// `getxattr(path, name, value)`—Get extended filesystem attributes.
 ///
 /// # References
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/getxattr.2.html
 #[inline]
-pub fn getxattr<P: path::Arg, Name: path::Arg>(
+pub fn getxattr<P: path::Arg, Name: path::Arg, Buf: Buffer<u8>>(
     path: P,
     name: Name,
-    value: &mut [u8],
-) -> io::Result<usize> {
+    mut value: Buf,
+) -> io::Result<Buf::Output> {
     path.into_with_c_str(|path| {
-        name.into_with_c_str(|name| backend::fs::syscalls::getxattr(path, name, value))
+        name.into_with_c_str(|name| {
+            // SAFETY: `getxattr` behaves.
+            let len = unsafe { backend::fs::syscalls::getxattr(path, name, value.parts_mut())? };
+            // SAFETY: `getxattr` behaves.
+            unsafe { Ok(value.assume_init(len)) }
+        })
     })
 }
 
@@ -47,13 +54,18 @@ pub fn getxattr<P: path::Arg, Name: path::Arg>(
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/lgetxattr.2.html
 #[inline]
-pub fn lgetxattr<P: path::Arg, Name: path::Arg>(
+pub fn lgetxattr<P: path::Arg, Name: path::Arg, Buf: Buffer<u8>>(
     path: P,
     name: Name,
-    value: &mut [u8],
-) -> io::Result<usize> {
+    mut value: Buf,
+) -> io::Result<Buf::Output> {
     path.into_with_c_str(|path| {
-        name.into_with_c_str(|name| backend::fs::syscalls::lgetxattr(path, name, value))
+        name.into_with_c_str(|name| {
+            // SAFETY: `lgetxattr` behaves.
+            let len = unsafe { backend::fs::syscalls::lgetxattr(path, name, value.parts_mut())? };
+            // SAFETY: `lgetxattr` behaves.
+            unsafe { Ok(value.assume_init(len)) }
+        })
     })
 }
 
@@ -65,12 +77,17 @@ pub fn lgetxattr<P: path::Arg, Name: path::Arg>(
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/fgetxattr.2.html
 #[inline]
-pub fn fgetxattr<Fd: AsFd, Name: path::Arg>(
+pub fn fgetxattr<Fd: AsFd, Name: path::Arg, Buf: Buffer<u8>>(
     fd: Fd,
     name: Name,
-    value: &mut [u8],
-) -> io::Result<usize> {
-    name.into_with_c_str(|name| backend::fs::syscalls::fgetxattr(fd.as_fd(), name, value))
+    mut value: Buf,
+) -> io::Result<Buf::Output> {
+    name.into_with_c_str(|name| {
+        // SAFETY: `fgetxattr` behaves.
+        let len = unsafe { backend::fs::syscalls::fgetxattr(fd.as_fd(), name, value.parts_mut())? };
+        // SAFETY: `fgetxattr` behaves.
+        unsafe { Ok(value.assume_init(len)) }
+    })
 }
 
 /// `setxattr(path, name, value.as_ptr(), value.len(), flags)`—Set extended
@@ -137,8 +154,13 @@ pub fn fsetxattr<Fd: AsFd, Name: path::Arg>(
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/listxattr.2.html
 #[inline]
-pub fn listxattr<P: path::Arg>(path: P, list: &mut [u8]) -> io::Result<usize> {
-    path.into_with_c_str(|path| backend::fs::syscalls::listxattr(path, list))
+pub fn listxattr<P: path::Arg, Buf: Buffer<u8>>(path: P, mut list: Buf) -> io::Result<Buf::Output> {
+    path.into_with_c_str(|path| {
+        // SAFETY: `listxattr` behaves.
+        let len = unsafe { backend::fs::syscalls::listxattr(path, list.parts_mut())? };
+        // SAFETY: `listxattr` behaves.
+        unsafe { Ok(list.assume_init(len)) }
+    })
 }
 
 /// `llistxattr(path, list.as_ptr(), list.len())`—List extended filesystem
@@ -149,8 +171,16 @@ pub fn listxattr<P: path::Arg>(path: P, list: &mut [u8]) -> io::Result<usize> {
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/llistxattr.2.html
 #[inline]
-pub fn llistxattr<P: path::Arg>(path: P, list: &mut [u8]) -> io::Result<usize> {
-    path.into_with_c_str(|path| backend::fs::syscalls::llistxattr(path, list))
+pub fn llistxattr<P: path::Arg, Buf: Buffer<u8>>(
+    path: P,
+    mut list: Buf,
+) -> io::Result<Buf::Output> {
+    path.into_with_c_str(|path| {
+        // SAFETY: `flistxattr` behaves.
+        let len = unsafe { backend::fs::syscalls::llistxattr(path, list.parts_mut())? };
+        // SAFETY: `flistxattr` behaves.
+        unsafe { Ok(list.assume_init(len)) }
+    })
 }
 
 /// `flistxattr(fd, list.as_ptr(), list.len())`—List extended filesystem
@@ -161,8 +191,11 @@ pub fn llistxattr<P: path::Arg>(path: P, list: &mut [u8]) -> io::Result<usize> {
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/flistxattr.2.html
 #[inline]
-pub fn flistxattr<Fd: AsFd>(fd: Fd, list: &mut [u8]) -> io::Result<usize> {
-    backend::fs::syscalls::flistxattr(fd.as_fd(), list)
+pub fn flistxattr<Fd: AsFd, Buf: Buffer<u8>>(fd: Fd, mut list: Buf) -> io::Result<Buf::Output> {
+    // SAFETY: `flistxattr` behaves.
+    let len = unsafe { backend::fs::syscalls::flistxattr(fd.as_fd(), list.parts_mut())? };
+    // SAFETY: `flistxattr` behaves.
+    unsafe { Ok(list.assume_init(len)) }
 }
 
 /// `removexattr(path, name)`—Remove an extended filesystem attribute.

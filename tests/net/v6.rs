@@ -35,8 +35,9 @@ fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
 
     let mut buffer = vec![0; BUFFER_SIZE];
     let data_socket = accept(&connection_socket).unwrap();
-    let nread = recv(&data_socket, &mut buffer, RecvFlags::empty()).unwrap();
+    let (nread, actual) = recv(&data_socket, &mut buffer, RecvFlags::empty()).unwrap();
     assert_eq!(String::from_utf8_lossy(&buffer[..nread]), "hello, world");
+    assert_eq!(actual, nread);
 
     send(&data_socket, b"goodnight, moon", SendFlags::empty()).unwrap();
 }
@@ -59,8 +60,9 @@ fn client(ready: Arc<(Mutex<u16>, Condvar)>) {
 
     send(&data_socket, b"hello, world", SendFlags::empty()).unwrap();
 
-    let nread = recv(&data_socket, &mut buffer, RecvFlags::empty()).unwrap();
+    let (nread, actual) = recv(&data_socket, &mut buffer, RecvFlags::empty()).unwrap();
     assert_eq!(String::from_utf8_lossy(&buffer[..nread]), "goodnight, moon");
+    assert_eq!(actual, nread);
 }
 
 #[test]

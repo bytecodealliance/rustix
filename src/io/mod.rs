@@ -12,7 +12,6 @@ mod errno;
 #[cfg(not(windows))]
 mod fcntl;
 mod ioctl;
-#[cfg(not(windows))]
 mod read_write;
 
 pub use close::*;
@@ -22,5 +21,4 @@ pub use errno::{retry_on_intr, Errno, Result};
 #[cfg(not(windows))]
 pub use fcntl::*;
 pub use ioctl::*;
-#[cfg(not(windows))]
 pub use read_write::*;

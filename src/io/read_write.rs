@@ -2,10 +2,9 @@
 
 #![allow(unsafe_code)]
 
-use crate::buffer::split_init;
+use crate::buffer::Buffer;
 use crate::{backend, io};
 use backend::fd::AsFd;
-use core::mem::MaybeUninit;
 
 // Declare `IoSlice` and `IoSliceMut`.
 #[cfg(not(windows))]
@@ -15,9 +14,6 @@ pub use crate::maybe_polyfill::io::{IoSlice, IoSliceMut};
 pub use backend::io::types::ReadWriteFlags;
 
 /// `read(fd, buf)`—Reads from a stream.
-///
-/// This takes a `&mut [u8]` which Rust requires to contain initialized memory.
-/// To use an uninitialized buffer, use [`read_uninit`].
 ///
 /// # References
 ///  - [POSIX]
@@ -40,27 +36,11 @@ pub use backend::io::types::ReadWriteFlags;
 /// [illumos]: https://illumos.org/man/2/read
 /// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/I_002fO-Primitives.html#index-reading-from-a-file-descriptor
 #[inline]
-pub fn read<Fd: AsFd>(fd: Fd, buf: &mut [u8]) -> io::Result<usize> {
-    unsafe { backend::io::syscalls::read(fd.as_fd(), buf.as_mut_ptr(), buf.len()) }
-}
-
-/// `read(fd, buf)`—Reads from a stream.
-///
-/// This is equivalent to [`read`], except that it can read into uninitialized
-/// memory. It returns the slice that was initialized by this function and the
-/// slice that remains uninitialized.
-#[inline]
-pub fn read_uninit<Fd: AsFd>(
-    fd: Fd,
-    buf: &mut [MaybeUninit<u8>],
-) -> io::Result<(&mut [u8], &mut [MaybeUninit<u8>])> {
-    // Get number of initialized bytes.
-    let length = unsafe {
-        backend::io::syscalls::read(fd.as_fd(), buf.as_mut_ptr().cast::<u8>(), buf.len())
-    };
-
-    // Split into the initialized and uninitialized portions.
-    Ok(unsafe { split_init(buf, length?) })
+pub fn read<Fd: AsFd, Buf: Buffer<u8>>(fd: Fd, mut buf: Buf) -> io::Result<Buf::Output> {
+    // SAFETY: `read` behaves.
+    let len = unsafe { backend::io::syscalls::read(fd.as_fd(), buf.parts_mut())? };
+    // SAFETY: `read` behaves.
+    unsafe { Ok(buf.assume_init(len)) }
 }
 
 /// `write(fd, buf)`—Writes to a stream.
@@ -92,9 +72,6 @@ pub fn write<Fd: AsFd>(fd: Fd, buf: &[u8]) -> io::Result<usize> {
 
 /// `pread(fd, buf, offset)`—Reads from a file at a given position.
 ///
-/// This takes a `&mut [u8]` which Rust requires to contain initialized memory.
-/// To use an uninitialized buffer, use [`pread_uninit`].
-///
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
@@ -115,26 +92,17 @@ pub fn write<Fd: AsFd>(fd: Fd, buf: &[u8]) -> io::Result<usize> {
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=pread&section=2
 /// [illumos]: https://illumos.org/man/2/pread
 /// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/I_002fO-Primitives.html#index-pread64
+#[cfg(not(windows))]
 #[inline]
-pub fn pread<Fd: AsFd>(fd: Fd, buf: &mut [u8], offset: u64) -> io::Result<usize> {
-    unsafe { backend::io::syscalls::pread(fd.as_fd(), buf.as_mut_ptr(), buf.len(), offset) }
-}
-
-/// `pread(fd, buf, offset)`—Reads from a file at a given position.
-///
-/// This is equivalent to [`pread`], except that it can read into uninitialized
-/// memory. It returns the slice that was initialized by this function and the
-/// slice that remains uninitialized.
-#[inline]
-pub fn pread_uninit<Fd: AsFd>(
+pub fn pread<Fd: AsFd, Buf: Buffer<u8>>(
     fd: Fd,
-    buf: &mut [MaybeUninit<u8>],
+    mut buf: Buf,
     offset: u64,
-) -> io::Result<(&mut [u8], &mut [MaybeUninit<u8>])> {
-    let length = unsafe {
-        backend::io::syscalls::pread(fd.as_fd(), buf.as_mut_ptr().cast::<u8>(), buf.len(), offset)
-    };
-    Ok(unsafe { split_init(buf, length?) })
+) -> io::Result<Buf::Output> {
+    // SAFETY: `pread` behaves.
+    let len = unsafe { backend::io::syscalls::pread(fd.as_fd(), buf.parts_mut(), offset)? };
+    // SAFETY: `pread` behaves.
+    unsafe { Ok(buf.assume_init(len)) }
 }
 
 /// `pwrite(fd, bufs)`—Writes to a file at a given position.
@@ -163,6 +131,7 @@ pub fn pread_uninit<Fd: AsFd>(
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=pwrite&section=2
 /// [illumos]: https://illumos.org/man/2/pwrite
 /// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/I_002fO-Primitives.html#index-pwrite64
+#[cfg(not(windows))]
 #[inline]
 pub fn pwrite<Fd: AsFd>(fd: Fd, buf: &[u8], offset: u64) -> io::Result<usize> {
     backend::io::syscalls::pwrite(fd.as_fd(), buf, offset)
@@ -190,7 +159,7 @@ pub fn pwrite<Fd: AsFd>(fd: Fd, buf: &[u8], offset: u64) -> io::Result<usize> {
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=readv&section=2
 /// [illumos]: https://illumos.org/man/2/readv
 /// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Scatter_002dGather.html#index-readv
-#[cfg(not(any(target_os = "espidf", target_os = "horizon")))]
+#[cfg(not(any(windows, target_os = "espidf", target_os = "horizon")))]
 #[inline]
 pub fn readv<Fd: AsFd>(fd: Fd, bufs: &mut [IoSliceMut<'_>]) -> io::Result<usize> {
     backend::io::syscalls::readv(fd.as_fd(), bufs)
@@ -218,7 +187,7 @@ pub fn readv<Fd: AsFd>(fd: Fd, bufs: &mut [IoSliceMut<'_>]) -> io::Result<usize>
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=writev&section=2
 /// [illumos]: https://illumos.org/man/2/writev
 /// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Scatter_002dGather.html#index-writev
-#[cfg(not(any(target_os = "espidf", target_os = "horizon")))]
+#[cfg(not(any(windows, target_os = "espidf", target_os = "horizon")))]
 #[inline]
 pub fn writev<Fd: AsFd>(fd: Fd, bufs: &[IoSlice<'_>]) -> io::Result<usize> {
     backend::io::syscalls::writev(fd.as_fd(), bufs)
@@ -244,6 +213,7 @@ pub fn writev<Fd: AsFd>(fd: Fd, bufs: &[IoSlice<'_>]) -> io::Result<usize> {
 /// [illumos]: https://illumos.org/man/2/preadv
 /// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Scatter_002dGather.html#index-preadv64
 #[cfg(not(any(
+    windows,
     target_os = "espidf",
     target_os = "haiku",
     target_os = "horizon",
@@ -281,6 +251,7 @@ pub fn preadv<Fd: AsFd>(fd: Fd, bufs: &mut [IoSliceMut<'_>], offset: u64) -> io:
 /// [illumos]: https://illumos.org/man/2/pwritev
 /// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/I_002fO-Primitives.html#index-pwrite64
 #[cfg(not(any(
+    windows,
     target_os = "espidf",
     target_os = "haiku",
     target_os = "horizon",

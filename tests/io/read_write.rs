@@ -73,7 +73,7 @@ fn test_readwrite_p() {
 fn test_readwrite_p_uninit() {
     use core::mem::MaybeUninit;
     use rustix::fs::{openat, Mode, OFlags, CWD};
-    use rustix::io::{pread_uninit, pwrite};
+    use rustix::io::{pread, pwrite};
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
@@ -88,9 +88,9 @@ fn test_readwrite_p_uninit() {
     pwrite(&file, b"hello", 200).unwrap();
     pwrite(&file, b"world", 300).unwrap();
     let mut buf = [MaybeUninit::uninit(); 5];
-    let (init, _) = pread_uninit(&file, &mut buf, 200).unwrap();
+    let (init, _) = pread(&file, &mut buf, 200).unwrap();
     assert_eq!(&init, b"hello");
-    let (init, _) = pread_uninit(&file, &mut buf, 300).unwrap();
+    let (init, _) = pread(&file, &mut buf, 300).unwrap();
     assert_eq!(&init, b"world");
 }
 
@@ -152,7 +152,7 @@ fn test_readwrite() {
 fn test_readwrite_uninit() {
     use core::mem::MaybeUninit;
     use rustix::fs::{openat, seek, Mode, OFlags, SeekFrom, CWD};
-    use rustix::io::{read_uninit, write};
+    use rustix::io::{read, write};
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
@@ -168,9 +168,9 @@ fn test_readwrite_uninit() {
     write(&file, b"world").unwrap();
     seek(&file, SeekFrom::Start(0)).unwrap();
     let mut buf = [MaybeUninit::uninit(); 5];
-    let (init, _) = read_uninit(&file, &mut buf).unwrap();
+    let (init, _) = read(&file, &mut buf).unwrap();
     assert_eq!(&init, b"hello");
-    let (init, _) = read_uninit(&file, &mut buf).unwrap();
+    let (init, _) = read(&file, &mut buf).unwrap();
     assert_eq!(&init, b"world");
 }
 

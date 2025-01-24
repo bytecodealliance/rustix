@@ -5,6 +5,7 @@
 //! ```no_run
 //! # #[cfg(feature = "net")]
 //! # fn main() -> std::io::Result<()> {
+//! use rustix::buffer::spare_capacity;
 //! use rustix::event::epoll;
 //! use rustix::fd::AsFd;
 //! use rustix::io::{ioctl_fionbio, read, write};
@@ -38,8 +39,8 @@
 //! // Process events.
 //! let mut event_list = Vec::with_capacity(4);
 //! loop {
-//!     epoll::wait(&epoll, &mut event_list, None)?;
-//!     for event in &event_list {
+//!     epoll::wait(&epoll, spare_capacity(&mut event_list), None)?;
+//!     for event in event_list.drain(..) {
 //!         let target = event.data;
 //!         if target.u64() == 1 {
 //!             // Accept a new connection, set it to non-blocking, and
@@ -75,12 +76,10 @@
 use super::epoll;
 pub use crate::backend::event::epoll::*;
 use crate::backend::event::syscalls;
+use crate::buffer::Buffer;
 use crate::fd::{AsFd, OwnedFd};
 use crate::io;
-#[cfg(feature = "alloc")]
 use crate::timespec::Timespec;
-#[cfg(feature = "alloc")]
-use alloc::vec::Vec;
 use core::ffi::c_void;
 use core::hash::{Hash, Hasher};
 
@@ -189,8 +188,7 @@ pub fn delete<EpollFd: AsFd, SourceFd: AsFd>(epoll: EpollFd, source: SourceFd) -
 /// `epoll_wait(self, events, timeout)`—Waits for registered events of
 /// interest.
 ///
-/// For each event of interest, an element is written to `events`. On
-/// success, this returns the number of written elements.
+/// For each event of interest, an element is written to `events`.
 ///
 /// Linux versions older than 5.11 (those that don't support `epoll_pwait2`)
 /// don't support timeouts greater than `c_int::MAX` milliseconds; if an
@@ -204,24 +202,17 @@ pub fn delete<EpollFd: AsFd, SourceFd: AsFd>(epoll: EpollFd, source: SourceFd) -
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/epoll_wait.2.html
 /// [illumos]: https://www.illumos.org/man/3C/epoll_wait
-#[cfg(feature = "alloc")]
-#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
 #[doc(alias = "epoll_wait")]
 #[inline]
-pub fn wait<EpollFd: AsFd>(
+pub fn wait<EpollFd: AsFd, Buf: Buffer<Event>>(
     epoll: EpollFd,
-    event_list: &mut Vec<Event>,
+    mut event_list: Buf,
     timeout: Option<&Timespec>,
-) -> io::Result<()> {
-    // SAFETY: We're calling `epoll_wait` via FFI and we know how it
-    // behaves.
-    unsafe {
-        event_list.clear();
-        let nfds = syscalls::epoll_wait(epoll.as_fd(), event_list.spare_capacity_mut(), timeout)?;
-        event_list.set_len(nfds);
-    }
-
-    Ok(())
+) -> io::Result<Buf::Output> {
+    // SAFETY: `epoll_wait` behaves.
+    let nfds = unsafe { syscalls::epoll_wait(epoll.as_fd(), event_list.parts_mut(), timeout)? };
+    // SAFETY: `epoll_wait` behaves.
+    unsafe { Ok(event_list.assume_init(nfds)) }
 }
 
 /// A record of an event that occurred.

@@ -56,9 +56,10 @@ fn test_usersock() {
     sendto(client, data, SendFlags::empty(), &addr).unwrap();
 
     let mut buffer = [0_u8; 4096];
-    let (len, src) = recvfrom(&server, &mut buffer, RecvFlags::empty()).unwrap();
+    let (len, actual, src) = recvfrom(&server, &mut buffer, RecvFlags::empty()).unwrap();
 
     assert_eq!(&buffer[..len], data);
+    assert_eq!(len, actual);
     let src = SocketAddrNetlink::try_from(src.unwrap()).unwrap();
     assert_eq!(src.groups(), 0);
 }
