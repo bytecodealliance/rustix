@@ -36,11 +36,9 @@ impl Pid {
     /// [pidfd]: https://man7.org/linux/man-pages/man2/pidfd_open.2.html
     #[inline]
     pub const fn from_raw(raw: RawPid) -> Option<Self> {
-        if raw > 0 {
-            // SAFETY: We just checked that `raw > 0`.
-            unsafe { Some(Self::from_raw_unchecked(raw)) }
-        } else {
-            None
+        match NonZeroI32::new(raw) {
+            Some(non_zero) => Some(Self(non_zero)),
+            None => None,
         }
     }
 

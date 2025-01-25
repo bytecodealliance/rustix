@@ -1,15 +1,11 @@
 //! User and Group ID types.
 
-#![allow(unsafe_code)]
-
 use crate::backend::c;
 use crate::ffi;
 
 /// A group identifier as a raw integer.
-#[cfg(not(target_os = "wasi"))]
 pub type RawGid = ffi::c_uint;
 /// A user identifier as a raw integer.
-#[cfg(not(target_os = "wasi"))]
 pub type RawUid = ffi::c_uint;
 
 /// `uid_t`—A Unix user ID.
@@ -28,11 +24,18 @@ impl Uid {
 
     /// Converts a `RawUid` into a `Uid`.
     ///
-    /// # Safety
-    ///
-    /// `raw` must be the value of a valid Unix user ID.
+    /// `raw` must be the value of a valid Unix user ID, and not `-1`.
     #[inline]
-    pub const unsafe fn from_raw(raw: RawUid) -> Self {
+    pub fn from_raw(raw: RawUid) -> Self {
+        debug_assert_ne!(raw, -1 as _);
+        Self(raw)
+    }
+
+    /// Converts a `RawUid` into a `Uid`.
+    ///
+    /// `raw` must be the value of a valid Unix user ID, and not `-1`.
+    #[inline]
+    pub const fn from_raw_unchecked(raw: RawUid) -> Self {
         Self(raw)
     }
 
@@ -55,11 +58,18 @@ impl Gid {
 
     /// Converts a `RawGid` into a `Gid`.
     ///
-    /// # Safety
-    ///
-    /// `raw` must be the value of a valid Unix group ID.
+    /// `raw` must be the value of a valid Unix group ID, and not `-1`.
     #[inline]
-    pub const unsafe fn from_raw(raw: RawGid) -> Self {
+    pub fn from_raw(raw: RawGid) -> Self {
+        debug_assert_ne!(raw, -1 as _);
+        Self(raw)
+    }
+
+    /// Converts a `RawGid` into a `Gid`.
+    ///
+    /// `raw` must be the value of a valid Unix group ID, and not `-1`.
+    #[inline]
+    pub const fn from_raw_unchecked(raw: RawGid) -> Self {
         Self(raw)
     }
 
