@@ -35,6 +35,13 @@ pub(crate) use linux_raw_sys::general::{
 #[cfg(test)]
 pub(crate) use linux_raw_sys::general::epoll_event;
 
+#[cfg(feature = "mm")]
+mod mm {
+    pub(crate) use linux_raw_sys::general::{MAP_HUGETLB, MAP_HUGE_SHIFT};
+}
+#[cfg(feature = "mm")]
+pub(crate) use mm::*;
+
 #[cfg(any(
     feature = "fs",
     all(

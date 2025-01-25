@@ -66,7 +66,7 @@ pub(crate) fn ptsname(fd: BorrowedFd<'_>, mut buffer: Vec<u8>) -> io::Result<CSt
             if let Some(func) = ptsname_r.get() {
                 func(borrowed_fd(fd), buffer.as_mut_ptr().cast(), buffer.len())
             } else {
-                libc::ENOSYS
+                c::ENOSYS
             }
         };
 

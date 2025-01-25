@@ -479,15 +479,15 @@ bitflags! {
         /// created. `MCL_ONFAULT` must be used with either `MCL_CURRENT` or
         /// `MCL_FUTURE` or both.
         #[cfg(linux_kernel)]
-        const ONFAULT = bitcast!(libc::MCL_ONFAULT);
+        const ONFAULT = bitcast!(c::MCL_ONFAULT);
         /// Lock all pages which will become mapped into the address space of
         /// the process in the future. These could be, for instance, new pages
         /// required by a growing heap and stack as well as new memory-mapped
         /// files or shared memory regions.
-        const FUTURE = bitcast!(libc::MCL_FUTURE);
+        const FUTURE = bitcast!(c::MCL_FUTURE);
         /// Lock all pages which are currently mapped into the address space of
         /// the process.
-        const CURRENT = bitcast!(libc::MCL_CURRENT);
+        const CURRENT = bitcast!(c::MCL_CURRENT);
 
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;

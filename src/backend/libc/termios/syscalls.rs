@@ -102,7 +102,7 @@ pub(crate) fn tcgetattr(fd: BorrowedFd<'_>) -> io::Result<Termios> {
         let mut result = MaybeUninit::<Termios>::uninit();
 
         // `result` is a `Termios` which starts with the same layout as
-        // `libc::termios`, so we can cast the pointer.
+        // `c::termios`, so we can cast the pointer.
         ret(c::tcgetattr(borrowed_fd(fd), result.as_mut_ptr().cast()))?;
 
         Ok(result.assume_init())
