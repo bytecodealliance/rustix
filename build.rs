@@ -151,11 +151,9 @@ fn main() {
             || arch == "mips"
             || arch == "sparc"
             || arch == "x86"
-            || (arch == "wasm32" && os == "emscripten")
             || (arch == "aarch64" && os == "linux" && abi == Ok("ilp32".to_string())))
         && (apple
             || os == "android"
-            || os == "emscripten"
             || os == "haiku"
             || env == "gnu"
             || (env == "musl" && arch == "x86")
