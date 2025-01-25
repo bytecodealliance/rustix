@@ -11,7 +11,7 @@ pub mod io {
     pub use std::io::{IoSlice, IoSliceMut};
 }
 
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[cfg(not(target_os = "wasi"))]
 #[cfg(feature = "net")]
 pub mod net {
     pub use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr, SocketAddrV4, SocketAddrV6};

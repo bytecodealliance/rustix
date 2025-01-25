@@ -1,6 +1,6 @@
 //! The same as v6.rs, but with `poll` calls.
 
-#![cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#![cfg(not(target_os = "wasi"))]
 
 use rustix::event::{poll, PollFd, PollFlags};
 use rustix::net::{

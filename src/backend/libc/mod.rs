@@ -117,7 +117,7 @@ pub(crate) mod mm;
 #[cfg(linux_kernel)]
 #[cfg(feature = "mount")]
 pub(crate) mod mount;
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[cfg(not(target_os = "wasi"))]
 #[cfg(feature = "net")]
 pub(crate) mod net;
 #[cfg(not(any(windows, target_os = "espidf")))]

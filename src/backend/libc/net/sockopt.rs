@@ -806,6 +806,7 @@ pub(crate) fn ipv6_original_dst(fd: BorrowedFd<'_>) -> io::Result<SocketAddrV6> 
     windows,
     target_os = "espidf",
     target_os = "haiku",
+    target_os = "redox",
     target_os = "vita"
 )))]
 #[inline]
@@ -818,6 +819,7 @@ pub(crate) fn set_ipv6_tclass(fd: BorrowedFd<'_>, value: u32) -> io::Result<()> 
     windows,
     target_os = "espidf",
     target_os = "haiku",
+    target_os = "redox",
     target_os = "vita"
 )))]
 #[inline]
@@ -836,13 +838,23 @@ pub(crate) fn tcp_nodelay(fd: BorrowedFd<'_>) -> io::Result<bool> {
 }
 
 #[inline]
-#[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
+#[cfg(not(any(
+    target_os = "openbsd",
+    target_os = "haiku",
+    target_os = "nto",
+    target_os = "redox"
+)))]
 pub(crate) fn set_tcp_keepcnt(fd: BorrowedFd<'_>, count: u32) -> io::Result<()> {
     setsockopt(fd, c::IPPROTO_TCP, c::TCP_KEEPCNT, count)
 }
 
 #[inline]
-#[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
+#[cfg(not(any(
+    target_os = "openbsd",
+    target_os = "haiku",
+    target_os = "nto",
+    target_os = "redox"
+)))]
 pub(crate) fn tcp_keepcnt(fd: BorrowedFd<'_>) -> io::Result<u32> {
     getsockopt(fd, c::IPPROTO_TCP, c::TCP_KEEPCNT)
 }
@@ -862,14 +874,24 @@ pub(crate) fn tcp_keepidle(fd: BorrowedFd<'_>) -> io::Result<Duration> {
 }
 
 #[inline]
-#[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
+#[cfg(not(any(
+    target_os = "openbsd",
+    target_os = "haiku",
+    target_os = "nto",
+    target_os = "redox"
+)))]
 pub(crate) fn set_tcp_keepintvl(fd: BorrowedFd<'_>, duration: Duration) -> io::Result<()> {
     let secs: c::c_uint = duration_to_secs(duration)?;
     setsockopt(fd, c::IPPROTO_TCP, c::TCP_KEEPINTVL, secs)
 }
 
 #[inline]
-#[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
+#[cfg(not(any(
+    target_os = "openbsd",
+    target_os = "haiku",
+    target_os = "nto",
+    target_os = "redox"
+)))]
 pub(crate) fn tcp_keepintvl(fd: BorrowedFd<'_>) -> io::Result<Duration> {
     let secs: c::c_uint = getsockopt(fd, c::IPPROTO_TCP, c::TCP_KEEPINTVL)?;
     Ok(Duration::from_secs(secs as u64))

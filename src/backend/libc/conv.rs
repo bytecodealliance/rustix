@@ -151,7 +151,7 @@ pub(super) fn ret_discarded_char_ptr(raw: *mut c::c_char) -> io::Result<()> {
 }
 
 /// Convert the buffer-length argument value of a `send` or `recv` call.
-#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(windows, target_os = "wasi")))]
 #[inline]
 pub(super) fn send_recv_len(len: usize) -> usize {
     len
@@ -168,7 +168,7 @@ pub(super) fn send_recv_len(len: usize) -> i32 {
 }
 
 /// Convert the return value of a `send` or `recv` call.
-#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(windows, target_os = "wasi")))]
 #[inline]
 pub(super) fn ret_send_recv(len: isize) -> io::Result<usize> {
     ret_usize(len)
@@ -183,7 +183,7 @@ pub(super) fn ret_send_recv(len: i32) -> io::Result<usize> {
 
 /// Convert the value to the `msg_iovlen` field of a `msghdr` struct.
 #[cfg(all(
-    not(any(windows, target_os = "espidf", target_os = "redox", target_os = "wasi")),
+    not(any(windows, target_os = "espidf", target_os = "wasi")),
     any(
         target_os = "android",
         all(

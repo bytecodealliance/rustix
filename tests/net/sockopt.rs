@@ -196,11 +196,19 @@ fn test_sockopts_tcp(s: &OwnedFd) {
 
     assert!(!sockopt::tcp_nodelay(s).unwrap());
 
-    #[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
+    #[cfg(not(any(
+        target_os = "openbsd",
+        target_os = "haiku",
+        target_os = "nto",
+        target_os = "redox"
+    )))]
     {
         assert!(sockopt::tcp_keepcnt(s).is_ok());
-        assert!(sockopt::tcp_keepidle(s).is_ok());
         assert!(sockopt::tcp_keepintvl(s).is_ok());
+    }
+    #[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
+    {
+        assert!(sockopt::tcp_keepidle(s).is_ok());
     }
 
     // Set the nodelay flag.
@@ -217,19 +225,28 @@ fn test_sockopts_tcp(s: &OwnedFd) {
 
     #[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
     {
+        #[cfg(not(target_os = "redox"))]
+        {
+            // Set keepalive values:
+            sockopt::set_tcp_keepcnt(s, 42).unwrap();
+            sockopt::set_tcp_keepintvl(s, Duration::from_secs(60)).unwrap();
+
+            // Check keepalive values:
+            assert_eq!(sockopt::tcp_keepcnt(s).unwrap(), 42);
+            assert_eq!(sockopt::tcp_keepintvl(s).unwrap(), Duration::from_secs(60));
+        }
+
         // Set keepalive values:
-        sockopt::set_tcp_keepcnt(s, 42).unwrap();
         sockopt::set_tcp_keepidle(s, Duration::from_secs(3601)).unwrap();
-        sockopt::set_tcp_keepintvl(s, Duration::from_secs(60)).unwrap();
 
         // Check keepalive values:
-        assert_eq!(sockopt::tcp_keepcnt(s).unwrap(), 42);
         assert_eq!(sockopt::tcp_keepidle(s).unwrap(), Duration::from_secs(3601));
-        assert_eq!(sockopt::tcp_keepintvl(s).unwrap(), Duration::from_secs(60));
 
-        #[cfg(not(target_os = "illumos"))]
+        #[cfg(not(any(target_os = "illumos", target_os = "redox")))]
         {
+            // Set keepalive values:
             sockopt::set_tcp_keepintvl(s, Duration::from_secs(61)).unwrap();
+            // Check keepalive values:
             assert_eq!(sockopt::tcp_keepintvl(s).unwrap(), Duration::from_secs(61));
         }
     }
@@ -468,7 +485,13 @@ fn test_sockopts_ipv6() {
     }
 
     // Check the initial value of `IPV6_TCLASS`, set it, and check it.
-    #[cfg(not(any(solarish, windows, target_os = "espidf", target_os = "haiku")))]
+    #[cfg(not(any(
+        solarish,
+        windows,
+        target_os = "espidf",
+        target_os = "haiku",
+        target_os = "redox"
+    )))]
     {
         assert_eq!(sockopt::ipv6_tclass(&s).unwrap(), 0);
         sockopt::set_ipv6_tclass(&s, 12).unwrap();
