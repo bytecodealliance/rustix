@@ -101,6 +101,8 @@ bitflags! {
     /// `FS_*` constants for use with [`ioctl_getflags`].
     ///
     /// [`ioctl_getflags`]: crate::fs::ioctl::ioctl_getflags
+    #[repr(transparent)]
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct IFlags: ffi::c_uint {
         /// `FS_APPEND_FL`
         const APPEND = linux_raw_sys::general::FS_APPEND_FL;

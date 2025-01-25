@@ -1,5 +1,5 @@
 #[cfg(feature = "process")]
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 #[test]
 fn test_special_fds() {
     use rustix::fs::{fstat, open, openat, Mode, OFlags, Stat, ABS, CWD};

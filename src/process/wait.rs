@@ -137,6 +137,15 @@ impl WaitStatus {
 #[cfg(not(any(target_os = "openbsd", target_os = "redox", target_os = "wasi")))]
 pub struct WaitIdStatus(pub(crate) backend::c::siginfo_t);
 
+// SAFTEY: `siginfo_t` does contain some raw pointers, such as the `si_ptr`
+// and the `si_addr` fields, however it's up to users to use those correctly.
+#[cfg(linux_raw)]
+unsafe impl Send for WaitIdStatus {}
+
+// SAFETY: Same as with `Send`.
+#[cfg(linux_raw)]
+unsafe impl Sync for WaitIdStatus {}
+
 #[cfg(not(any(target_os = "openbsd", target_os = "redox", target_os = "wasi")))]
 impl WaitIdStatus {
     /// Returns whether the process is currently stopped.

@@ -105,12 +105,12 @@ fn test_termios_modes() {
     assert!(!tio.local_modes.contains(LocalModes::TOSTOP));
     assert!(!tio.output_modes.contains(OutputModes::ONOCR));
     assert!(!tio.input_modes.contains(InputModes::IGNBRK));
-    assert!(!tio.control_modes.contains(ControlModes::CRTSCTS));
+    assert!(!tio.control_modes.contains(ControlModes::CLOCAL));
 
     tio.local_modes.insert(LocalModes::TOSTOP);
     tio.output_modes.insert(OutputModes::ONOCR);
     tio.input_modes.insert(InputModes::IGNBRK);
-    tio.control_modes.insert(ControlModes::CRTSCTS);
+    tio.control_modes.insert(ControlModes::CLOCAL);
 
     tcsetattr(&pty, OptionalActions::Now, &tio).unwrap();
 
@@ -119,7 +119,7 @@ fn test_termios_modes() {
     assert!(new_tio.local_modes.contains(LocalModes::TOSTOP));
     assert!(new_tio.output_modes.contains(OutputModes::ONOCR));
     assert!(new_tio.input_modes.contains(InputModes::IGNBRK));
-    assert!(new_tio.control_modes.contains(ControlModes::CRTSCTS));
+    assert!(new_tio.control_modes.contains(ControlModes::CLOCAL));
 }
 
 // Disable on illumos where `tcgetattr` doesn't appear to support
