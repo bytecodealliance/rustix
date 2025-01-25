@@ -39,7 +39,10 @@ unsafe impl<Opcode: CompileTimeOpcode> Ioctl for NoArg<Opcode> {
     type Output = ();
 
     const IS_MUTATING: bool = false;
-    const OPCODE: self::Opcode = Opcode::OPCODE;
+
+    fn opcode(&self) -> self::Opcode {
+        Opcode::OPCODE
+    }
 
     fn as_ptr(&mut self) -> *mut c::c_void {
         core::ptr::null_mut()
@@ -89,7 +92,10 @@ unsafe impl<Opcode: CompileTimeOpcode, Output> Ioctl for Getter<Opcode, Output> 
     type Output = Output;
 
     const IS_MUTATING: bool = true;
-    const OPCODE: self::Opcode = Opcode::OPCODE;
+
+    fn opcode(&self) -> self::Opcode {
+        Opcode::OPCODE
+    }
 
     fn as_ptr(&mut self) -> *mut c::c_void {
         self.output.as_mut_ptr().cast()
@@ -142,7 +148,10 @@ unsafe impl<Opcode: CompileTimeOpcode, Input> Ioctl for Setter<Opcode, Input> {
     type Output = ();
 
     const IS_MUTATING: bool = false;
-    const OPCODE: self::Opcode = Opcode::OPCODE;
+
+    fn opcode(&self) -> self::Opcode {
+        Opcode::OPCODE
+    }
 
     fn as_ptr(&mut self) -> *mut c::c_void {
         addr_of_mut!(self.input).cast::<c::c_void>()
@@ -186,7 +195,10 @@ unsafe impl<'a, Opcode: CompileTimeOpcode, T> Ioctl for Updater<'a, Opcode, T> {
     type Output = ();
 
     const IS_MUTATING: bool = true;
-    const OPCODE: self::Opcode = Opcode::OPCODE;
+
+    fn opcode(&self) -> self::Opcode {
+        Opcode::OPCODE
+    }
 
     fn as_ptr(&mut self) -> *mut c::c_void {
         (self.value as *mut T).cast()
@@ -244,7 +256,10 @@ unsafe impl<Opcode: CompileTimeOpcode> Ioctl for IntegerSetter<Opcode> {
     type Output = ();
 
     const IS_MUTATING: bool = false;
-    const OPCODE: self::Opcode = Opcode::OPCODE;
+
+    fn opcode(&self) -> self::Opcode {
+        Opcode::OPCODE
+    }
 
     fn as_ptr(&mut self) -> *mut c::c_void {
         self.value
