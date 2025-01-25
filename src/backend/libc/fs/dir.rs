@@ -130,10 +130,19 @@ impl Dir {
     }
 
     /// `seekdir(self, offset)`
+    ///
+    /// This function iso only available on 64-bit platforms because it's
+    /// implemented using [`libc::seekdir`] which only supports offsets that
+    /// fit in a `c_long`.
+    ///
+    /// [`libc::seekdir`]: https://docs.rs/libc/latest/arm-unknown-linux-gnueabihf/libc/fn.seekdir.html
+    #[cfg(target_pointer_width = "64")]
+    #[cfg_attr(docsrs, doc(cfg(target_pointer_width = "64")))]
+    #[doc(alias = "seekdir")]
     #[inline]
-    pub fn seekdir(&mut self, offset: i64) -> io::Result<()> {
+    pub fn seek(&mut self, offset: i64) -> io::Result<()> {
         self.any_errors = false;
-        unsafe { c::seekdir(self.libc_dir.as_ptr(), offset as c::c_long) }
+        unsafe { c::seekdir(self.libc_dir.as_ptr(), offset) }
         Ok(())
     }
 
@@ -179,7 +188,14 @@ impl Dir {
                     #[cfg(not(any(freebsdlike, netbsdlike, target_os = "vita")))]
                     d_ino: dirent.d_ino,
 
-                    #[cfg(any(linux_like))]
+                    #[cfg(any(
+                        linux_like,
+                        solarish,
+                        target_os = "fuchsia",
+                        target_os = "hermit",
+                        target_os = "openbsd",
+                        target_os = "redox"
+                    ))]
                     d_off: dirent.d_off,
 
                     #[cfg(any(freebsdlike, netbsdlike))]
@@ -290,7 +306,14 @@ pub struct DirEntry {
 
     name: CString,
 
-    #[cfg(any(linux_like))]
+    #[cfg(any(
+        linux_like,
+        solarish,
+        target_os = "fuchsia",
+        target_os = "hermit",
+        target_os = "openbsd",
+        target_os = "redox"
+    ))]
     d_off: c::off_t,
 }
 
@@ -304,7 +327,14 @@ impl DirEntry {
     /// Returns the "offset" of this directory entry. Note that this is not
     /// a true numerical offset but an opaque cookie that identifies a
     /// position in the given stream.
-    #[cfg(any(linux_like))]
+    #[cfg(any(
+        linux_like,
+        solarish,
+        target_os = "fuchsia",
+        target_os = "hermit",
+        target_os = "openbsd",
+        target_os = "redox"
+    ))]
     #[inline]
     pub fn offset(&self) -> i64 {
         self.d_off as i64

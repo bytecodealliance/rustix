@@ -80,8 +80,20 @@ impl Dir {
     }
 
     /// `seekdir(self, offset)`
+    ///
+    /// This function iso only available on 64-bit platforms because it's
+    /// implemented using [`libc::seekdir`] which only supports offsets that
+    /// fit in a `c_long`.
+    ///
+    /// [`libc::seekdir`]: https://docs.rs/libc/latest/arm-unknown-linux-gnueabihf/libc/fn.seekdir.html
+    // In the linux_raw backend here, we don't use `libc::seekdir` and don't
+    // have this limitattion, but it's a goal of rustix to support the same API
+    // on both the linux_raw and libc backends.
+    #[cfg(target_pointer_width = "64")]
+    #[cfg_attr(docsrs, doc(cfg(target_pointer_width = "64")))]
+    #[doc(alias = "seekdir")]
     #[inline]
-    pub fn seekdir(&mut self, offset: i64) -> io::Result<()> {
+    pub fn seek(&mut self, offset: i64) -> io::Result<()> {
         self.any_errors = false;
         self.rewind = false;
         self.pos = self.buf.len();
