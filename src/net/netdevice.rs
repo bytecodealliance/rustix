@@ -33,7 +33,7 @@ use alloc::string::String;
 /// [Linux]: https://man7.org/linux/man-pages/man7/netdevice.7.html
 #[inline]
 #[doc(alias = "SIOCGIFINDEX")]
-pub fn name_to_index(fd: impl AsFd, if_name: &str) -> io::Result<u32> {
+pub fn name_to_index<Fd: AsFd>(fd: Fd, if_name: &str) -> io::Result<u32> {
     crate::backend::net::netdevice::name_to_index(fd, if_name)
 }
 
@@ -50,7 +50,7 @@ pub fn name_to_index(fd: impl AsFd, if_name: &str) -> io::Result<u32> {
 #[inline]
 #[doc(alias = "SIOCGIFNAME")]
 #[cfg(feature = "alloc")]
-pub fn index_to_name(fd: impl AsFd, index: u32) -> io::Result<String> {
+pub fn index_to_name<Fd: AsFd>(fd: Fd, index: u32) -> io::Result<String> {
     crate::backend::net::netdevice::index_to_name(fd, index)
 }
 

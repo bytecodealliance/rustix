@@ -71,8 +71,8 @@ pub fn init(flags: inotify::CreateFlags) -> io::Result<OwnedFd> {
 /// application should keep track of this externally to avoid logic errors.
 #[doc(alias = "inotify_add_watch")]
 #[inline]
-pub fn add_watch<P: crate::path::Arg>(
-    inot: impl AsFd,
+pub fn add_watch<P: crate::path::Arg, Fd: AsFd>(
+    inot: Fd,
     path: P,
     flags: inotify::WatchFlags,
 ) -> io::Result<i32> {
@@ -85,7 +85,7 @@ pub fn add_watch<P: crate::path::Arg>(
 /// [`inotify::add_watch`] and not previously have been removed.
 #[doc(alias = "inotify_rm_watch")]
 #[inline]
-pub fn remove_watch(inot: impl AsFd, wd: i32) -> io::Result<()> {
+pub fn remove_watch<Fd: AsFd>(inot: Fd, wd: i32) -> io::Result<()> {
     syscalls::inotify_rm_watch(inot.as_fd(), wd)
 }
 

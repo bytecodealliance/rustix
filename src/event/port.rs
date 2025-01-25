@@ -58,9 +58,9 @@ pub fn port_create() -> io::Result<OwnedFd> {
 ///
 /// [OpenSolaris]: https://www.unix.com/man-page/opensolaris/3C/port_associate/
 /// [illumos]: https://illumos.org/man/3C/port_associate
-pub unsafe fn port_associate_fd(
-    port: impl AsFd,
-    object: impl AsRawFd,
+pub unsafe fn port_associate_fd<Fd: AsFd, RawFd: AsRawFd>(
+    port: Fd,
+    object: RawFd,
     events: PollFlags,
     userdata: *mut ffi::c_void,
 ) -> io::Result<()> {
@@ -87,7 +87,10 @@ pub unsafe fn port_associate_fd(
 ///
 /// [OpenSolaris]: https://www.unix.com/man-page/opensolaris/3C/port_dissociate
 /// [illumos]: https://illumos.org/man/3C/port_dissociate
-pub unsafe fn port_dissociate_fd(port: impl AsFd, object: impl AsRawFd) -> io::Result<()> {
+pub unsafe fn port_dissociate_fd<Fd: AsFd, RawFd: AsRawFd>(
+    port: Fd,
+    object: RawFd,
+) -> io::Result<()> {
     syscalls::port_dissociate(port.as_fd(), c::PORT_SOURCE_FD, object.as_raw_fd() as _)
 }
 
@@ -99,7 +102,7 @@ pub unsafe fn port_dissociate_fd(port: impl AsFd, object: impl AsRawFd) -> io::R
 ///
 /// [OpenSolaris]: https://www.unix.com/man-page/opensolaris/3C/port_get/
 /// [illumos]: https://illumos.org/man/3C/port_get
-pub fn port_get(port: impl AsFd, timeout: Option<Duration>) -> io::Result<Event> {
+pub fn port_get<Fd: AsFd>(port: Fd, timeout: Option<Duration>) -> io::Result<Event> {
     let mut timeout = timeout.map(|timeout| c::timespec {
         tv_sec: timeout.as_secs().try_into().unwrap(),
         tv_nsec: timeout.subsec_nanos() as _,
@@ -125,8 +128,8 @@ pub fn port_get(port: impl AsFd, timeout: Option<Duration>) -> io::Result<Event>
 /// [OpenSolaris]: https://www.unix.com/man-page/opensolaris/3C/port_getn/
 /// [illumos]: https://illumos.org/man/3C/port_getn
 #[cfg(feature = "alloc")]
-pub fn port_getn(
-    port: impl AsFd,
+pub fn port_getn<Fd: AsFd>(
+    port: Fd,
     events: &mut Vec<Event>,
     min_events: usize,
     timeout: Option<Duration>,
@@ -157,7 +160,7 @@ pub fn port_getn(
 ///
 /// [OpenSolaris]: https://www.unix.com/man-page/opensolaris/3C/port_getn/
 /// [illumos]: https://illumos.org/man/3C/port_getn
-pub fn port_getn_query(port: impl AsFd) -> io::Result<u32> {
+pub fn port_getn_query<Fd: AsFd>(port: Fd) -> io::Result<u32> {
     syscalls::port_getn_query(port.as_fd())
 }
 
@@ -169,6 +172,6 @@ pub fn port_getn_query(port: impl AsFd) -> io::Result<u32> {
 ///
 /// [OpenSolaris]: https://www.unix.com/man-page/opensolaris/3C/port_send/
 /// [illumos]: https://illumos.org/man/3C/port_send
-pub fn port_send(port: impl AsFd, events: i32, userdata: *mut ffi::c_void) -> io::Result<()> {
+pub fn port_send<Fd: AsFd>(port: Fd, events: i32, userdata: *mut ffi::c_void) -> io::Result<()> {
     syscalls::port_send(port.as_fd(), events, userdata.cast())
 }

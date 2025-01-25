@@ -617,8 +617,8 @@ impl FusedIterator for AncillaryDrain<'_> {}
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=sendmsg&section=2
 /// [illumos]: https://illumos.org/man/3SOCKET/sendmsg
 #[inline]
-pub fn sendmsg(
-    socket: impl AsFd,
+pub fn sendmsg<Fd: AsFd>(
+    socket: Fd,
     iov: &[IoSlice<'_>],
     control: &mut SendAncillaryBuffer<'_, '_, '_>,
     flags: SendFlags,
@@ -647,8 +647,8 @@ pub fn sendmsg(
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=sendmsg&section=2
 /// [illumos]: https://illumos.org/man/3SOCKET/sendmsg
 #[inline]
-pub fn sendmsg_v4(
-    socket: impl AsFd,
+pub fn sendmsg_v4<Fd: AsFd>(
+    socket: Fd,
     addr: &SocketAddrV4,
     iov: &[IoSlice<'_>],
     control: &mut SendAncillaryBuffer<'_, '_, '_>,
@@ -678,8 +678,8 @@ pub fn sendmsg_v4(
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=sendmsg&section=2
 /// [illumos]: https://illumos.org/man/3SOCKET/sendmsg
 #[inline]
-pub fn sendmsg_v6(
-    socket: impl AsFd,
+pub fn sendmsg_v6<Fd: AsFd>(
+    socket: Fd,
     addr: &SocketAddrV6,
     iov: &[IoSlice<'_>],
     control: &mut SendAncillaryBuffer<'_, '_, '_>,
@@ -711,8 +711,8 @@ pub fn sendmsg_v6(
 /// [illumos]: https://illumos.org/man/3SOCKET/sendmsg
 #[inline]
 #[cfg(unix)]
-pub fn sendmsg_unix(
-    socket: impl AsFd,
+pub fn sendmsg_unix<Fd: AsFd>(
+    socket: Fd,
     addr: &super::SocketAddrUnix,
     iov: &[IoSlice<'_>],
     control: &mut SendAncillaryBuffer<'_, '_, '_>,
@@ -729,8 +729,8 @@ pub fn sendmsg_unix(
 /// [Linux]: https://man7.org/linux/man-pages/man2/sendmsg.2.html
 #[inline]
 #[cfg(target_os = "linux")]
-pub fn sendmsg_xdp(
-    socket: impl AsFd,
+pub fn sendmsg_xdp<Fd: AsFd>(
+    socket: Fd,
     addr: &super::SocketAddrXdp,
     iov: &[IoSlice<'_>],
     control: &mut SendAncillaryBuffer<'_, '_, '_>,
@@ -760,8 +760,8 @@ pub fn sendmsg_xdp(
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=sendmsg&section=2
 /// [illumos]: https://illumos.org/man/3SOCKET/sendmsg
 #[inline]
-pub fn sendmsg_any(
-    socket: impl AsFd,
+pub fn sendmsg_any<Fd: AsFd>(
+    socket: Fd,
     addr: Option<&SocketAddrAny>,
     iov: &[IoSlice<'_>],
     control: &mut SendAncillaryBuffer<'_, '_, '_>,
@@ -807,8 +807,8 @@ pub fn sendmsg_any(
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=recvmsg&section=2
 /// [illumos]: https://illumos.org/man/3SOCKET/recvmsg
 #[inline]
-pub fn recvmsg(
-    socket: impl AsFd,
+pub fn recvmsg<Fd: AsFd>(
+    socket: Fd,
     iov: &mut [IoSliceMut<'_>],
     control: &mut RecvAncillaryBuffer<'_>,
     flags: RecvFlags,

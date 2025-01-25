@@ -1091,8 +1091,10 @@ const PR_PAC_SET_ENABLED_KEYS: c_int = 60;
 /// [`prctl(PR_PAC_SET_ENABLED_KEYS,…)`]: https://www.kernel.org/doc/html/v6.10/arch/arm64/pointer-authentication.html
 #[inline]
 #[doc(alias = "PR_PAC_SET_ENABLED_KEYS")]
-pub unsafe fn configure_pointer_authentication_keys(
-    config: impl Iterator<Item = (PointerAuthenticationKeys, bool)>,
+pub unsafe fn configure_pointer_authentication_keys<
+    Config: Iterator<Item = (PointerAuthenticationKeys, bool)>,
+>(
+    config: Config,
 ) -> io::Result<()> {
     let mut affected_keys: u32 = 0;
     let mut enabled_keys: u32 = 0;
