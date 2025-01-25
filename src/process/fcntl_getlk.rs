@@ -2,11 +2,13 @@ use super::Flock;
 use crate::fd::AsFd;
 use crate::{backend, io};
 
-/// `fcntl(fd, F_GETLK)`—Get the first lock that blocks the lock description pointed to by the
-/// argument `lock`. If no such lock is found, then `None` is returned.
+/// `fcntl(fd, F_GETLK)`—Get the first lock that blocks the lock description
+/// pointed to by the argument `lock`. If no such lock is found, then `None` is
+/// returned.
 ///
-/// If `lock.typ` is set to `FlockType::Unlocked`, the returned value/error is not explicitly
-/// defined, as per POSIX, and will depend on the underlying platform implementation.
+/// If `lock.typ` is set to `FlockType::Unlocked`, the returned value/error is
+/// not explicitly defined, as per POSIX, and will depend on the underlying
+/// platform implementation.
 ///
 /// # References
 ///  - [POSIX]

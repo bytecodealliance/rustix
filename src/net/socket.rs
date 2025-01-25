@@ -1,5 +1,6 @@
 use crate::fd::OwnedFd;
-use crate::net::{addr::SocketAddrArg, SocketAddrAny};
+use crate::net::addr::SocketAddrArg;
+use crate::net::SocketAddrAny;
 use crate::{backend, io};
 use backend::fd::AsFd;
 

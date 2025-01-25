@@ -14,10 +14,9 @@ use crate::io;
 use crate::net::sockopt::Timeout;
 #[cfg(target_os = "linux")]
 use crate::net::xdp::{XdpMmapOffsets, XdpOptionsFlags, XdpRingOffset, XdpStatistics, XdpUmemReg};
-use crate::net::SocketAddrBuf;
 use crate::net::{
-    AddressFamily, Ipv4Addr, Ipv6Addr, Protocol, RawProtocol, SocketAddrV4, SocketAddrV6,
-    SocketType, UCred,
+    AddressFamily, Ipv4Addr, Ipv6Addr, Protocol, RawProtocol, SocketAddrBuf, SocketAddrV4,
+    SocketAddrV6, SocketType, UCred,
 };
 #[cfg(feature = "alloc")]
 use alloc::borrow::ToOwned;
@@ -25,12 +24,10 @@ use alloc::borrow::ToOwned;
 use alloc::string::String;
 use core::mem::MaybeUninit;
 use core::time::Duration;
+use linux_raw_sys::general::{__kernel_old_timeval, __kernel_sock_timeval};
+use linux_raw_sys::net::{IPV6_MTU, IPV6_MULTICAST_IF, IP_MTU, IP_MULTICAST_IF};
 #[cfg(target_os = "linux")]
 use linux_raw_sys::xdp::{xdp_mmap_offsets, xdp_statistics, xdp_statistics_v1};
-use linux_raw_sys::{
-    general::{__kernel_old_timeval, __kernel_sock_timeval},
-    net::{IPV6_MTU, IPV6_MULTICAST_IF, IP_MTU, IP_MULTICAST_IF},
-};
 #[cfg(target_arch = "x86")]
 use {
     crate::backend::conv::{slice_just_addr, x86_sys},

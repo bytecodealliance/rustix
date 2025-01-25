@@ -132,11 +132,13 @@ fn io_uring_buf_ring_can_be_registered() {
     let mut params = io_uring_params::default();
     let ring_fd = io_uring_setup(4, &mut params).unwrap();
 
-    // Test that the kernel version supports IORING_REGISTER_PBUF_RING. If it doesn't, the kernel
-    // will return EINVAL. Not setting a `ring_addr` on `io_uring_buf_reg` will return `EFAULT`.
+    // Test that the kernel version supports IORING_REGISTER_PBUF_RING. If it
+    // doesn't, the kernel will return EINVAL. Not setting a `ring_addr` on
+    // `io_uring_buf_reg` will return `EFAULT`.
     if let Err(e) = register_buf_ring(ring_fd.as_fd(), &io_uring_buf_reg::default()) {
         if e == Errno::INVAL {
-            // Skip the test, as the current kernel version doesn't support what we need to test.
+            // Skip the test, as the current kernel version doesn't support what we need to
+            // test.
             return;
         }
     }

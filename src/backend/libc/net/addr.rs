@@ -79,8 +79,9 @@ impl SocketAddrUnix {
 
     /// Construct a new unnamed address.
     ///
-    /// The kernel will assign an abstract Unix-domain address to the socket when you call
-    /// [`bind_unix()`][crate::net::bind_unix]. You can inspect the assigned name with
+    /// The kernel will assign an abstract Unix-domain address to the socket
+    /// when you call [`bind_unix()`][crate::net::bind_unix]. You can
+    /// inspect the assigned name with
     /// [`getsockname`][crate::net::getsockname].
     ///
     /// # References

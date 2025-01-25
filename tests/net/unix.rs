@@ -930,8 +930,8 @@ fn test_unix_msg_with_combo() {
     server.join().unwrap();
 }
 
-/// Bind socket to an unnamed Unix-domain address, and assert that an abstract Unix-domain name was
-/// assigned by the kernel.
+/// Bind socket to an unnamed Unix-domain address, and assert that an abstract
+/// Unix-domain name was assigned by the kernel.
 #[cfg(linux_kernel)]
 #[test]
 fn test_bind_unnamed_address() {

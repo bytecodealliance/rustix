@@ -48,8 +48,8 @@ impl Timespec {
     ///
     /// # Panics
     ///
-    /// If `0 <= .tv_nsec < 1_000_000_000` doesn't hold, this function may panic or return
-    /// unexpected results.
+    /// If `0 <= .tv_nsec < 1_000_000_000` doesn't hold, this function may
+    /// panic or return unexpected results.
     ///
     /// # Example
     ///
@@ -57,15 +57,42 @@ impl Timespec {
     /// use rustix::event::Timespec;
     ///
     /// assert_eq!(
-    ///     Timespec { tv_sec: 1, tv_nsec: 2 }.checked_add(Timespec { tv_sec: 30, tv_nsec: 40 }),
-    ///     Some(Timespec { tv_sec: 31, tv_nsec: 42 })
+    ///     Timespec {
+    ///         tv_sec: 1,
+    ///         tv_nsec: 2
+    ///     }
+    ///     .checked_add(Timespec {
+    ///         tv_sec: 30,
+    ///         tv_nsec: 40
+    ///     }),
+    ///     Some(Timespec {
+    ///         tv_sec: 31,
+    ///         tv_nsec: 42
+    ///     })
     /// );
     /// assert_eq!(
-    ///     Timespec { tv_sec: 0, tv_nsec: 999_999_999 }.checked_add(Timespec { tv_sec: 0, tv_nsec: 2 }),
-    ///     Some(Timespec { tv_sec: 1, tv_nsec: 1 })
+    ///     Timespec {
+    ///         tv_sec: 0,
+    ///         tv_nsec: 999_999_999
+    ///     }
+    ///     .checked_add(Timespec {
+    ///         tv_sec: 0,
+    ///         tv_nsec: 2
+    ///     }),
+    ///     Some(Timespec {
+    ///         tv_sec: 1,
+    ///         tv_nsec: 1
+    ///     })
     /// );
     /// assert_eq!(
-    ///     Timespec { tv_sec: i64::MAX, tv_nsec: 999_999_999 }.checked_add(Timespec { tv_sec: 0, tv_nsec: 1 }),
+    ///     Timespec {
+    ///         tv_sec: i64::MAX,
+    ///         tv_nsec: 999_999_999
+    ///     }
+    ///     .checked_add(Timespec {
+    ///         tv_sec: 0,
+    ///         tv_nsec: 1
+    ///     }),
     ///     None
     /// );
     /// ```
@@ -90,8 +117,8 @@ impl Timespec {
     ///
     /// # Panics
     ///
-    /// If `0 <= .tv_nsec < 1_000_000_000` doesn't hold, this function may panic or return
-    /// unexpected results.
+    /// If `0 <= .tv_nsec < 1_000_000_000` doesn't hold, this function may
+    /// panic or return unexpected results.
     ///
     /// # Example
     ///
@@ -99,15 +126,42 @@ impl Timespec {
     /// use rustix::event::Timespec;
     ///
     /// assert_eq!(
-    ///     Timespec { tv_sec: 31, tv_nsec: 42 }.checked_sub(Timespec { tv_sec: 30, tv_nsec: 40 }),
-    ///     Some(Timespec { tv_sec: 1, tv_nsec: 2 })
+    ///     Timespec {
+    ///         tv_sec: 31,
+    ///         tv_nsec: 42
+    ///     }
+    ///     .checked_sub(Timespec {
+    ///         tv_sec: 30,
+    ///         tv_nsec: 40
+    ///     }),
+    ///     Some(Timespec {
+    ///         tv_sec: 1,
+    ///         tv_nsec: 2
+    ///     })
     /// );
     /// assert_eq!(
-    ///     Timespec { tv_sec: 1, tv_nsec: 1 }.checked_sub(Timespec { tv_sec: 0, tv_nsec: 2 }),
-    ///     Some(Timespec { tv_sec: 0, tv_nsec: 999_999_999 })
+    ///     Timespec {
+    ///         tv_sec: 1,
+    ///         tv_nsec: 1
+    ///     }
+    ///     .checked_sub(Timespec {
+    ///         tv_sec: 0,
+    ///         tv_nsec: 2
+    ///     }),
+    ///     Some(Timespec {
+    ///         tv_sec: 0,
+    ///         tv_nsec: 999_999_999
+    ///     })
     /// );
     /// assert_eq!(
-    ///     Timespec { tv_sec: i64::MIN, tv_nsec: 0 }.checked_sub(Timespec { tv_sec: 0, tv_nsec: 1 }),
+    ///     Timespec {
+    ///         tv_sec: i64::MIN,
+    ///         tv_nsec: 0
+    ///     }
+    ///     .checked_sub(Timespec {
+    ///         tv_sec: 0,
+    ///         tv_nsec: 1
+    ///     }),
     ///     None
     /// );
     /// ```

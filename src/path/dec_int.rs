@@ -164,8 +164,9 @@ impl DecInt {
         let mut buf = [MaybeUninit::uninit(); BUF_LEN];
         buf[BUF_LEN - 1] = MaybeUninit::new(b'\0');
 
-        // We use `loop { …; if cond { break } }` instead of `while !cond { … }` so the loop is
-        // entered at least once. This way `0` does not need a special handling.
+        // We use `loop { …; if cond { break } }` instead of `while !cond { … }` so the
+        // loop is entered at least once. This way `0` does not need a special
+        // handling.
         loop {
             len += 1;
             if len > BUF_LEN {

@@ -49,7 +49,7 @@ pub(super) struct Vdso {
     verdef: *const Elf_Verdef,
 }
 
-/// Straight from the ELF specification...and then tweaked slightly, in order to
+/// Straight from the ELF specification…and then tweaked slightly, in order to
 /// avoid a few clang warnings.
 /// (And then translated to Rust).
 fn elf_hash(name: &CStr) -> u32 {

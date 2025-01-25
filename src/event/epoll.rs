@@ -241,11 +241,11 @@ pub fn wait<EpollFd: AsFd>(
     ),
     repr(packed)
 )]
-#[derive(Copy, Clone, Eq, PartialEq, Hash)]
 #[cfg_attr(
     all(solarish, any(target_arch = "x86", target_arch = "x86_64")),
     repr(packed(4))
 )]
+#[derive(Copy, Clone, Eq, PartialEq, Hash)]
 pub struct Event {
     /// Which specific event(s) occurred.
     pub flags: EventFlags,

@@ -3,7 +3,8 @@
 #![allow(unsafe_code)]
 
 use crate::buffer::split_init;
-use crate::net::{addr::SocketAddrArg, SocketAddrAny};
+use crate::net::addr::SocketAddrArg;
+use crate::net::SocketAddrAny;
 use crate::{backend, io};
 use backend::fd::AsFd;
 use core::cmp::min;

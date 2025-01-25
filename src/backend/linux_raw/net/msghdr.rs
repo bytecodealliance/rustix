@@ -8,8 +8,8 @@
 use crate::backend::c;
 
 use crate::io::{self, IoSlice, IoSliceMut};
-use crate::net::SocketAddrBuf;
-use crate::net::{addr::SocketAddrArg, RecvAncillaryBuffer, SendAncillaryBuffer};
+use crate::net::addr::SocketAddrArg;
+use crate::net::{RecvAncillaryBuffer, SendAncillaryBuffer, SocketAddrBuf};
 
 use core::ptr::null_mut;
 

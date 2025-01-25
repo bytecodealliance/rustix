@@ -8,8 +8,9 @@ use crate::net::addr::SocketAddrLen;
 use crate::net::netlink::SocketAddrNetlink;
 #[cfg(target_os = "linux")]
 use crate::net::xdp::{SockaddrXdpFlags, SocketAddrXdp};
-use crate::net::{AddressFamily, SocketAddrAny};
-use crate::net::{Ipv4Addr, Ipv6Addr, SocketAddrUnix, SocketAddrV4, SocketAddrV6};
+use crate::net::{
+    AddressFamily, Ipv4Addr, Ipv6Addr, SocketAddrAny, SocketAddrUnix, SocketAddrV4, SocketAddrV6,
+};
 use core::mem::size_of;
 use core::slice;
 

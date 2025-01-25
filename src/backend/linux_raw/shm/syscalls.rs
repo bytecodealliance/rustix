@@ -3,8 +3,7 @@ use crate::ffi::CStr;
 use crate::backend::fs::syscalls::{open, unlink};
 use crate::backend::fs::types::{Mode, OFlags};
 use crate::fd::OwnedFd;
-use crate::io;
-use crate::shm;
+use crate::{io, shm};
 
 const NAME_MAX: usize = 255;
 const SHM_DIR: &[u8] = b"/dev/shm/";

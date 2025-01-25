@@ -10,7 +10,8 @@ use rustix::io;
 ))]
 use rustix::net::ipproto;
 use rustix::net::{sockopt, AddressFamily, SocketType};
-use std::{net::Ipv4Addr, time::Duration};
+use std::net::Ipv4Addr;
+use std::time::Duration;
 
 // Test `socket` socket options.
 fn test_sockopts_socket(s: &OwnedFd) {
