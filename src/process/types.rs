@@ -27,9 +27,9 @@ impl Flock {
         Flock {
             start: raw_fl.l_start as _,
             length: raw_fl.l_len as _,
-            pid: transmute(raw_fl.l_pid),
-            typ: transmute(raw_fl.l_type),
-            offset_type: transmute(raw_fl.l_whence),
+            pid: Pid::from_raw(raw_fl.l_pid),
+            typ: transmute::<i16, FlockType>(raw_fl.l_type),
+            offset_type: transmute::<i16, FlockOffsetType>(raw_fl.l_whence),
         }
     }
 
@@ -37,7 +37,7 @@ impl Flock {
         let mut f: c::flock = unsafe { core::mem::zeroed() };
         f.l_start = self.start as _;
         f.l_len = self.length as _;
-        f.l_pid = unsafe { transmute(self.pid) };
+        f.l_pid = Pid::as_raw(self.pid);
         f.l_type = self.typ as _;
         f.l_whence = self.offset_type as _;
         f

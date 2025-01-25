@@ -575,7 +575,7 @@ fn test_unix_msg_with_scm_rights() {
         .unwrap();
 
         // Read a value from the pipe.
-        let mut buffer = [0u8; 13];
+        let mut buffer = [0_u8; 13];
         read(&read_end, &mut buffer).unwrap();
         assert_eq!(&buffer, b"pipe message!".as_ref());
     };
@@ -897,17 +897,17 @@ fn test_unix_msg_with_combo() {
         .unwrap();
 
         // Read a value from the pipe.
-        let mut buffer = [0u8; 13];
+        let mut buffer = [0_u8; 13];
         read(&read_end, &mut buffer).unwrap();
         assert_eq!(&buffer, b"pipe message!".as_ref());
 
         // Read a value from the other pipe.
-        let mut buffer = [0u8; 20];
+        let mut buffer = [0_u8; 20];
         read(&another_read_end, &mut buffer).unwrap();
         assert_eq!(&buffer, b"and another message!".as_ref());
 
         // Read a value from the other pipe.
-        let mut buffer = [0u8; 20];
+        let mut buffer = [0_u8; 20];
         read(&yet_another_read_end, &mut buffer).unwrap();
         assert_eq!(&buffer, b"yet another message!".as_ref());
     };

@@ -11,7 +11,8 @@ use crate::event::Timespec;
 use crate::fd::RawFd;
 use crate::{backend, io};
 #[cfg(any(windows, target_os = "wasi"))]
-use core::mem::{align_of, size_of};
+use core::mem::align_of;
+use core::mem::size_of;
 #[cfg(any(windows, target_os = "wasi"))]
 use core::slice;
 
@@ -128,7 +129,7 @@ pub unsafe fn select(
 }
 
 #[cfg(not(any(windows, target_os = "wasi")))]
-const BITS: usize = core::mem::size_of::<FdSetElement>() * 8;
+const BITS: usize = size_of::<FdSetElement>() * 8;
 
 /// Set `fd` in the set pointed to by `fds`.
 #[doc(alias = "FD_SET")]

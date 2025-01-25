@@ -42,7 +42,7 @@ pub(crate) fn CPU_COUNT_S(size_in_bytes: usize, cpuset: &RawCpuSet) -> u32 {
 
 #[inline]
 pub(crate) fn CPU_COUNT(cpuset: &RawCpuSet) -> u32 {
-    CPU_COUNT_S(core::mem::size_of::<RawCpuSet>(), cpuset)
+    CPU_COUNT_S(size_of::<RawCpuSet>(), cpuset)
 }
 
 #[inline]

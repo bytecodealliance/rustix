@@ -1,4 +1,5 @@
 use crate::ffi;
+use core::mem::size_of;
 
 /// `sysinfo`
 #[non_exhaustive]
@@ -32,8 +33,7 @@ pub struct Sysinfo {
     /// Memory unit size in bytes
     pub mem_unit: ffi::c_uint,
 
-    pub(crate) f:
-        [u8; 20 - 2 * core::mem::size_of::<ffi::c_long>() - core::mem::size_of::<ffi::c_int>()],
+    pub(crate) f: [u8; 20 - 2 * size_of::<ffi::c_long>() - size_of::<ffi::c_int>()],
 }
 
 pub(crate) type RawUname = linux_raw_sys::system::new_utsname;

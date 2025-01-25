@@ -32,10 +32,6 @@ use linux_raw_sys::general::{
 #[cfg(feature = "alloc")]
 use {alloc::borrow::Cow, alloc::vec};
 
-// TODO: Fix linux-raw-sys to define EM_CURRENT for s390x.
-#[cfg(target_arch = "s390x")]
-const EM_CURRENT: u16 = 22; // EM_S390
-
 #[cfg(feature = "param")]
 #[inline]
 pub(crate) fn page_size() -> usize {
@@ -248,7 +244,7 @@ fn pr_get_auxv_dynamic(buffer: &mut [u8; 512]) -> crate::io::Result<Cow<'_, [u8]
     };
 
     // If that indicates it needs a bigger buffer, allocate one.
-    let mut buffer = vec![0u8; len];
+    let mut buffer = vec![0_u8; len];
     let len = unsafe {
         ret_usize(syscall_always_asm!(
             __NR_prctl,
@@ -282,7 +278,7 @@ fn maybe_init_auxv() {
 /// /proc/self/auxv for kernels that don't support `PR_GET_AUXV`.
 #[cold]
 fn init_auxv_impl() -> Result<(), ()> {
-    let mut buffer = [0u8; 512];
+    let mut buffer = [0_u8; 512];
 
     // If we don't have "alloc", just try to read into our statically-sized
     // buffer. This might fail due to the buffer being insufficient; we're

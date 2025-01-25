@@ -589,6 +589,6 @@ pub(crate) fn epoll_wait(
             events.len().try_into().unwrap_or(i32::MAX),
             timeout,
         ))
-        .map(|i| i.try_into().unwrap_or(usize::MAX))
+        .map(|i| i as usize)
     }
 }

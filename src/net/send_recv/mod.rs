@@ -58,6 +58,7 @@ pub fn recv<Fd: AsFd>(fd: Fd, buf: &mut [u8], flags: RecvFlags) -> io::Result<us
 /// memory. It returns the slice that was initialized by this function, the
 /// slice that remains uninitialized, and the number of bytes received before
 /// any truncation due to the `RecvFlags::TRUNC` flag.
+#[allow(clippy::type_complexity)]
 #[inline]
 pub fn recv_uninit<Fd: AsFd>(
     fd: Fd,

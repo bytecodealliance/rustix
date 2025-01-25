@@ -207,6 +207,7 @@ impl Signal {
     #[doc(alias = "SIGRTMIN")]
     #[cfg(feature = "use-libc-sigrt")]
     #[cfg_attr(docsrs, doc(cfg(feature = "use-libc-sigrt")))]
+    #[cfg(any(linux_like, solarish, target_os = "hurd"))]
     pub fn rt_min() -> Self {
         // SAFETY: The libc is telling us this is the value it wants us to use.
         unsafe { Self::from_raw_unchecked(libc_sigrt_min()) }
@@ -216,6 +217,7 @@ impl Signal {
     #[doc(alias = "SIGRTMAX")]
     #[cfg(feature = "use-libc-sigrt")]
     #[cfg_attr(docsrs, doc(cfg(feature = "use-libc-sigrt")))]
+    #[cfg(any(linux_like, solarish, target_os = "hurd"))]
     pub fn rt_max() -> Self {
         // SAFETY: The libc is telling us this is the value it wants us to use.
         unsafe { Self::from_raw_unchecked(libc_sigrt_max()) }
@@ -224,6 +226,7 @@ impl Signal {
     /// Convert a raw signal number into a `Signal`.
     #[cfg(feature = "use-libc-sigrt")]
     #[cfg_attr(docsrs, doc(cfg(feature = "use-libc-sigrt")))]
+    #[cfg(any(linux_like, solarish, target_os = "hurd"))]
     pub fn from_raw(sig: i32) -> Option<Self> {
         if let Some(non_zero) = NonZeroI32::new(sig) {
             Self::from_raw_nonzero(non_zero)
@@ -235,6 +238,7 @@ impl Signal {
     /// Convert a raw non-zero signal number into a `Signal`.
     #[cfg(feature = "use-libc-sigrt")]
     #[cfg_attr(docsrs, doc(cfg(feature = "use-libc-sigrt")))]
+    #[cfg(any(linux_like, solarish, target_os = "hurd"))]
     pub fn from_raw_nonzero(non_zero: NonZeroI32) -> Option<Self> {
         let sig = non_zero.get();
         match sig {

@@ -718,7 +718,6 @@ fn lstat_old(path: &CStr) -> io::Result<Stat> {
     target_arch = "mips64",
     target_arch = "mips64r6"
 ))]
-#[allow(deprecated)] // for `st_[amc]time` u64->i64 transition
 fn statx_to_stat(x: crate::fs::Statx) -> io::Result<Stat> {
     Ok(Stat {
         st_dev: crate::fs::makedev(x.stx_dev_major, x.stx_dev_minor),
@@ -742,7 +741,6 @@ fn statx_to_stat(x: crate::fs::Statx) -> io::Result<Stat> {
 
 /// Convert from a Linux `stat64` value to rustix's `Stat`.
 #[cfg(target_pointer_width = "32")]
-#[allow(deprecated)] // for `st_[amc]time` u64->i64 transition
 fn stat_to_stat(s64: linux_raw_sys::general::stat64) -> io::Result<Stat> {
     Ok(Stat {
         st_dev: s64.st_dev.try_into().map_err(|_| io::Errno::OVERFLOW)?,
@@ -945,7 +943,7 @@ fn statfs_to_statvfs(statfs: StatFs) -> StatVfs {
         f_files: statfs.f_files as u64,
         f_ffree: statfs.f_ffree as u64,
         f_favail: statfs.f_ffree as u64,
-        f_fsid: u64::from(f_fsid_val0 as u32) | u64::from(f_fsid_val1 as u32) << 32,
+        f_fsid: u64::from(f_fsid_val0 as u32) | (u64::from(f_fsid_val1 as u32) << 32),
         f_flag: StatVfsMountFlags::from_bits_retain(statfs.f_flags as u64),
         f_namemax: statfs.f_namelen as u64,
     }

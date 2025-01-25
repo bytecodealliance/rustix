@@ -23,7 +23,7 @@ impl SocketAddrBuf {
     #[inline]
     pub(crate) fn new() -> Self {
         SocketAddrBuf {
-            len: size_of::<SocketAddrStorage>().try_into().unwrap(),
+            len: size_of::<SocketAddrStorage>() as c::socklen_t,
             storage: MaybeUninit::<SocketAddrStorage>::uninit(),
         }
     }
@@ -94,8 +94,8 @@ impl SocketAddrAny {
     /// * `len` bytes must be initialized.
     #[inline]
     pub unsafe fn new(storage: MaybeUninit<SocketAddrStorage>, len: SocketAddrLen) -> Self {
-        assert!(len as usize >= core::mem::size_of::<read_sockaddr::sockaddr_header>());
-        assert!(len as usize <= core::mem::size_of::<SocketAddrStorage>());
+        assert!(len as usize >= size_of::<read_sockaddr::sockaddr_header>());
+        assert!(len as usize <= size_of::<SocketAddrStorage>());
         let len = NonZeroU32::new_unchecked(len);
         Self { storage, len }
     }
@@ -146,6 +146,10 @@ impl PartialEq<SocketAddrAny> for SocketAddrAny {
 
 impl Eq for SocketAddrAny {}
 
+#[allow(
+    clippy::non_canonical_partial_ord_impl,
+    reason = "this just forwards to another `partial_cmp`"
+)]
 impl PartialOrd<SocketAddrAny> for SocketAddrAny {
     fn partial_cmp(&self, other: &SocketAddrAny) -> Option<core::cmp::Ordering> {
         self.bytes().partial_cmp(other.bytes())

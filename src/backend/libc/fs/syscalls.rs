@@ -1831,7 +1831,6 @@ pub(crate) fn sendfile(
 
 /// Convert from a Linux `statx` value to rustix's `Stat`.
 #[cfg(all(linux_kernel, target_pointer_width = "32"))]
-#[allow(deprecated)] // for `st_[amc]time` u64->i64 transition
 fn statx_to_stat(x: crate::fs::Statx) -> io::Result<Stat> {
     Ok(Stat {
         st_dev: crate::fs::makedev(x.stx_dev_major, x.stx_dev_minor).into(),
@@ -1882,7 +1881,6 @@ fn statx_to_stat(x: crate::fs::Statx) -> io::Result<Stat> {
 
 /// Convert from a Linux `stat64` value to rustix's `Stat`.
 #[cfg(all(linux_kernel, target_pointer_width = "32"))]
-#[allow(deprecated)] // for `st_[amc]time` u64->i64 transition
 fn stat64_to_stat(s64: c::stat64) -> io::Result<Stat> {
     Ok(Stat {
         st_dev: s64.st_dev.try_into().map_err(|_| io::Errno::OVERFLOW)?,

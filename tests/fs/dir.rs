@@ -83,7 +83,7 @@ fn test_dir_seek() {
     let mut filenames = Vec::<String>::with_capacity(count);
     for i in 0..count {
         let filename = format!("{}-{}.txt", prefix, i);
-        let mut file = std::fs::File::create(&tempdir.path().join(&filename)).unwrap();
+        let mut file = std::fs::File::create(tempdir.path().join(&filename)).unwrap();
         filenames.push(filename);
         file.write_all(test_string.as_bytes()).unwrap();
     }

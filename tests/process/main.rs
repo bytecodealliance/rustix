@@ -12,6 +12,7 @@
     target_os = "vita",
     target_os = "wasi"
 )))]
+#[cfg(feature = "fs")]
 mod fcntl_getlk;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have get[gpu]id.
 mod id;
