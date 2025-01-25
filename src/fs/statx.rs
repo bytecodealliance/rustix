@@ -51,11 +51,14 @@ pub struct Statx {
 /// `struct statx_timestamp` for use with [`Statx`].
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-#[allow(missing_docs)]
 #[non_exhaustive]
 pub struct StatxTimestamp {
+    /// Seconds.
     pub tv_sec: i64,
+
+    /// Nanoseconds. Must be less than 1_000_000_000.
     pub tv_nsec: u32,
+
     pub(crate) __reserved: i32,
 }
 
@@ -156,7 +159,7 @@ bitflags! {
     }
 }
 
-/// `statx(dirfd, path, flags, mask, statxbuf)`
+/// `statx(dirfd, path, flags, mask, statxbuf)`—Extended `stat`.
 ///
 /// This function returns [`io::Errno::NOSYS`] if `statx` is not available on
 /// the platform, such as Linux before 4.11. This also includes older Docker

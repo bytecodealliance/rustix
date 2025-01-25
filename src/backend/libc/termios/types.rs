@@ -1,3 +1,5 @@
+//! Types for the `termios` module.
+
 #![allow(non_camel_case_types)]
 
 #[cfg(not(target_os = "redox"))]

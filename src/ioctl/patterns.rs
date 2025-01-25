@@ -279,7 +279,13 @@ pub trait CompileTimeOpcode {
     const OPCODE: Opcode;
 }
 
-/// Provides a bad opcode at compile time.
+/// Provides a “bad” opcode at compile time.
+///
+/// Linux [calls them “bad”] because they use an older style of opcode
+/// numbering; it doesn't mean there's anything bad about them from the
+/// perspective of a user of these opcodes.
+///
+/// [calls them “bad”]: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/uapi/asm-generic/ioctl.h?id=6d89ead19946181df1e41d38917fddc951dbd95b#n89
 pub struct BadOpcode<const OPCODE: RawOpcode>;
 
 impl<const OPCODE: RawOpcode> CompileTimeOpcode for BadOpcode<OPCODE> {

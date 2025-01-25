@@ -240,6 +240,8 @@ pub fn unlinkat<P: path::Arg, Fd: AsFd>(dirfd: Fd, path: P, flags: AtFlags) -> i
 /// `renameat(old_dirfd, old_path, new_dirfd, new_path)`—Renames a file or
 /// directory.
 ///
+/// See [`renameat_with`] to pass additional flags.
+///
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
@@ -267,6 +269,9 @@ pub fn renameat<P: path::Arg, Q: path::Arg, PFd: AsFd, QFd: AsFd>(
 
 /// `renameat2(old_dirfd, old_path, new_dirfd, new_path, flags)`—Renames a
 /// file or directory.
+///
+/// `renameat_with` is the same as [`renameat`] but adds an additional
+/// flags operand.
 ///
 /// # References
 ///  - [Linux]
@@ -412,7 +417,7 @@ pub fn chmodat<P: path::Arg, Fd: AsFd>(
 /// # References
 ///  - [Apple]
 ///
-/// [Apple]: https://opensource.apple.com/source/xnu/xnu-3789.21.4/bsd/man/man2/clonefile.2.auto.html
+/// [Apple]: https://github.com/apple-oss-distributions/xnu/blob/main/bsd/man/man2/clonefile.2
 #[cfg(apple)]
 #[inline]
 pub fn fclonefileat<Fd: AsFd, DstFd: AsFd, P: path::Arg>(

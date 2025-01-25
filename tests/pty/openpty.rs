@@ -1,3 +1,5 @@
+//! Tests that do what `openpty` would do.
+
 #![allow(unused_mut, unused_imports)]
 
 use rustix::fs::{openat, Mode, OFlags, CWD};

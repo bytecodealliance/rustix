@@ -107,11 +107,11 @@ pub fn create(flags: epoll::CreateFlags) -> io::Result<OwnedFd> {
 /// This registers interest in any of the events set in `event_flags` occurring
 /// on the file descriptor associated with `data`.
 ///
-/// Note that `close`ing a file descriptor does not necessarily unregister
-/// interest which can lead to spurious events being returned from
-/// [`epoll::wait`]. If a file descriptor is an `Arc<dyn SystemResource>`, then
-/// `epoll` can be thought to maintain a `Weak<dyn SystemResource>` to the file
-/// descriptor. Check the [faq] for details.
+/// `close`ing a file descriptor does not necessarily unregister interest which
+/// can lead to spurious events being returned from [`epoll::wait`]. If a file
+/// descriptor is an `Arc<dyn SystemResource>`, then `epoll` can be thought to
+/// maintain a `Weak<dyn SystemResource>` to the file descriptor. Check the
+/// [faq] for details.
 ///
 /// # References
 ///  - [Linux]
@@ -205,7 +205,8 @@ pub fn delete<EpollFd: AsFd, SourceFd: AsFd>(epoll: EpollFd, source: SourceFd) -
 /// [Linux]: https://man7.org/linux/man-pages/man2/epoll_wait.2.html
 /// [illumos]: https://www.illumos.org/man/3C/epoll_wait
 #[cfg(feature = "alloc")]
-#[cfg_attr(docsrs, doc(cfg(feature = "alloc"), alias = "epoll_wait"))]
+#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
+#[doc(alias = "epoll_wait")]
 #[inline]
 pub fn wait<EpollFd: AsFd>(
     epoll: EpollFd,

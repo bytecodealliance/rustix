@@ -332,16 +332,17 @@ bitflags! {
 
         /// `O_LARGEFILE`
         ///
-        /// Note that rustix and/or libc will automatically set this flag when appropriate on
-        /// `open(2)` and friends, thus typical users do not need to care about it.
-        /// It will may be reported in return of `fcntl_getfl`, though.
+        /// Rustix and/or libc will automatically set this flag when
+        /// appropriate in the [`rustix::fs::open`] family of functions, so
+        /// typical users do not need to care about it. It may be reported in
+        /// the return of `fcntl_getfl`, though.
         #[cfg(any(linux_kernel, solarish))]
         const LARGEFILE = bitcast!(c::O_LARGEFILE);
 
         /// `O_ASYNC`, `FASYNC`
         ///
-        /// Note that this flag can't be used with [`rustix::fs::open`] family of functions, use
-        /// [`rustix::fs::fcntl_setfl`] instead
+        /// This flag can't be used with the [`rustix::fs::open`] family of
+        /// functions, use [`rustix::fs::fcntl_setfl`] instead.
         #[cfg(not(any(
             target_os = "aix",
             target_os = "espidf",
@@ -994,7 +995,7 @@ pub type StatFs = c::statfs;
 #[cfg(linux_like)]
 pub type StatFs = c::statfs64;
 
-/// `fsid_t` for use with `StatFs`.
+/// `fsid_t` for use with [`StatFs`].
 #[cfg(not(any(
     solarish,
     target_os = "espidf",

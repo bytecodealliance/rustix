@@ -53,7 +53,7 @@ pub fn gettid() -> Pid {
     backend::thread::syscalls::gettid()
 }
 
-/// `setuid(uid)`
+/// `setuid(uid)`—Sets the effective user ID of the calling thread.
 ///
 /// # Warning
 ///
@@ -78,7 +78,8 @@ pub fn set_thread_uid(uid: Uid) -> io::Result<()> {
     backend::thread::syscalls::setuid_thread(uid)
 }
 
-/// `setresuid(ruid, euid, suid)`
+/// `setresuid(ruid, euid, suid)`—Sets the real, effective, and saved user ID
+/// of the calling thread.
 ///
 /// # Warning
 ///
@@ -101,7 +102,7 @@ pub fn set_thread_res_uid(ruid: Uid, euid: Uid, suid: Uid) -> io::Result<()> {
     backend::thread::syscalls::setresuid_thread(ruid, euid, suid)
 }
 
-/// `setgid(gid)`
+/// `setgid(gid)`—Sets the effective group ID of the current thread.
 ///
 /// # Warning
 ///
@@ -126,7 +127,8 @@ pub fn set_thread_gid(gid: Gid) -> io::Result<()> {
     backend::thread::syscalls::setgid_thread(gid)
 }
 
-/// `setresgid(rgid, egid, sgid)`
+/// `setresgid(rgid, egid, sgid)`—Sets the real, effective, and saved group
+/// ID of the current thread.
 ///
 /// # Warning
 ///
@@ -149,7 +151,7 @@ pub fn set_thread_res_gid(rgid: Gid, egid: Gid, sgid: Gid) -> io::Result<()> {
     backend::thread::syscalls::setresgid_thread(rgid, egid, sgid)
 }
 
-/// `setgroups(groups)`-Sets the supplementary group IDs for the calling
+/// `setgroups(groups)`—Sets the supplementary group IDs for the calling
 /// thread.
 ///
 /// # Warning

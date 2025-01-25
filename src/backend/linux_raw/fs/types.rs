@@ -252,15 +252,16 @@ bitflags! {
 
         /// `O_LARGEFILE`
         ///
-        /// Note that rustix and/or libc will automatically set this flag when appropriate on
-        /// `open(2)` and friends, thus typical users do not need to care about it.
-        /// It will may be reported in return of `fcntl_getfl`, though.
+        /// Tustix and/or libc will automatically set this flag when
+        /// appropriate in the [`rustix::fs::open`] family of functions, so
+        /// typical users do not need to care about it. It may be reported in
+        /// the return of `fcntl_getfl`, though.
         const LARGEFILE = linux_raw_sys::general::O_LARGEFILE;
 
         /// `O_ASYNC`, `FASYNC`
         ///
-        /// Note that this flag can't be used with [`rustix::fs::open`] family of functions, use
-        /// [`rustix::fs::fcntl_setfl`] instead
+        /// This flag can't be used with the [`rustix::fs::open`] family of
+        /// functions, use [`rustix::fs::fcntl_setfl`] instead.
         const ASYNC = linux_raw_sys::general::FASYNC;
 
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>

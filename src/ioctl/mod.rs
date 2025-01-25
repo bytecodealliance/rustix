@@ -280,8 +280,8 @@ impl Opcode {
 
 /// The direction that an `ioctl` is going.
 ///
-/// Note that this is relative to userspace. `Read` means reading data from the
-/// kernel, and write means the kernel writing data to userspace.
+/// The direction is relative to userspace: `Read` means reading data from the
+/// kernel, and `Write` means the kernel writing data to userspace.
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Direction {
     /// None of the above.

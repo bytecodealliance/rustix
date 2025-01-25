@@ -70,6 +70,8 @@ pub fn io_uring_setup(entries: u32, params: &mut io_uring_params) -> io::Result<
 /// `io_uring_register(fd, opcode, arg, nr_args)`—Register files or user
 /// buffers for asynchronous I/O.
 ///
+/// To pass flags, use [`io_uring_register_with`].
+///
 /// # Safety
 ///
 /// io_uring operates on raw pointers and raw file descriptors. Users are

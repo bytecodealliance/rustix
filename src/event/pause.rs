@@ -1,6 +1,6 @@
 use crate::backend;
 
-/// `pause()`
+/// `pause()`—Sleep until interrupted by a signal.
 ///
 /// The POSIX `pause` interface returns an error code, but the only thing
 /// `pause` does is sleep until interrupted by a signal, so it always

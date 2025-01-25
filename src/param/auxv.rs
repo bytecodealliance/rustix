@@ -21,6 +21,8 @@ use crate::ffi::CStr;
 /// [Linux `sysconf`]: https://man7.org/linux/man-pages/man3/sysconf.3.html
 /// [Linux `getpagesize`]: https://man7.org/linux/man-pages/man2/getpagesize.2.html
 #[inline]
+#[doc(alias = "PAGESIZE")]
+#[doc(alias = "PAGE_SIZE")]
 #[doc(alias = "_SC_PAGESIZE")]
 #[doc(alias = "_SC_PAGE_SIZE")]
 #[doc(alias = "getpagesize")]

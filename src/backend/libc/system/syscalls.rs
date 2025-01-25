@@ -83,7 +83,7 @@ pub(crate) fn setdomainname(name: &[u8]) -> io::Result<()> {
     }
 }
 
-// https://github.com/rust-lang/libc/pull/4212
+// <https://github.com/rust-lang/libc/pull/4212>
 #[cfg(target_os = "android")]
 pub(crate) fn setdomainname(name: &[u8]) -> io::Result<()> {
     syscall! {

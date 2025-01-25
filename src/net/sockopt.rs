@@ -82,7 +82,7 @@
 //! [POSIX `netinet/in.h`]: https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/netinet_in.h.html
 //! [Linux `ip`]: https://man7.org/linux/man-pages/man7/ip.7.html
 //! [Winsock `IPPROTO_IP` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-ip-socket-options
-//! [Apple `ip`]: https://opensource.apple.com/source/xnu/xnu-7195.81.3/bsd/man/man4/ip.4.auto.html
+//! [Apple `ip`]: https://github.com/apple-oss-distributions/xnu/blob/main/bsd/man/man4/ip.4
 //! [FreeBSD `ip`]: https://man.freebsd.org/cgi/man.cgi?query=ip&sektion=4
 //! [NetBSD `ip`]: https://man.netbsd.org/ip.4
 //! [OpenBSD `ip`]: https://man.openbsd.org/ip.4
@@ -106,7 +106,7 @@
 //! [POSIX `netinet/in.h`]: https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/netinet_in.h.html
 //! [Linux `ipv6`]: https://man7.org/linux/man-pages/man7/ipv6.7.html
 //! [Winsock `IPPROTO_IPV6` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-ipv6-socket-options
-//! [Apple `ip6`]: https://opensource.apple.com/source/xnu/xnu-7195.81.3/bsd/man/man4/ip6.4.auto.html
+//! [Apple `ip6`]: https://github.com/apple-oss-distributions/xnu/blob/main/bsd/man/man4/ip6.4
 //! [FreeBSD `ip6`]: https://man.freebsd.org/cgi/man.cgi?query=ip6&sektion=4
 //! [NetBSD `ip6`]: https://man.netbsd.org/ip6.4
 //! [OpenBSD `ip6`]: https://man.openbsd.org/ip6.4
@@ -130,7 +130,7 @@
 //! [POSIX `netinet/tcp.h`]: https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/netinet_tcp.h.html
 //! [Linux `tcp`]: https://man7.org/linux/man-pages/man7/tcp.7.html
 //! [Winsock `IPPROTO_TCP` options]: https://docs.microsoft.com/en-us/windows/win32/winsock/ipproto-tcp-socket-options
-//! [Apple `tcp`]: https://opensource.apple.com/source/xnu/xnu-7195.81.3/bsd/man/man4/tcp.4.auto.html
+//! [Apple `tcp`]: https://github.com/apple-oss-distributions/xnu/blob/main/bsd/man/man4/tcp.4
 //! [FreeBSD `tcp`]: https://man.freebsd.org/cgi/man.cgi?query=tcp&sektion=4
 //! [NetBSD `tcp`]: https://man.netbsd.org/tcp.4
 //! [OpenBSD `tcp`]: https://man.openbsd.org/tcp.4

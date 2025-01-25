@@ -220,6 +220,8 @@ pub fn fsconfig_reconfigure(fs_fd: BorrowedFd<'_>) -> io::Result<()> {
 
 /// `fsconfig(fs_fd, FSCONFIG_CMD_CREATE_EXCL, key, NULL, 0)`
 ///
+/// This function was added in Linux 6.6.
+///
 /// # References
 ///  - [Unfinished draft]
 ///

@@ -1,3 +1,5 @@
+//! Types for use with [`rustix::process`] functions.
+
 #![allow(unsafe_code)]
 
 use crate::backend::c;
@@ -6,7 +8,7 @@ use core::mem::transmute;
 
 /// File lock data structure used in [`fcntl_getlk`].
 ///
-/// [`fcntl_getlk`]: crate::fs::fcntl_getlk
+/// [`fcntl_getlk`]: crate::process::fcntl_getlk()
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Flock {
     /// Starting offset for lock
@@ -58,7 +60,7 @@ impl From<FlockType> for Flock {
 
 /// `F_*LCK` constants for use with [`fcntl_getlk`].
 ///
-/// [`fcntl_getlk`]: crate::fs::fcntl_getlk
+/// [`fcntl_getlk`]: crate::process::fcntl_getlk()
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(i16)]
 pub enum FlockType {
@@ -72,7 +74,7 @@ pub enum FlockType {
 
 /// `F_SEEK*` constants for use with [`fcntl_getlk`].
 ///
-/// [`fcntl_getlk`]: crate::fs::fcntl_getlk
+/// [`fcntl_getlk`]: crate::process::fcntl_getlk()
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(i16)]
 pub enum FlockOffsetType {

@@ -280,6 +280,8 @@ pub unsafe fn mprotect(ptr: *mut c_void, len: usize, flags: MprotectFlags) -> io
 /// requested if the memory isn't page-aligned. Other implementations fail if
 /// the memory isn't page-aligned.
 ///
+/// See [`mlock_with`] to pass additional flags.
+///
 /// # Safety
 ///
 /// The range of memory starting at `ptr`, rounded down to the applicable page

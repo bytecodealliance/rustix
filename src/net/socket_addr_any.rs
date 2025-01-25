@@ -1,3 +1,5 @@
+//! The [`SocketAddrAny`] type and related utilities.
+
 #![allow(unsafe_code)]
 
 use crate::backend::c;
@@ -39,7 +41,7 @@ impl SocketAddrBuf {
         SocketAddrAny::new(self.storage, self.len.try_into().unwrap())
     }
 
-    /// Convert the buffer into [`Option<SocketAddrAny>].
+    /// Convert the buffer into [`Option<SocketAddrAny>`].
     ///
     /// This returns `None` if `len` is zero or other platform-specific
     /// conditions define the address as empty.

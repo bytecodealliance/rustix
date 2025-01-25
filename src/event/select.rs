@@ -96,7 +96,7 @@ pub struct FdSetElement(pub(crate) usize);
 ///
 /// # Safety
 ///
-/// All fds in in all the sets must correspond to open file descriptors.
+/// All fds in all the sets must correspond to open file descriptors.
 ///
 /// # References
 ///  - [POSIX]
