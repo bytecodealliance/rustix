@@ -97,10 +97,6 @@ pub(crate) const O_LARGEFILE: c_int = linux_raw_sys::general::O_LARGEFILE as _;
 #[cfg(solarish)]
 pub(crate) const O_LARGEFILE: c_int = 0x2000;
 
-// TODO: This is new in Linux 6.11; remove when linux-raw-sys is updated.
-#[cfg(linux_kernel)]
-pub(crate) const MAP_DROPPABLE: u32 = 0x8;
-
 // On PowerPC, the regular `termios` has the `termios2` fields and there is no
 // `termios2`, so we define aliases.
 #[cfg(all(
@@ -513,3 +509,7 @@ pub(crate) use statx_flags::*;
 #[cfg(feature = "fs")]
 #[cfg(target_os = "android")]
 pub(crate) use libc::__fsid_t as fsid_t;
+
+#[cfg(feature = "mm")]
+#[cfg(target_os = "android")]
+pub(crate) const MAP_DROPPABLE: c_int = bitcast!(linux_raw_sys::general::MAP_DROPPABLE);

@@ -1050,7 +1050,7 @@ pub struct io_uring_sqe {
     pub user_data: io_uring_user_data,
     pub buf: buf_union,
     pub personality: u16,
-    pub splice_fd_in_or_file_index: splice_fd_in_or_file_index_union,
+    pub splice_fd_in_or_file_index_or_addr_len: splice_fd_in_or_file_index_or_addr_len_union,
     pub addr3_or_cmd: addr3_or_cmd_union,
 }
 
@@ -1157,11 +1157,10 @@ pub union buf_union {
     pub buf_group: u16,
 }
 
-// TODO: Rename this to include `addr_len` when we have a semver bump?
 #[allow(missing_docs)]
 #[repr(C)]
 #[derive(Copy, Clone)]
-pub union splice_fd_in_or_file_index_union {
+pub union splice_fd_in_or_file_index_or_addr_len_union {
     pub splice_fd_in: i32,
     pub file_index: u32,
     pub addr_len: addr_len_struct,
@@ -1496,10 +1495,10 @@ impl Default for buf_union {
     }
 }
 
-impl Default for splice_fd_in_or_file_index_union {
+impl Default for splice_fd_in_or_file_index_or_addr_len_union {
     #[inline]
     fn default() -> Self {
-        default_union!(splice_fd_in_or_file_index_union, splice_fd_in)
+        default_union!(splice_fd_in_or_file_index_or_addr_len_union, splice_fd_in)
     }
 }
 
@@ -1527,7 +1526,10 @@ mod tests {
         check_renamed_type!(addr3_or_cmd_union, io_uring_sqe__bindgen_ty_6);
         check_renamed_type!(op_flags_union, io_uring_sqe__bindgen_ty_3);
         check_renamed_type!(buf_union, io_uring_sqe__bindgen_ty_4);
-        check_renamed_type!(splice_fd_in_or_file_index_union, io_uring_sqe__bindgen_ty_5);
+        check_renamed_type!(
+            splice_fd_in_or_file_index_or_addr_len_union,
+            io_uring_sqe__bindgen_ty_5
+        );
         check_renamed_type!(addr_len_struct, io_uring_sqe__bindgen_ty_5__bindgen_ty_1);
         check_renamed_type!(
             register_or_sqe_op_or_sqe_flags_union,
@@ -1549,7 +1551,11 @@ mod tests {
         check_struct_field!(io_uring_sqe, user_data);
         check_struct_renamed_field!(io_uring_sqe, buf, __bindgen_anon_4);
         check_struct_field!(io_uring_sqe, personality);
-        check_struct_renamed_field!(io_uring_sqe, splice_fd_in_or_file_index, __bindgen_anon_5);
+        check_struct_renamed_field!(
+            io_uring_sqe,
+            splice_fd_in_or_file_index_or_addr_len,
+            __bindgen_anon_5
+        );
         check_struct_renamed_field!(io_uring_sqe, addr3_or_cmd, __bindgen_anon_6);
 
         check_type!(io_uring_restriction);
