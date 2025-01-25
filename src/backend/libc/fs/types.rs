@@ -949,9 +949,11 @@ pub type StatFs = c::statfs64;
 /// `fsid_t` for use with `StatFs`.
 #[cfg(not(any(
     solarish,
+    target_os = "espidf",
     target_os = "haiku",
     target_os = "nto",
     target_os = "redox",
+    target_os = "vita",
     target_os = "wasi"
 )))]
 pub type Fsid = c::fsid_t;
