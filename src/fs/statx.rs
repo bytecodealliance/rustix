@@ -12,8 +12,6 @@ use backend::fs::syscalls::statx as _statx;
 use compat::statx as _statx;
 
 /// `struct statx` for use with [`statx`].
-///
-/// [`statx`]: crate::fs::statx
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 #[allow(missing_docs)]
