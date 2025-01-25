@@ -416,6 +416,7 @@ fn test_abstract_unix_msg_unconnected() {
     do_test_unix_msg_unconnected(name);
 }
 
+#[cfg(feature = "pipe")]
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 #[test]
 fn test_unix_msg_with_scm_rights() {
@@ -704,6 +705,7 @@ fn test_unix_peercred_implicit() {
 
 /// Like `test_unix_msg_with_scm_rights`, but with multiple file descriptors
 /// over multiple control messages.
+#[cfg(feature = "pipe")]
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 #[test]
 fn test_unix_msg_with_combo() {

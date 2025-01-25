@@ -20,8 +20,7 @@ use crate::thread::{
 use crate::utils::as_mut_ptr;
 use core::mem::MaybeUninit;
 use core::sync::atomic::AtomicU32;
-use linux_raw_sys::general::TIMER_ABSTIME;
-use linux_raw_sys::general::{membarrier_cmd, membarrier_cmd_flag};
+use linux_raw_sys::general::{membarrier_cmd, membarrier_cmd_flag, TIMER_ABSTIME};
 #[cfg(target_pointer_width = "32")]
 use {crate::utils::option_as_ptr, linux_raw_sys::general::timespec as __kernel_old_timespec};
 

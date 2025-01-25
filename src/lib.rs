@@ -310,8 +310,8 @@ pub mod runtime;
     not(feature = "use-explicitly-provided-auxv"),
     any(
         feature = "param",
-        feature = "process",
         feature = "runtime",
+        feature = "thread",
         feature = "time",
         target_arch = "x86",
     )
@@ -328,8 +328,8 @@ pub(crate) mod fs;
     not(feature = "use-explicitly-provided-auxv"),
     any(
         feature = "param",
-        feature = "process",
         feature = "runtime",
+        feature = "thread",
         feature = "time",
         target_arch = "x86",
     )

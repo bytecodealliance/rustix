@@ -295,7 +295,7 @@ pub enum WaitId<'a> {
 /// # Bugs
 ///
 /// This function does not currently support waiting for given process group
-/// (the < 0 case of `waitpid`); to do that, currently the [`waitpgid`] or
+/// (the `< -1` case of `waitpid`); to do that, currently the [`waitpgid`] or
 /// [`waitid`] function must be used.
 ///
 /// This function does not currently support waiting for any process (the

@@ -8,6 +8,8 @@
 use crate::backend::c;
 use crate::backend::conv::{by_ref, c_uint, ret};
 use crate::fd::BorrowedFd;
+#[cfg(feature = "alloc")]
+use crate::ffi::CStr;
 use crate::io;
 use crate::pid::Pid;
 use crate::termios::{
@@ -15,7 +17,8 @@ use crate::termios::{
     QueueSelector, SpecialCodeIndex, Termios, Winsize,
 };
 #[cfg(feature = "alloc")]
-use crate::{ffi::CStr, fs::FileType, path::DecInt};
+#[cfg(feature = "fs")]
+use crate::{fs::FileType, path::DecInt};
 use core::mem::MaybeUninit;
 
 #[inline]
@@ -365,6 +368,7 @@ pub(crate) fn isatty(fd: BorrowedFd<'_>) -> bool {
 }
 
 #[cfg(feature = "alloc")]
+#[cfg(feature = "fs")]
 pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [MaybeUninit<u8>]) -> io::Result<usize> {
     let fd_stat = crate::backend::fs::syscalls::fstat(fd)?;
 
