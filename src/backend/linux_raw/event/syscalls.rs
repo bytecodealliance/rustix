@@ -8,7 +8,8 @@
 #[cfg(feature = "alloc")]
 use crate::backend::c;
 use crate::backend::conv::{
-    by_ref, c_int, c_uint, ret, ret_c_int, ret_error, ret_owned_fd, ret_usize, slice_mut, zero,
+    by_ref, c_int, c_uint, opt_ref, ret, ret_c_int, ret_error, ret_owned_fd, ret_usize, size_of,
+    slice_mut, zero,
 };
 use crate::event::{epoll, EventfdFlags, FdSetElement, PollFd, Timespec};
 use crate::fd::{BorrowedFd, OwnedFd};
@@ -17,11 +18,7 @@ use crate::utils::{as_mut_ptr, option_as_ptr};
 #[cfg(feature = "alloc")]
 use core::mem::MaybeUninit;
 use core::ptr::null_mut;
-use linux_raw_sys::general::{EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD};
-use {
-    crate::backend::conv::{opt_ref, size_of},
-    linux_raw_sys::general::kernel_sigset_t,
-};
+use linux_raw_sys::general::{kernel_sigset_t, EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD};
 
 #[inline]
 pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: Option<&Timespec>) -> io::Result<usize> {
