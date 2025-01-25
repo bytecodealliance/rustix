@@ -358,6 +358,7 @@ mod prctl;
 mod signal;
 #[cfg(any(
     feature = "fs",
+    feature = "event",
     feature = "process",
     feature = "runtime",
     feature = "thread",
