@@ -56,7 +56,7 @@ pub struct Statx {
 pub struct StatxTimestamp {
     pub tv_sec: i64,
     pub tv_nsec: u32,
-    pub __reserved: i32,
+    pub(crate) __reserved: i32,
 }
 
 bitflags! {
