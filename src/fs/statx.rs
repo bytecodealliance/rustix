@@ -175,7 +175,7 @@ bitflags! {
 /// # use rustix::fd::BorrowedFd;
 /// /// Try to determine if the provided path is a mount root. Will return
 /// /// `Ok(None)` if the kernel is not new enough to support `statx` or
-/// /// [`libc::STATX_ATTR_MOUNT_ROOT`].
+/// /// [`StatxAttributes::MOUNT_ROOT`].
 /// fn is_mountpoint(root: BorrowedFd<'_>, path: &Path) -> io::Result<Option<bool>> {
 ///     use rustix::fs::{AtFlags, StatxAttributes, StatxFlags};
 ///
