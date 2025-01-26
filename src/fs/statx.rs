@@ -10,6 +10,11 @@ use backend::fs::syscalls::statx as _statx;
 #[cfg(not(feature = "linux_4_11"))]
 use compat::statx as _statx;
 
+/// `STATX_ATTR_MOUNT_ROOT`—Address of the root of a mount
+#[allow(dead_code)]
+#[cfg(all(linux_kernel, any(target_env = "musl", target_env = "gnu")))]
+pub const STATX_ATTR_MOUNT_ROOT: u32 = backend::c::STATX_ATTR_MOUNT_ROOT as u32;
+
 /// `statx(dirfd, path, flags, mask, statxbuf)`
 ///
 /// This function returns [`io::Errno::NOSYS`] if `statx` is not available on
