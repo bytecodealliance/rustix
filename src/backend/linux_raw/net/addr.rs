@@ -8,6 +8,7 @@
 
 use crate::backend::c;
 use crate::ffi::CStr;
+use crate::net::AddressFamily;
 use crate::{io, path};
 use core::cmp::Ordering;
 use core::hash::{Hash, Hasher};
@@ -166,6 +167,27 @@ impl fmt::Debug for SocketAddrUnix {
 /// `struct sockaddr_storage`.
 #[repr(transparent)]
 pub struct SocketAddrStorage(c::sockaddr_storage);
+
+impl SocketAddrStorage {
+    /// Return the `sa_family` of this socket address.
+    pub fn family(&self) -> AddressFamily {
+        unsafe {
+            AddressFamily::from_raw(crate::backend::net::read_sockaddr::read_sa_family(
+                crate::utils::as_ptr(&self.0).cast::<c::sockaddr>(),
+            ))
+        }
+    }
+
+    /// Clear the `sa_family` of this socket address to
+    /// `AddressFamily::UNSPEC`.
+    pub fn clear_family(&mut self) {
+        unsafe {
+            crate::backend::net::read_sockaddr::initialize_family_to_unspec(
+                crate::utils::as_mut_ptr(&mut self.0).cast::<c::sockaddr>(),
+            )
+        }
+    }
+}
 
 /// Return the offset of the `sun_path` field of `sockaddr_un`.
 #[inline]

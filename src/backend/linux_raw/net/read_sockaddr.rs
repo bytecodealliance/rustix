@@ -1,4 +1,4 @@
-//! The BSD sockets API requires us to read the `ss_family` field before we can
+//! The BSD sockets API requires us to read the `sa_family` field before we can
 //! interpret the rest of a `sockaddr` produced by the kernel.
 #![allow(unsafe_code)]
 
@@ -13,16 +13,16 @@ use core::slice;
 // This must match the header of `sockaddr`.
 #[repr(C)]
 struct sockaddr_header {
-    ss_family: u16,
+    sa_family: u16,
 }
 
-/// Read the `ss_family` field from a socket address returned from the OS.
+/// Read the `sa_family` field from a socket address returned from the OS.
 ///
 /// # Safety
 ///
 /// `storage` must point to a valid socket address returned from the OS.
 #[inline]
-unsafe fn read_ss_family(storage: *const c::sockaddr) -> u16 {
+pub(crate) unsafe fn read_sa_family(storage: *const c::sockaddr) -> u16 {
     // Assert that we know the layout of `sockaddr`.
     let _ = c::sockaddr {
         __storage: c::sockaddr_storage {
@@ -36,14 +36,14 @@ unsafe fn read_ss_family(storage: *const c::sockaddr) -> u16 {
         },
     };
 
-    (*storage.cast::<sockaddr_header>()).ss_family
+    (*storage.cast::<sockaddr_header>()).sa_family
 }
 
-/// Set the `ss_family` field of a socket address to `AF_UNSPEC`, so that we
+/// Set the `sa_family` field of a socket address to `AF_UNSPEC`, so that we
 /// can test for `AF_UNSPEC` to test whether it was stored to.
 #[inline]
 pub(crate) unsafe fn initialize_family_to_unspec(storage: *mut c::sockaddr) {
-    (*storage.cast::<sockaddr_header>()).ss_family = c::AF_UNSPEC as _;
+    (*storage.cast::<sockaddr_header>()).sa_family = c::AF_UNSPEC as _;
 }
 
 /// Read a socket address encoded in a platform-specific format.
@@ -60,7 +60,7 @@ pub(crate) unsafe fn read_sockaddr(
     if len < size_of::<c::sa_family_t>() {
         return Err(io::Errno::INVAL);
     }
-    match read_ss_family(storage).into() {
+    match read_sa_family(storage).into() {
         c::AF_INET => {
             if len < size_of::<c::sockaddr_in>() {
                 return Err(io::Errno::INVAL);
@@ -156,7 +156,7 @@ pub(crate) unsafe fn read_sockaddr_os(storage: *const c::sockaddr, len: usize) -
     let offsetof_sun_path = super::addr::offsetof_sun_path();
 
     assert!(len >= size_of::<c::sa_family_t>());
-    match read_ss_family(storage).into() {
+    match read_sa_family(storage).into() {
         c::AF_INET => {
             assert!(len >= size_of::<c::sockaddr_in>());
             let decode = &*storage.cast::<c::sockaddr_in>();
