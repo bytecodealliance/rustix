@@ -38,12 +38,14 @@ const PR_GET_PDEATHSIG: c_int = 2;
 #[doc(alias = "PR_GET_PDEATHSIG")]
 pub fn parent_process_death_signal() -> io::Result<Option<Signal>> {
     let raw = unsafe { prctl_get_at_arg2_optional::<c_int>(PR_GET_PDEATHSIG)? };
-    if let Some(raw) = NonZeroI32::new(raw) {
+    if let Some(non_zero) = NonZeroI32::new(raw) {
         // SAFETY: The only way to get a libc-reserved signal number in
         // here would be to do something equivalent to
         // `set_parent_process_death_signal`, but that would have required
         // using a `Signal` with a libc-reserved value.
-        Ok(Some(unsafe { Signal::from_raw_nonzero_unchecked(raw) }))
+        Ok(Some(unsafe {
+            Signal::from_raw_nonzero_unchecked(non_zero)
+        }))
     } else {
         Ok(None)
     }
