@@ -341,7 +341,7 @@ impl Signal {
     ///
     /// See [`Signal::from_raw`] to do this with checks.
     ///
-    /// See [`Signal::from_raw_nonozero_unchecked`] if you already have a
+    /// See [`Signal::from_raw_nonzero_unchecked`] if you already have a
     /// `NonZeroI32`.
     ///
     /// # Safety

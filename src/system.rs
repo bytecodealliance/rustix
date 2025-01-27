@@ -199,9 +199,9 @@ pub fn setdomainname(name: &[u8]) -> io::Result<()> {
 pub enum RebootCommand {
     /// Disables the Ctrl-Alt-Del keystroke.
     ///
-    /// When disabled, the keystroke will send a [`Signal::Int`] to pid 1.
+    /// When disabled, the keystroke will send a [`Signal::INT`] to pid 1.
     ///
-    /// [`Signal::Int`]: crate::process::Signal::Int
+    /// [`Signal::INT`]: crate::process::Signal::INT
     CadOff = c::LINUX_REBOOT_CMD_CAD_OFF,
     /// Enables the Ctrl-Alt-Del keystroke.
     ///

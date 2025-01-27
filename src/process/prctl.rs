@@ -448,7 +448,7 @@ const PR_TSC_SIGSEGV: u32 = 2;
 pub enum TimeStampCounterReadability {
     /// Allow the use of the timestamp counter.
     Readable = PR_TSC_ENABLE,
-    /// Throw a [`Signal::Segv`] signal instead of reading the TSC.
+    /// Throw a [`Signal::SEGV`] signal instead of reading the TSC.
     RaiseSIGSEGV = PR_TSC_SIGSEGV,
 }
 
