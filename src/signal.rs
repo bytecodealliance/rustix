@@ -2,9 +2,10 @@
 //!
 //! # Safety
 //!
-//! Some signal numbers are reserved by the libc. [`Signal::from_raw_unchecked`]
-//! allows constructing `Signal` values with arbitrary values. Users must avoid
-//! using these values.
+//! Some signal numbers are reserved by the libc.
+//! [`Signal::from_raw_unchecked`] allows constructing `Signal` values with
+//! arbitrary values. Users must avoid using these values to send or
+//! consume signals in any way.
 #![allow(unsafe_code)]
 
 use crate::backend::c;
