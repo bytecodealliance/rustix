@@ -566,7 +566,8 @@ pub fn linux_secure() -> bool {
 ///
 /// This is not identical to `brk` in libc. libc `brk` may have bookkeeping
 /// that needs to be kept up to date that this doesn't keep up to date, so
-/// don't use it unless you are implementing libc.
+/// don't use it unless you know your code won't share a process with a libc
+/// (perhaps because you yourself are implementing a libc).
 #[cfg(linux_raw)]
 #[inline]
 pub unsafe fn brk(addr: *mut c_void) -> io::Result<*mut c_void> {
@@ -576,16 +577,18 @@ pub unsafe fn brk(addr: *mut c_void) -> io::Result<*mut c_void> {
 /// `__SIGRTMIN`—The start of the realtime signal range.
 ///
 /// This is the raw `SIGRTMIN` value from the OS, which is not the same as the
-/// `SIGRTMIN` macro provided by libc. Don't use this unless you are
-/// implementing libc.
+/// `SIGRTMIN` macro provided by libc. Don't use this unless you know your code
+/// won't share a process with a libc (perhaps because you yourself are
+/// implementing a libc).
 #[cfg(linux_raw)]
 pub const SIGRTMIN: u32 = linux_raw_sys::general::SIGRTMIN;
 
 /// `__SIGRTMAX`—The last of the realtime signal range.
 ///
 /// This is the raw `SIGRTMAX` value from the OS, which is not the same as the
-/// `SIGRTMAX` macro provided by libc. Don't use this unless you are
-/// implementing libc.
+/// `SIGRTMAX` macro provided by libc. Don't use this unless you know your code
+/// won't share a process with a libc (perhaps because you yourself are
+/// implementing a libc).
 #[cfg(linux_raw)]
 pub const SIGRTMAX: u32 = {
     // Use the actual `SIGRTMAX` value on platforms which define it.
