@@ -62,7 +62,13 @@ pub type Sigaction = linux_raw_sys::general::kernel_sigaction;
 #[cfg(linux_raw)]
 pub type Stack = linux_raw_sys::general::stack_t;
 
-/// `sigset_t`
+/// `sigset_t`.
+///
+/// Undefined behavior could happen in some functions if `Sigset` ever
+/// contains signal numbers in the range from
+/// `linux_raw_sys::general::SIGRTMIN` to what the libc thinks `SIGRTMIN` is.
+/// Unless you are implementing the libc. Which you probably are, if you're
+/// reading this.
 #[cfg(linux_raw)]
 pub type Sigset = linux_raw_sys::general::kernel_sigset_t;
 
