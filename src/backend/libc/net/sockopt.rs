@@ -481,6 +481,26 @@ pub(crate) fn ipv6_v6only(fd: BorrowedFd<'_>) -> io::Result<bool> {
 }
 
 #[inline]
+pub(crate) fn set_ip_multicast_ifv4(fd: BorrowedFd<'_>, value: &Ipv4Addr) -> io::Result<()> {
+    setsockopt(fd, c::IPPROTO_IP, c::IP_MULTICAST_IF, to_imr_addr(value))
+}
+
+#[inline]
+pub(crate) fn ip_multicast_ifv4(fd: BorrowedFd<'_>) -> io::Result<Ipv4Addr> {
+    getsockopt(fd, c::IPPROTO_IP, c::IP_MULTICAST_IF).map(from_in_addr)
+}
+
+#[inline]
+pub(crate) fn set_ip_multicast_ifv6(fd: BorrowedFd<'_>, value: u32) -> io::Result<()> {
+    setsockopt(fd, c::IPPROTO_IPV6, c::IPV6_MULTICAST_IF, value as c::c_int)
+}
+
+#[inline]
+pub(crate) fn ip_multicast_ifv6(fd: BorrowedFd<'_>) -> io::Result<u32> {
+    getsockopt(fd, c::IPPROTO_IPV6, c::IPV6_MULTICAST_IF)
+}
+
+#[inline]
 pub(crate) fn set_ip_multicast_loop(fd: BorrowedFd<'_>, multicast_loop: bool) -> io::Result<()> {
     setsockopt(
         fd,
@@ -1148,6 +1168,17 @@ fn to_ip_mreq(multiaddr: &Ipv4Addr, interface: &Ipv4Addr) -> c::ip_mreq {
         imr_multiaddr: to_imr_addr(multiaddr),
         imr_interface: to_imr_addr(interface),
     }
+}
+
+#[cfg(not(windows))]
+#[inline]
+fn from_in_addr(in_addr: c::in_addr) -> Ipv4Addr {
+    Ipv4Addr::from(in_addr.s_addr.to_ne_bytes())
+}
+
+#[cfg(windows)]
+fn from_in_addr(in_addr: c::in_addr) -> Ipv4Addr {
+    Ipv4Addr::from(unsafe { in_addr.S_un.S_addr.to_ne_bytes() })
 }
 
 #[cfg(any(

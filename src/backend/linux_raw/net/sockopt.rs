@@ -24,9 +24,12 @@ use alloc::borrow::ToOwned;
 use alloc::string::String;
 use core::mem::MaybeUninit;
 use core::time::Duration;
-use linux_raw_sys::general::{__kernel_old_timeval, __kernel_sock_timeval};
 #[cfg(target_os = "linux")]
 use linux_raw_sys::xdp::{xdp_mmap_offsets, xdp_statistics, xdp_statistics_v1};
+use linux_raw_sys::{
+    general::{__kernel_old_timeval, __kernel_sock_timeval},
+    net::{IPV6_MULTICAST_IF, IP_MULTICAST_IF},
+};
 #[cfg(target_arch = "x86")]
 use {
     crate::backend::conv::{slice_just_addr, x86_sys},
@@ -443,6 +446,26 @@ pub(crate) fn set_ipv6_v6only(fd: BorrowedFd<'_>, only_v6: bool) -> io::Result<(
 #[inline]
 pub(crate) fn ipv6_v6only(fd: BorrowedFd<'_>) -> io::Result<bool> {
     getsockopt(fd, c::IPPROTO_IPV6, c::IPV6_V6ONLY).map(to_bool)
+}
+
+#[inline]
+pub(crate) fn set_ip_multicast_ifv4(fd: BorrowedFd<'_>, value: &Ipv4Addr) -> io::Result<()> {
+    setsockopt(fd, c::IPPROTO_IP, IP_MULTICAST_IF, to_imr_addr(value))
+}
+
+#[inline]
+pub(crate) fn ip_multicast_ifv4(fd: BorrowedFd<'_>) -> io::Result<Ipv4Addr> {
+    getsockopt(fd, c::IPPROTO_IP, IP_MULTICAST_IF).map(from_in_addr)
+}
+
+#[inline]
+pub(crate) fn set_ip_multicast_ifv6(fd: BorrowedFd<'_>, value: u32) -> io::Result<()> {
+    setsockopt(fd, c::IPPROTO_IPV6, IPV6_MULTICAST_IF, value as c::c_int)
+}
+
+#[inline]
+pub(crate) fn ip_multicast_ifv6(fd: BorrowedFd<'_>) -> io::Result<u32> {
+    getsockopt(fd, c::IPPROTO_IPV6, IPV6_MULTICAST_IF)
 }
 
 #[inline]
@@ -974,6 +997,11 @@ pub(crate) fn xdp_statistics(fd: BorrowedFd<'_>) -> io::Result<XdpStatistics> {
 #[inline]
 pub(crate) fn xdp_options(fd: BorrowedFd<'_>) -> io::Result<XdpOptionsFlags> {
     getsockopt(fd, c::SOL_XDP, c::XDP_OPTIONS)
+}
+
+#[inline]
+fn from_in_addr(in_addr: c::in_addr) -> Ipv4Addr {
+    Ipv4Addr::from(in_addr.s_addr.to_ne_bytes())
 }
 
 #[inline]

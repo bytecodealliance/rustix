@@ -10,7 +10,7 @@ use rustix::io;
 ))]
 use rustix::net::ipproto;
 use rustix::net::{sockopt, AddressFamily, SocketType};
-use std::time::Duration;
+use std::{net::Ipv4Addr, time::Duration};
 
 // Test `socket` socket options.
 fn test_sockopts_socket(s: &OwnedFd) {
@@ -485,4 +485,40 @@ fn test_sockopts_ipv6() {
     }
 
     test_sockopts_tcp(&s);
+}
+
+#[test]
+fn test_sockopts_multicast_ifv4() {
+    crate::init();
+
+    let s = rustix::net::socket(AddressFamily::INET, SocketType::DGRAM, None).unwrap();
+
+    // Set a ipv4 interface
+    match sockopt::set_ip_multicast_ifv4(&s, &Ipv4Addr::LOCALHOST) {
+        Ok(_) => {
+            assert_eq!(sockopt::ip_multicast_ifv4(&s).unwrap(), Ipv4Addr::LOCALHOST);
+        }
+        Err(e) if e.to_string().contains("Protocol not available") => {
+            // Skip test on unsupported platforms
+        }
+        Err(e) => panic!("{e}"),
+    }
+}
+
+#[test]
+fn test_sockopts_multicast_ifv6() {
+    crate::init();
+
+    let s = rustix::net::socket(AddressFamily::INET6, SocketType::DGRAM, None).unwrap();
+
+    // Set a ipv6 interface
+    match sockopt::set_ip_multicast_ifv6(&s, 1) {
+        Ok(_) => {
+            assert_eq!(sockopt::ip_multicast_ifv6(&s).unwrap(), 1);
+        }
+        Err(e) if e.to_string().contains("Protocol not available") => {
+            // Skip test on unsupported platforms
+        }
+        Err(e) => panic!("{e}"),
+    }
 }
