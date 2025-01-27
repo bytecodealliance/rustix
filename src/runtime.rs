@@ -5,7 +5,10 @@
 //!
 //!  - Some of the functions in this module cannot be used in a process which
 //!    also has a libc present. This can be true even for functions that have
-//!    the same name as a libc function that Rust code can use.
+//!    the same name as a libc function that Rust code can use. Such functions
+//!    are not marked `unsafe` (unless they are unsafe for other reasons),
+//!    even though they invoke Undefined Behavior if called in a process which
+//!    has a libc present.
 //!
 //!  - Some of the functions in this module don't behave exactly the same way
 //!    as functions in libc with similar names. Sometimes information about the
