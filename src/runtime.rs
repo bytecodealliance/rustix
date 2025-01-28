@@ -5,7 +5,10 @@
 //!
 //!  - Some of the functions in this module cannot be used in a process which
 //!    also has a libc present. This can be true even for functions that have
-//!    the same name as a libc function that Rust code can use.
+//!    the same name as a libc function that Rust code can use. Such functions
+//!    are not marked `unsafe` (unless they are unsafe for other reasons), even
+//!    though they invoke Undefined Behavior if called in a process which has a
+//!    libc present.
 //!
 //!  - Some of the functions in this module don't behave exactly the same way
 //!    as functions in libc with similar names. Sometimes information about the
@@ -62,7 +65,13 @@ pub type Sigaction = linux_raw_sys::general::kernel_sigaction;
 #[cfg(linux_raw)]
 pub type Stack = linux_raw_sys::general::stack_t;
 
-/// `sigset_t`
+/// `sigset_t`.
+///
+/// Undefined behavior could happen in some functions if `Sigset` ever
+/// contains signal numbers in the range from
+/// `linux_raw_sys::general::SIGRTMIN` to what the libc thinks `SIGRTMIN` is.
+/// Unless you are implementing the libc. Which you may indeed be doing, if
+/// you're reading this.
 #[cfg(linux_raw)]
 pub type Sigset = linux_raw_sys::general::kernel_sigset_t;
 
@@ -560,26 +569,31 @@ pub fn linux_secure() -> bool {
 ///
 /// This is not identical to `brk` in libc. libc `brk` may have bookkeeping
 /// that needs to be kept up to date that this doesn't keep up to date, so
-/// don't use it unless you are implementing libc.
+/// don't use it unless you know your code won't share a process with a libc
+/// (perhaps because you yourself are implementing a libc).
 #[cfg(linux_raw)]
 #[inline]
 pub unsafe fn brk(addr: *mut c_void) -> io::Result<*mut c_void> {
     backend::runtime::syscalls::brk(addr)
 }
 
-/// `__SIGRTMIN`—The start of the realtime signal range.
+/// `SIGRTMIN`—The start of the raw OS “real-time” signal range.
 ///
 /// This is the raw `SIGRTMIN` value from the OS, which is not the same as the
-/// `SIGRTMIN` macro provided by libc. Don't use this unless you are
-/// implementing libc.
+/// `SIGRTMIN` macro provided by libc. Don't use this unless you know your code
+/// won't share a process with a libc (perhaps because you yourself are
+/// implementing a libc).
+///
+/// See [`sigrt`] for a convenient way to construct `SIGRTMIN + n` values.
 #[cfg(linux_raw)]
 pub const SIGRTMIN: u32 = linux_raw_sys::general::SIGRTMIN;
 
-/// `__SIGRTMAX`—The last of the realtime signal range.
+/// `SIGRTMAX`—The last of the raw OS “real-time” signal range.
 ///
 /// This is the raw `SIGRTMAX` value from the OS, which is not the same as the
-/// `SIGRTMAX` macro provided by libc. Don't use this unless you are
-/// implementing libc.
+/// `SIGRTMAX` macro provided by libc. Don't use this unless you know your code
+/// won't share a process with a libc (perhaps because you yourself are
+/// implementing a libc).
 #[cfg(linux_raw)]
 pub const SIGRTMAX: u32 = {
     // Use the actual `SIGRTMAX` value on platforms which define it.
@@ -604,3 +618,24 @@ pub const SIGRTMAX: u32 = {
         linux_raw_sys::general::_NSIG - 1
     }
 };
+
+/// Return a [`Signal`] corresponding to `SIGRTMIN + n`.
+///
+/// This is similar to [`Signal::rt`], but uses the raw OS `SIGRTMIN` value
+/// instead of the libc `SIGRTMIN` value. Don't use this unless you know your
+/// code won't share a process with a libc (perhaps because you yourself are
+/// implementing a libc).
+#[cfg(linux_raw)]
+#[doc(alias = "SIGRTMIN")]
+pub fn sigrt(n: u32) -> Option<Signal> {
+    let sig = SIGRTMIN.wrapping_add(n);
+    if (SIGRTMIN..=SIGRTMAX).contains(&sig) {
+        // SAFETY: We've checked that `sig` is in the expected range. It could
+        // still conflict with libc's reserved values, however users of the
+        // `runtime` module here must already know that there's no other libc
+        // to conflict with.
+        Some(unsafe { Signal::from_raw_unchecked(sig as i32) })
+    } else {
+        None
+    }
+}

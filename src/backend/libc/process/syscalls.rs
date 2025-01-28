@@ -523,7 +523,7 @@ pub(crate) fn setsid() -> io::Result<Pid> {
 #[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
 #[inline]
 pub(crate) fn kill_process(pid: Pid, sig: Signal) -> io::Result<()> {
-    unsafe { ret(c::kill(pid.as_raw_nonzero().get(), sig as i32)) }
+    unsafe { ret(c::kill(pid.as_raw_nonzero().get(), sig.as_raw())) }
 }
 
 #[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
@@ -532,7 +532,7 @@ pub(crate) fn kill_process_group(pid: Pid, sig: Signal) -> io::Result<()> {
     unsafe {
         ret(c::kill(
             pid.as_raw_nonzero().get().wrapping_neg(),
-            sig as i32,
+            sig.as_raw(),
         ))
     }
 }
@@ -540,7 +540,7 @@ pub(crate) fn kill_process_group(pid: Pid, sig: Signal) -> io::Result<()> {
 #[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
 #[inline]
 pub(crate) fn kill_current_process_group(sig: Signal) -> io::Result<()> {
-    unsafe { ret(c::kill(0, sig as i32)) }
+    unsafe { ret(c::kill(0, sig.as_raw())) }
 }
 
 #[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
@@ -600,7 +600,7 @@ pub(crate) fn pidfd_send_signal(pidfd: BorrowedFd<'_>, sig: Signal) -> io::Resul
     unsafe {
         ret(pidfd_send_signal(
             borrowed_fd(pidfd),
-            sig as c::c_int,
+            sig.as_raw(),
             core::ptr::null(),
             0,
         ))

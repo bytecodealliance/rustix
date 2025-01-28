@@ -85,7 +85,7 @@ name = "mod"
 harness = false
 
 [package.metadata.docs.rs]
-features = ["all-apis"]
+features = ["all-apis", "use-libc-sigrt"]
 targets = [
     "x86_64-unknown-linux-gnu",
     "i686-unknown-linux-gnu",
@@ -194,6 +194,9 @@ all-apis = [
     "thread",
     "time",
 ]
+
+# Enable `Signal::rt` and related features, which depend on libc.
+use-libc-sigrt = []
 
 # When using the linux_raw backend, should we use libc for reading the aux
 # vectors, instead of reading them ourselves from /proc/self/auxv?

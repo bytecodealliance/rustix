@@ -215,16 +215,13 @@ pub(crate) fn sigsuspend(set: &Sigset) -> io::Result<()> {
 #[inline]
 pub(crate) fn sigwait(set: &Sigset) -> io::Result<Signal> {
     unsafe {
-        match Signal::from_raw(ret_c_int(syscall_readonly!(
+        Ok(Signal::from_raw_unchecked(ret_c_int(syscall_readonly!(
             __NR_rt_sigtimedwait,
             by_ref(set),
             zero(),
             zero(),
             size_of::<kernel_sigset_t, _>()
-        ))?) {
-            Some(signum) => Ok(signum),
-            None => Err(io::Errno::NOTSUP),
-        }
+        ))?))
     }
 }
 

@@ -22,7 +22,7 @@ fn main() -> std::io::Result<()> {
         #[cfg(feature = "process")]
         Event::new(
             EventFilter::Signal {
-                signal: rustix::process::Signal::Info,
+                signal: rustix::process::Signal::INFO,
                 times: 0,
             },
             EventFlags::ADD,

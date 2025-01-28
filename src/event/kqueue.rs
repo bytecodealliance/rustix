@@ -34,7 +34,9 @@ impl Event {
             EventFilter::Proc { pid, flags } => {
                 (Pid::as_raw(Some(pid)) as _, 0, c::EVFILT_PROC, flags.bits())
             }
-            EventFilter::Signal { signal, times: _ } => (signal as _, 0, c::EVFILT_SIGNAL, 0),
+            EventFilter::Signal { signal, times: _ } => {
+                (signal.as_raw() as _, 0, c::EVFILT_SIGNAL, 0)
+            }
             EventFilter::Timer { ident, timer } => {
                 #[cfg(any(apple, target_os = "freebsd", target_os = "netbsd"))]
                 let (data, fflags) = match timer {
@@ -118,7 +120,8 @@ impl Event {
                 flags: ProcessEvents::from_bits_retain(self.inner.fflags),
             },
             c::EVFILT_SIGNAL => EventFilter::Signal {
-                signal: Signal::from_raw(self.inner.ident as _).unwrap(),
+                // SAFETY: `EventFilter::new` requires a valid `Signal`.
+                signal: unsafe { Signal::from_raw_unchecked(self.inner.ident as _) },
                 times: self.inner.data as _,
             },
             c::EVFILT_TIMER => EventFilter::Timer {

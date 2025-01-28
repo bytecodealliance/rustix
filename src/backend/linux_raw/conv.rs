@@ -709,7 +709,7 @@ pub(super) fn negative_pid<'a, Num: ArgNumber>(pid: Pid) -> ArgReg<'a, Num> {
 impl<'a, Num: ArgNumber> From<Signal> for ArgReg<'a, Num> {
     #[inline]
     fn from(sig: Signal) -> Self {
-        pass_usize(sig as usize)
+        pass_usize(sig.as_raw() as usize)
     }
 }
 

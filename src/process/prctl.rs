@@ -6,6 +6,7 @@
 #![allow(unsafe_code)]
 
 use core::mem::size_of;
+use core::num::NonZeroI32;
 use core::ptr::{null, null_mut, NonNull};
 
 use bitflags::bitflags;
@@ -36,7 +37,18 @@ const PR_GET_PDEATHSIG: c_int = 2;
 #[inline]
 #[doc(alias = "PR_GET_PDEATHSIG")]
 pub fn parent_process_death_signal() -> io::Result<Option<Signal>> {
-    unsafe { prctl_get_at_arg2_optional::<c_int>(PR_GET_PDEATHSIG) }.map(Signal::from_raw)
+    let raw = unsafe { prctl_get_at_arg2_optional::<c_int>(PR_GET_PDEATHSIG)? };
+    if let Some(non_zero) = NonZeroI32::new(raw) {
+        // SAFETY: The only way to get a libc-reserved signal number in
+        // here would be to do something equivalent to
+        // `set_parent_process_death_signal`, but that would have required
+        // using a `Signal` with a libc-reserved value.
+        Ok(Some(unsafe {
+            Signal::from_raw_nonzero_unchecked(non_zero)
+        }))
+    } else {
+        Ok(None)
+    }
 }
 
 const PR_SET_PDEATHSIG: c_int = 1;
@@ -52,7 +64,7 @@ const PR_SET_PDEATHSIG: c_int = 1;
 #[inline]
 #[doc(alias = "PR_SET_PDEATHSIG")]
 pub fn set_parent_process_death_signal(signal: Option<Signal>) -> io::Result<()> {
-    let signal = signal.map_or(0_usize, |signal| signal as usize);
+    let signal = signal.map_or(0_usize, |signal| signal.as_raw() as usize);
     unsafe { prctl_2args(PR_SET_PDEATHSIG, signal as *mut _) }.map(|_r| ())
 }
 
@@ -436,7 +448,7 @@ const PR_TSC_SIGSEGV: u32 = 2;
 pub enum TimeStampCounterReadability {
     /// Allow the use of the timestamp counter.
     Readable = PR_TSC_ENABLE,
-    /// Throw a [`Signal::Segv`] signal instead of reading the TSC.
+    /// Throw a [`Signal::SEGV`] signal instead of reading the TSC.
     RaiseSIGSEGV = PR_TSC_SIGSEGV,
 }
 
