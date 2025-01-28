@@ -109,7 +109,13 @@ mod tests {
             check_renamed_struct_field!(Stat, stat, __unused6);
         }
 
-        #[cfg(not(any(target_os = "haiku", target_os = "illumos", target_os = "redox")))]
+        #[cfg(not(any(
+            solarish,
+            target_os = "haiku",
+            target_os = "nto",
+            target_os = "redox",
+            target_os = "wasi"
+        )))]
         {
             check_renamed_type!(Fsid, fsid_t);
             #[cfg(not(libc))] // libc hides the `val` field
