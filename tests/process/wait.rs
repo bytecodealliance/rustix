@@ -23,6 +23,7 @@ fn test_waitpid_none() {
         .unwrap();
     assert_eq!(pid, process::Pid::from_child(&child));
     assert!(status.stopped());
+    assert_ne!(status.as_raw(), 0);
 
     // Clean up the child process.
     unsafe { kill(child.id() as _, SIGKILL) };
@@ -50,6 +51,7 @@ fn test_waitpid_some() {
         .unwrap();
     assert_eq!(rpid, pid);
     assert!(status.stopped());
+    assert_ne!(status.as_raw(), 0);
 
     // Clean up the child process.
     unsafe { kill(child.id() as _, SIGKILL) };
@@ -77,6 +79,7 @@ fn test_waitpgid() {
         .unwrap();
     assert_eq!(pid, process::Pid::from_child(&child));
     assert!(status.stopped());
+    assert_ne!(status.as_raw(), 0);
 
     // Clean up the child process.
     unsafe { kill(child.id() as _, SIGKILL) };
@@ -116,6 +119,9 @@ fn test_waitid() {
     assert!(status.stopped());
     #[cfg(not(any(target_os = "fuchsia", target_os = "netbsd")))]
     assert_eq!(status.stopping_signal(), Some(SIGSTOP as _));
+    assert_eq!(status.raw_signo(), libc::SIGCHLD);
+    assert_eq!(status.raw_errno(), 0);
+    assert_eq!(status.raw_code(), libc::CLD_STOPPED);
 
     unsafe { kill(child.id() as _, SIGCONT) };
 
@@ -139,6 +145,9 @@ fn test_waitid() {
     assert!(status.stopped());
     #[cfg(not(any(target_os = "fuchsia", target_os = "netbsd")))]
     assert_eq!(status.stopping_signal(), Some(SIGSTOP as _));
+    assert_eq!(status.raw_signo(), libc::SIGCHLD);
+    assert_eq!(status.raw_errno(), 0);
+    assert_eq!(status.raw_code(), libc::CLD_STOPPED);
 
     unsafe { kill(child.id() as _, SIGCONT) };
 
