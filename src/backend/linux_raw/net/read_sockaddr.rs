@@ -137,7 +137,7 @@ pub(crate) unsafe fn read_sockaddr(
 ///
 /// `storage` must point to a valid socket address returned from the OS.
 pub(crate) unsafe fn maybe_read_sockaddr_os(
-    storage: *const c::sockaddr,
+    storage: *const c::sockaddr_storage,
     len: usize,
 ) -> Option<SocketAddrAny> {
     if len == 0 {
@@ -152,11 +152,14 @@ pub(crate) unsafe fn maybe_read_sockaddr_os(
 /// # Safety
 ///
 /// `storage` must point to a valid socket address returned from the OS.
-pub(crate) unsafe fn read_sockaddr_os(storage: *const c::sockaddr, len: usize) -> SocketAddrAny {
+pub(crate) unsafe fn read_sockaddr_os(
+    storage: *const c::sockaddr_storage,
+    len: usize,
+) -> SocketAddrAny {
     let offsetof_sun_path = super::addr::offsetof_sun_path();
 
     assert!(len >= size_of::<c::sa_family_t>());
-    match read_sa_family(storage).into() {
+    match read_sa_family(storage.cast::<c::sockaddr>()).into() {
         c::AF_INET => {
             assert!(len >= size_of::<c::sockaddr_in>());
             let decode = &*storage.cast::<c::sockaddr_in>();

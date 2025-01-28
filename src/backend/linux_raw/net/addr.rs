@@ -169,6 +169,14 @@ impl fmt::Debug for SocketAddrUnix {
 pub struct SocketAddrStorage(c::sockaddr_storage);
 
 impl SocketAddrStorage {
+    /// Return a socket addr storage initialized to all zero bytes. The
+    /// `sa_family` is set to `AddressFamily::UNSPEC`.
+    pub fn zeroed() -> Self {
+        assert_eq!(c::AF_UNSPEC, 0);
+        // SAFETY: `sockaddr_storage` is meant to be zero-initializable.
+        unsafe { core::mem::zeroed() }
+    }
+
     /// Return the `sa_family` of this socket address.
     pub fn family(&self) -> AddressFamily {
         unsafe {
@@ -184,6 +192,16 @@ impl SocketAddrStorage {
         unsafe {
             crate::backend::net::read_sockaddr::initialize_family_to_unspec(
                 crate::utils::as_mut_ptr(&mut self.0).cast::<c::sockaddr>(),
+            )
+        }
+    }
+
+    /// View the storage as a byte slice.
+    pub fn as_mut_bytes(&mut self) -> &mut [u8] {
+        unsafe {
+            slice::from_raw_parts_mut(
+                crate::utils::as_mut_ptr(self).cast::<u8>(),
+                size_of::<Self>(),
             )
         }
     }

@@ -76,14 +76,14 @@ pub(crate) unsafe fn recvfrom(
     // `recvfrom` does not write to the storage if the socket is
     // connection-oriented sockets, so we initialize the family field to
     // `AF_UNSPEC` so that we can detect this case.
-    initialize_family_to_unspec(storage.as_mut_ptr());
+    initialize_family_to_unspec(storage.as_mut_ptr().cast::<c::sockaddr>());
 
     ret_send_recv(c::recvfrom(
         borrowed_fd(fd),
         buf.cast(),
         send_recv_len(buf_len),
         bitflags_bits!(flags),
-        storage.as_mut_ptr().cast(),
+        storage.as_mut_ptr().cast::<c::sockaddr>(),
         &mut len,
     ))
     .map(|nread| {
@@ -485,7 +485,7 @@ pub(crate) fn acceptfrom(sockfd: BorrowedFd<'_>) -> io::Result<(OwnedFd, Option<
         let mut len = size_of::<c::sockaddr_storage>() as c::socklen_t;
         let owned_fd = ret_owned_fd(c::accept(
             borrowed_fd(sockfd),
-            storage.as_mut_ptr().cast(),
+            storage.as_mut_ptr().cast::<c::sockaddr>(),
             &mut len,
         ))?;
         Ok((
@@ -515,7 +515,7 @@ pub(crate) fn acceptfrom_with(
         let mut len = size_of::<c::sockaddr_storage>() as c::socklen_t;
         let owned_fd = ret_owned_fd(c::accept4(
             borrowed_fd(sockfd),
-            storage.as_mut_ptr().cast(),
+            storage.as_mut_ptr().cast::<c::sockaddr>(),
             &mut len,
             flags.bits() as c::c_int,
         ))?;
@@ -571,7 +571,7 @@ pub(crate) fn getsockname(sockfd: BorrowedFd<'_>) -> io::Result<SocketAddrAny> {
         let mut len = size_of::<c::sockaddr_storage>() as c::socklen_t;
         ret(c::getsockname(
             borrowed_fd(sockfd),
-            storage.as_mut_ptr().cast(),
+            storage.as_mut_ptr().cast::<c::sockaddr>(),
             &mut len,
         ))?;
         Ok(read_sockaddr_os(storage.as_ptr(), len.try_into().unwrap()))
@@ -585,7 +585,7 @@ pub(crate) fn getpeername(sockfd: BorrowedFd<'_>) -> io::Result<Option<SocketAdd
         let mut len = size_of::<c::sockaddr_storage>() as c::socklen_t;
         ret(c::getpeername(
             borrowed_fd(sockfd),
-            storage.as_mut_ptr().cast(),
+            storage.as_mut_ptr().cast::<c::sockaddr>(),
             &mut len,
         ))?;
         Ok(maybe_read_sockaddr_os(
