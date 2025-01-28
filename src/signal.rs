@@ -26,6 +26,7 @@ pub struct Signal(NonZeroI32);
 /// To construct `SIGRTMIN + n` “real-time” signal values, use
 /// [`Signal::rt`].
 // SAFETY: The libc-defined signal values are all non-zero.
+#[rustfmt::skip]
 impl Signal {
     /// `SIGHUP`
     pub const HUP: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGHUP) });
