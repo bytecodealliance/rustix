@@ -70,8 +70,8 @@ pub type Stack = linux_raw_sys::general::stack_t;
 /// Undefined behavior could happen in some functions if `Sigset` ever
 /// contains signal numbers in the range from
 /// `linux_raw_sys::general::SIGRTMIN` to what the libc thinks `SIGRTMIN` is.
-/// Unless you are implementing the libc. Which you probably are, if you're
-/// reading this.
+/// Unless you are implementing the libc. Which you may indeed be doing, if
+/// you're reading this.
 #[cfg(linux_raw)]
 pub type Sigset = linux_raw_sys::general::kernel_sigset_t;
 
@@ -577,16 +577,18 @@ pub unsafe fn brk(addr: *mut c_void) -> io::Result<*mut c_void> {
     backend::runtime::syscalls::brk(addr)
 }
 
-/// `__SIGRTMIN`—The start of the realtime signal range.
+/// `SIGRTMIN`—The start of the raw OS “real-time” signal range.
 ///
 /// This is the raw `SIGRTMIN` value from the OS, which is not the same as the
 /// `SIGRTMIN` macro provided by libc. Don't use this unless you know your code
 /// won't share a process with a libc (perhaps because you yourself are
 /// implementing a libc).
+///
+/// See [`sigrt`] for a convenient way to construct `SIGRTMIN + n` values.
 #[cfg(linux_raw)]
 pub const SIGRTMIN: u32 = linux_raw_sys::general::SIGRTMIN;
 
-/// `__SIGRTMAX`—The last of the realtime signal range.
+/// `SIGRTMAX`—The last of the raw OS “real-time” signal range.
 ///
 /// This is the raw `SIGRTMAX` value from the OS, which is not the same as the
 /// `SIGRTMAX` macro provided by libc. Don't use this unless you know your code
@@ -617,7 +619,7 @@ pub const SIGRTMAX: u32 = {
     }
 };
 
-/// Return a signal corresponding to `SIGRTMIN + n`.
+/// Return a [`Signal`] corresponding to `SIGRTMIN + n`.
 ///
 /// This is similar to [`Signal::rt`], but uses the raw OS `SIGRTMIN` value
 /// instead of the libc `SIGRTMIN` value. Don't use this unless you know your
