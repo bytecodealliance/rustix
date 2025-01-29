@@ -2,6 +2,7 @@
 
 use crate::backend::c;
 use crate::net::AddressFamily;
+use core::mem::size_of;
 #[cfg(unix)]
 use {
     crate::ffi::CStr,
