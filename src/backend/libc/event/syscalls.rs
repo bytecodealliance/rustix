@@ -164,8 +164,31 @@ pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: Option<&Timespec>) -> io::Re
             }
         };
 
-        ret_c_int(unsafe { c::ppoll(fds.as_mut_ptr().cast(), nfds, timeout, null()) })
-            .map(|nready| nready as usize)
+        #[cfg(not(target_os = "netbsd"))]
+        {
+            ret_c_int(unsafe { c::ppoll(fds.as_mut_ptr().cast(), nfds, timeout, null()) })
+                .map(|nready| nready as usize)
+        }
+
+        // NetBSD 9.x lacks `ppoll`, so use a weak symbol and fall back to
+        // plain `poll` if needed.
+        #[cfg(target_os = "netbsd")]
+        {
+            weak! {
+                fn ppoll(
+                    *mut c::pollfd,
+                    c::nfds_t,
+                    *const c::timespec,
+                    *const c::sigset_t
+                ) -> c::c_int
+            }
+            if let Some(func) = ppoll.get() {
+                return ret_c_int(unsafe {
+                    func(fds.as_mut_ptr().cast(), nfds, timeout, null())
+                })
+                .map(|nready| nready as usize);
+            }
+        }
     }
 
     // If we don't have `ppoll`, convert the timeout to `c_int` and use `poll`.
@@ -174,8 +197,7 @@ pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: Option<&Timespec>) -> io::Re
         freebsdlike,
         target_os = "fuchsia",
         target_os = "haiku",
-        target_os = "hurd",
-        target_os = "netbsd"
+        target_os = "hurd"
     )))]
     {
         let timeout = match timeout {
