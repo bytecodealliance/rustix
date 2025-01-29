@@ -813,12 +813,12 @@ pub fn recvmsg<Fd: AsFd>(
     iov: &mut [IoSliceMut<'_>],
     control: &mut RecvAncillaryBuffer<'_>,
     flags: RecvFlags,
-) -> io::Result<RecvMsgReturn> {
+) -> io::Result<RecvMsg> {
     backend::net::syscalls::recvmsg(socket.as_fd(), iov, control, flags)
 }
 
 /// The result of a successful [`recvmsg`] call.
-pub struct RecvMsgReturn {
+pub struct RecvMsg {
     /// The number of bytes received.
     ///
     /// When `RecvFlags::TRUNC` is in use, this may be greater than the
@@ -834,9 +834,9 @@ pub struct RecvMsgReturn {
 }
 
 #[cfg(feature = "std")]
-impl fmt::Debug for RecvMsgReturn {
+impl fmt::Debug for RecvMsg {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("RecvMsgReturn")
+        f.debug_struct("RecvMsg")
             .field("bytes", &self.bytes)
             .field("flags", &self.flags)
             .field("address", &self.address)
