@@ -54,6 +54,23 @@ macro_rules! check_struct_renamed_field {
     };
 }
 
+/// The same as `check_struct_field`, but for when the struct is renamed
+/// but the field is not.
+macro_rules! check_renamed_struct_field {
+    ($to_struct:ident, $from_struct:ident, $field:ident) => {
+        const_assert_eq!(
+            memoffset::offset_of!($to_struct, $field),
+            memoffset::offset_of!(c::$from_struct, $field)
+        );
+
+        // As above, this can't use `const_assert_eq`.
+        assert_eq!(
+            memoffset::span_of!($to_struct, $field),
+            memoffset::span_of!(c::$from_struct, $field)
+        );
+    };
+}
+
 /// The same as `check_struct_renamed_field`, but for when both the struct and
 /// a field are renamed.
 macro_rules! check_renamed_struct_renamed_field {

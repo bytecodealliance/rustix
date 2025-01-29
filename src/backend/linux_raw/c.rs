@@ -18,6 +18,8 @@ pub(crate) use linux_raw_sys::general::{
     __kernel_pid_t as pid_t, __kernel_time64_t as time_t, __kernel_timespec as timespec, iovec,
     O_CLOEXEC, O_NOCTTY, O_NONBLOCK, O_RDWR,
 };
+#[cfg(feature = "system")]
+pub(crate) use linux_raw_sys::system::sysinfo;
 
 #[cfg(feature = "event")]
 #[cfg(test)]

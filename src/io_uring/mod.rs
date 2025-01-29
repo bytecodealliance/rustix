@@ -24,8 +24,11 @@
 //! [rustix-uring]: https://crates.io/crates/rustix-uring
 #![allow(unsafe_code)]
 
+mod bindgen_types;
+
 use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
 use crate::{backend, io};
+use bindgen_types::*;
 use core::ffi::c_void;
 use core::mem::MaybeUninit;
 use core::ptr::{null_mut, write_bytes};
@@ -1210,7 +1213,7 @@ pub struct io_uring_cqe {
     pub user_data: io_uring_user_data,
     pub res: i32,
     pub flags: IoringCqeFlags,
-    pub big_cqe: sys::__IncompleteArrayField<u64>,
+    pub big_cqe: IncompleteArrayField<u64>,
 }
 
 #[allow(missing_docs)]
@@ -1286,7 +1289,7 @@ pub struct io_uring_probe {
     pub ops_len: u8,
     pub resv: u16,
     pub resv2: [u32; 3],
-    pub ops: sys::__IncompleteArrayField<io_uring_probe_op>,
+    pub ops: IncompleteArrayField<io_uring_probe_op>,
 }
 
 #[allow(missing_docs)]
@@ -1416,15 +1419,15 @@ pub struct buf_ring_tail_struct {
 #[repr(C)]
 #[derive(Debug, Default)]
 pub struct buf_ring_bufs_struct {
-    pub bufs: sys::__IncompleteArrayField<io_uring_buf>,
+    pub bufs: IncompleteArrayField<io_uring_buf>,
 }
 
 #[allow(missing_docs)]
 #[repr(C)]
 #[derive(Debug, Default)]
 pub struct tail_or_bufs_struct {
-    pub tail: sys::__BindgenUnionField<buf_ring_tail_struct>,
-    pub bufs: sys::__BindgenUnionField<buf_ring_bufs_struct>,
+    pub tail: UnionField<buf_ring_tail_struct>,
+    pub bufs: UnionField<buf_ring_bufs_struct>,
     pub union_field: [u64; 2],
 }
 
