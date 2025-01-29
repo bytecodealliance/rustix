@@ -11,7 +11,6 @@ use crate::ffi::CStr;
 use crate::{io, path};
 use core::cmp::Ordering;
 use core::hash::{Hash, Hasher};
-use core::mem::size_of;
 use core::{fmt, slice};
 
 /// `struct sockaddr_un`
