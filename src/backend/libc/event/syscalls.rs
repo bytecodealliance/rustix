@@ -183,10 +183,8 @@ pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: Option<&Timespec>) -> io::Re
                 ) -> c::c_int
             }
             if let Some(func) = ppoll.get() {
-                return ret_c_int(unsafe {
-                    func(fds.as_mut_ptr().cast(), nfds, timeout, null())
-                })
-                .map(|nready| nready as usize);
+                return ret_c_int(unsafe { func(fds.as_mut_ptr().cast(), nfds, timeout, null()) })
+                    .map(|nready| nready as usize);
             }
         }
     }
