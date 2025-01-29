@@ -3,14 +3,13 @@
 //! # Examples
 //!
 //! ```
-//! # fn test() -> io::Result<()> {
+//! # fn test() -> std::io::Result<()> {
 //! use rustix::event::port;
 //! use rustix::stdio::stdout;
 //! use std::io;
-//! use std::ptr::without_provenance_mut;
 //!
 //! let some_fd = stdout();
-//! let some_userdata = without_provenance_mut(7);
+//! let some_userdata = 7 as *mut _;
 //!
 //! // Create a port.
 //! let port = port::create()?;
@@ -21,7 +20,7 @@
 //! }
 //!
 //! // Get a single event.
-//! let event = port::get(&port, None);
+//! let event = port::get(&port, None)?;
 //!
 //! assert_eq!(event.userdata(), some_userdata);
 //! # Ok(())
