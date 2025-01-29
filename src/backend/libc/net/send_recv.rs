@@ -96,9 +96,10 @@ bitflags! {
         /// `MSG_PEEK`
         const PEEK = bitcast!(c::MSG_PEEK);
         /// `MSG_TRUNC`
-        // Apple and illumos have `MSG_TRUNC` but it's not documented for use
-        // with `recv` and friends, and in practice appears to be ignored.
-        #[cfg(not(any(apple, solarish)))]
+        // Apple, illumos, and NetBSD have `MSG_TRUNC` but it's not documented
+        // for use with `recv` and friends, and in practice appears to be
+        // ignored.
+        #[cfg(not(any(apple, solarish, target_os = "netbsd")))]
         const TRUNC = bitcast!(c::MSG_TRUNC);
         /// `MSG_WAITALL`
         const WAITALL = bitcast!(c::MSG_WAITALL);

@@ -19,8 +19,8 @@ fn net_recv_uninit_trunc() {
     let n = rustix::net::sendto_unix(&sender, request, SendFlags::empty(), &name).expect("send");
     assert_eq!(n, request.len());
 
-    // Test with `RecvFlags::TRUNC`, which is not supported on Apple or illumos.
-    #[cfg(not(any(apple, solarish)))]
+    // Test with `RecvFlags::TRUNC`, which is not supported on Apple, illumos, or NetBSD.
+    #[cfg(not(any(apple, solarish, target_os = "netbsd")))]
     {
         let mut response = [MaybeUninit::<u8>::zeroed(); 5];
         let (init, uninit) = rustix::net::recv_uninit(&receiver, &mut response, RecvFlags::TRUNC)
@@ -62,8 +62,8 @@ fn net_recvmsg_trunc() {
     let sender = rustix::net::socket(AddressFamily::UNIX, SocketType::DGRAM, None).unwrap();
     let request = b"Hello, World!!!";
 
-    // Test with `RecvFlags::TRUNC`, which is not supported on Apple or illumos.
-    #[cfg(not(any(apple, solarish)))]
+    // Test with `RecvFlags::TRUNC`, which is not supported on Apple, illumos, or NetBSD.
+    #[cfg(not(any(apple, solarish, target_os = "netbsd")))]
     {
         let n =
             rustix::net::sendto_unix(&sender, request, SendFlags::empty(), &name).expect("send");
