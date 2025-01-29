@@ -3,6 +3,7 @@
 use crate::backend::c;
 use crate::net::AddressFamily;
 use core::mem::size_of;
+use core::slice;
 #[cfg(unix)]
 use {
     crate::ffi::CStr,
@@ -11,7 +12,6 @@ use {
     core::cmp::Ordering,
     core::fmt,
     core::hash::{Hash, Hasher},
-    core::slice,
 };
 
 /// `struct sockaddr_un`
