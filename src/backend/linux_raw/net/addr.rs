@@ -6,6 +6,7 @@
 //! to be NUL-terminated.
 #![allow(unsafe_code)]
 
+use core::mem::size_of;
 use crate::backend::c;
 use crate::ffi::CStr;
 use crate::net::AddressFamily;
