@@ -680,7 +680,7 @@ pub fn set_ip_multicast_if_with_ifindex<Fd: AsFd>(
     fd: Fd,
     multiaddr: &Ipv4Addr,
     address: &Ipv4Addr,
-    ifindex: i32,
+    ifindex: u32,
 ) -> io::Result<()> {
     backend::net::sockopt::set_ip_multicast_if_with_ifindex(fd.as_fd(), multiaddr, address, ifindex)
 }
@@ -869,7 +869,7 @@ pub fn set_ip_add_membership_with_ifindex<Fd: AsFd>(
     fd: Fd,
     multiaddr: &Ipv4Addr,
     address: &Ipv4Addr,
-    ifindex: i32,
+    ifindex: u32,
 ) -> io::Result<()> {
     backend::net::sockopt::set_ip_add_membership_with_ifindex(
         fd.as_fd(),
@@ -978,7 +978,7 @@ pub fn set_ip_drop_membership_with_ifindex<Fd: AsFd>(
     fd: Fd,
     multiaddr: &Ipv4Addr,
     address: &Ipv4Addr,
-    ifindex: i32,
+    ifindex: u32,
 ) -> io::Result<()> {
     backend::net::sockopt::set_ip_drop_membership_with_ifindex(
         fd.as_fd(),

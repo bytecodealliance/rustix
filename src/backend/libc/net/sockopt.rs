@@ -502,9 +502,9 @@ pub(crate) fn set_ip_multicast_if_with_ifindex(
     fd: BorrowedFd<'_>,
     multiaddr: &Ipv4Addr,
     address: &Ipv4Addr,
-    ifindex: i32,
+    ifindex: u32,
 ) -> io::Result<()> {
-    let mreqn = to_ip_mreqn(multiaddr, address, ifindex);
+    let mreqn = to_ip_mreqn(multiaddr, address, ifindex as i32);
     setsockopt(fd, c::IPPROTO_IP, c::IP_MULTICAST_IF, mreqn)
 }
 
@@ -590,9 +590,9 @@ pub(crate) fn set_ip_add_membership_with_ifindex(
     fd: BorrowedFd<'_>,
     multiaddr: &Ipv4Addr,
     address: &Ipv4Addr,
-    ifindex: i32,
+    ifindex: u32,
 ) -> io::Result<()> {
-    let mreqn = to_ip_mreqn(multiaddr, address, ifindex);
+    let mreqn = to_ip_mreqn(multiaddr, address, ifindex as i32);
     setsockopt(fd, c::IPPROTO_IP, c::IP_ADD_MEMBERSHIP, mreqn)
 }
 
@@ -669,9 +669,9 @@ pub(crate) fn set_ip_drop_membership_with_ifindex(
     fd: BorrowedFd<'_>,
     multiaddr: &Ipv4Addr,
     address: &Ipv4Addr,
-    ifindex: i32,
+    ifindex: u32,
 ) -> io::Result<()> {
-    let mreqn = to_ip_mreqn(multiaddr, address, ifindex);
+    let mreqn = to_ip_mreqn(multiaddr, address, ifindex as i32);
     setsockopt(fd, c::IPPROTO_IP, c::IP_DROP_MEMBERSHIP, mreqn)
 }
 
