@@ -505,7 +505,7 @@ fn test_sockopts_multicast_ifv4() {
     }
 }
 
-#[cfg(linux_like)]
+#[cfg(linux_kernel)]
 #[test]
 fn test_sockopts_multicast_if_with_ifindex() {
     crate::init();
