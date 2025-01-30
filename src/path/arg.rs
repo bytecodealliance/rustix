@@ -21,7 +21,11 @@ use std::os::hermit::ext::ffi::{OsStrExt, OsStringExt};
 use std::os::unix::ffi::{OsStrExt, OsStringExt};
 #[cfg(all(feature = "std", target_os = "vxworks"))]
 use std::os::vxworks::ext::ffi::{OsStrExt, OsStringExt};
-#[cfg(all(feature = "std", target_os = "wasi"))]
+#[cfg(all(
+    feature = "std",
+    target_os = "wasi",
+    any(not(target_env = "p2"), wasip2)
+))]
 use std::os::wasi::ffi::{OsStrExt, OsStringExt};
 #[cfg(feature = "std")]
 use std::path::{Component, Components, Iter, Path, PathBuf};
@@ -225,19 +229,18 @@ impl Arg for String {
 }
 
 #[cfg(feature = "std")]
+#[cfg(any(not(target_os = "wasi"), not(target_env = "p2"), wasip2))]
 impl Arg for &OsStr {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
         self.to_str().ok_or(io::Errno::INVAL)
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn to_string_lossy(&self) -> Cow<'_, str> {
         OsStr::to_string_lossy(self)
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Owned(
@@ -245,7 +248,6 @@ impl Arg for &OsStr {
         ))
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -267,19 +269,18 @@ impl Arg for &OsStr {
 }
 
 #[cfg(feature = "std")]
+#[cfg(any(not(target_os = "wasi"), not(target_env = "p2"), wasip2))]
 impl Arg for &OsString {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
         OsString::as_os_str(self).to_str().ok_or(io::Errno::INVAL)
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn to_string_lossy(&self) -> Cow<'_, str> {
         self.as_os_str().to_string_lossy()
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Owned(
@@ -288,7 +289,6 @@ impl Arg for &OsString {
         ))
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -308,19 +308,18 @@ impl Arg for &OsString {
 }
 
 #[cfg(feature = "std")]
+#[cfg(any(not(target_os = "wasi"), not(target_env = "p2"), wasip2))]
 impl Arg for OsString {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
         self.as_os_str().to_str().ok_or(io::Errno::INVAL)
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn to_string_lossy(&self) -> Cow<'_, str> {
         self.as_os_str().to_string_lossy()
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Owned(
@@ -328,7 +327,6 @@ impl Arg for OsString {
         ))
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -350,19 +348,18 @@ impl Arg for OsString {
 }
 
 #[cfg(feature = "std")]
+#[cfg(any(not(target_os = "wasi"), not(target_env = "p2"), wasip2))]
 impl Arg for &Path {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
         self.as_os_str().to_str().ok_or(io::Errno::INVAL)
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn to_string_lossy(&self) -> Cow<'_, str> {
         Path::to_string_lossy(self)
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Owned(
@@ -370,7 +367,6 @@ impl Arg for &Path {
         ))
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -392,6 +388,7 @@ impl Arg for &Path {
 }
 
 #[cfg(feature = "std")]
+#[cfg(any(not(target_os = "wasi"), not(target_env = "p2"), wasip2))]
 impl Arg for &PathBuf {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -401,13 +398,11 @@ impl Arg for &PathBuf {
             .ok_or(io::Errno::INVAL)
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn to_string_lossy(&self) -> Cow<'_, str> {
         self.as_path().to_string_lossy()
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Owned(
@@ -416,7 +411,6 @@ impl Arg for &PathBuf {
         ))
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -436,19 +430,18 @@ impl Arg for &PathBuf {
 }
 
 #[cfg(feature = "std")]
+#[cfg(any(not(target_os = "wasi"), not(target_env = "p2"), wasip2))]
 impl Arg for PathBuf {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
         self.as_os_str().to_str().ok_or(io::Errno::INVAL)
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn to_string_lossy(&self) -> Cow<'_, str> {
         self.as_os_str().to_string_lossy()
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Owned(
@@ -456,7 +449,6 @@ impl Arg for PathBuf {
         ))
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -524,19 +516,16 @@ impl Arg for &CString {
         unimplemented!()
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn to_string_lossy(&self) -> Cow<'_, str> {
         unimplemented!()
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Borrowed(self))
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -562,19 +551,16 @@ impl Arg for CString {
         self.to_str().map_err(|_utf8_err| io::Errno::INVAL)
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn to_string_lossy(&self) -> Cow<'_, str> {
         CStr::to_string_lossy(self)
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Borrowed(self))
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -600,13 +586,11 @@ impl<'a> Arg for Cow<'a, str> {
         Ok(self)
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn to_string_lossy(&self) -> Cow<'_, str> {
         Cow::Borrowed(self)
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Owned(
@@ -614,7 +598,6 @@ impl<'a> Arg for Cow<'a, str> {
         ))
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -640,20 +623,18 @@ impl<'a> Arg for Cow<'a, str> {
 }
 
 #[cfg(feature = "std")]
-#[cfg(feature = "alloc")]
+#[cfg(any(not(target_os = "wasi"), not(target_env = "p2"), wasip2))]
 impl<'a> Arg for Cow<'a, OsStr> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
         (**self).to_str().ok_or(io::Errno::INVAL)
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn to_string_lossy(&self) -> Cow<'_, str> {
         (**self).to_string_lossy()
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Owned(
@@ -661,7 +642,6 @@ impl<'a> Arg for Cow<'a, OsStr> {
         ))
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -693,20 +673,17 @@ impl<'a> Arg for Cow<'a, CStr> {
         self.to_str().map_err(|_utf8_err| io::Errno::INVAL)
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn to_string_lossy(&self) -> Cow<'_, str> {
         let borrow: &CStr = core::borrow::Borrow::borrow(self);
         borrow.to_string_lossy()
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Borrowed(self))
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -726,19 +703,18 @@ impl<'a> Arg for Cow<'a, CStr> {
 }
 
 #[cfg(feature = "std")]
+#[cfg(any(not(target_os = "wasi"), not(target_env = "p2"), wasip2))]
 impl<'a> Arg for Component<'a> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
         self.as_os_str().to_str().ok_or(io::Errno::INVAL)
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn to_string_lossy(&self) -> Cow<'_, str> {
         self.as_os_str().to_string_lossy()
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Owned(
@@ -746,7 +722,6 @@ impl<'a> Arg for Component<'a> {
         ))
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -768,19 +743,18 @@ impl<'a> Arg for Component<'a> {
 }
 
 #[cfg(feature = "std")]
+#[cfg(any(not(target_os = "wasi"), not(target_env = "p2"), wasip2))]
 impl<'a> Arg for Components<'a> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
         self.as_path().to_str().ok_or(io::Errno::INVAL)
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn to_string_lossy(&self) -> Cow<'_, str> {
         self.as_path().to_string_lossy()
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Owned(
@@ -789,7 +763,6 @@ impl<'a> Arg for Components<'a> {
         ))
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -812,19 +785,18 @@ impl<'a> Arg for Components<'a> {
 }
 
 #[cfg(feature = "std")]
+#[cfg(any(not(target_os = "wasi"), not(target_env = "p2"), wasip2))]
 impl<'a> Arg for Iter<'a> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
         self.as_path().to_str().ok_or(io::Errno::INVAL)
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn to_string_lossy(&self) -> Cow<'_, str> {
         self.as_path().to_string_lossy()
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Owned(
@@ -833,7 +805,6 @@ impl<'a> Arg for Iter<'a> {
         ))
     }
 
-    #[cfg(feature = "alloc")]
     #[inline]
     fn into_c_str<'b>(self) -> io::Result<Cow<'b, CStr>>
     where
@@ -939,6 +910,7 @@ impl Arg for &Vec<u8> {
 }
 
 #[cfg(feature = "alloc")]
+#[cfg(any(not(target_os = "wasi"), not(target_env = "p2"), wasip2))]
 impl Arg for Vec<u8> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {

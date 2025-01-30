@@ -82,6 +82,7 @@ fn main() {
     // WASI support can utilize wasi_ext if present.
     if os == "wasi" {
         use_feature_or_nothing("wasi_ext");
+        use_feature_or_nothing("wasip2");
     }
 
     // If the libc backend is requested, or if we're not on a platform for

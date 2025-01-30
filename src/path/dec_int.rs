@@ -13,7 +13,11 @@ use core::mem::{self, MaybeUninit};
 use core::num::NonZeroU8;
 #[cfg(all(feature = "std", unix))]
 use std::os::unix::ffi::OsStrExt;
-#[cfg(all(feature = "std", target_os = "wasi"))]
+#[cfg(all(
+    feature = "std",
+    target_os = "wasi",
+    any(not(target_env = "p2"), wasip2)
+))]
 use std::os::wasi::ffi::OsStrExt;
 #[cfg(feature = "std")]
 use {core::fmt, std::ffi::OsStr, std::path::Path};
@@ -236,6 +240,7 @@ impl DecInt {
 }
 
 #[cfg(feature = "std")]
+#[cfg(any(not(target_os = "wasi"), not(target_env = "p2"), wasip2))]
 impl AsRef<Path> for DecInt {
     #[inline]
     fn as_ref(&self) -> &Path {
