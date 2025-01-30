@@ -505,25 +505,28 @@ fn test_sockopts_multicast_ifv4() {
     }
 }
 
-#[cfg(any(
-    apple,
-    freebsdlike,
-    linux_like,
-    target_os = "fuchsia",
-    target_os = "openbsd"
-))]
+#[cfg(linux_like)]
 #[test]
 fn test_sockopts_multicast_if_with_ifindex() {
     crate::init();
 
     let s = rustix::net::socket(AddressFamily::INET, SocketType::DGRAM, None).unwrap();
 
+    let fd = rustix::net::socket_with(
+        AddressFamily::INET,
+        SocketType::DGRAM,
+        rustix::net::SocketFlags::CLOEXEC,
+        None,
+    )
+    .unwrap();
+    let index = rustix::net::netdevice::name_to_index(&fd, "lo").unwrap();
+
     // Set a ipv4 interface
     match sockopt::set_ip_multicast_if_with_ifindex(
         &s,
         &Ipv4Addr::new(224, 254, 0, 0),
         &Ipv4Addr::UNSPECIFIED,
-        0,
+        index,
     ) {
         Ok(_) => {
             assert_eq!(sockopt::ip_multicast_if(&s).unwrap(), Ipv4Addr::UNSPECIFIED);
