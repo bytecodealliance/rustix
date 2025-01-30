@@ -129,7 +129,7 @@ fn test_unix() {
 #[cfg(not(any(target_os = "espidf", target_os = "redox", target_os = "wasi")))]
 fn do_test_unix_msg(addr: SocketAddrUnix) {
     use rustix::io::{IoSlice, IoSliceMut};
-    use rustix::net::{recvmsg, sendmsg, RecvFlags, SendFlags};
+    use rustix::net::{recvmsg, sendmsg, RecvFlags, ReturnFlags, SendFlags};
 
     let server = {
         let connection_socket = socket(AddressFamily::UNIX, SocketType::SEQPACKET, None).unwrap();
@@ -142,14 +142,16 @@ fn do_test_unix_msg(addr: SocketAddrUnix) {
                 let data_socket = accept(&connection_socket).unwrap();
                 let mut sum = 0;
                 loop {
-                    let nread = recvmsg(
+                    let result = recvmsg(
                         &data_socket,
                         &mut [IoSliceMut::new(&mut buffer)],
                         &mut Default::default(),
                         RecvFlags::empty(),
                     )
-                    .unwrap()
-                    .bytes;
+                    .unwrap();
+                    let nread = result.bytes;
+
+                    assert_eq!(result.flags, ReturnFlags::empty());
 
                     if &buffer[..nread] == b"exit" {
                         break 'exit;
@@ -210,6 +212,7 @@ fn do_test_unix_msg(addr: SocketAddrUnix) {
                 RecvFlags::empty(),
             )
             .unwrap();
+            assert_eq!(result.flags, ReturnFlags::empty());
             let nread = result.bytes;
             assert_eq!(
                 i32::from_str(&String::from_utf8_lossy(&buffer[..nread])).unwrap(),
@@ -259,7 +262,7 @@ fn do_test_unix_msg(addr: SocketAddrUnix) {
 #[cfg(not(any(target_os = "espidf", target_os = "redox", target_os = "wasi")))]
 fn do_test_unix_msg_unconnected(addr: SocketAddrUnix) {
     use rustix::io::{IoSlice, IoSliceMut};
-    use rustix::net::{recvmsg, sendmsg_unix, RecvFlags, SendFlags};
+    use rustix::net::{recvmsg, sendmsg_unix, RecvFlags, ReturnFlags, SendFlags};
 
     let server = {
         let runs: &[i32] = &[3, 184, 187, 0];
@@ -271,16 +274,17 @@ fn do_test_unix_msg_unconnected(addr: SocketAddrUnix) {
             for expected_sum in runs {
                 let mut sum = 0;
                 loop {
-                    let nread = recvmsg(
+                    let result = recvmsg(
                         &data_socket,
                         &mut [IoSliceMut::new(&mut buffer)],
                         &mut Default::default(),
                         RecvFlags::empty(),
                     )
-                    .unwrap()
-                    .bytes;
+                    .unwrap();
+                    let nread = result.bytes;
 
                     assert_ne!(&buffer[..nread], b"exit");
+                    assert_eq!(result.flags, ReturnFlags::empty());
                     if &buffer[..nread] == b"sum" {
                         break;
                     }
@@ -290,16 +294,17 @@ fn do_test_unix_msg_unconnected(addr: SocketAddrUnix) {
 
                 assert_eq!(sum, *expected_sum);
             }
-            let nread = recvmsg(
+            let result = recvmsg(
                 &data_socket,
                 &mut [IoSliceMut::new(&mut buffer)],
                 &mut Default::default(),
                 RecvFlags::empty(),
             )
-            .unwrap()
-            .bytes;
+            .unwrap();
+            let nread = result.bytes;
 
             assert_eq!(&buffer[..nread], b"exit");
+            assert_eq!(result.flags, ReturnFlags::empty());
         }
     };
 
@@ -425,7 +430,7 @@ fn test_unix_msg_with_scm_rights() {
     use rustix::fd::AsFd;
     use rustix::io::{IoSlice, IoSliceMut};
     use rustix::net::{
-        recvmsg, sendmsg, RecvAncillaryBuffer, RecvAncillaryMessage, RecvFlags,
+        recvmsg, sendmsg, RecvAncillaryBuffer, RecvAncillaryMessage, RecvFlags, ReturnFlags,
         SendAncillaryBuffer, SendAncillaryMessage, SendFlags,
     };
     use rustix::pipe::pipe;
@@ -454,14 +459,16 @@ fn test_unix_msg_with_scm_rights() {
                 let mut sum = 0;
                 loop {
                     let mut cmsg_buffer = RecvAncillaryBuffer::new(&mut cmsg_space);
-                    let nread = recvmsg(
+                    let result = recvmsg(
                         &data_socket,
                         &mut [IoSliceMut::new(&mut buffer)],
                         &mut cmsg_buffer,
                         RecvFlags::empty(),
                     )
-                    .unwrap()
-                    .bytes;
+                    .unwrap();
+                    let nread = result.bytes;
+
+                    assert_eq!(result.flags, ReturnFlags::empty());
 
                     // Read out the pipe if we got it.
                     if let Some(end) = cmsg_buffer
@@ -536,18 +543,19 @@ fn test_unix_msg_with_scm_rights() {
             )
             .unwrap();
 
-            let nread = recvmsg(
+            let result = recvmsg(
                 &data_socket,
                 &mut [IoSliceMut::new(&mut buffer)],
                 &mut Default::default(),
                 RecvFlags::empty(),
             )
-            .unwrap()
-            .bytes;
+            .unwrap();
+            let nread = result.bytes;
             assert_eq!(
                 i32::from_str(&String::from_utf8_lossy(&buffer[..nread])).unwrap(),
                 *sum
             );
+            assert_eq!(result.flags, ReturnFlags::empty());
         }
 
         let data_socket = socket(AddressFamily::UNIX, SocketType::SEQPACKET, None).unwrap();
@@ -600,7 +608,7 @@ fn test_unix_peercred_explicit() {
     use rustix::io::{IoSlice, IoSliceMut};
     use rustix::net::{
         recvmsg, sendmsg, sockopt, RecvAncillaryBuffer, RecvAncillaryMessage, RecvFlags,
-        SendAncillaryBuffer, SendAncillaryMessage, SendFlags, SocketFlags,
+        ReturnFlags, SendAncillaryBuffer, SendAncillaryMessage, SendFlags, SocketFlags,
     };
 
     let (send_sock, recv_sock) = rustix::net::socketpair(
@@ -631,13 +639,15 @@ fn test_unix_peercred_explicit() {
     let mut cmsg_buffer = RecvAncillaryBuffer::new(&mut cmsg_space);
 
     let mut buffer = [0; BUFFER_SIZE];
-    recvmsg(
+    let result = recvmsg(
         &recv_sock,
         &mut [IoSliceMut::new(&mut buffer)],
         &mut cmsg_buffer,
         RecvFlags::empty(),
     )
     .unwrap();
+
+    assert_eq!(result.flags, ReturnFlags::empty());
 
     match cmsg_buffer.drain().next().unwrap() {
         RecvAncillaryMessage::ScmCredentials(ucred2) => assert_eq!(ucred2, ucred),
@@ -656,7 +666,7 @@ fn test_unix_peercred_implicit() {
     use rustix::io::{IoSlice, IoSliceMut};
     use rustix::net::{
         recvmsg, sendmsg, sockopt, RecvAncillaryBuffer, RecvAncillaryMessage, RecvFlags,
-        SendAncillaryBuffer, SendFlags, SocketFlags,
+        ReturnFlags, SendAncillaryBuffer, SendFlags, SocketFlags,
     };
     use rustix::process::{getgid, getpid, getuid};
 
@@ -689,13 +699,15 @@ fn test_unix_peercred_implicit() {
     let mut cmsg_buffer = RecvAncillaryBuffer::new(&mut cmsg_space);
 
     let mut buffer = [0; BUFFER_SIZE];
-    recvmsg(
+    let result = recvmsg(
         &recv_sock,
         &mut [IoSliceMut::new(&mut buffer)],
         &mut cmsg_buffer,
         RecvFlags::empty(),
     )
     .unwrap();
+
+    assert_eq!(result.flags, ReturnFlags::empty());
 
     match cmsg_buffer.drain().next().unwrap() {
         RecvAncillaryMessage::ScmCredentials(ucred2) => assert_eq!(ucred2, ucred),
@@ -714,7 +726,7 @@ fn test_unix_msg_with_combo() {
     use rustix::fd::AsFd;
     use rustix::io::{IoSlice, IoSliceMut};
     use rustix::net::{
-        recvmsg, sendmsg, RecvAncillaryBuffer, RecvAncillaryMessage, RecvFlags,
+        recvmsg, sendmsg, RecvAncillaryBuffer, RecvAncillaryMessage, RecvFlags, ReturnFlags,
         SendAncillaryBuffer, SendAncillaryMessage, SendFlags,
     };
     use rustix::pipe::pipe;
@@ -745,14 +757,16 @@ fn test_unix_msg_with_combo() {
                 let mut sum = 0;
                 loop {
                     let mut cmsg_buffer = RecvAncillaryBuffer::new(&mut cmsg_space);
-                    let nread = recvmsg(
+                    let result = recvmsg(
                         &data_socket,
                         &mut [IoSliceMut::new(&mut buffer)],
                         &mut cmsg_buffer,
                         RecvFlags::empty(),
                     )
-                    .unwrap()
-                    .bytes;
+                    .unwrap();
+                    let nread = result.bytes;
+
+                    assert_eq!(result.flags, ReturnFlags::empty());
 
                     // Read out the pipe if we got it.
                     for cmsg in cmsg_buffer.drain() {
@@ -844,18 +858,19 @@ fn test_unix_msg_with_combo() {
             )
             .unwrap();
 
-            let nread = recvmsg(
+            let result = recvmsg(
                 &data_socket,
                 &mut [IoSliceMut::new(&mut buffer)],
                 &mut Default::default(),
                 RecvFlags::empty(),
             )
-            .unwrap()
-            .bytes;
+            .unwrap();
+            let nread = result.bytes;
             assert_eq!(
                 i32::from_str(&String::from_utf8_lossy(&buffer[..nread])).unwrap(),
                 *sum
             );
+            assert_eq!(result.flags, ReturnFlags::empty());
         }
 
         let data_socket = socket(AddressFamily::UNIX, SocketType::SEQPACKET, None).unwrap();

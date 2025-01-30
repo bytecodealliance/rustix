@@ -1211,24 +1211,28 @@ impl core::fmt::Debug for SpecialCodeIndex {
             Self::VKILL => write!(f, "VKILL"),
             #[cfg(not(any(
                 solarish,
+                target_os = "aix",
                 all(linux_kernel, any(target_arch = "sparc", target_arch = "sparc64"))
             )))]
             Self::VEOF => write!(f, "VEOF"),
             #[cfg(not(any(
                 solarish,
+                target_os = "aix",
                 all(linux_kernel, any(target_arch = "sparc", target_arch = "sparc64"))
             )))]
             Self::VTIME => write!(f, "VTIME"),
             #[cfg(not(any(
                 solarish,
+                target_os = "aix",
                 all(linux_kernel, any(target_arch = "sparc", target_arch = "sparc64"))
             )))]
             Self::VMIN => write!(f, "VMIN"),
 
-            // On Solarish platforms, and Linux on SPARC, `VMIN` and `VTIME`
+            // On Solarish platforms, Linux on SPARC, and AIX, `VMIN` and `VTIME`
             // have the same value as `VEOF` and `VEOL`.
             #[cfg(any(
                 solarish,
+                target_os = "aix",
                 all(linux_kernel, any(target_arch = "sparc", target_arch = "sparc64"))
             ))]
             Self::VMIN => write!(f, "VMIN/VEOF"),

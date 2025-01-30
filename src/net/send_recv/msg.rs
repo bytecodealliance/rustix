@@ -7,7 +7,8 @@ use crate::fd::{AsFd, BorrowedFd, OwnedFd};
 use crate::io::{self, IoSlice, IoSliceMut};
 #[cfg(linux_kernel)]
 use crate::net::UCred;
-
+#[cfg(feature = "std")]
+use core::fmt;
 use core::iter::FusedIterator;
 use core::marker::PhantomData;
 use core::mem::{align_of, size_of, size_of_val, take};
@@ -15,7 +16,7 @@ use core::mem::{align_of, size_of, size_of_val, take};
 use core::ptr::addr_of;
 use core::{ptr, slice};
 
-use super::{RecvFlags, SendFlags, SocketAddrAny, SocketAddrV4, SocketAddrV6};
+use super::{RecvFlags, ReturnFlags, SendFlags, SocketAddrAny, SocketAddrV4, SocketAddrV6};
 
 /// Macro for defining the amount of space to allocate in a buffer for use with
 /// [`RecvAncillaryBuffer::new`] and [`SendAncillaryBuffer::new`].
@@ -819,13 +820,28 @@ pub fn recvmsg<Fd: AsFd>(
 /// The result of a successful [`recvmsg`] call.
 pub struct RecvMsgReturn {
     /// The number of bytes received.
+    ///
+    /// When `RecvFlags::TRUNC` is in use, this may be greater than the
+    /// length of the buffer, as it reflects the number of bytes received
+    /// before truncation into the buffer.
     pub bytes: usize,
 
     /// The flags received.
-    pub flags: RecvFlags,
+    pub flags: ReturnFlags,
 
     /// The address of the socket we received from, if any.
     pub address: Option<SocketAddrAny>,
+}
+
+#[cfg(feature = "std")]
+impl fmt::Debug for RecvMsgReturn {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("RecvMsgReturn")
+            .field("bytes", &self.bytes)
+            .field("flags", &self.flags)
+            .field("address", &self.address)
+            .finish()
+    }
 }
 
 /// An iterator over data in an ancillary buffer.

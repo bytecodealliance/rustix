@@ -63,6 +63,7 @@ bitflags! {
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct RecvFlags: u32 {
+        /// `MSG_CMSG_CLOEXEC`
         #[cfg(not(any(
             apple,
             solarish,
@@ -73,7 +74,6 @@ bitflags! {
             target_os = "nto",
             target_os = "vita",
         )))]
-        /// `MSG_CMSG_CLOEXEC`
         const CMSG_CLOEXEC = bitcast!(c::MSG_CMSG_CLOEXEC);
         /// `MSG_DONTWAIT`
         #[cfg(not(windows))]
@@ -96,9 +96,44 @@ bitflags! {
         /// `MSG_PEEK`
         const PEEK = bitcast!(c::MSG_PEEK);
         /// `MSG_TRUNC`
+        // Apple, illumos, and NetBSD have `MSG_TRUNC` but it's not documented
+        // for use with `recv` and friends, and in practice appears to be
+        // ignored.
+        #[cfg(not(any(apple, solarish, target_os = "netbsd")))]
         const TRUNC = bitcast!(c::MSG_TRUNC);
         /// `MSG_WAITALL`
         const WAITALL = bitcast!(c::MSG_WAITALL);
+
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
+        const _ = !0;
+    }
+}
+
+bitflags! {
+    /// `MSG_*` flags returned from [`recvmsg`], in the `flags` field of
+    /// [`RecvMsgReturn`]
+    ///
+    /// [`recvmsg`]: crate::net::recvmsg
+    /// [`RecvMsgReturn`]: crate::net::RecvMsgReturn
+    #[repr(transparent)]
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct ReturnFlags: u32 {
+        /// `MSG_OOB`
+        const OOB = bitcast!(c::MSG_OOB);
+        /// `MSG_EOR`
+        #[cfg(not(windows))]
+        const EOR = bitcast!(c::MSG_EOR);
+        /// `MSG_TRUNC`
+        const TRUNC = bitcast!(c::MSG_TRUNC);
+        /// `MSG_CTRUNC`
+        const CTRUNC = bitcast!(c::MSG_CTRUNC);
+
+        /// `MSG_CMSG_CLOEXEC`
+        #[cfg(linux_kernel)]
+        const CMSG_CLOEXEC = bitcast!(c::MSG_CMSG_CLOEXEC);
+        /// `MSG_ERRQUEUE`
+        #[cfg(linux_kernel)]
+        const ERRQUEUE = bitcast!(c::MSG_ERRQUEUE);
 
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;

@@ -13,7 +13,7 @@ use backend::fd::{AsFd, BorrowedFd};
 use core::cmp::min;
 use core::mem::MaybeUninit;
 
-pub use backend::net::send_recv::{RecvFlags, SendFlags};
+pub use backend::net::send_recv::{RecvFlags, ReturnFlags, SendFlags};
 
 #[cfg(not(any(
     windows,

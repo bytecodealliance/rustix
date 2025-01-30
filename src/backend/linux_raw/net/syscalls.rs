@@ -11,7 +11,7 @@ use super::msghdr::{
     with_noaddr_msghdr, with_recv_msghdr, with_unix_msghdr, with_v4_msghdr, with_v6_msghdr,
 };
 use super::read_sockaddr::{initialize_family_to_unspec, maybe_read_sockaddr_os, read_sockaddr_os};
-use super::send_recv::{RecvFlags, SendFlags};
+use super::send_recv::{RecvFlags, ReturnFlags, SendFlags};
 #[cfg(target_os = "linux")]
 use super::write_sockaddr::encode_sockaddr_xdp;
 use super::write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6};
@@ -293,7 +293,7 @@ pub(crate) fn recvmsg(
             RecvMsgReturn {
                 bytes,
                 address: addr,
-                flags: RecvFlags::from_bits_retain(msghdr.msg_flags),
+                flags: ReturnFlags::from_bits_retain(msghdr.msg_flags),
             }
         })
     })
