@@ -83,6 +83,7 @@ jobs:
       run: >
         rustup target add
         wasm32-wasip1
+        wasm32-wasip2
         x86_64-unknown-fuchsia
     - if: matrix.rust == '1.63'
       run: rustup target add x86_64-fuchsia
@@ -102,6 +103,8 @@ jobs:
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-netbsd --features=all-apis --all-targets
     - if: matrix.rust != '1.63'
       run: cargo check --workspace --release -vv --target=wasm32-wasip1 --features=all-apis
+    - if: matrix.rust != '1.63'
+      run: cargo check --workspace --release -vv --target=wasm32-wasip2 --features=all-apis
     - if: matrix.rust != '1.63'
       run: cargo check --workspace --release -vv --target=x86_64-unknown-fuchsia --features=all-apis --all-targets
     - if: matrix.rust == '1.63'
@@ -179,10 +182,8 @@ jobs:
     - run: >
         rustup target add
         x86_64-unknown-redox
-        wasm32-wasip1
         thumbv7neon-unknown-linux-gnueabihf
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-redox --features=all-apis
-    - run: cargo check --workspace --release -vv --target=wasm32-wasip1 --features=all-apis
     - run: cargo check --workspace --release -vv --target=thumbv7neon-unknown-linux-gnueabihf --features=all-apis
 
   check_tier3:

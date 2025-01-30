@@ -5,6 +5,7 @@
         target_os = "wasi",
         target_env = "p2",
         any(feature = "fs", feature = "mount", feature = "net")
+        wasip2,
     ),
     feature(wasip2)
 )]

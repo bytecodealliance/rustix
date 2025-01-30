@@ -21,7 +21,11 @@ use std::os::hermit::ext::ffi::{OsStrExt, OsStringExt};
 use std::os::unix::ffi::{OsStrExt, OsStringExt};
 #[cfg(all(feature = "std", target_os = "vxworks"))]
 use std::os::vxworks::ext::ffi::{OsStrExt, OsStringExt};
-#[cfg(all(feature = "std", target_os = "wasi"))]
+#[cfg(all(
+    feature = "std",
+    target_os = "wasi",
+    any(not(target_env = "p2"), wasip2)
+))]
 use std::os::wasi::ffi::{OsStrExt, OsStringExt};
 #[cfg(feature = "std")]
 use std::path::{Component, Components, Iter, Path, PathBuf};
@@ -225,6 +229,7 @@ impl Arg for String {
 }
 
 #[cfg(feature = "std")]
+#[cfg(any(not(target_os = "wasi"), not(target_env = "p2"), wasip2))]
 impl Arg for &OsStr {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -267,6 +272,7 @@ impl Arg for &OsStr {
 }
 
 #[cfg(feature = "std")]
+#[cfg(any(not(target_os = "wasi"), not(target_env = "p2"), wasip2))]
 impl Arg for &OsString {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -308,6 +314,7 @@ impl Arg for &OsString {
 }
 
 #[cfg(feature = "std")]
+#[cfg(any(not(target_os = "wasi"), not(target_env = "p2"), wasip2))]
 impl Arg for OsString {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -350,6 +357,7 @@ impl Arg for OsString {
 }
 
 #[cfg(feature = "std")]
+#[cfg(any(not(target_os = "wasi"), not(target_env = "p2"), wasip2))]
 impl Arg for &Path {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -392,6 +400,7 @@ impl Arg for &Path {
 }
 
 #[cfg(feature = "std")]
+#[cfg(any(not(target_os = "wasi"), not(target_env = "p2"), wasip2))]
 impl Arg for &PathBuf {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -436,6 +445,7 @@ impl Arg for &PathBuf {
 }
 
 #[cfg(feature = "std")]
+#[cfg(any(not(target_os = "wasi"), not(target_env = "p2"), wasip2))]
 impl Arg for PathBuf {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -639,8 +649,8 @@ impl<'a> Arg for Cow<'a, str> {
     }
 }
 
-#[cfg(feature = "std")]
 #[cfg(feature = "alloc")]
+#[cfg(any(not(target_os = "wasi"), not(target_env = "p2"), wasip2))]
 impl<'a> Arg for Cow<'a, OsStr> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -726,6 +736,7 @@ impl<'a> Arg for Cow<'a, CStr> {
 }
 
 #[cfg(feature = "std")]
+#[cfg(any(not(target_os = "wasi"), not(target_env = "p2"), wasip2))]
 impl<'a> Arg for Component<'a> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -768,6 +779,7 @@ impl<'a> Arg for Component<'a> {
 }
 
 #[cfg(feature = "std")]
+#[cfg(any(not(target_os = "wasi"), not(target_env = "p2"), wasip2))]
 impl<'a> Arg for Components<'a> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -812,6 +824,7 @@ impl<'a> Arg for Components<'a> {
 }
 
 #[cfg(feature = "std")]
+#[cfg(any(not(target_os = "wasi"), not(target_env = "p2"), wasip2))]
 impl<'a> Arg for Iter<'a> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -939,6 +952,7 @@ impl Arg for &Vec<u8> {
 }
 
 #[cfg(feature = "alloc")]
+#[cfg(any(not(target_os = "wasi"), not(target_env = "p2"), wasip2))]
 impl Arg for Vec<u8> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
