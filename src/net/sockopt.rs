@@ -654,8 +654,35 @@ pub fn ipv6_v6only<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
 /// [module-level documentation]: self#references-for-get_ip_-and-set_ip_-functions
 #[inline]
 #[doc(alias = "IP_MULTICAST_IF")]
-pub fn set_ip_multicast_ifv4<Fd: AsFd>(fd: Fd, value: &Ipv4Addr) -> io::Result<()> {
-    backend::net::sockopt::set_ip_multicast_ifv4(fd.as_fd(), value)
+pub fn set_ip_multicast_if<Fd: AsFd>(fd: Fd, value: &Ipv4Addr) -> io::Result<()> {
+    backend::net::sockopt::set_ip_multicast_if(fd.as_fd(), value)
+}
+
+/// `setsockopt(fd, IPPROTO_IP, IP_MULTICAST_IF, multiaddr, address,
+/// ifindex)`
+///
+/// This is similar to [`set_ip_multicast_if`] but additionally allows an
+/// `ifindex` value to be given.
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_ip_-and-set_ip_-functions
+#[cfg(any(
+    apple,
+    freebsdlike,
+    linux_like,
+    target_os = "fuchsia",
+    target_os = "openbsd"
+))]
+#[inline]
+#[doc(alias = "IP_MULTICAST_IF")]
+pub fn set_ip_multicast_if_with_ifindex<Fd: AsFd>(
+    fd: Fd,
+    multiaddr: &Ipv4Addr,
+    address: &Ipv4Addr,
+    ifindex: i32,
+) -> io::Result<()> {
+    backend::net::sockopt::set_ip_multicast_if_with_ifindex(fd.as_fd(), multiaddr, address, ifindex)
 }
 
 /// `getsockopt(fd, IPPROTO_IP, IP_MULTICAST_IF)`
@@ -665,8 +692,8 @@ pub fn set_ip_multicast_ifv4<Fd: AsFd>(fd: Fd, value: &Ipv4Addr) -> io::Result<(
 /// [module-level documentation]: self#references-for-get_ip_-and-set_ip_-functions
 #[inline]
 #[doc(alias = "IP_MULTICAST_IF")]
-pub fn ip_multicast_ifv4<Fd: AsFd>(fd: Fd) -> io::Result<Ipv4Addr> {
-    backend::net::sockopt::ip_multicast_ifv4(fd.as_fd())
+pub fn ip_multicast_if<Fd: AsFd>(fd: Fd) -> io::Result<Ipv4Addr> {
+    backend::net::sockopt::ip_multicast_if(fd.as_fd())
 }
 
 /// `setsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_IF, value)`
@@ -676,8 +703,8 @@ pub fn ip_multicast_ifv4<Fd: AsFd>(fd: Fd) -> io::Result<Ipv4Addr> {
 /// [module-level documentation]: self#references-for-get_ip_-and-set_ip_-functions
 #[inline]
 #[doc(alias = "IPV6_MULTICAST_IF")]
-pub fn set_ip_multicast_ifv6<Fd: AsFd>(fd: Fd, value: u32) -> io::Result<()> {
-    backend::net::sockopt::set_ip_multicast_ifv6(fd.as_fd(), value)
+pub fn set_ipv6_multicast_if<Fd: AsFd>(fd: Fd, value: u32) -> io::Result<()> {
+    backend::net::sockopt::set_ipv6_multicast_if(fd.as_fd(), value)
 }
 
 /// `getsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_IF)`
@@ -687,8 +714,8 @@ pub fn set_ip_multicast_ifv6<Fd: AsFd>(fd: Fd, value: u32) -> io::Result<()> {
 /// [module-level documentation]: self#references-for-get_ip_-and-set_ip_-functions
 #[inline]
 #[doc(alias = "IPV6_MULTICAST_IF")]
-pub fn ip_multicast_ifv6<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
-    backend::net::sockopt::ip_multicast_ifv6(fd.as_fd())
+pub fn ipv6_multicast_if<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
+    backend::net::sockopt::ipv6_multicast_if(fd.as_fd())
 }
 
 /// `setsockopt(fd, IPPROTO_IP, IP_MULTICAST_LOOP, value)`
