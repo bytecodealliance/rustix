@@ -8,32 +8,22 @@ use core::mem::MaybeUninit;
 use core::slice;
 
 /// A memory buffer that may be uninitialized.
-pub trait Buffer<T> {
-    /// The result of the process operation.
-    type Result;
+pub trait Buffer<T>: private::Sealed<T> {}
 
-    /// Convert this buffer into a maybe-unitiailized view.
-    fn as_maybe_uninitialized(&mut self) -> &mut [MaybeUninit<T>];
+// Implement `Buffer` for all the types that implement `Sealed`.
+impl<T> Buffer<T> for &mut [T] {}
+impl<T, const N: usize> Buffer<T> for &mut [T; N] {}
+impl<T> Buffer<T> for &mut Vec<T> {}
+impl<'a, T> Buffer<T> for &'a mut [MaybeUninit<T>] {}
+impl<'a, T, const N: usize> Buffer<T> for &'a mut [MaybeUninit<T>; N] {}
+impl<T> Buffer<T> for Vec<T> {}
 
-    /// Convert a finished buffer pointer into its result.
-    ///
-    /// # Safety
-    ///
-    /// At least `len` bytes of the buffer must now be initialized.
-    unsafe fn finish(self, len: usize) -> Self::Result;
-}
-
-/// Implements [`Buffer`] around the a slice of bytes.
-///
-/// `Result` is a `usize` indicating how many bytes were written.
-impl<T> Buffer<T> for &mut [T] {
+impl<T> private::Sealed<T> for &mut [T] {
     type Result = usize;
 
     #[inline]
-    fn as_maybe_uninitialized(&mut self) -> &mut [MaybeUninit<T>] {
-        // SAFETY: This just casts away the knowledge that the elements are
-        // initialized.
-        unsafe { core::mem::transmute::<&mut [T], &mut [MaybeUninit<T>]>(self) }
+    fn as_raw_parts_mut(&mut self) -> (*mut T, usize) {
+        (self.as_mut_ptr(), self.len())
     }
 
     #[inline]
@@ -42,17 +32,12 @@ impl<T> Buffer<T> for &mut [T] {
     }
 }
 
-/// Implements [`Buffer`] around the a slice of bytes.
-///
-/// `Result` is a `usize` indicating how many bytes were written.
-impl<T, const N: usize> Buffer<T> for &mut [T; N] {
+impl<T, const N: usize> private::Sealed<T> for &mut [T; N] {
     type Result = usize;
 
     #[inline]
-    fn as_maybe_uninitialized(&mut self) -> &mut [MaybeUninit<T>] {
-        // SAFETY: This just casts away the knowledge that the elements are
-        // initialized.
-        unsafe { core::mem::transmute::<&mut [T], &mut [MaybeUninit<T>]>(*self) }
+    fn as_raw_parts_mut(&mut self) -> (*mut T, usize) {
+        (self.as_mut_ptr(), N)
     }
 
     #[inline]
@@ -61,17 +46,15 @@ impl<T, const N: usize> Buffer<T> for &mut [T; N] {
     }
 }
 
-/// Implements [`Buffer`] around the a slice of bytes.
-///
-/// `Result` is a `usize` indicating how many bytes were written.
-impl<T> Buffer<T> for &mut Vec<T> {
+// `Vec` implements `DerefMut` to `&mut [T]`, however it doesn't get
+// auto-derefed in a `impl Buffer<u8>`, so we add this `impl` so that our users
+// don't have to add an extra `*` in these situations.
+impl<T> private::Sealed<T> for &mut Vec<T> {
     type Result = usize;
 
     #[inline]
-    fn as_maybe_uninitialized(&mut self) -> &mut [MaybeUninit<T>] {
-        // SAFETY: This just casts away the knowledge that the elements are
-        // initialized.
-        unsafe { core::mem::transmute::<&mut [T], &mut [MaybeUninit<T>]>(self) }
+    fn as_raw_parts_mut(&mut self) -> (*mut T, usize) {
+        (self.as_mut_ptr(), self.len())
     }
 
     #[inline]
@@ -80,16 +63,12 @@ impl<T> Buffer<T> for &mut Vec<T> {
     }
 }
 
-/// Implements [`Buffer`] around the a slice of uninitialized bytes.
-///
-/// `Result` is a pair of slices giving the initialized and uninitialized
-/// subslices after the new data is written.
-impl<'a, T> Buffer<T> for &'a mut [MaybeUninit<T>] {
+impl<'a, T> private::Sealed<T> for &'a mut [MaybeUninit<T>] {
     type Result = (&'a mut [T], &'a mut [MaybeUninit<T>]);
 
     #[inline]
-    fn as_maybe_uninitialized(&mut self) -> &mut [MaybeUninit<T>] {
-        self
+    fn as_raw_parts_mut(&mut self) -> (*mut T, usize) {
+        (self.as_mut_ptr().cast(), self.len())
     }
 
     #[inline]
@@ -103,18 +82,33 @@ impl<'a, T> Buffer<T> for &'a mut [MaybeUninit<T>] {
     }
 }
 
-/// Implements [`Buffer`] around the `Vec` type.
-///
-/// This implementation fills the buffer, overwriting any previous data, with
-/// the new data data and sets the length.
+impl<'a, T, const N: usize> private::Sealed<T> for &'a mut [MaybeUninit<T>; N] {
+    type Result = (&'a mut [T], &'a mut [MaybeUninit<T>]);
+
+    #[inline]
+    fn as_raw_parts_mut(&mut self) -> (*mut T, usize) {
+        (self.as_mut_ptr().cast(), self.len())
+    }
+
+    #[inline]
+    unsafe fn finish(self, len: usize) -> Self::Result {
+        let (init, uninit) = self.split_at_mut(len);
+
+        // SAFETY: The user asserts that the slice is now initialized.
+        let init = slice::from_raw_parts_mut(init.as_mut_ptr().cast::<T>(), init.len());
+
+        (init, uninit)
+    }
+}
+
 #[cfg(feature = "alloc")]
-impl<T> Buffer<T> for Vec<T> {
+impl<T> private::Sealed<T> for Vec<T> {
     type Result = Vec<T>;
 
     #[inline]
-    fn as_maybe_uninitialized(&mut self) -> &mut [MaybeUninit<T>] {
+    fn as_raw_parts_mut(&mut self) -> (*mut T, usize) {
         self.clear();
-        self.spare_capacity_mut()
+        (self.as_mut_ptr(), self.capacity())
     }
 
     #[inline]
@@ -141,6 +135,23 @@ pub(super) unsafe fn split_init(
     let init = slice::from_raw_parts_mut(buf_ptr.cast::<u8>(), init_len);
     let uninit = slice::from_raw_parts_mut(buf_ptr.add(init_len), uninit_len);
     (init, uninit)
+}
+
+mod private {
+    pub trait Sealed<T> {
+        /// The result of the process operation.
+        type Result;
+
+        /// Return a pointer and length for this buffer.
+        fn as_raw_parts_mut(&mut self) -> (*mut T, usize);
+
+        /// Convert a finished buffer pointer into its result.
+        ///
+        /// # Safety
+        ///
+        /// At least `len` bytes of the buffer must now be initialized.
+        unsafe fn finish(self, len: usize) -> Self::Result;
+    }
 }
 
 #[cfg(test)]

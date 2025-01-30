@@ -40,8 +40,6 @@
 //! # }
 
 #![allow(unused_qualifications)]
-#![allow(dead_code)] // FIXME
-#![allow(unused_imports)] // FIXME
 
 use super::inotify;
 pub use crate::backend::fs::inotify::{CreateFlags, ReadFlags, WatchFlags};
@@ -177,9 +175,7 @@ impl<'buf, Fd: AsFd> Reader<'buf, Fd> {
     #[allow(clippy::should_implement_trait)]
     pub fn next(&mut self) -> io::Result<Event<'_>> {
         if self.is_buffer_empty() {
-            todo!("FIXME: see \"Why doesn't this work?\" in examples/new_read.rs");
-            /*
-            match read(self.fd.as_fd(), self.buf).map(|(init, _)| init.len()) {
+            match read(self.fd.as_fd(), &mut *self.buf).map(|(init, _)| init.len()) {
                 Ok(0) => return Err(Errno::INVAL),
                 Ok(bytes_read) => {
                     self.initialized = bytes_read;
@@ -187,7 +183,6 @@ impl<'buf, Fd: AsFd> Reader<'buf, Fd> {
                 }
                 Err(e) => return Err(e),
             }
-            */
         }
 
         let ptr = self.buf[self.offset..].as_ptr();

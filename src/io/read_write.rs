@@ -38,7 +38,8 @@ pub use backend::io::types::ReadWriteFlags;
 /// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/I_002fO-Primitives.html#index-reading-from-a-file-descriptor
 #[inline]
 pub fn read<Fd: AsFd, Buf: Buffer<u8>>(fd: Fd, mut buf: Buf) -> io::Result<Buf::Result> {
-    let len = backend::io::syscalls::read(fd.as_fd(), buf.as_maybe_uninitialized())?;
+    // SAFETY: `read` behaves.
+    let len = unsafe { backend::io::syscalls::read(fd.as_fd(), buf.as_raw_parts_mut())? };
     // SAFETY: `read` works.
     unsafe { Ok(buf.finish(len)) }
 }
