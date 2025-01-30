@@ -505,6 +505,13 @@ fn test_sockopts_multicast_ifv4() {
     }
 }
 
+#[cfg(any(
+    apple,
+    freebsdlike,
+    linux_like,
+    target_os = "fuchsia",
+    target_os = "openbsd"
+))]
 #[test]
 fn test_sockopts_multicast_if_with_ifindex() {
     crate::init();
