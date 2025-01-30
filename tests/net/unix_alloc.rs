@@ -421,6 +421,7 @@ fn test_abstract_unix_msg_unconnected() {
 
 #[cfg(feature = "pipe")]
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[cfg(feature = "pipe")]
 #[test]
 fn test_unix_msg_with_scm_rights() {
     crate::init();
@@ -660,6 +661,7 @@ fn test_unix_peercred() {
 /// over multiple control messages.
 #[cfg(feature = "pipe")]
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[cfg(feature = "pipe")]
 #[test]
 fn test_unix_msg_with_combo() {
     crate::init();

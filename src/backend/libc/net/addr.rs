@@ -76,6 +76,26 @@ impl SocketAddrUnix {
         })
     }
 
+    /// Construct a new unnamed address.
+    ///
+    /// The kernel will assign an abstract Unix-domain address to the socket when you call
+    /// [`bind_unix()`][crate::net::bind_unix]. You can inspect the assigned name with
+    /// [`getsockname`][crate::net::getsockname].
+    ///
+    /// # References
+    ///  - [Linux]
+    ///
+    /// [Linux]: https://www.man7.org/linux/man-pages/man7/unix.7.html
+    #[cfg(linux_kernel)]
+    #[inline]
+    pub fn new_unnamed() -> Self {
+        Self {
+            unix: Self::init(),
+            #[cfg(not(any(bsd, target_os = "haiku")))]
+            len: offsetof_sun_path() as _,
+        }
+    }
+
     const fn init() -> c::sockaddr_un {
         c::sockaddr_un {
             #[cfg(any(
@@ -103,19 +123,10 @@ impl SocketAddrUnix {
     /// For a filesystem path address, return the path.
     #[inline]
     pub fn path(&self) -> Option<&CStr> {
-        let len = self.len();
-        if len != 0 && self.unix.sun_path[0] != 0 {
-            let end = len as usize - offsetof_sun_path();
-            let bytes = &self.unix.sun_path[..end];
-            // SAFETY: `from_raw_parts` to convert from `&[c_char]` to `&[u8]`.
-            // And `from_bytes_with_nul_unchecked` since the string is
-            // NUL-terminated.
-            unsafe {
-                Some(CStr::from_bytes_with_nul_unchecked(slice::from_raw_parts(
-                    bytes.as_ptr().cast(),
-                    bytes.len(),
-                )))
-            }
+        let bytes = self.bytes()?;
+        if !bytes.is_empty() && bytes[0] != 0 {
+            // SAFETY: `from_bytes_with_nul_unchecked` since the string is NUL-terminated.
+            Some(unsafe { CStr::from_bytes_with_nul_unchecked(bytes) })
         } else {
             None
         }
@@ -125,15 +136,18 @@ impl SocketAddrUnix {
     #[cfg(linux_kernel)]
     #[inline]
     pub fn abstract_name(&self) -> Option<&[u8]> {
-        let len = self.len();
-        if len != 0 && self.unix.sun_path[0] == 0 {
-            let end = len as usize - offsetof_sun_path();
-            let bytes = &self.unix.sun_path[1..end];
-            // SAFETY: `from_raw_parts` to convert from `&[c_char]` to `&[u8]`.
-            unsafe { Some(slice::from_raw_parts(bytes.as_ptr().cast(), bytes.len())) }
+        if let [0, ref bytes @ ..] = self.bytes()? {
+            Some(bytes)
         } else {
             None
         }
+    }
+
+    /// `true` if the socket address is unnamed.
+    #[cfg(linux_kernel)]
+    #[inline]
+    pub fn is_unnamed(&self) -> bool {
+        self.bytes() == Some(&[])
     }
 
     #[inline]
@@ -151,6 +165,18 @@ impl SocketAddrUnix {
     #[inline]
     pub(crate) fn len(&self) -> usize {
         self.addr_len() as usize
+    }
+
+    #[inline]
+    fn bytes(&self) -> Option<&[u8]> {
+        let len = self.len() as usize;
+        if len != 0 {
+            let bytes = &self.unix.sun_path[..len - offsetof_sun_path()];
+            // SAFETY: `from_raw_parts` to convert from `&[c_char]` to `&[u8]`.
+            Some(unsafe { slice::from_raw_parts(bytes.as_ptr().cast(), bytes.len()) })
+        } else {
+            None
+        }
     }
 }
 
