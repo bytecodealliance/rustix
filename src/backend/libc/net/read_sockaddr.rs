@@ -1,4 +1,4 @@
-//! The BSD sockets API requires us to read the `ss_family` field before we can
+//! The BSD sockets API requires us to read the `sa_family` field before we can
 //! interpret the rest of a `sockaddr` produced by the kernel.
 
 #[cfg(unix)]
@@ -33,7 +33,7 @@ struct sockaddr_header {
         target_os = "nto",
         target_os = "vita"
     ))]
-    ss_family: u8,
+    sa_family: u8,
     #[cfg(not(any(
         bsd,
         target_os = "aix",
@@ -42,16 +42,16 @@ struct sockaddr_header {
         target_os = "nto",
         target_os = "vita"
     )))]
-    ss_family: u16,
+    sa_family: u16,
 }
 
-/// Read the `ss_family` field from a socket address returned from the OS.
+/// Read the `sa_family` field from a socket address returned from the OS.
 ///
 /// # Safety
 ///
 /// `storage` must point to a valid socket address returned from the OS.
 #[inline]
-unsafe fn read_ss_family(storage: *const c::sockaddr_storage) -> u16 {
+pub(crate) unsafe fn read_sa_family(storage: *const c::sockaddr) -> u16 {
     // Assert that we know the layout of `sockaddr`.
     let _ = c::sockaddr {
         #[cfg(any(
@@ -90,7 +90,7 @@ unsafe fn read_ss_family(storage: *const c::sockaddr_storage) -> u16 {
         sa_data: [0; 30],
     };
 
-    (*storage.cast::<sockaddr_header>()).ss_family.into()
+    (*storage.cast::<sockaddr_header>()).sa_family.into()
 }
 
 /// Read the first byte of the `sun_path` field, assuming we have an `AF_UNIX`
@@ -105,10 +105,10 @@ unsafe fn read_sun_path0(storage: *const c::sockaddr_storage) -> u8 {
         .read()
 }
 
-/// Set the `ss_family` field of a socket address to `AF_UNSPEC`, so that we
+/// Set the `sa_family` field of a socket address to `AF_UNSPEC`, so that we
 /// can test for `AF_UNSPEC` to test whether it was stored to.
-pub(crate) unsafe fn initialize_family_to_unspec(storage: *mut c::sockaddr_storage) {
-    (*storage.cast::<sockaddr_header>()).ss_family = c::AF_UNSPEC as _;
+pub(crate) unsafe fn initialize_family_to_unspec(storage: *mut c::sockaddr) {
+    (*storage.cast::<sockaddr_header>()).sa_family = c::AF_UNSPEC as _;
 }
 
 /// Read a socket address encoded in a platform-specific format.
@@ -117,7 +117,7 @@ pub(crate) unsafe fn initialize_family_to_unspec(storage: *mut c::sockaddr_stora
 ///
 /// `storage` must point to valid socket address storage.
 pub(crate) unsafe fn read_sockaddr(
-    storage: *const c::sockaddr_storage,
+    storage: *const c::sockaddr,
     len: usize,
 ) -> io::Result<SocketAddrAny> {
     #[cfg(unix)]
@@ -126,7 +126,7 @@ pub(crate) unsafe fn read_sockaddr(
     if len < size_of::<c::sa_family_t>() {
         return Err(io::Errno::INVAL);
     }
-    match read_ss_family(storage).into() {
+    match read_sa_family(storage).into() {
         c::AF_INET => {
             if len < size_of::<c::sockaddr_in>() {
                 return Err(io::Errno::INVAL);
@@ -243,7 +243,7 @@ pub(crate) unsafe fn maybe_read_sockaddr_os(
     }
 
     assert!(len >= size_of::<c::sa_family_t>());
-    let family = read_ss_family(storage).into();
+    let family = read_sa_family(storage.cast::<c::sockaddr>()).into();
     if family == c::AF_UNSPEC {
         return None;
     }
@@ -268,7 +268,7 @@ pub(crate) unsafe fn read_sockaddr_os(
     len: usize,
 ) -> SocketAddrAny {
     assert!(len >= size_of::<c::sa_family_t>());
-    let family = read_ss_family(storage).into();
+    let family = read_sa_family(storage.cast::<c::sockaddr>()).into();
     inner_read_sockaddr_os(family, storage, len)
 }
 

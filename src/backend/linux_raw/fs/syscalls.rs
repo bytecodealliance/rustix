@@ -35,18 +35,17 @@ use crate::ffi::{self, CStr};
 #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
 use crate::fs::CWD;
 use crate::fs::{
-    inotify, Access, Advice, AtFlags, FallocateFlags, FileType, FlockOperation, Gid, MemfdFlags,
-    Mode, OFlags, RenameFlags, ResolveFlags, SealFlags, SeekFrom, Stat, StatFs, StatVfs,
-    StatVfsMountFlags, StatxFlags, Timestamps, Uid, XattrFlags,
+    inotify, Access, Advice, AtFlags, FallocateFlags, FileType, FlockOperation, Fsid, Gid,
+    MemfdFlags, Mode, OFlags, RenameFlags, ResolveFlags, SealFlags, SeekFrom, Stat, StatFs,
+    StatVfs, StatVfsMountFlags, Statx, StatxFlags, Timestamps, Uid, XattrFlags,
 };
 use crate::io;
 use core::mem::MaybeUninit;
 #[cfg(any(target_arch = "mips64", target_arch = "mips64r6"))]
 use linux_raw_sys::general::stat as linux_stat64;
 use linux_raw_sys::general::{
-    __kernel_fsid_t, open_how, statx, AT_EACCESS, AT_FDCWD, AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW,
-    F_ADD_SEALS, F_GETFL, F_GET_SEALS, F_SETFL, SEEK_CUR, SEEK_DATA, SEEK_END, SEEK_HOLE, SEEK_SET,
-    STATX__RESERVED,
+    open_how, AT_EACCESS, AT_FDCWD, AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW, F_ADD_SEALS, F_GETFL,
+    F_GET_SEALS, F_SETFL, SEEK_CUR, SEEK_DATA, SEEK_END, SEEK_HOLE, SEEK_SET, STATX__RESERVED,
 };
 #[cfg(target_pointer_width = "32")]
 use {
@@ -812,7 +811,7 @@ pub(crate) fn statx(
     path: &CStr,
     flags: AtFlags,
     mask: StatxFlags,
-) -> io::Result<statx> {
+) -> io::Result<Statx> {
     // If a future Linux kernel adds more fields to `struct statx` and users
     // passing flags unknown to rustix in `StatxFlags`, we could end up
     // writing outside of the buffer. To prevent this possibility, we mask off
@@ -832,7 +831,7 @@ pub(crate) fn statx(
     let mask = mask & StatxFlags::all();
 
     unsafe {
-        let mut statx_buf = MaybeUninit::<statx>::uninit();
+        let mut statx_buf = MaybeUninit::<Statx>::uninit();
         ret(syscall!(
             __NR_statx,
             dirfd,
@@ -928,7 +927,9 @@ pub(crate) fn statvfs(path: &CStr) -> io::Result<StatVfs> {
 }
 
 fn statfs_to_statvfs(statfs: StatFs) -> StatVfs {
-    let __kernel_fsid_t { val } = statfs.f_fsid;
+    let Fsid { val } = Fsid {
+        val: statfs.f_fsid.val,
+    };
     let [f_fsid_val0, f_fsid_val1]: [i32; 2] = val;
 
     StatVfs {

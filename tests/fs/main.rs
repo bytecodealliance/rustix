@@ -43,6 +43,7 @@ mod renameat;
 mod seals;
 mod seek;
 mod special;
+mod stat;
 #[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 mod statfs;
 #[cfg(linux_kernel)]

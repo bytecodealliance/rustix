@@ -8,9 +8,11 @@
 
 use crate::backend::c;
 use crate::ffi::CStr;
+use crate::net::AddressFamily;
 use crate::{io, path};
 use core::cmp::Ordering;
 use core::hash::{Hash, Hasher};
+use core::mem::size_of;
 use core::{fmt, slice};
 
 /// `struct sockaddr_un`
@@ -163,8 +165,48 @@ impl fmt::Debug for SocketAddrUnix {
     }
 }
 
-/// `struct sockaddr_storage` as a raw struct.
-pub type SocketAddrStorage = c::sockaddr;
+/// `struct sockaddr_storage`.
+#[repr(transparent)]
+pub struct SocketAddrStorage(c::sockaddr_storage);
+
+impl SocketAddrStorage {
+    /// Return a socket addr storage initialized to all zero bytes. The
+    /// `sa_family` is set to `AddressFamily::UNSPEC`.
+    pub fn zeroed() -> Self {
+        assert_eq!(c::AF_UNSPEC, 0);
+        // SAFETY: `sockaddr_storage` is meant to be zero-initializable.
+        unsafe { core::mem::zeroed() }
+    }
+
+    /// Return the `sa_family` of this socket address.
+    pub fn family(&self) -> AddressFamily {
+        unsafe {
+            AddressFamily::from_raw(crate::backend::net::read_sockaddr::read_sa_family(
+                crate::utils::as_ptr(&self.0).cast::<c::sockaddr>(),
+            ))
+        }
+    }
+
+    /// Clear the `sa_family` of this socket address to
+    /// `AddressFamily::UNSPEC`.
+    pub fn clear_family(&mut self) {
+        unsafe {
+            crate::backend::net::read_sockaddr::initialize_family_to_unspec(
+                crate::utils::as_mut_ptr(&mut self.0).cast::<c::sockaddr>(),
+            )
+        }
+    }
+
+    /// View the storage as a byte slice.
+    pub fn as_mut_bytes(&mut self) -> &mut [u8] {
+        unsafe {
+            slice::from_raw_parts_mut(
+                crate::utils::as_mut_ptr(self).cast::<u8>(),
+                size_of::<Self>(),
+            )
+        }
+    }
+}
 
 /// Return the offset of the `sun_path` field of `sockaddr_un`.
 #[inline]

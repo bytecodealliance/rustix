@@ -674,128 +674,6 @@ bitflags! {
     }
 }
 
-#[cfg(all(target_os = "linux", target_env = "gnu"))]
-bitflags! {
-    /// `STATX_*` constants for use with [`statx`].
-    ///
-    /// [`statx`]: crate::fs::statx
-    #[repr(transparent)]
-    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct StatxFlags: u32 {
-        /// `STATX_TYPE`
-        const TYPE = c::STATX_TYPE;
-
-        /// `STATX_MODE`
-        const MODE = c::STATX_MODE;
-
-        /// `STATX_NLINK`
-        const NLINK = c::STATX_NLINK;
-
-        /// `STATX_UID`
-        const UID = c::STATX_UID;
-
-        /// `STATX_GID`
-        const GID = c::STATX_GID;
-
-        /// `STATX_ATIME`
-        const ATIME = c::STATX_ATIME;
-
-        /// `STATX_MTIME`
-        const MTIME = c::STATX_MTIME;
-
-        /// `STATX_CTIME`
-        const CTIME = c::STATX_CTIME;
-
-        /// `STATX_INO`
-        const INO = c::STATX_INO;
-
-        /// `STATX_SIZE`
-        const SIZE = c::STATX_SIZE;
-
-        /// `STATX_BLOCKS`
-        const BLOCKS = c::STATX_BLOCKS;
-
-        /// `STATX_BASIC_STATS`
-        const BASIC_STATS = c::STATX_BASIC_STATS;
-
-        /// `STATX_BTIME`
-        const BTIME = c::STATX_BTIME;
-
-        /// `STATX_MNT_ID` (since Linux 5.8)
-        const MNT_ID = c::STATX_MNT_ID;
-
-        /// `STATX_DIOALIGN` (since Linux 6.1)
-        const DIOALIGN = c::STATX_DIOALIGN;
-
-        /// `STATX_ALL`
-        const ALL = c::STATX_ALL;
-
-        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
-        const _ = !0;
-    }
-}
-
-#[cfg(any(
-    target_os = "android",
-    all(target_os = "linux", not(target_env = "gnu")),
-))]
-bitflags! {
-    /// `STATX_*` constants for use with [`statx`].
-    ///
-    /// [`statx`]: crate::fs::statx
-    #[repr(transparent)]
-    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct StatxFlags: u32 {
-        /// `STATX_TYPE`
-        const TYPE = 0x0001;
-
-        /// `STATX_MODE`
-        const MODE = 0x0002;
-
-        /// `STATX_NLINK`
-        const NLINK = 0x0004;
-
-        /// `STATX_UID`
-        const UID = 0x0008;
-
-        /// `STATX_GID`
-        const GID = 0x0010;
-
-        /// `STATX_ATIME`
-        const ATIME = 0x0020;
-
-        /// `STATX_MTIME`
-        const MTIME = 0x0040;
-
-        /// `STATX_CTIME`
-        const CTIME = 0x0080;
-
-        /// `STATX_INO`
-        const INO = 0x0100;
-
-        /// `STATX_SIZE`
-        const SIZE = 0x0200;
-
-        /// `STATX_BLOCKS`
-        const BLOCKS = 0x0400;
-
-        /// `STATX_BASIC_STATS`
-        const BASIC_STATS = 0x07ff;
-
-        /// `STATX_BTIME`
-        const BTIME = 0x800;
-
-        /// `STATX_MNT_ID` (since Linux 5.8)
-        const MNT_ID = 0x1000;
-
-        /// `STATX_ALL`
-        const ALL = 0xfff;
-
-        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
-        const _ = !0;
-    }
-}
-
 #[cfg(not(any(
     netbsdlike,
     target_os = "espidf",
@@ -1022,13 +900,12 @@ pub type Stat = c::stat64;
 // we use our own struct, populated from `statx` where possible, to avoid the
 // y2038 bug.
 #[cfg(all(linux_kernel, target_pointer_width = "32"))]
-#[repr(C)]
 #[derive(Debug, Copy, Clone)]
 #[allow(missing_docs)]
 pub struct Stat {
     pub st_dev: u64,
     pub st_mode: u32,
-    pub st_nlink: u32,
+    pub st_nlink: u64,
     pub st_uid: u32,
     pub st_gid: u32,
     pub st_rdev: u64,
@@ -1069,6 +946,16 @@ pub type StatFs = c::statfs;
 #[cfg(linux_like)]
 pub type StatFs = c::statfs64;
 
+/// `fsid_t` for use with `StatFs`.
+#[cfg(not(any(
+    solarish,
+    target_os = "haiku",
+    target_os = "nto",
+    target_os = "redox",
+    target_os = "wasi"
+)))]
+pub type Fsid = c::fsid_t;
+
 /// `struct statvfs` for use with [`statvfs`] and [`fstatvfs`].
 ///
 /// [`statvfs`]: crate::fs::statvfs
@@ -1087,70 +974,6 @@ pub struct StatVfs {
     pub f_fsid: u64,
     pub f_flag: StatVfsMountFlags,
     pub f_namemax: u64,
-}
-
-/// `struct statx` for use with [`statx`].
-///
-/// [`statx`]: crate::fs::statx
-#[cfg(all(target_os = "linux", target_env = "gnu"))]
-// Use the glibc `struct statx`.
-pub type Statx = c::statx;
-
-/// `struct statx_timestamp` for use with [`Statx`].
-#[cfg(all(target_os = "linux", target_env = "gnu"))]
-// Use the glibc `struct statx_timestamp`.
-pub type StatxTimestamp = c::statx;
-
-/// `struct statx` for use with [`statx`].
-///
-/// [`statx`]: crate::fs::statx
-// Non-glibc ABIs don't currently declare a `struct statx`, so we declare it
-// ourselves.
-#[cfg(any(
-    target_os = "android",
-    all(target_os = "linux", not(target_env = "gnu")),
-))]
-#[repr(C)]
-#[allow(missing_docs)]
-pub struct Statx {
-    pub stx_mask: u32,
-    pub stx_blksize: u32,
-    pub stx_attributes: u64,
-    pub stx_nlink: u32,
-    pub stx_uid: u32,
-    pub stx_gid: u32,
-    pub stx_mode: u16,
-    __statx_pad1: [u16; 1],
-    pub stx_ino: u64,
-    pub stx_size: u64,
-    pub stx_blocks: u64,
-    pub stx_attributes_mask: u64,
-    pub stx_atime: StatxTimestamp,
-    pub stx_btime: StatxTimestamp,
-    pub stx_ctime: StatxTimestamp,
-    pub stx_mtime: StatxTimestamp,
-    pub stx_rdev_major: u32,
-    pub stx_rdev_minor: u32,
-    pub stx_dev_major: u32,
-    pub stx_dev_minor: u32,
-    pub stx_mnt_id: u64,
-    __statx_pad2: u64,
-    __statx_pad3: [u64; 12],
-}
-
-/// `struct statx_timestamp` for use with [`Statx`].
-// Non-glibc ABIs don't currently declare a `struct statx_timestamp`, so we
-// declare it ourselves.
-#[cfg(any(
-    target_os = "android",
-    all(target_os = "linux", not(target_env = "gnu")),
-))]
-#[repr(C)]
-#[allow(missing_docs)]
-pub struct StatxTimestamp {
-    pub tv_sec: i64,
-    pub tv_nsec: u32,
-    pub __statx_timestamp_pad1: [i32; 1],
 }
 
 /// `mode_t`
