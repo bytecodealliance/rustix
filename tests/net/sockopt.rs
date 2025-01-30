@@ -10,7 +10,7 @@ use rustix::io;
 ))]
 use rustix::net::ipproto;
 use rustix::net::{sockopt, AddressFamily, SocketType};
-use std::time::Duration;
+use std::{net::Ipv4Addr, time::Duration};
 
 // Test `socket` socket options.
 fn test_sockopts_socket(s: &OwnedFd) {
@@ -485,4 +485,73 @@ fn test_sockopts_ipv6() {
     }
 
     test_sockopts_tcp(&s);
+}
+
+#[test]
+fn test_sockopts_multicast_ifv4() {
+    crate::init();
+
+    let s = rustix::net::socket(AddressFamily::INET, SocketType::DGRAM, None).unwrap();
+
+    // Set a ipv4 interface
+    match sockopt::set_ip_multicast_if(&s, &Ipv4Addr::LOCALHOST) {
+        Ok(_) => {
+            assert_eq!(sockopt::ip_multicast_if(&s).unwrap(), Ipv4Addr::LOCALHOST);
+        }
+        Err(e) if e.to_string().contains("Protocol not available") => {
+            // Skip test on unsupported platforms
+        }
+        Err(e) => panic!("{e}"),
+    }
+}
+
+#[cfg(linux_kernel)]
+#[test]
+fn test_sockopts_multicast_if_with_ifindex() {
+    crate::init();
+
+    let s = rustix::net::socket(AddressFamily::INET, SocketType::DGRAM, None).unwrap();
+
+    let fd = rustix::net::socket_with(
+        AddressFamily::INET,
+        SocketType::DGRAM,
+        rustix::net::SocketFlags::CLOEXEC,
+        None,
+    )
+    .unwrap();
+    let index = rustix::net::netdevice::name_to_index(&fd, "lo").unwrap();
+
+    // Set a ipv4 interface
+    match sockopt::set_ip_multicast_if_with_ifindex(
+        &s,
+        &Ipv4Addr::new(224, 254, 0, 0),
+        &Ipv4Addr::UNSPECIFIED,
+        index,
+    ) {
+        Ok(_) => {
+            assert_eq!(sockopt::ip_multicast_if(&s).unwrap(), Ipv4Addr::UNSPECIFIED);
+        }
+        Err(e) if e.to_string().contains("Protocol not available") => {
+            // Skip test on unsupported platforms
+        }
+        Err(e) => panic!("{e}"),
+    }
+}
+
+#[test]
+fn test_sockopts_multicast_ifv6() {
+    crate::init();
+
+    let s = rustix::net::socket(AddressFamily::INET6, SocketType::DGRAM, None).unwrap();
+
+    // Set a ipv6 interface
+    match sockopt::set_ipv6_multicast_if(&s, 1) {
+        Ok(_) => {
+            assert_eq!(sockopt::ipv6_multicast_if(&s).unwrap(), 1);
+        }
+        Err(e) if e.to_string().contains("Protocol not available") => {
+            // Skip test on unsupported platforms
+        }
+        Err(e) => panic!("{e}"),
+    }
 }
