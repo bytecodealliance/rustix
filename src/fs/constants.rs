@@ -48,7 +48,8 @@ mod tests {
 
         // Check that the layout of `Stat` matches `libc::stat`.
         #[cfg(not(any(
-            all(linux_kernel, target_pointer_width = "64", libc),
+            linux_raw,
+            all(linux_kernel, libc),
             target_os = "hurd",
             target_os = "emscripten",
             target_os = "l4re",
