@@ -116,19 +116,20 @@ pub(crate) fn option_as_libc_timespec_ptr(timespec: Option<&Timespec>) -> *const
 /// [here]: https://github.com/rust-lang/rust/issues/108277#issuecomment-1787057158
 #[cfg(apple)]
 #[inline]
-pub(crate) fn fix_negative_nsecs(secs: &mut i64, nsecs: &mut i64) {
-    if *nsecs < 0 {
-        adjust(secs, nsecs);
-    }
-
+pub(crate) fn fix_negative_nsecs(secs: &mut i64, mut nsecs: i32) -> i32 {
     #[cold]
-    fn adjust(secs: &mut i64, nsecs: &mut i64) {
-        assert!(*nsecs >= -1_000_000_000);
+    fn adjust(secs: &mut i64, nsecs: i32) -> i32 {
+        assert!(nsecs >= -1_000_000_000);
         assert!(*secs < 0);
         assert!(*secs > i64::MIN);
-        *nsecs += 1_000_000_000;
         *secs -= 1;
+        nsecs + 1_000_000_000
     }
+
+    if nsecs < 0 {
+        nsecs = adjust(secs, nsecs);
+    }
+    nsecs
 }
 
 #[cfg(apple)]
@@ -136,10 +137,10 @@ pub(crate) fn fix_negative_nsecs(secs: &mut i64, nsecs: &mut i64) {
 fn test_negative_timestamps() {
     let mut secs = -59;
     let mut nsecs = -900_000_000;
-    fix_negative_nsecs(&mut secs, &mut nsecs);
+    nsecs = fix_negative_nsecs(&mut secs, nsecs);
     assert_eq!(secs, -60);
     assert_eq!(nsecs, 100_000_000);
-    fix_negative_nsecs(&mut secs, &mut nsecs);
+    nsecs = fix_negative_nsecs(&mut secs, nsecs);
     assert_eq!(secs, -60);
     assert_eq!(nsecs, 100_000_000);
 }

@@ -612,7 +612,7 @@ pub(crate) fn stat(path: &CStr) -> io::Result<Stat> {
     )))]
     unsafe {
         let mut stat = MaybeUninit::<Stat>::uninit();
-        ret(c::stat(c_str(path), stat.as_mut_ptr()))?;
+        ret(c::stat(c_str(path), stat.as_mut_ptr().cast()))?;
         let stat = stat.assume_init();
         #[cfg(apple)]
         let stat = fix_negative_stat_nsecs(stat);
@@ -655,7 +655,7 @@ pub(crate) fn lstat(path: &CStr) -> io::Result<Stat> {
     )))]
     unsafe {
         let mut stat = MaybeUninit::<Stat>::uninit();
-        ret(c::lstat(c_str(path), stat.as_mut_ptr()))?;
+        ret(c::lstat(c_str(path), stat.as_mut_ptr().cast()))?;
         let stat = stat.assume_init();
         #[cfg(apple)]
         let stat = fix_negative_stat_nsecs(stat);
@@ -697,7 +697,7 @@ pub(crate) fn statat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::
         ret(c::fstatat(
             borrowed_fd(dirfd),
             c_str(path),
-            stat.as_mut_ptr(),
+            stat.as_mut_ptr().cast(),
             bitflags_bits!(flags),
         ))?;
         let stat = stat.assume_init();
@@ -1453,7 +1453,7 @@ pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     )))]
     unsafe {
         let mut stat = MaybeUninit::<Stat>::uninit();
-        ret(c::fstat(borrowed_fd(fd), stat.as_mut_ptr()))?;
+        ret(c::fstat(borrowed_fd(fd), stat.as_mut_ptr().cast()))?;
         let stat = stat.assume_init();
         #[cfg(apple)]
         let stat = fix_negative_stat_nsecs(stat);
@@ -2568,9 +2568,12 @@ pub(crate) fn fremovexattr(fd: BorrowedFd<'_>, name: &CStr) -> io::Result<()> {
 /// See [`crate::timespec::fix_negative_nsec`] for details.
 #[cfg(apple)]
 fn fix_negative_stat_nsecs(mut stat: Stat) -> Stat {
-    crate::timespec::fix_negative_nsecs(&mut stat.st_atime, &mut stat.st_atime_nsec);
-    crate::timespec::fix_negative_nsecs(&mut stat.st_mtime, &mut stat.st_mtime_nsec);
-    crate::timespec::fix_negative_nsecs(&mut stat.st_ctime, &mut stat.st_ctime_nsec);
+    stat.st_atime_nsec =
+        crate::timespec::fix_negative_nsecs(&mut stat.st_atime, stat.st_atime_nsec as _) as _;
+    stat.st_mtime_nsec =
+        crate::timespec::fix_negative_nsecs(&mut stat.st_mtime, stat.st_mtime_nsec as _) as _;
+    stat.st_ctime_nsec =
+        crate::timespec::fix_negative_nsecs(&mut stat.st_ctime, stat.st_ctime_nsec as _) as _;
     stat
 }
 
