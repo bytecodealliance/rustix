@@ -5,7 +5,9 @@ use std::mem::MaybeUninit;
 
 fn main() {
     let mut buf = vec![0_u8; 3];
+    buf.reserve(32);
     let _x: () = read(stdin(), extend(&mut buf)).unwrap();
+    let _x: (&mut [u8], &mut [MaybeUninit<u8>]) = read(stdin(), buf.spare_capacity_mut()).unwrap();
     let _x: usize = read(stdin(), &mut buf).unwrap();
     let _x: usize = read(stdin(), &mut *buf).unwrap();
     let _x: usize = read(stdin(), &mut buf[..]).unwrap();
