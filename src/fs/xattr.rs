@@ -137,7 +137,7 @@ pub fn fsetxattr<Fd: AsFd, Name: path::Arg>(
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/listxattr.2.html
 #[inline]
-pub fn listxattr<P: path::Arg>(path: P, list: &mut [ffi::c_char]) -> io::Result<usize> {
+pub fn listxattr<P: path::Arg>(path: P, list: &mut [u8]) -> io::Result<usize> {
     path.into_with_c_str(|path| backend::fs::syscalls::listxattr(path, list))
 }
 
@@ -149,7 +149,7 @@ pub fn listxattr<P: path::Arg>(path: P, list: &mut [ffi::c_char]) -> io::Result<
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/llistxattr.2.html
 #[inline]
-pub fn llistxattr<P: path::Arg>(path: P, list: &mut [ffi::c_char]) -> io::Result<usize> {
+pub fn llistxattr<P: path::Arg>(path: P, list: &mut [u8]) -> io::Result<usize> {
     path.into_with_c_str(|path| backend::fs::syscalls::llistxattr(path, list))
 }
 
@@ -161,7 +161,7 @@ pub fn llistxattr<P: path::Arg>(path: P, list: &mut [ffi::c_char]) -> io::Result
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/flistxattr.2.html
 #[inline]
-pub fn flistxattr<Fd: AsFd>(fd: Fd, list: &mut [ffi::c_char]) -> io::Result<usize> {
+pub fn flistxattr<Fd: AsFd>(fd: Fd, list: &mut [u8]) -> io::Result<usize> {
     backend::fs::syscalls::flistxattr(fd.as_fd(), list)
 }
 

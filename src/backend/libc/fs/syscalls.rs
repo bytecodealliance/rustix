@@ -2441,17 +2441,21 @@ pub(crate) fn fsetxattr(
 }
 
 #[cfg(any(apple, linux_kernel, target_os = "hurd"))]
-pub(crate) fn listxattr(path: &CStr, list: &mut [ffi::c_char]) -> io::Result<usize> {
+pub(crate) fn listxattr(path: &CStr, list: &mut [u8]) -> io::Result<usize> {
     #[cfg(not(apple))]
     unsafe {
-        ret_usize(c::listxattr(path.as_ptr(), list.as_mut_ptr(), list.len()))
+        ret_usize(c::listxattr(
+            path.as_ptr(),
+            list.as_mut_ptr().cast::<ffi::c_char>(),
+            list.len(),
+        ))
     }
 
     #[cfg(apple)]
     unsafe {
         ret_usize(c::listxattr(
             path.as_ptr(),
-            list.as_mut_ptr(),
+            list.as_mut_ptr().cast::<ffi::c_char>(),
             list.len(),
             0,
         ))
@@ -2459,17 +2463,21 @@ pub(crate) fn listxattr(path: &CStr, list: &mut [ffi::c_char]) -> io::Result<usi
 }
 
 #[cfg(any(apple, linux_kernel, target_os = "hurd"))]
-pub(crate) fn llistxattr(path: &CStr, list: &mut [ffi::c_char]) -> io::Result<usize> {
+pub(crate) fn llistxattr(path: &CStr, list: &mut [u8]) -> io::Result<usize> {
     #[cfg(not(apple))]
     unsafe {
-        ret_usize(c::llistxattr(path.as_ptr(), list.as_mut_ptr(), list.len()))
+        ret_usize(c::llistxattr(
+            path.as_ptr(),
+            list.as_mut_ptr().cast::<ffi::c_char>(),
+            list.len(),
+        ))
     }
 
     #[cfg(apple)]
     unsafe {
         ret_usize(c::listxattr(
             path.as_ptr(),
-            list.as_mut_ptr(),
+            list.as_mut_ptr().cast::<ffi::c_char>(),
             list.len(),
             c::XATTR_NOFOLLOW,
         ))
@@ -2477,17 +2485,26 @@ pub(crate) fn llistxattr(path: &CStr, list: &mut [ffi::c_char]) -> io::Result<us
 }
 
 #[cfg(any(apple, linux_kernel, target_os = "hurd"))]
-pub(crate) fn flistxattr(fd: BorrowedFd<'_>, list: &mut [ffi::c_char]) -> io::Result<usize> {
+pub(crate) fn flistxattr(fd: BorrowedFd<'_>, list: &mut [u8]) -> io::Result<usize> {
     let fd = borrowed_fd(fd);
 
     #[cfg(not(apple))]
     unsafe {
-        ret_usize(c::flistxattr(fd, list.as_mut_ptr(), list.len()))
+        ret_usize(c::flistxattr(
+            fd,
+            list.as_mut_ptr().cast::<ffi::c_char>(),
+            list.len(),
+        ))
     }
 
     #[cfg(apple)]
     unsafe {
-        ret_usize(c::flistxattr(fd, list.as_mut_ptr(), list.len(), 0))
+        ret_usize(c::flistxattr(
+            fd,
+            list.as_mut_ptr().cast::<ffi::c_char>(),
+            list.len(),
+            0,
+        ))
     }
 }
 
