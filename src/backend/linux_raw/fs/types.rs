@@ -738,7 +738,7 @@ pub struct Stat {
     pub st_gid: ffi::c_uint,
     pub(crate) __pad1: ffi::c_uint,
     pub st_rdev: ffi::c_ulong,
-    pub st_size: ffi::c_ulong,
+    pub st_size: ffi::c_long, // Linux has `c_ulong` but we make it signed.
     pub st_atime: ffi::c_long,
     pub st_atime_nsec: ffi::c_ulong,
     pub st_mtime: ffi::c_long,
