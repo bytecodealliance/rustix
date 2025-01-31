@@ -697,7 +697,7 @@ pub struct Stat {
     pub(crate) __unused4: ffi::c_uint,
     pub(crate) __unused5: ffi::c_uint,
 }
-// This follows `stat64`.
+// This follows `stat`. powerpc64 defines a `stat64` but it's not used.
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 #[allow(missing_docs)]

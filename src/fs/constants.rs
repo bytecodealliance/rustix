@@ -69,16 +69,13 @@ mod tests {
         )))]
         {
             // Check that `Stat` matches `c::stat`.
-            #[cfg(not(any(
-                all(linux_raw, target_arch = "powerpc64"),
-                all(
-                    libc,
-                    any(
-                        all(linux_kernel, target_pointer_width = "64"),
-                        target_os = "hurd",
-                        target_os = "emscripten",
-                        target_os = "l4re",
-                    )
+            #[cfg(not(all(
+                libc,
+                any(
+                    all(linux_kernel, target_pointer_width = "64"),
+                    target_os = "hurd",
+                    target_os = "emscripten",
+                    target_os = "l4re",
                 )
             )))]
             {
@@ -155,16 +152,13 @@ mod tests {
             }
 
             // Check that `Stat` matches `c::stat64`.
-            #[cfg(any(
-                all(linux_raw, target_arch = "powerpc64"),
-                all(
-                    libc,
-                    any(
-                        all(linux_kernel, target_pointer_width = "64"),
-                        target_os = "hurd",
-                        target_os = "emscripten",
-                        target_os = "l4re",
-                    )
+            #[cfg(all(
+                libc,
+                any(
+                    all(linux_kernel, target_pointer_width = "64"),
+                    target_os = "hurd",
+                    target_os = "emscripten",
+                    target_os = "l4re",
                 )
             ))]
             {
