@@ -611,6 +611,9 @@ pub(crate) fn stat(path: &CStr) -> io::Result<Stat> {
         )
     )))]
     unsafe {
+        #[cfg(test)]
+        assert_eq_size!(Stat, c::stat);
+
         let mut stat = MaybeUninit::<Stat>::uninit();
         ret(c::stat(c_str(path), stat.as_mut_ptr().cast()))?;
         let stat = stat.assume_init();
@@ -654,6 +657,9 @@ pub(crate) fn lstat(path: &CStr) -> io::Result<Stat> {
         )
     )))]
     unsafe {
+        #[cfg(test)]
+        assert_eq_size!(Stat, c::stat);
+
         let mut stat = MaybeUninit::<Stat>::uninit();
         ret(c::lstat(c_str(path), stat.as_mut_ptr().cast()))?;
         let stat = stat.assume_init();
@@ -693,6 +699,9 @@ pub(crate) fn statat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::
         )
     )))]
     unsafe {
+        #[cfg(test)]
+        assert_eq_size!(Stat, c::stat);
+
         let mut stat = MaybeUninit::<Stat>::uninit();
         ret(c::fstatat(
             borrowed_fd(dirfd),
@@ -1452,6 +1461,9 @@ pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
         )
     )))]
     unsafe {
+        #[cfg(test)]
+        assert_eq_size!(Stat, c::stat);
+
         let mut stat = MaybeUninit::<Stat>::uninit();
         ret(c::fstat(borrowed_fd(fd), stat.as_mut_ptr().cast()))?;
         let stat = stat.assume_init();

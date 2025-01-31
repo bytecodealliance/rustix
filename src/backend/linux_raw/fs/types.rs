@@ -584,15 +584,14 @@ pub enum FlockOperation {
 ///
 /// [`statat`]: crate::fs::statat
 /// [`fstat`]: crate::fs::fstat
-// On 32-bit, and mips64, Linux's `struct stat64` has a 32-bit `st_mtime` and
-// friends, so we use our own struct, populated from `statx` where possible, to
-// avoid the y2038 bug.
+// On 32-bit with `struct stat64` and mips64 with `struct stat`, Linux's
+// `st_mtime` and friends are 32-bit, so we use our own struct, populated from
+// `statx` where possible, to avoid the y2038 bug.
 #[cfg(any(
     target_pointer_width = "32",
     target_arch = "mips64",
     target_arch = "mips64r6"
 ))]
-#[repr(C)]
 #[derive(Debug, Copy, Clone)]
 #[allow(missing_docs)]
 #[non_exhaustive]
