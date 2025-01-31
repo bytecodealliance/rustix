@@ -1862,17 +1862,17 @@ fn stat64_to_stat(s64: c::stat64) -> io::Result<Stat> {
         st_size: s64.st_size.try_into().map_err(|_| io::Errno::OVERFLOW)?,
         st_blksize: s64.st_blksize.try_into().map_err(|_| io::Errno::OVERFLOW)?,
         st_blocks: s64.st_blocks.try_into().map_err(|_| io::Errno::OVERFLOW)?,
-        st_atime: bitcast!(i64::from(s64.st_atime)),
+        st_atime: i64::from(s64.st_atime),
         st_atime_nsec: s64
             .st_atime_nsec
             .try_into()
             .map_err(|_| io::Errno::OVERFLOW)?,
-        st_mtime: bitcast!(i64::from(s64.st_mtime)),
+        st_mtime: i64::from(s64.st_mtime),
         st_mtime_nsec: s64
             .st_mtime_nsec
             .try_into()
             .map_err(|_| io::Errno::OVERFLOW)?,
-        st_ctime: bitcast!(i64::from(s64.st_ctime)),
+        st_ctime: i64::from(s64.st_ctime),
         st_ctime_nsec: s64
             .st_ctime_nsec
             .try_into()

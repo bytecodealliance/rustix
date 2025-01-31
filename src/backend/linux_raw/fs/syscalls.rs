@@ -730,11 +730,11 @@ fn statx_to_stat(x: crate::fs::Statx) -> io::Result<Stat> {
         st_size: x.stx_size.try_into().map_err(|_| io::Errno::OVERFLOW)?,
         st_blksize: x.stx_blksize.into(),
         st_blocks: x.stx_blocks.into(),
-        st_atime: bitcast!(i64::from(x.stx_atime.tv_sec)),
+        st_atime: i64::from(x.stx_atime.tv_sec),
         st_atime_nsec: x.stx_atime.tv_nsec.into(),
-        st_mtime: bitcast!(i64::from(x.stx_mtime.tv_sec)),
+        st_mtime: i64::from(x.stx_mtime.tv_sec),
         st_mtime_nsec: x.stx_mtime.tv_nsec.into(),
-        st_ctime: bitcast!(i64::from(x.stx_ctime.tv_sec)),
+        st_ctime: i64::from(x.stx_ctime.tv_sec),
         st_ctime_nsec: x.stx_ctime.tv_nsec.into(),
         st_ino: x.stx_ino.into(),
     })
@@ -754,17 +754,17 @@ fn stat_to_stat(s64: linux_raw_sys::general::stat64) -> io::Result<Stat> {
         st_size: s64.st_size.try_into().map_err(|_| io::Errno::OVERFLOW)?,
         st_blksize: s64.st_blksize.try_into().map_err(|_| io::Errno::OVERFLOW)?,
         st_blocks: s64.st_blocks.try_into().map_err(|_| io::Errno::OVERFLOW)?,
-        st_atime: bitcast!(i64::from(s64.st_atime)),
+        st_atime: i64::from(s64.st_atime),
         st_atime_nsec: s64
             .st_atime_nsec
             .try_into()
             .map_err(|_| io::Errno::OVERFLOW)?,
-        st_mtime: bitcast!(i64::from(s64.st_mtime)),
+        st_mtime: i64::from(s64.st_mtime),
         st_mtime_nsec: s64
             .st_mtime_nsec
             .try_into()
             .map_err(|_| io::Errno::OVERFLOW)?,
-        st_ctime: bitcast!(i64::from(s64.st_ctime)),
+        st_ctime: i64::from(s64.st_ctime),
         st_ctime_nsec: s64
             .st_ctime_nsec
             .try_into()
@@ -786,17 +786,17 @@ fn stat_to_stat(s: linux_raw_sys::general::stat) -> io::Result<Stat> {
         st_size: s.st_size.try_into().map_err(|_| io::Errno::OVERFLOW)?,
         st_blksize: s.st_blksize.try_into().map_err(|_| io::Errno::OVERFLOW)?,
         st_blocks: s.st_blocks.try_into().map_err(|_| io::Errno::OVERFLOW)?,
-        st_atime: bitcast!(i64::from(s.st_atime)),
+        st_atime: i64::from(s.st_atime),
         st_atime_nsec: s
             .st_atime_nsec
             .try_into()
             .map_err(|_| io::Errno::OVERFLOW)?,
-        st_mtime: bitcast!(i64::from(s.st_mtime)),
+        st_mtime: i64::from(s.st_mtime),
         st_mtime_nsec: s
             .st_mtime_nsec
             .try_into()
             .map_err(|_| io::Errno::OVERFLOW)?,
-        st_ctime: bitcast!(i64::from(s.st_ctime)),
+        st_ctime: i64::from(s.st_ctime),
         st_ctime_nsec: s
             .st_ctime_nsec
             .try_into()
