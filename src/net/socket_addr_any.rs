@@ -14,15 +14,13 @@ use crate::net::xdp::SocketAddrXdp;
 #[cfg(unix)]
 use crate::net::SocketAddrUnix;
 use crate::net::{
-    addr::{SocketAddrArg, SocketAddrOpaque},
+    addr::{SocketAddrArg, SocketAddrOpaque, SocketAddrStorage},
     AddressFamily, SocketAddr, SocketAddrV4, SocketAddrV6,
 };
 use crate::{backend, io};
 #[cfg(feature = "std")]
 use core::fmt;
 use core::ptr::copy_nonoverlapping;
-
-pub use backend::net::addr::SocketAddrStorage;
 
 /// `struct sockaddr_storage` as a Rust enum.
 #[derive(Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]

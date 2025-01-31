@@ -3,7 +3,7 @@ fn encode_decode() {
     #[cfg(unix)]
     use rustix::net::SocketAddrUnix;
     use rustix::net::{
-        Ipv4Addr, Ipv6Addr, SocketAddrAny, SocketAddrStorage, SocketAddrV4, SocketAddrV6,
+        addr::SocketAddrStorage, Ipv4Addr, Ipv6Addr, SocketAddrAny, SocketAddrV4, SocketAddrV6,
     };
 
     unsafe {

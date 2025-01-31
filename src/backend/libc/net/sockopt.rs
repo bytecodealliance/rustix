@@ -47,9 +47,9 @@ use crate::net::Protocol;
     target_env = "newlib"
 ))]
 use crate::net::RawProtocol;
-use crate::net::{Ipv4Addr, Ipv6Addr, SocketType};
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
-use crate::net::{SocketAddrAny, SocketAddrStorage, SocketAddrV4};
+use crate::net::{addr::SocketAddrStorage, SocketAddrAny, SocketAddrV4};
+use crate::net::{Ipv4Addr, Ipv6Addr, SocketType};
 #[cfg(linux_kernel)]
 use crate::net::{SocketAddrV6, UCred};
 use crate::utils::as_mut_ptr;

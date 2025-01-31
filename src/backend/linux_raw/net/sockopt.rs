@@ -15,8 +15,8 @@ use crate::net::sockopt::Timeout;
 #[cfg(target_os = "linux")]
 use crate::net::xdp::{XdpMmapOffsets, XdpOptionsFlags, XdpRingOffset, XdpStatistics, XdpUmemReg};
 use crate::net::{
-    AddressFamily, Ipv4Addr, Ipv6Addr, Protocol, RawProtocol, SocketAddrAny, SocketAddrStorage,
-    SocketAddrV4, SocketAddrV6, SocketType, UCred,
+    addr::SocketAddrStorage, AddressFamily, Ipv4Addr, Ipv6Addr, Protocol, RawProtocol,
+    SocketAddrAny, SocketAddrV4, SocketAddrV6, SocketType, UCred,
 };
 #[cfg(feature = "alloc")]
 use alloc::borrow::ToOwned;

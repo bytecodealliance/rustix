@@ -10,6 +10,8 @@ use crate::backend::net::write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6
 
 use super::{SocketAddr, SocketAddrV4, SocketAddrV6};
 
+pub use crate::backend::net::addr::SocketAddrStorage;
+
 #[cfg(unix)]
 use super::SocketAddrUnix;
 

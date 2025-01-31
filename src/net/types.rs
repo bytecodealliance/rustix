@@ -1864,7 +1864,7 @@ fn test_sizes() {
     #[cfg(target_os = "linux")]
     use crate::backend::c;
     use crate::ffi::c_int;
-    use crate::net::SocketAddrStorage;
+    use crate::net::addr::SocketAddrStorage;
     use core::mem::transmute;
 
     // Backend code needs to cast these to `c_int` so make sure that cast isn't
