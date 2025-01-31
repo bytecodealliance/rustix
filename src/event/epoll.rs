@@ -36,7 +36,7 @@
 //! let mut sockets = HashMap::new();
 //!
 //! // Process events.
-//! let mut event_list = epoll::EventVec::with_capacity(4);
+//! let mut event_list = Vec::with_capacity(4);
 //! loop {
 //!     epoll::wait(&epoll, &mut event_list, -1)?;
 //!     for event in &event_list {
@@ -81,7 +81,6 @@ use crate::io;
 use alloc::vec::Vec;
 use core::ffi::c_void;
 use core::hash::{Hash, Hasher};
-use core::slice;
 
 /// `epoll_create1(flags)`—Creates a new epoll object.
 ///
@@ -202,44 +201,18 @@ pub fn delete<EpollFd: AsFd, SourceFd: AsFd>(epoll: EpollFd, source: SourceFd) -
 #[inline]
 pub fn wait<EpollFd: AsFd>(
     epoll: EpollFd,
-    event_list: &mut EventVec,
+    event_list: &mut Vec<Event>,
     timeout: crate::ffi::c_int,
 ) -> io::Result<()> {
     // SAFETY: We're calling `epoll_wait` via FFI and we know how it
     // behaves.
     unsafe {
-        event_list.events.clear();
-        let nfds = syscalls::epoll_wait(
-            epoll.as_fd(),
-            event_list.events.spare_capacity_mut(),
-            timeout,
-        )?;
-        event_list.events.set_len(nfds);
+        event_list.clear();
+        let nfds = syscalls::epoll_wait(epoll.as_fd(), event_list.spare_capacity_mut(), timeout)?;
+        event_list.set_len(nfds);
     }
 
     Ok(())
-}
-
-/// An iterator over the [`epoll::Event`]s in an [`epoll::EventVec`].
-pub struct Iter<'a> {
-    /// Use `Copied` to copy the struct, since `Event` is `packed` on some
-    /// platforms, and it's common for users to directly destructure it, which
-    /// would lead to errors about forming references to packed fields.
-    iter: core::iter::Copied<slice::Iter<'a, Event>>,
-}
-
-impl<'a> Iterator for Iter<'a> {
-    type Item = epoll::Event;
-
-    #[inline]
-    fn next(&mut self) -> Option<Self::Item> {
-        self.iter.next()
-    }
-
-    #[inline]
-    fn size_hint(&self) -> (usize, Option<usize>) {
-        self.iter.size_hint()
-    }
 }
 
 /// A record of an event that occurred.
@@ -355,100 +328,6 @@ struct SixtyFourBitPointer {
     #[cfg(target_endian = "little")]
     #[cfg(target_pointer_width = "32")]
     _padding: u32,
-}
-
-/// A vector of `epoll::Event`s, plus context for interpreting them.
-#[cfg(feature = "alloc")]
-pub struct EventVec {
-    events: Vec<Event>,
-}
-
-#[cfg(feature = "alloc")]
-impl EventVec {
-    /// Constructs an `epoll::EventVec` from raw pointer, length, and capacity.
-    ///
-    /// # Safety
-    ///
-    /// This function calls [`Vec::from_raw_parts`] with its arguments.
-    ///
-    /// [`Vec::from_raw_parts`]: https://doc.rust-lang.org/stable/std/vec/struct.Vec.html#method.from_raw_parts
-    #[inline]
-    pub unsafe fn from_raw_parts(ptr: *mut Event, len: usize, capacity: usize) -> Self {
-        Self {
-            events: Vec::from_raw_parts(ptr, len, capacity),
-        }
-    }
-
-    /// Constructs an `epoll::EventVec` with memory for `capacity`
-    /// `epoll::Event`s.
-    #[inline]
-    pub fn with_capacity(capacity: usize) -> Self {
-        Self {
-            events: Vec::with_capacity(capacity),
-        }
-    }
-
-    /// Returns the current `epoll::Event` capacity of this `epoll::EventVec`.
-    #[inline]
-    pub fn capacity(&self) -> usize {
-        self.events.capacity()
-    }
-
-    /// Reserves enough memory for at least `additional` more `epoll::Event`s.
-    #[inline]
-    pub fn reserve(&mut self, additional: usize) {
-        self.events.reserve(additional);
-    }
-
-    /// Reserves enough memory for exactly `additional` more `epoll::Event`s.
-    #[inline]
-    pub fn reserve_exact(&mut self, additional: usize) {
-        self.events.reserve_exact(additional);
-    }
-
-    /// Clears all the `epoll::Events` out of this `epoll::EventVec`.
-    #[inline]
-    pub fn clear(&mut self) {
-        self.events.clear();
-    }
-
-    /// Shrinks the capacity of this `epoll::EventVec` as much as possible.
-    #[inline]
-    pub fn shrink_to_fit(&mut self) {
-        self.events.shrink_to_fit();
-    }
-
-    /// Returns an iterator over the `epoll::Event`s in this `epoll::EventVec`.
-    #[inline]
-    pub fn iter(&self) -> Iter<'_> {
-        Iter {
-            iter: self.events.iter().copied(),
-        }
-    }
-
-    /// Returns the number of `epoll::Event`s logically contained in this
-    /// `epoll::EventVec`.
-    #[inline]
-    pub fn len(&mut self) -> usize {
-        self.events.len()
-    }
-
-    /// Tests whether this `epoll::EventVec` is logically empty.
-    #[inline]
-    pub fn is_empty(&mut self) -> bool {
-        self.events.is_empty()
-    }
-}
-
-#[cfg(feature = "alloc")]
-impl<'a> IntoIterator for &'a EventVec {
-    type IntoIter = Iter<'a>;
-    type Item = epoll::Event;
-
-    #[inline]
-    fn into_iter(self) -> Self::IntoIter {
-        self.iter()
-    }
 }
 
 #[cfg(test)]
