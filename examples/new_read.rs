@@ -1,19 +1,18 @@
+use rustix::buffer::extend;
 use rustix::io::read;
 use rustix::stdio::stdin;
 use std::mem::MaybeUninit;
 
 fn main() {
-    let buf = vec![0_u8; 3];
-    let _x: Vec<u8> = read(stdin(), buf).unwrap();
-
     let mut buf = vec![0_u8; 3];
+    let _x: () = read(stdin(), extend(&mut buf)).unwrap();
     let _x: usize = read(stdin(), &mut buf).unwrap();
     let _x: usize = read(stdin(), &mut *buf).unwrap();
+    let _x: usize = read(stdin(), &mut buf[..]).unwrap();
+    let _x: usize = read(stdin(), &mut (*buf)[..]).unwrap();
 
     let mut buf = [0, 0, 0];
     let _x: usize = read(stdin(), &mut buf).unwrap();
-
-    let mut buf = [0, 0, 0];
     let _x: usize = read(stdin(), &mut buf[..]).unwrap();
 
     let mut buf = [
@@ -22,12 +21,6 @@ fn main() {
         MaybeUninit::uninit(),
     ];
     let _x: (&mut [u8], &mut [MaybeUninit<u8>]) = read(stdin(), &mut buf).unwrap();
-
-    let mut buf = [
-        MaybeUninit::uninit(),
-        MaybeUninit::uninit(),
-        MaybeUninit::uninit(),
-    ];
     let _x: (&mut [u8], &mut [MaybeUninit<u8>]) = read(stdin(), &mut buf[..]).unwrap();
 
     // This is reduced from src/fs/inotify.rs line 177.

@@ -159,8 +159,7 @@ extern crate static_assertions;
 #[allow(unused_imports)]
 mod static_assertions;
 
-// Internal utilities.
-mod buffer;
+pub mod buffer;
 #[cfg(not(windows))]
 #[macro_use]
 pub(crate) mod cstr;

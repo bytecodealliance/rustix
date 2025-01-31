@@ -13,10 +13,12 @@ pub trait Buffer<T>: private::Sealed<T> {}
 // Implement `Buffer` for all the types that implement `Sealed`.
 impl<T> Buffer<T> for &mut [T] {}
 impl<T, const N: usize> Buffer<T> for &mut [T; N] {}
+#[cfg(feature = "alloc")]
 impl<T> Buffer<T> for &mut Vec<T> {}
 impl<'a, T> Buffer<T> for &'a mut [MaybeUninit<T>] {}
 impl<'a, T, const N: usize> Buffer<T> for &'a mut [MaybeUninit<T>; N] {}
-impl<T> Buffer<T> for Vec<T> {}
+#[cfg(feature = "alloc")]
+impl<'a, T> Buffer<T> for Extend<'a, T> {}
 
 impl<T> private::Sealed<T> for &mut [T] {
     type Result = usize;
@@ -49,6 +51,7 @@ impl<T, const N: usize> private::Sealed<T> for &mut [T; N] {
 // `Vec` implements `DerefMut` to `&mut [T]`, however it doesn't get
 // auto-derefed in a `impl Buffer<u8>`, so we add this `impl` so that our users
 // don't have to add an extra `*` in these situations.
+#[cfg(feature = "alloc")]
 impl<T> private::Sealed<T> for &mut Vec<T> {
     type Result = usize;
 
@@ -101,20 +104,34 @@ impl<'a, T, const N: usize> private::Sealed<T> for &'a mut [MaybeUninit<T>; N] {
     }
 }
 
+/// A type that implements [`Buffer`] by appending to a `Vec`, up to its
+/// capacity.
+///
+/// Because this uses the capacity, and never reallocates, it's a good idea to
+/// reserve some space in a `Vec` before using this!
 #[cfg(feature = "alloc")]
-impl<T> private::Sealed<T> for Vec<T> {
-    type Result = Vec<T>;
+pub struct Extend<'a, T>(&'a mut Vec<T>);
+
+/// Construct an [`Extend`].
+#[cfg(feature = "alloc")]
+pub fn extend<T>(v: &mut Vec<T>) -> Extend<T> {
+    Extend(v)
+}
+
+#[cfg(feature = "alloc")]
+impl<'a, T> private::Sealed<T> for Extend<'a, T> {
+    /// The mutated `Vec` reflects the number of bytes read.
+    type Result = ();
 
     #[inline]
     fn as_raw_parts_mut(&mut self) -> (*mut T, usize) {
-        self.clear();
-        (self.as_mut_ptr(), self.capacity())
+        let spare = self.0.spare_capacity_mut();
+        (spare.as_mut_ptr().cast(), spare.len())
     }
 
     #[inline]
-    unsafe fn finish(mut self, len: usize) -> Self::Result {
-        self.set_len(len);
-        self
+    unsafe fn finish(self, len: usize) -> Self::Result {
+        self.0.set_len(self.0.len() + len);
     }
 }
 
