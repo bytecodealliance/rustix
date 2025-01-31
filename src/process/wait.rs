@@ -142,39 +142,39 @@ impl WaitIdStatus {
     /// Returns whether the process is currently stopped.
     #[inline]
     pub fn stopped(&self) -> bool {
-        self.si_code() == backend::c::CLD_STOPPED
+        self.raw_code() == bitcast!(backend::c::CLD_STOPPED)
     }
 
     /// Returns whether the process is currently trapped.
     #[inline]
     pub fn trapped(&self) -> bool {
-        self.si_code() == backend::c::CLD_TRAPPED
+        self.raw_code() == bitcast!(backend::c::CLD_TRAPPED)
     }
 
     /// Returns whether the process has exited normally.
     #[inline]
     pub fn exited(&self) -> bool {
-        self.si_code() == backend::c::CLD_EXITED
+        self.raw_code() == bitcast!(backend::c::CLD_EXITED)
     }
 
     /// Returns whether the process was terminated by a signal and did not
     /// create a core file.
     #[inline]
     pub fn killed(&self) -> bool {
-        self.si_code() == backend::c::CLD_KILLED
+        self.raw_code() == bitcast!(backend::c::CLD_KILLED)
     }
 
     /// Returns whether the process was terminated by a signal and did create a
     /// core file.
     #[inline]
     pub fn dumped(&self) -> bool {
-        self.si_code() == backend::c::CLD_DUMPED
+        self.raw_code() == bitcast!(backend::c::CLD_DUMPED)
     }
 
     /// Returns whether the process has continued from a job control stop.
     #[inline]
     pub fn continued(&self) -> bool {
-        self.si_code() == backend::c::CLD_CONTINUED
+        self.raw_code() == bitcast!(backend::c::CLD_CONTINUED)
     }
 
     /// Returns the number of the signal that stopped the process, if the
@@ -225,19 +225,45 @@ impl WaitIdStatus {
         }
     }
 
+    /// Return the raw `si_signo` value returned from `waitid`.
     #[cfg(linux_raw)]
-    fn si_code(&self) -> u32 {
-        self.0.si_code() as u32 // CLD_ consts are unsigned
+    pub fn raw_signo(&self) -> crate::ffi::c_int {
+        self.0.si_signo()
     }
 
+    /// Return the raw `si_signo` value returned from `waitid`.
     #[cfg(not(linux_raw))]
-    fn si_code(&self) -> backend::c::c_int {
+    pub fn raw_signo(&self) -> crate::ffi::c_int {
+        self.0.si_signo
+    }
+
+    /// Return the raw `si_errno` value returned from `waitid`.
+    #[cfg(linux_raw)]
+    pub fn raw_errno(&self) -> crate::ffi::c_int {
+        self.0.si_errno()
+    }
+
+    /// Return the raw `si_errno` value returned from `waitid`.
+    #[cfg(not(linux_raw))]
+    pub fn raw_errno(&self) -> crate::ffi::c_int {
+        self.0.si_errno
+    }
+
+    /// Return the raw `si_code` value returned from `waitid`.
+    #[cfg(linux_raw)]
+    pub fn raw_code(&self) -> crate::ffi::c_int {
+        self.0.si_code()
+    }
+
+    /// Return the raw `si_code` value returned from `waitid`.
+    #[cfg(not(linux_raw))]
+    pub fn raw_code(&self) -> crate::ffi::c_int {
         self.0.si_code
     }
 
     #[cfg(not(any(target_os = "emscripten", target_os = "fuchsia", target_os = "netbsd")))]
     #[allow(unsafe_code)]
-    fn si_status(&self) -> backend::c::c_int {
+    fn si_status(&self) -> crate::ffi::c_int {
         // SAFETY: POSIX [specifies] that the `siginfo_t` returned by a
         // `waitid` call always has a valid `si_status` value.
         //
