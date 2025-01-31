@@ -1,3 +1,11 @@
+//! Wait for processes to change state.
+//!
+//! # Safety
+//!
+//! This code needs to implement `Send` and `Sync` for `WaitIdStatus` because
+//! the linux-raw-sys bindings generate a type that doesn't do so
+//! automatically.
+#![allow(unsafe_code)]
 use crate::process::Pid;
 use crate::{backend, io};
 use bitflags::bitflags;
