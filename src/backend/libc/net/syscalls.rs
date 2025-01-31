@@ -25,7 +25,7 @@ use core::mem::{size_of, MaybeUninit};
 use {
     super::msghdr::{with_noaddr_msghdr, with_recv_msghdr, with_v4_msghdr, with_v6_msghdr},
     crate::io::{IoSlice, IoSliceMut},
-    crate::net::{RecvAncillaryBuffer, RecvMsgReturn, SendAncillaryBuffer},
+    crate::net::{RecvAncillaryBuffer, RecvMsg, SendAncillaryBuffer},
 };
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 use {
@@ -324,7 +324,7 @@ pub(crate) fn recvmsg(
     iov: &mut [IoSliceMut<'_>],
     control: &mut RecvAncillaryBuffer<'_>,
     msg_flags: RecvFlags,
-) -> io::Result<RecvMsgReturn> {
+) -> io::Result<RecvMsg> {
     let mut storage = MaybeUninit::<c::sockaddr_storage>::uninit();
 
     with_recv_msghdr(&mut storage, iov, control, |msghdr| {
@@ -341,7 +341,7 @@ pub(crate) fn recvmsg(
             let addr =
                 unsafe { maybe_read_sockaddr_os(msghdr.msg_name as _, msghdr.msg_namelen as _) };
 
-            RecvMsgReturn {
+            RecvMsg {
                 bytes,
                 address: addr,
                 flags: ReturnFlags::from_bits_retain(bitcast!(msghdr.msg_flags)),

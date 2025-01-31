@@ -111,10 +111,10 @@ bitflags! {
 
 bitflags! {
     /// `MSG_*` flags returned from [`recvmsg`], in the `flags` field of
-    /// [`RecvMsgReturn`]
+    /// [`RecvMsg`]
     ///
     /// [`recvmsg`]: crate::net::recvmsg
-    /// [`RecvMsgReturn`]: crate::net::RecvMsgReturn
+    /// [`RecvMsg`]: crate::net::RecvMsg
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct ReturnFlags: u32 {

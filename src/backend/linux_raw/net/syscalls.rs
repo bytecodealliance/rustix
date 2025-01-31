@@ -25,7 +25,7 @@ use crate::io::{self, IoSlice, IoSliceMut};
 #[cfg(target_os = "linux")]
 use crate::net::xdp::SocketAddrXdp;
 use crate::net::{
-    AddressFamily, Protocol, RecvAncillaryBuffer, RecvMsgReturn, SendAncillaryBuffer, Shutdown,
+    AddressFamily, Protocol, RecvAncillaryBuffer, RecvMsg, SendAncillaryBuffer, Shutdown,
     SocketAddrAny, SocketAddrUnix, SocketAddrV4, SocketAddrV6, SocketFlags, SocketType,
 };
 use c::{sockaddr_in, sockaddr_in6, sockaddr_storage, socklen_t};
@@ -264,7 +264,7 @@ pub(crate) fn recvmsg(
     iov: &mut [IoSliceMut<'_>],
     control: &mut RecvAncillaryBuffer<'_>,
     msg_flags: RecvFlags,
-) -> io::Result<RecvMsgReturn> {
+) -> io::Result<RecvMsg> {
     let mut storage = MaybeUninit::<c::sockaddr_storage>::uninit();
 
     with_recv_msghdr(&mut storage, iov, control, |msghdr| {
@@ -290,7 +290,7 @@ pub(crate) fn recvmsg(
             let addr =
                 unsafe { maybe_read_sockaddr_os(msghdr.msg_name as _, msghdr.msg_namelen as _) };
 
-            RecvMsgReturn {
+            RecvMsg {
                 bytes,
                 address: addr,
                 flags: ReturnFlags::from_bits_retain(msghdr.msg_flags),
