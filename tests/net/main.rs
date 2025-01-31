@@ -2,11 +2,11 @@
 
 #![cfg(feature = "net")]
 #![cfg_attr(target_os = "wasi", feature(wasi_ext))]
-#![cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#![cfg(not(target_os = "wasi"))]
 #![cfg_attr(core_c_str, feature(core_c_str))]
 
 mod addr;
-#[cfg(unix)]
+#[cfg(all(unix, not(target_os = "redox")))]
 mod cmsg;
 mod connect_bind_send;
 mod dgram;

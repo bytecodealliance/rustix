@@ -1,5 +1,8 @@
+#[cfg(not(target_os = "redox"))]
 use rustix::io::IoSliceMut;
-use rustix::net::{AddressFamily, RecvFlags, ReturnFlags, SendFlags, SocketAddrUnix, SocketType};
+#[cfg(not(target_os = "redox"))]
+use rustix::net::ReturnFlags;
+use rustix::net::{AddressFamily, RecvFlags, SendFlags, SocketAddrUnix, SocketType};
 use std::mem::MaybeUninit;
 
 /// Test `recv_uninit` with the `RecvFlags::Trunc` flag.
@@ -55,6 +58,7 @@ fn net_recv_uninit_trunc() {
 }
 
 /// Test `recvmsg` with the `RecvFlags::Trunc` flag.
+#[cfg(not(target_os = "redox"))]
 #[test]
 fn net_recvmsg_trunc() {
     crate::init();

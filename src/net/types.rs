@@ -31,7 +31,7 @@ impl SocketType {
     pub const RAW: Self = Self(c::SOCK_RAW as _);
 
     /// `SOCK_RDM`
-    #[cfg(not(any(target_os = "espidf", target_os = "haiku")))]
+    #[cfg(not(any(target_os = "espidf", target_os = "haiku", target_os = "redox")))]
     pub const RDM: Self = Self(c::SOCK_RDM as _);
 
     /// Constructs a `SocketType` from a raw integer.
@@ -94,6 +94,7 @@ impl AddressFamily {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "nto",
+        target_os = "redox",
         target_os = "vita",
     )))]
     pub const NETLINK: Self = Self(c::AF_NETLINK as _);
@@ -110,6 +111,7 @@ impl AddressFamily {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "nto",
+        target_os = "redox",
         target_os = "vita",
     )))]
     pub const AX25: Self = Self(c::AF_AX25 as _);
@@ -117,11 +119,12 @@ impl AddressFamily {
     #[cfg(not(any(
         target_os = "aix",
         target_os = "espidf",
+        target_os = "redox",
         target_os = "vita",
     )))]
     pub const IPX: Self = Self(c::AF_IPX as _);
     /// `AF_APPLETALK`
-    #[cfg(not(any(target_os = "espidf", target_os = "vita")))]
+    #[cfg(not(any(target_os = "espidf", target_os = "redox", target_os = "vita")))]
     pub const APPLETALK: Self = Self(c::AF_APPLETALK as _);
     /// `AF_NETROM`
     #[cfg(not(any(
@@ -133,6 +136,7 @@ impl AddressFamily {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "nto",
+        target_os = "redox",
         target_os = "vita",
     )))]
     pub const NETROM: Self = Self(c::AF_NETROM as _);
@@ -146,6 +150,7 @@ impl AddressFamily {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "nto",
+        target_os = "redox",
         target_os = "vita",
     )))]
     pub const BRIDGE: Self = Self(c::AF_BRIDGE as _);
@@ -159,6 +164,7 @@ impl AddressFamily {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "nto",
+        target_os = "redox",
         target_os = "vita",
     )))]
     pub const ATMPVC: Self = Self(c::AF_ATMPVC as _);
@@ -171,6 +177,7 @@ impl AddressFamily {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "nto",
+        target_os = "redox",
         target_os = "vita",
     )))]
     pub const X25: Self = Self(c::AF_X25 as _);
@@ -184,11 +191,17 @@ impl AddressFamily {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "nto",
+        target_os = "redox",
         target_os = "vita",
     )))]
     pub const ROSE: Self = Self(c::AF_ROSE as _);
     /// `AF_DECnet`
-    #[cfg(not(any(target_os = "espidf", target_os = "haiku", target_os = "vita")))]
+    #[cfg(not(any(
+        target_os = "espidf",
+        target_os = "haiku",
+        target_os = "redox",
+        target_os = "vita"
+    )))]
     pub const DECnet: Self = Self(c::AF_DECnet as _);
     /// `AF_NETBEUI`
     #[cfg(not(any(
@@ -200,6 +213,7 @@ impl AddressFamily {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "nto",
+        target_os = "redox",
         target_os = "vita",
     )))]
     pub const NETBEUI: Self = Self(c::AF_NETBEUI as _);
@@ -213,6 +227,7 @@ impl AddressFamily {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "nto",
+        target_os = "redox",
         target_os = "vita",
     )))]
     pub const SECURITY: Self = Self(c::AF_SECURITY as _);
@@ -225,6 +240,7 @@ impl AddressFamily {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "nto",
+        target_os = "redox",
         target_os = "vita",
     )))]
     pub const KEY: Self = Self(c::AF_KEY as _);
@@ -242,6 +258,7 @@ impl AddressFamily {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "nto",
+        target_os = "redox",
         target_os = "vita",
     )))]
     pub const PACKET: Self = Self(c::AF_PACKET as _);
@@ -255,6 +272,7 @@ impl AddressFamily {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "nto",
+        target_os = "redox",
         target_os = "vita",
     )))]
     pub const ASH: Self = Self(c::AF_ASH as _);
@@ -268,6 +286,7 @@ impl AddressFamily {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "nto",
+        target_os = "redox",
         target_os = "vita",
     )))]
     pub const ECONET: Self = Self(c::AF_ECONET as _);
@@ -281,6 +300,7 @@ impl AddressFamily {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "nto",
+        target_os = "redox",
         target_os = "vita",
     )))]
     pub const ATMSVC: Self = Self(c::AF_ATMSVC as _);
@@ -294,11 +314,17 @@ impl AddressFamily {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "nto",
+        target_os = "redox",
         target_os = "vita",
     )))]
     pub const RDS: Self = Self(c::AF_RDS as _);
     /// `AF_SNA`
-    #[cfg(not(any(target_os = "espidf", target_os = "haiku", target_os = "vita")))]
+    #[cfg(not(any(
+        target_os = "espidf",
+        target_os = "haiku",
+        target_os = "redox",
+        target_os = "vita"
+    )))]
     pub const SNA: Self = Self(c::AF_SNA as _);
     /// `AF_IRDA`
     #[cfg(not(any(
@@ -309,6 +335,7 @@ impl AddressFamily {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "nto",
+        target_os = "redox",
         target_os = "vita",
     )))]
     pub const IRDA: Self = Self(c::AF_IRDA as _);
@@ -322,6 +349,7 @@ impl AddressFamily {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "nto",
+        target_os = "redox",
         target_os = "vita",
     )))]
     pub const PPPOX: Self = Self(c::AF_PPPOX as _);
@@ -335,6 +363,7 @@ impl AddressFamily {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "nto",
+        target_os = "redox",
         target_os = "vita",
     )))]
     pub const WANPIPE: Self = Self(c::AF_WANPIPE as _);
@@ -348,6 +377,7 @@ impl AddressFamily {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "nto",
+        target_os = "redox",
         target_os = "vita",
     )))]
     pub const LLC: Self = Self(c::AF_LLC as _);
@@ -361,6 +391,7 @@ impl AddressFamily {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "nto",
+        target_os = "redox",
         target_os = "vita",
     )))]
     pub const CAN: Self = Self(c::AF_CAN as _);
@@ -374,6 +405,7 @@ impl AddressFamily {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "nto",
+        target_os = "redox",
         target_os = "vita",
     )))]
     pub const TIPC: Self = Self(c::AF_TIPC as _);
@@ -385,6 +417,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "hurd",
+        target_os = "redox",
         target_os = "vita",
     )))]
     pub const BLUETOOTH: Self = Self(c::AF_BLUETOOTH as _);
@@ -398,6 +431,7 @@ impl AddressFamily {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "nto",
+        target_os = "redox",
         target_os = "vita",
     )))]
     pub const IUCV: Self = Self(c::AF_IUCV as _);
@@ -411,6 +445,7 @@ impl AddressFamily {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "nto",
+        target_os = "redox",
         target_os = "vita",
     )))]
     pub const RXRPC: Self = Self(c::AF_RXRPC as _);
@@ -422,6 +457,7 @@ impl AddressFamily {
         target_os = "espidf",
         target_os = "haiku",
         target_os = "hurd",
+        target_os = "redox",
         target_os = "vita",
     )))]
     pub const ISDN: Self = Self(c::AF_ISDN as _);
@@ -435,6 +471,7 @@ impl AddressFamily {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "nto",
+        target_os = "redox",
         target_os = "vita",
     )))]
     pub const PHONET: Self = Self(c::AF_PHONET as _);
@@ -448,6 +485,7 @@ impl AddressFamily {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "nto",
+        target_os = "redox",
         target_os = "vita",
     )))]
     pub const IEEE802154: Self = Self(c::AF_IEEE802154 as _);
@@ -684,6 +722,7 @@ pub mod ipproto {
         windows,
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "redox",
         target_os = "vita"
     )))]
     pub const IPIP: Protocol = Protocol(new_raw_protocol(c::IPPROTO_IPIP as _));
@@ -694,6 +733,7 @@ pub mod ipproto {
         solarish,
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "redox",
         target_os = "vita"
     )))]
     pub const EGP: Protocol = Protocol(new_raw_protocol(c::IPPROTO_EGP as _));
@@ -721,6 +761,7 @@ pub mod ipproto {
         windows,
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "redox",
         target_os = "vita"
     )))]
     pub const TP: Protocol = Protocol(new_raw_protocol(c::IPPROTO_TP as _));
@@ -735,6 +776,7 @@ pub mod ipproto {
         target_os = "haiku",
         target_os = "nto",
         target_os = "openbsd",
+        target_os = "redox",
         target_os = "vita",
     )))]
     pub const DCCP: Protocol = Protocol(new_raw_protocol(c::IPPROTO_DCCP as _));
@@ -746,6 +788,7 @@ pub mod ipproto {
         windows,
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "redox",
         target_os = "vita"
     )))]
     pub const RSVP: Protocol = Protocol(new_raw_protocol(c::IPPROTO_RSVP as _));
@@ -755,6 +798,7 @@ pub mod ipproto {
         windows,
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "redox",
         target_os = "vita"
     )))]
     pub const GRE: Protocol = Protocol(new_raw_protocol(c::IPPROTO_GRE as _));
@@ -763,6 +807,7 @@ pub mod ipproto {
         solarish,
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "redox",
         target_os = "vita"
     )))]
     pub const ESP: Protocol = Protocol(new_raw_protocol(c::IPPROTO_ESP as _));
@@ -771,6 +816,7 @@ pub mod ipproto {
         solarish,
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "redox",
         target_os = "vita"
     )))]
     pub const AH: Protocol = Protocol(new_raw_protocol(c::IPPROTO_AH as _));
@@ -783,6 +829,7 @@ pub mod ipproto {
         target_os = "espidf",
         target_os = "haiku",
         target_os = "nto",
+        target_os = "redox",
         target_os = "vita",
     )))]
     pub const MTP: Protocol = Protocol(new_raw_protocol(c::IPPROTO_MTP as _));
@@ -795,6 +842,7 @@ pub mod ipproto {
         target_os = "espidf",
         target_os = "haiku",
         target_os = "nto",
+        target_os = "redox",
         target_os = "vita",
     )))]
     pub const BEETPH: Protocol = Protocol(new_raw_protocol(c::IPPROTO_BEETPH as _));
@@ -805,6 +853,7 @@ pub mod ipproto {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "redox",
         target_os = "vita",
     )))]
     pub const ENCAP: Protocol = Protocol(new_raw_protocol(c::IPPROTO_ENCAP as _));
@@ -814,6 +863,7 @@ pub mod ipproto {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "redox",
         target_os = "vita"
     )))]
     pub const PIM: Protocol = Protocol(new_raw_protocol(c::IPPROTO_PIM as _));
@@ -826,6 +876,7 @@ pub mod ipproto {
         target_os = "espidf",
         target_os = "haiku",
         target_os = "nto",
+        target_os = "redox",
         target_os = "vita",
     )))]
     pub const COMP: Protocol = Protocol(new_raw_protocol(c::IPPROTO_COMP as _));
@@ -836,6 +887,7 @@ pub mod ipproto {
         target_os = "espidf",
         target_os = "haiku",
         target_os = "openbsd",
+        target_os = "redox",
         target_os = "vita",
     )))]
     pub const SCTP: Protocol = Protocol(new_raw_protocol(c::IPPROTO_SCTP as _));
@@ -850,6 +902,7 @@ pub mod ipproto {
         target_os = "espidf",
         target_os = "haiku",
         target_os = "nto",
+        target_os = "redox",
         target_os = "vita",
     )))]
     pub const UDPLITE: Protocol = Protocol(new_raw_protocol(c::IPPROTO_UDPLITE as _));
@@ -864,6 +917,7 @@ pub mod ipproto {
         target_os = "haiku",
         target_os = "netbsd",
         target_os = "nto",
+        target_os = "redox",
         target_os = "vita",
     )))]
     pub const MPLS: Protocol = Protocol(new_raw_protocol(c::IPPROTO_MPLS as _));
@@ -884,6 +938,7 @@ pub mod ipproto {
         target_os = "fuchsia",
         target_os = "haiku",
         target_os = "nto",
+        target_os = "redox",
         target_os = "vita",
     )))]
     pub const MPTCP: Protocol = Protocol(new_raw_protocol(c::IPPROTO_MPTCP as _));
@@ -892,6 +947,7 @@ pub mod ipproto {
         solarish,
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "redox",
         target_os = "vita"
     )))]
     pub const FRAGMENT: Protocol = Protocol(new_raw_protocol(c::IPPROTO_FRAGMENT as _));
@@ -907,6 +963,7 @@ pub mod ipproto {
         target_os = "espidf",
         target_os = "haiku",
         target_os = "nto",
+        target_os = "redox",
         target_os = "vita",
     )))]
     pub const MH: Protocol = Protocol(new_raw_protocol(c::IPPROTO_MH as _));
@@ -915,6 +972,7 @@ pub mod ipproto {
         solarish,
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "redox",
         target_os = "vita"
     )))]
     pub const ROUTING: Protocol = Protocol(new_raw_protocol(c::IPPROTO_ROUTING as _));

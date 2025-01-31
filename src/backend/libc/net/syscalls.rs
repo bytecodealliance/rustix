@@ -4,39 +4,33 @@
 use super::addr::SocketAddrUnix;
 #[cfg(target_os = "linux")]
 use super::msghdr::with_xdp_msghdr;
+use super::read_sockaddr::{initialize_family_to_unspec, maybe_read_sockaddr_os, read_sockaddr_os};
+#[cfg(not(any(windows, target_os = "espidf", target_os = "redox", target_os = "vita")))]
+use super::send_recv::ReturnFlags;
+use super::send_recv::{RecvFlags, SendFlags};
 #[cfg(target_os = "linux")]
 use super::write_sockaddr::encode_sockaddr_xdp;
+use super::write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6};
 use crate::backend::c;
 use crate::backend::conv::{borrowed_fd, ret, ret_owned_fd, ret_send_recv, send_recv_len};
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io;
 #[cfg(target_os = "linux")]
 use crate::net::xdp::SocketAddrXdp;
-use crate::net::{SocketAddrAny, SocketAddrV4, SocketAddrV6};
+use crate::net::{
+    AddressFamily, Protocol, Shutdown, SocketAddrAny, SocketAddrV4, SocketAddrV6, SocketFlags,
+    SocketType,
+};
 use crate::utils::as_ptr;
 use core::mem::{size_of, MaybeUninit};
-#[cfg(not(any(
-    windows,
-    target_os = "espidf",
-    target_os = "redox",
-    target_os = "vita",
-    target_os = "wasi"
-)))]
+use core::ptr::null_mut;
+#[cfg(not(any(windows, target_os = "espidf", target_os = "redox", target_os = "vita")))]
 use {
     super::msghdr::{with_noaddr_msghdr, with_recv_msghdr, with_v4_msghdr, with_v6_msghdr},
     crate::io::{IoSlice, IoSliceMut},
     crate::net::{RecvAncillaryBuffer, RecvMsg, SendAncillaryBuffer},
 };
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
-use {
-    super::read_sockaddr::{initialize_family_to_unspec, maybe_read_sockaddr_os, read_sockaddr_os},
-    super::send_recv::{RecvFlags, ReturnFlags, SendFlags},
-    super::write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6},
-    crate::net::{AddressFamily, Protocol, Shutdown, SocketFlags, SocketType},
-    core::ptr::null_mut,
-};
 
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) unsafe fn recv(
     fd: BorrowedFd<'_>,
     buf: *mut u8,
@@ -51,7 +45,6 @@ pub(crate) unsafe fn recv(
     ))
 }
 
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn send(fd: BorrowedFd<'_>, buf: &[u8], flags: SendFlags) -> io::Result<usize> {
     unsafe {
         ret_send_recv(c::send(
@@ -63,7 +56,6 @@ pub(crate) fn send(fd: BorrowedFd<'_>, buf: &[u8], flags: SendFlags) -> io::Resu
     }
 }
 
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) unsafe fn recvfrom(
     fd: BorrowedFd<'_>,
     buf: *mut u8,
@@ -94,7 +86,6 @@ pub(crate) unsafe fn recvfrom(
     })
 }
 
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn sendto_v4(
     fd: BorrowedFd<'_>,
     buf: &[u8],
@@ -113,7 +104,6 @@ pub(crate) fn sendto_v4(
     }
 }
 
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn sendto_v6(
     fd: BorrowedFd<'_>,
     buf: &[u8],
@@ -132,7 +122,7 @@ pub(crate) fn sendto_v6(
     }
 }
 
-#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
+#[cfg(not(windows))]
 pub(crate) fn sendto_unix(
     fd: BorrowedFd<'_>,
     buf: &[u8],
@@ -170,7 +160,6 @@ pub(crate) fn sendto_xdp(
     }
 }
 
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn socket(
     domain: AddressFamily,
     type_: SocketType,
@@ -189,7 +178,6 @@ pub(crate) fn socket(
     }
 }
 
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn socket_with(
     domain: AddressFamily,
     type_: SocketType,
@@ -209,7 +197,6 @@ pub(crate) fn socket_with(
     }
 }
 
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn bind_v4(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()> {
     unsafe {
         ret(c::bind(
@@ -220,7 +207,6 @@ pub(crate) fn bind_v4(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result
     }
 }
 
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn bind_v6(sockfd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()> {
     unsafe {
         ret(c::bind(
@@ -231,7 +217,7 @@ pub(crate) fn bind_v6(sockfd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result
     }
 }
 
-#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
+#[cfg(not(windows))]
 pub(crate) fn bind_unix(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Result<()> {
     unsafe {
         ret(c::bind(
@@ -253,7 +239,6 @@ pub(crate) fn bind_xdp(sockfd: BorrowedFd<'_>, addr: &SocketAddrXdp) -> io::Resu
     }
 }
 
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn connect_v4(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Result<()> {
     unsafe {
         ret(c::connect(
@@ -264,7 +249,6 @@ pub(crate) fn connect_v4(sockfd: BorrowedFd<'_>, addr: &SocketAddrV4) -> io::Res
     }
 }
 
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn connect_v6(sockfd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Result<()> {
     unsafe {
         ret(c::connect(
@@ -275,7 +259,7 @@ pub(crate) fn connect_v6(sockfd: BorrowedFd<'_>, addr: &SocketAddrV6) -> io::Res
     }
 }
 
-#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
+#[cfg(not(windows))]
 pub(crate) fn connect_unix(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io::Result<()> {
     unsafe {
         ret(c::connect(
@@ -286,7 +270,6 @@ pub(crate) fn connect_unix(sockfd: BorrowedFd<'_>, addr: &SocketAddrUnix) -> io:
     }
 }
 
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn connect_unspec(sockfd: BorrowedFd<'_>) -> io::Result<()> {
     debug_assert_eq!(c::AF_UNSPEC, 0);
     let addr = MaybeUninit::<c::sockaddr_storage>::zeroed();
@@ -299,12 +282,10 @@ pub(crate) fn connect_unspec(sockfd: BorrowedFd<'_>) -> io::Result<()> {
     }
 }
 
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn listen(sockfd: BorrowedFd<'_>, backlog: c::c_int) -> io::Result<()> {
     unsafe { ret(c::listen(borrowed_fd(sockfd), backlog)) }
 }
 
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn accept(sockfd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
     unsafe {
         let owned_fd = ret_owned_fd(c::accept(borrowed_fd(sockfd), null_mut(), null_mut()))?;
@@ -312,13 +293,7 @@ pub(crate) fn accept(sockfd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
     }
 }
 
-#[cfg(not(any(
-    windows,
-    target_os = "espidf",
-    target_os = "redox",
-    target_os = "vita",
-    target_os = "wasi"
-)))]
+#[cfg(not(any(windows, target_os = "espidf", target_os = "redox", target_os = "vita")))]
 pub(crate) fn recvmsg(
     sockfd: BorrowedFd<'_>,
     iov: &mut [IoSliceMut<'_>],
@@ -350,13 +325,7 @@ pub(crate) fn recvmsg(
     })
 }
 
-#[cfg(not(any(
-    windows,
-    target_os = "espidf",
-    target_os = "redox",
-    target_os = "vita",
-    target_os = "wasi"
-)))]
+#[cfg(not(any(windows, target_os = "espidf", target_os = "redox", target_os = "vita")))]
 pub(crate) fn sendmsg(
     sockfd: BorrowedFd<'_>,
     iov: &[IoSlice<'_>],
@@ -372,13 +341,7 @@ pub(crate) fn sendmsg(
     })
 }
 
-#[cfg(not(any(
-    windows,
-    target_os = "espidf",
-    target_os = "redox",
-    target_os = "vita",
-    target_os = "wasi"
-)))]
+#[cfg(not(any(windows, target_os = "espidf", target_os = "redox", target_os = "vita")))]
 pub(crate) fn sendmsg_v4(
     sockfd: BorrowedFd<'_>,
     addr: &SocketAddrV4,
@@ -395,13 +358,7 @@ pub(crate) fn sendmsg_v4(
     })
 }
 
-#[cfg(not(any(
-    windows,
-    target_os = "espidf",
-    target_os = "redox",
-    target_os = "vita",
-    target_os = "wasi"
-)))]
+#[cfg(not(any(windows, target_os = "espidf", target_os = "redox", target_os = "vita")))]
 pub(crate) fn sendmsg_v6(
     sockfd: BorrowedFd<'_>,
     addr: &SocketAddrV6,
@@ -461,10 +418,9 @@ pub(crate) fn sendmsg_xdp(
     target_os = "aix",
     target_os = "espidf",
     target_os = "haiku",
-    target_os = "redox",
     target_os = "nto",
+    target_os = "redox",
     target_os = "vita",
-    target_os = "wasi",
 )))]
 pub(crate) fn accept_with(sockfd: BorrowedFd<'_>, flags: SocketFlags) -> io::Result<OwnedFd> {
     unsafe {
@@ -478,7 +434,6 @@ pub(crate) fn accept_with(sockfd: BorrowedFd<'_>, flags: SocketFlags) -> io::Res
     }
 }
 
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn acceptfrom(sockfd: BorrowedFd<'_>) -> io::Result<(OwnedFd, Option<SocketAddrAny>)> {
     unsafe {
         let mut storage = MaybeUninit::<c::sockaddr_storage>::uninit();
@@ -504,7 +459,6 @@ pub(crate) fn acceptfrom(sockfd: BorrowedFd<'_>) -> io::Result<(OwnedFd, Option<
     target_os = "nto",
     target_os = "redox",
     target_os = "vita",
-    target_os = "wasi",
 )))]
 pub(crate) fn acceptfrom_with(
     sockfd: BorrowedFd<'_>,
@@ -535,6 +489,7 @@ pub(crate) fn acceptfrom_with(
     target_os = "espidf",
     target_os = "haiku",
     target_os = "nto",
+    target_os = "redox",
     target_os = "vita",
 ))]
 pub(crate) fn accept_with(sockfd: BorrowedFd<'_>, _flags: SocketFlags) -> io::Result<OwnedFd> {
@@ -550,6 +505,7 @@ pub(crate) fn accept_with(sockfd: BorrowedFd<'_>, _flags: SocketFlags) -> io::Re
     target_os = "espidf",
     target_os = "haiku",
     target_os = "nto",
+    target_os = "redox",
     target_os = "vita",
 ))]
 pub(crate) fn acceptfrom_with(
@@ -559,12 +515,10 @@ pub(crate) fn acceptfrom_with(
     acceptfrom(sockfd)
 }
 
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn shutdown(sockfd: BorrowedFd<'_>, how: Shutdown) -> io::Result<()> {
     unsafe { ret(c::shutdown(borrowed_fd(sockfd), how as c::c_int)) }
 }
 
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn getsockname(sockfd: BorrowedFd<'_>) -> io::Result<SocketAddrAny> {
     unsafe {
         let mut storage = MaybeUninit::<c::sockaddr_storage>::uninit();
@@ -578,7 +532,6 @@ pub(crate) fn getsockname(sockfd: BorrowedFd<'_>) -> io::Result<SocketAddrAny> {
     }
 }
 
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 pub(crate) fn getpeername(sockfd: BorrowedFd<'_>) -> io::Result<Option<SocketAddrAny>> {
     unsafe {
         let mut storage = MaybeUninit::<c::sockaddr_storage>::uninit();
@@ -595,7 +548,7 @@ pub(crate) fn getpeername(sockfd: BorrowedFd<'_>) -> io::Result<Option<SocketAdd
     }
 }
 
-#[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
+#[cfg(not(windows))]
 pub(crate) fn socketpair(
     domain: AddressFamily,
     type_: SocketType,

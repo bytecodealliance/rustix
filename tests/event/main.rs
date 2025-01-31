@@ -21,6 +21,7 @@ mod windows {
 
     impl Thing {
         pub fn new() -> Self {
+            #[cfg(feature = "net")]
             let _ = rustix::net::wsa_startup().unwrap();
             Self
         }
@@ -28,6 +29,7 @@ mod windows {
 
     impl Drop for Thing {
         fn drop(&mut self) {
+            #[cfg(feature = "net")]
             rustix::net::wsa_cleanup().unwrap();
         }
     }

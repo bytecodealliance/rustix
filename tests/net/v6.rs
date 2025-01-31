@@ -2,11 +2,13 @@
 //!
 //! The client send a message and the server sends one back.
 
-#![cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#![cfg(not(target_os = "wasi"))]
 
+#[cfg(not(target_os = "redox"))]
+use rustix::net::ReturnFlags;
 use rustix::net::{
     accept, bind_v6, connect_v6, getsockname, listen, recv, send, socket, AddressFamily, Ipv6Addr,
-    RecvFlags, ReturnFlags, SendFlags, SocketAddrAny, SocketAddrV6, SocketType,
+    RecvFlags, SendFlags, SocketAddrAny, SocketAddrV6, SocketType,
 };
 use std::sync::{Arc, Condvar, Mutex};
 use std::thread;

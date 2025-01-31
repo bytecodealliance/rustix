@@ -20,6 +20,7 @@ bitflags! {
             target_os = "nto",
             target_os = "haiku",
             target_os = "hurd",
+            target_os = "redox",
             target_os = "vita",
         )))]
         const CONFIRM = bitcast!(c::MSG_CONFIRM);
@@ -40,10 +41,11 @@ bitflags! {
             target_os = "haiku",
             target_os = "hurd",
             target_os = "nto",
+            target_os = "redox",
             target_os = "vita",
         )))]
         const MORE = bitcast!(c::MSG_MORE);
-        #[cfg(not(any(apple, windows, target_os = "vita")))]
+        #[cfg(not(any(apple, windows, target_os = "redox", target_os = "vita")))]
         /// `MSG_NOSIGNAL`
         const NOSIGNAL = bitcast!(c::MSG_NOSIGNAL);
         /// `MSG_OOB`
@@ -72,6 +74,7 @@ bitflags! {
             target_os = "espidf",
             target_os = "haiku",
             target_os = "nto",
+            target_os = "redox",
             target_os = "vita",
         )))]
         const CMSG_CLOEXEC = bitcast!(c::MSG_CMSG_CLOEXEC);
@@ -88,6 +91,7 @@ bitflags! {
             target_os = "haiku",
             target_os = "hurd",
             target_os = "nto",
+            target_os = "redox",
             target_os = "vita",
         )))]
         const ERRQUEUE = bitcast!(c::MSG_ERRQUEUE);
