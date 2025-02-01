@@ -1539,7 +1539,11 @@ bitflags! {
 /// `AF_XDP` related types and constants.
 #[cfg(target_os = "linux")]
 pub mod xdp {
-    use crate::net::addr::{call_with_sockaddr, SocketAddrArg, SocketAddrOpaque};
+    use crate::backend::net::read_sockaddr::read_sockaddr_xdp;
+    use crate::net::{
+        addr::{call_with_sockaddr, SocketAddrArg, SocketAddrOpaque},
+        SocketAddrAny,
+    };
 
     use super::{bitflags, c};
 
@@ -1692,6 +1696,21 @@ pub mod xdp {
             };
 
             call_with_sockaddr(&addr, f)
+        }
+    }
+
+    impl From<SocketAddrXdp> for SocketAddrAny {
+        #[inline]
+        fn from(from: SocketAddrXdp) -> Self {
+            from.as_any()
+        }
+    }
+
+    impl TryFrom<SocketAddrAny> for SocketAddrXdp {
+        type Error = crate::io::Errno;
+
+        fn try_from(addr: SocketAddrAny) -> Result<Self, Self::Error> {
+            read_sockaddr_xdp(&addr)
         }
     }
 

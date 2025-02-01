@@ -8,7 +8,7 @@
 use rustix::net::ReturnFlags;
 use rustix::net::{
     accept, bind_v4, connect_v4, getsockname, listen, recv, send, socket, AddressFamily, Ipv4Addr,
-    RecvFlags, SendFlags, SocketAddrAny, SocketAddrV4, SocketType,
+    RecvFlags, SendFlags, SocketAddrV4, SocketType,
 };
 use std::sync::{Arc, Condvar, Mutex};
 use std::thread;
@@ -21,10 +21,8 @@ fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
     let name = SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), 0);
     bind_v4(&connection_socket, &name).unwrap();
 
-    let who = match getsockname(&connection_socket).unwrap() {
-        SocketAddrAny::V4(addr) => addr,
-        _ => panic!(),
-    };
+    let who = getsockname(&connection_socket).unwrap();
+    let who = SocketAddrV4::try_from(who).unwrap();
 
     listen(&connection_socket, 1).unwrap();
 
@@ -102,10 +100,8 @@ fn test_v4_msg() {
         let name = SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), 0);
         bind_v4(&connection_socket, &name).unwrap();
 
-        let who = match getsockname(&connection_socket).unwrap() {
-            SocketAddrAny::V4(addr) => addr,
-            _ => panic!(),
-        };
+        let who = getsockname(&connection_socket).unwrap();
+        let who = SocketAddrV4::try_from(who).unwrap();
 
         listen(&connection_socket, 1).unwrap();
 

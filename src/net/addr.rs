@@ -4,11 +4,14 @@
 //! The concrete address types and [`SocketAddrAny`] are in [the parent module][`super`].
 
 #![allow(unsafe_code)]
-use core::mem::size_of;
+use core::{
+    mem::{size_of, MaybeUninit},
+    ptr,
+};
 
 use crate::backend::net::write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6};
 
-use super::{SocketAddr, SocketAddrV4, SocketAddrV6};
+use super::{SocketAddr, SocketAddrAny, SocketAddrV4, SocketAddrV6};
 
 pub use crate::backend::net::addr::SocketAddrStorage;
 
@@ -42,6 +45,15 @@ pub unsafe trait SocketAddrArg {
     ///   * Other socket types can construct their C-compatible struct on the
     ///     stack and call the closure with a pointer to it.
     fn with_sockaddr<R>(&self, f: impl FnOnce(*const SocketAddrOpaque, usize) -> R) -> R;
+
+    /// Convert to `SocketAddrAny`.
+    fn as_any(&self) -> SocketAddrAny {
+        self.with_sockaddr(|ptr, len| unsafe {
+            let mut storage = MaybeUninit::<SocketAddrStorage>::uninit();
+            ptr::copy_nonoverlapping(ptr.cast::<u8>(), storage.as_mut_ptr().cast::<u8>(), len);
+            SocketAddrAny::new(storage, len)
+        })
+    }
 }
 
 /// Helper for implementing SocketAddrArg::with_sockaddr

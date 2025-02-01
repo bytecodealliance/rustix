@@ -14,9 +14,10 @@ use crate::io;
 use crate::net::sockopt::Timeout;
 #[cfg(target_os = "linux")]
 use crate::net::xdp::{XdpMmapOffsets, XdpOptionsFlags, XdpRingOffset, XdpStatistics, XdpUmemReg};
+use crate::net::SocketAddrBuf;
 use crate::net::{
-    addr::SocketAddrStorage, AddressFamily, Ipv4Addr, Ipv6Addr, Protocol, RawProtocol,
-    SocketAddrAny, SocketAddrV4, SocketAddrV6, SocketType, UCred,
+    AddressFamily, Ipv4Addr, Ipv6Addr, Protocol, RawProtocol, SocketAddrV4, SocketAddrV6,
+    SocketType, UCred,
 };
 #[cfg(feature = "alloc")]
 use alloc::borrow::ToOwned;
@@ -692,32 +693,22 @@ pub(crate) fn ipv6_freebind(fd: BorrowedFd<'_>) -> io::Result<bool> {
 pub(crate) fn ip_original_dst(fd: BorrowedFd<'_>) -> io::Result<SocketAddrV4> {
     let level = c::IPPROTO_IP;
     let optname = c::SO_ORIGINAL_DST;
-    let mut value = MaybeUninit::<SocketAddrStorage>::uninit();
-    let mut optlen = core::mem::size_of_val(&value).try_into().unwrap();
+    let mut addr = SocketAddrBuf::new();
 
-    getsockopt_raw(fd, level, optname, &mut value, &mut optlen)?;
+    getsockopt_raw(fd, level, optname, &mut addr.storage, &mut addr.len)?;
 
-    let any = unsafe { SocketAddrAny::read(value.as_ptr(), optlen as usize)? };
-    match any {
-        SocketAddrAny::V4(v4) => Ok(v4),
-        _ => unreachable!(),
-    }
+    Ok(unsafe { addr.into_any() }.try_into().unwrap())
 }
 
 #[inline]
 pub(crate) fn ipv6_original_dst(fd: BorrowedFd<'_>) -> io::Result<SocketAddrV6> {
     let level = c::IPPROTO_IPV6;
     let optname = c::IP6T_SO_ORIGINAL_DST;
-    let mut value = MaybeUninit::<SocketAddrStorage>::uninit();
-    let mut optlen = core::mem::size_of_val(&value).try_into().unwrap();
+    let mut addr = SocketAddrBuf::new();
 
-    getsockopt_raw(fd, level, optname, &mut value, &mut optlen)?;
+    getsockopt_raw(fd, level, optname, &mut addr.storage, &mut addr.len)?;
 
-    let any = unsafe { SocketAddrAny::read(value.as_ptr(), optlen as usize)? };
-    match any {
-        SocketAddrAny::V6(v6) => Ok(v6),
-        _ => unreachable!(),
-    }
+    Ok(unsafe { addr.into_any() }.try_into().unwrap())
 }
 
 #[inline]

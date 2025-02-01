@@ -238,6 +238,7 @@ impl fmt::Debug for SocketAddrUnix {
 
 /// `struct sockaddr_storage`.
 #[repr(transparent)]
+#[derive(Copy, Clone)]
 pub struct SocketAddrStorage(c::sockaddr_storage);
 
 impl SocketAddrStorage {

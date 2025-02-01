@@ -1,11 +1,12 @@
 //! libc syscalls supporting `rustix::net`.
 
-use super::read_sockaddr::{initialize_family_to_unspec, maybe_read_sockaddr_os, read_sockaddr_os};
+use super::read_sockaddr::initialize_family_to_unspec;
 use super::send_recv::{RecvFlags, SendFlags};
 use crate::backend::c;
 use crate::backend::conv::{borrowed_fd, ret, ret_owned_fd, ret_send_recv, send_recv_len};
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io;
+use crate::net::SocketAddrBuf;
 use crate::net::{
     addr::SocketAddrArg, AddressFamily, Protocol, Shutdown, SocketAddrAny, SocketFlags, SocketType,
 };
@@ -51,28 +52,23 @@ pub(crate) unsafe fn recvfrom(
     buf_len: usize,
     flags: RecvFlags,
 ) -> io::Result<(usize, Option<SocketAddrAny>)> {
-    let mut storage = MaybeUninit::<c::sockaddr_storage>::uninit();
-    let mut len = size_of::<c::sockaddr_storage>() as c::socklen_t;
+    let mut addr = SocketAddrBuf::new();
 
     // `recvfrom` does not write to the storage if the socket is
     // connection-oriented sockets, so we initialize the family field to
     // `AF_UNSPEC` so that we can detect this case.
-    initialize_family_to_unspec(storage.as_mut_ptr().cast::<c::sockaddr>());
+    initialize_family_to_unspec(addr.storage.as_mut_ptr().cast::<c::sockaddr>());
 
-    ret_send_recv(c::recvfrom(
+    let nread = ret_send_recv(c::recvfrom(
         borrowed_fd(fd),
         buf.cast(),
         send_recv_len(buf_len),
         bitflags_bits!(flags),
-        storage.as_mut_ptr().cast::<c::sockaddr>(),
-        &mut len,
-    ))
-    .map(|nread| {
-        (
-            nread,
-            maybe_read_sockaddr_os(storage.as_ptr(), len.try_into().unwrap()),
-        )
-    })
+        addr.storage.as_mut_ptr().cast::<c::sockaddr>(),
+        &mut addr.len,
+    ))?;
+
+    Ok((nread, addr.into_any_option()))
 }
 
 pub(crate) fn sendto(
@@ -186,28 +182,23 @@ pub(crate) fn recvmsg(
     control: &mut RecvAncillaryBuffer<'_>,
     msg_flags: RecvFlags,
 ) -> io::Result<RecvMsg> {
-    let mut storage = MaybeUninit::<c::sockaddr_storage>::uninit();
+    let mut addr = SocketAddrBuf::new();
 
-    with_recv_msghdr(&mut storage, iov, control, |msghdr| {
-        let result = unsafe {
+    let (bytes, flags) = with_recv_msghdr(&mut addr, iov, control, |msghdr| {
+        let bytes = unsafe {
             ret_send_recv(c::recvmsg(
                 borrowed_fd(sockfd),
                 msghdr,
                 bitflags_bits!(msg_flags),
-            ))
+            ))?
         };
+        Ok((bytes, msghdr.msg_flags))
+    })?;
 
-        result.map(|bytes| {
-            // Get the address of the sender, if any.
-            let addr =
-                unsafe { maybe_read_sockaddr_os(msghdr.msg_name as _, msghdr.msg_namelen as _) };
-
-            RecvMsg {
-                bytes,
-                address: addr,
-                flags: ReturnFlags::from_bits_retain(bitcast!(msghdr.msg_flags)),
-            }
-        })
+    Ok(RecvMsg {
+        bytes,
+        address: unsafe { addr.into_any_option() },
+        flags: ReturnFlags::from_bits_retain(bitcast!(flags)),
     })
 }
 
@@ -268,17 +259,13 @@ pub(crate) fn accept_with(sockfd: BorrowedFd<'_>, flags: SocketFlags) -> io::Res
 
 pub(crate) fn acceptfrom(sockfd: BorrowedFd<'_>) -> io::Result<(OwnedFd, Option<SocketAddrAny>)> {
     unsafe {
-        let mut storage = MaybeUninit::<c::sockaddr_storage>::uninit();
-        let mut len = size_of::<c::sockaddr_storage>() as c::socklen_t;
+        let mut addr = SocketAddrBuf::new();
         let owned_fd = ret_owned_fd(c::accept(
             borrowed_fd(sockfd),
-            storage.as_mut_ptr().cast::<c::sockaddr>(),
-            &mut len,
+            addr.storage.as_mut_ptr().cast::<c::sockaddr>(),
+            &mut addr.len,
         ))?;
-        Ok((
-            owned_fd,
-            maybe_read_sockaddr_os(storage.as_ptr(), len.try_into().unwrap()),
-        ))
+        Ok((owned_fd, addr.into_any_option()))
     }
 }
 
@@ -297,18 +284,14 @@ pub(crate) fn acceptfrom_with(
     flags: SocketFlags,
 ) -> io::Result<(OwnedFd, Option<SocketAddrAny>)> {
     unsafe {
-        let mut storage = MaybeUninit::<c::sockaddr_storage>::uninit();
-        let mut len = size_of::<c::sockaddr_storage>() as c::socklen_t;
+        let mut addr = SocketAddrBuf::new();
         let owned_fd = ret_owned_fd(c::accept4(
             borrowed_fd(sockfd),
-            storage.as_mut_ptr().cast::<c::sockaddr>(),
-            &mut len,
+            addr.storage.as_mut_ptr().cast::<c::sockaddr>(),
+            &mut addr.len,
             flags.bits() as c::c_int,
         ))?;
-        Ok((
-            owned_fd,
-            maybe_read_sockaddr_os(storage.as_ptr(), len.try_into().unwrap()),
-        ))
+        Ok((owned_fd, addr.into_any_option()))
     }
 }
 
@@ -353,30 +336,25 @@ pub(crate) fn shutdown(sockfd: BorrowedFd<'_>, how: Shutdown) -> io::Result<()> 
 
 pub(crate) fn getsockname(sockfd: BorrowedFd<'_>) -> io::Result<SocketAddrAny> {
     unsafe {
-        let mut storage = MaybeUninit::<c::sockaddr_storage>::uninit();
-        let mut len = size_of::<c::sockaddr_storage>() as c::socklen_t;
+        let mut addr = SocketAddrBuf::new();
         ret(c::getsockname(
             borrowed_fd(sockfd),
-            storage.as_mut_ptr().cast::<c::sockaddr>(),
-            &mut len,
+            addr.storage.as_mut_ptr().cast::<c::sockaddr>(),
+            &mut addr.len,
         ))?;
-        Ok(read_sockaddr_os(storage.as_ptr(), len.try_into().unwrap()))
+        Ok(addr.into_any())
     }
 }
 
 pub(crate) fn getpeername(sockfd: BorrowedFd<'_>) -> io::Result<Option<SocketAddrAny>> {
     unsafe {
-        let mut storage = MaybeUninit::<c::sockaddr_storage>::uninit();
-        let mut len = size_of::<c::sockaddr_storage>() as c::socklen_t;
+        let mut addr = SocketAddrBuf::new();
         ret(c::getpeername(
             borrowed_fd(sockfd),
-            storage.as_mut_ptr().cast::<c::sockaddr>(),
-            &mut len,
+            addr.storage.as_mut_ptr().cast::<c::sockaddr>(),
+            &mut addr.len,
         ))?;
-        Ok(maybe_read_sockaddr_os(
-            storage.as_ptr(),
-            len.try_into().unwrap(),
-        ))
+        Ok(addr.into_any_option())
     }
 }
 

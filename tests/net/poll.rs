@@ -5,7 +5,7 @@
 use rustix::event::{poll, PollFd, PollFlags};
 use rustix::net::{
     accept, bind_v6, connect_v6, getsockname, listen, recv, send, socket, AddressFamily, Ipv6Addr,
-    RecvFlags, SendFlags, SocketAddrAny, SocketAddrV6, SocketType,
+    RecvFlags, SendFlags, SocketAddrV6, SocketType,
 };
 use std::sync::{Arc, Condvar, Mutex};
 use std::thread;
@@ -18,10 +18,8 @@ fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
     let name = SocketAddrV6::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1), 0, 0, 0);
     bind_v6(&connection_socket, &name).unwrap();
 
-    let who = match getsockname(&connection_socket).unwrap() {
-        SocketAddrAny::V6(addr) => addr,
-        _ => panic!(),
-    };
+    let who = getsockname(&connection_socket).unwrap();
+    let who = SocketAddrV6::try_from(who).unwrap();
 
     listen(&connection_socket, 1).unwrap();
 

@@ -222,10 +222,7 @@ fn do_test_unix_msg(addr: SocketAddrUnix) {
             // `SocketAddrUnix::path()` returned `None` for some reason.
             // illumos and NetBSD too.
             #[cfg(not(any(solarish, target_os = "freebsd", target_os = "netbsd")))]
-            assert_eq!(
-                Some(rustix::net::SocketAddrAny::Unix(addr.clone())),
-                result.address
-            );
+            assert_eq!(Some(addr.clone().into()), result.address);
         }
 
         let data_socket = socket(AddressFamily::UNIX, SocketType::SEQPACKET, None).unwrap();
@@ -946,10 +943,7 @@ fn test_bind_unnamed_address() {
     bind_unix(&sock, &address).unwrap();
 
     let address = rustix::net::getsockname(&sock).unwrap();
-    let address = match address {
-        rustix::net::SocketAddrAny::Unix(address) => address,
-        address => panic!("expected Unix address, got {address:?}"),
-    };
+    let address = SocketAddrUnix::try_from(address).unwrap();
     assert!(!address.is_unnamed());
     assert_ne!(address.abstract_name(), None);
     assert_eq!(address.path(), None);

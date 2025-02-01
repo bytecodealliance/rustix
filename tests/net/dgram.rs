@@ -1,8 +1,7 @@
 //! Tests similar to connect_bind_send.rs, but operating on datagram sockets.
 
 use rustix::net::{
-    AddressFamily, Ipv6Addr, RecvFlags, SendFlags, SocketAddrAny, SocketAddrV4, SocketAddrV6,
-    SocketType,
+    AddressFamily, Ipv6Addr, RecvFlags, SendFlags, SocketAddrV4, SocketAddrV6, SocketType,
 };
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 
@@ -139,10 +138,7 @@ fn net_dgram_v4_connect() {
     rustix::net::bind(&listener, &addr).expect("bind");
 
     let local_addr = rustix::net::getsockname(&listener).unwrap();
-    let local_addr = match local_addr {
-        SocketAddrAny::V4(v4) => SocketAddr::V4(v4),
-        other => panic!("unexpected socket address {:?}", other),
-    };
+    let local_addr = SocketAddrV4::try_from(local_addr).unwrap();
     let sender = rustix::net::socket(AddressFamily::INET, SocketType::DGRAM, None).unwrap();
     rustix::net::connect(&sender, &local_addr).expect("connect");
     let request = b"Hello, World!!!";
@@ -172,10 +168,7 @@ fn net_dgram_v6_connect() {
     rustix::net::bind(&listener, &addr).expect("bind");
 
     let local_addr = rustix::net::getsockname(&listener).unwrap();
-    let local_addr = match local_addr {
-        SocketAddrAny::V6(v6) => SocketAddr::V6(v6),
-        other => panic!("unexpected socket address {:?}", other),
-    };
+    let local_addr = SocketAddrV6::try_from(local_addr).unwrap();
     let sender = rustix::net::socket(AddressFamily::INET6, SocketType::DGRAM, None).unwrap();
     rustix::net::connect(&sender, &local_addr).expect("connect");
     let request = b"Hello, World!!!";
@@ -225,17 +218,13 @@ fn net_dgram_v4_connect_unspec() {
     assert_eq!(getpeername_v4(&socket).unwrap(), localhost_addr);
 
     fn getsockname_v4<Fd: rustix::fd::AsFd>(sockfd: Fd) -> rustix::io::Result<SocketAddrV4> {
-        match rustix::net::getsockname(sockfd)? {
-            SocketAddrAny::V4(addr_v4) => Ok(addr_v4),
-            _ => Err(rustix::io::Errno::AFNOSUPPORT),
-        }
+        rustix::net::getsockname(sockfd)?.try_into()
     }
 
     fn getpeername_v4<Fd: rustix::fd::AsFd>(sockfd: Fd) -> rustix::io::Result<SocketAddrV4> {
         match rustix::net::getpeername(sockfd)? {
-            Some(SocketAddrAny::V4(addr_v4)) => Ok(addr_v4),
+            Some(addr) => addr.try_into(),
             None => Err(rustix::io::Errno::NOTCONN),
-            _ => Err(rustix::io::Errno::AFNOSUPPORT),
         }
     }
 }
@@ -271,17 +260,13 @@ fn net_dgram_v6_connect_unspec() {
     assert_eq!(getpeername_v6(&socket).unwrap(), localhost_addr);
 
     fn getsockname_v6<Fd: rustix::fd::AsFd>(sockfd: Fd) -> rustix::io::Result<SocketAddrV6> {
-        match rustix::net::getsockname(sockfd)? {
-            SocketAddrAny::V6(addr_v6) => Ok(addr_v6),
-            _ => Err(rustix::io::Errno::AFNOSUPPORT),
-        }
+        rustix::net::getsockname(sockfd)?.try_into()
     }
 
     fn getpeername_v6<Fd: rustix::fd::AsFd>(sockfd: Fd) -> rustix::io::Result<SocketAddrV6> {
         match rustix::net::getpeername(sockfd)? {
-            Some(SocketAddrAny::V6(addr_v6)) => Ok(addr_v6),
+            Some(addr) => addr.try_into(),
             None => Err(rustix::io::Errno::NOTCONN),
-            _ => Err(rustix::io::Errno::AFNOSUPPORT),
         }
     }
 }
@@ -321,7 +306,7 @@ fn net_dgram_v6_bind_any() {
     crate::init();
 
     let localhost = Ipv6Addr::LOCALHOST;
-    let addr = SocketAddrAny::V6(SocketAddrV6::new(localhost, 0, 0, 0));
+    let addr = SocketAddrV6::new(localhost, 0, 0, 0).into();
     let listener = rustix::net::socket(AddressFamily::INET6, SocketType::DGRAM, None).unwrap();
     rustix::net::bind_any(&listener, &addr).expect("bind");
 
@@ -359,10 +344,7 @@ fn net_dgram_v4_connect_sendto() {
     let sender = rustix::net::socket(AddressFamily::INET, SocketType::DGRAM, None).unwrap();
     rustix::net::connect_any(&sender, &local_addr).expect("connect");
     let request = b"Hello, World!!!";
-    let local_addr = match local_addr {
-        SocketAddrAny::V4(v4) => SocketAddr::V4(v4),
-        other => panic!("unexpected socket address {:?}", other),
-    };
+    let local_addr = SocketAddrV4::try_from(local_addr).unwrap();
     let n = rustix::net::sendto(&sender, request, SendFlags::empty(), &local_addr).expect("send");
     drop(sender);
 
@@ -379,15 +361,9 @@ fn net_dgram_v4_connect_sendto() {
     assert_eq!(request, &response[..n]);
 
     let peer_addr = from.expect("peer address should be available");
-    let peer_addr = match peer_addr {
-        SocketAddrAny::V4(v4) => v4,
-        other => panic!("unexpected socket address {:?}", other),
-    };
+    let peer_addr = SocketAddrV4::try_from(peer_addr).unwrap();
 
-    let local_addr = match local_addr {
-        SocketAddr::V4(v4) => v4,
-        other => panic!("unexpected socket address {:?}", other),
-    };
+    let local_addr = SocketAddrV4::try_from(local_addr).unwrap();
 
     assert_eq!(peer_addr.ip(), local_addr.ip());
 }
@@ -405,10 +381,7 @@ fn net_dgram_v4_sendto() {
     let local_addr = rustix::net::getsockname(&listener).unwrap();
     let sender = rustix::net::socket(AddressFamily::INET, SocketType::DGRAM, None).unwrap();
     let request = b"Hello, World!!!";
-    let local_addr = match local_addr {
-        SocketAddrAny::V4(v4) => SocketAddr::V4(v4),
-        other => panic!("unexpected socket address {:?}", other),
-    };
+    let local_addr = SocketAddrV4::try_from(local_addr).unwrap();
     let n = rustix::net::sendto(&sender, request, SendFlags::empty(), &local_addr).expect("send");
     drop(sender);
 
@@ -425,15 +398,9 @@ fn net_dgram_v4_sendto() {
     assert_eq!(request, &response[..n]);
 
     let peer_addr = from.expect("peer address should be available");
-    let peer_addr = match peer_addr {
-        SocketAddrAny::V4(v4) => v4,
-        other => panic!("unexpected socket address {:?}", other),
-    };
+    let peer_addr = SocketAddrV4::try_from(peer_addr).unwrap();
 
-    let local_addr = match local_addr {
-        SocketAddr::V4(v4) => v4,
-        other => panic!("unexpected socket address {:?}", other),
-    };
+    let local_addr = SocketAddrV4::try_from(local_addr).unwrap();
 
     assert_eq!(peer_addr.ip(), local_addr.ip());
 }
@@ -453,10 +420,7 @@ fn net_dgram_v6_connect_sendto() {
     let sender = rustix::net::socket(AddressFamily::INET6, SocketType::DGRAM, None).unwrap();
     rustix::net::connect_any(&sender, &local_addr).expect("connect");
     let request = b"Hello, World!!!";
-    let local_addr = match local_addr {
-        SocketAddrAny::V6(v6) => SocketAddr::V6(v6),
-        other => panic!("unexpected socket address {:?}", other),
-    };
+    let local_addr = SocketAddrV6::try_from(local_addr).unwrap();
     let n = rustix::net::sendto(&sender, request, SendFlags::empty(), &local_addr).expect("send");
     drop(sender);
 
@@ -473,16 +437,9 @@ fn net_dgram_v6_connect_sendto() {
     assert_eq!(request, &response[..n]);
 
     let peer_addr = from.expect("peer address should be available");
-    let peer_addr = match peer_addr {
-        SocketAddrAny::V6(v6) => v6,
-        other => panic!("unexpected socket address {:?}", other),
-    };
+    let peer_addr = SocketAddrV6::try_from(peer_addr).unwrap();
 
-    let local_addr = match local_addr {
-        SocketAddr::V6(v6) => v6,
-        other => panic!("unexpected socket address {:?}", other),
-    };
-
+    let local_addr = SocketAddrV6::try_from(local_addr).unwrap();
     assert_eq!(peer_addr.ip(), local_addr.ip());
 }
 
@@ -499,10 +456,7 @@ fn net_dgram_v6_sendto() {
     let local_addr = rustix::net::getsockname(&listener).unwrap();
     let sender = rustix::net::socket(AddressFamily::INET6, SocketType::DGRAM, None).unwrap();
     let request = b"Hello, World!!!";
-    let local_addr = match local_addr {
-        SocketAddrAny::V6(v6) => SocketAddr::V6(v6),
-        other => panic!("unexpected socket address {:?}", other),
-    };
+    let local_addr = SocketAddrV6::try_from(local_addr).unwrap();
     let n = rustix::net::sendto(&sender, request, SendFlags::empty(), &local_addr).expect("send");
     drop(sender);
 
@@ -519,16 +473,9 @@ fn net_dgram_v6_sendto() {
     assert_eq!(request, &response[..n]);
 
     let peer_addr = from.expect("peer address should be available");
-    let peer_addr = match peer_addr {
-        SocketAddrAny::V6(v6) => v6,
-        other => panic!("unexpected socket address {:?}", other),
-    };
+    let peer_addr = SocketAddrV6::try_from(peer_addr).unwrap();
 
-    let local_addr = match local_addr {
-        SocketAddr::V6(v6) => v6,
-        other => panic!("unexpected socket address {:?}", other),
-    };
-
+    let local_addr = SocketAddrV6::try_from(local_addr).unwrap();
     assert_eq!(peer_addr.ip(), local_addr.ip());
 }
 
@@ -564,16 +511,9 @@ fn net_dgram_v4_connect_sendto_any() {
     assert_eq!(request, &response[..n]);
 
     let peer_addr = from.expect("peer address should be available");
-    let peer_addr = match peer_addr {
-        SocketAddrAny::V4(v4) => v4,
-        other => panic!("unexpected socket address {:?}", other),
-    };
+    let peer_addr = SocketAddrV4::try_from(peer_addr).unwrap();
 
-    let local_addr = match local_addr {
-        SocketAddrAny::V4(v4) => v4,
-        other => panic!("unexpected socket address {:?}", other),
-    };
-
+    let local_addr = SocketAddrV4::try_from(local_addr).unwrap();
     assert_eq!(peer_addr.ip(), local_addr.ip());
 }
 
@@ -607,16 +547,9 @@ fn net_dgram_v4_sendto_any() {
     assert_eq!(request, &response[..n]);
 
     let peer_addr = from.expect("peer address should be available");
-    let peer_addr = match peer_addr {
-        SocketAddrAny::V4(v4) => v4,
-        other => panic!("unexpected socket address {:?}", other),
-    };
+    let peer_addr = SocketAddrV4::try_from(peer_addr).unwrap();
 
-    let local_addr = match local_addr {
-        SocketAddrAny::V4(v4) => v4,
-        other => panic!("unexpected socket address {:?}", other),
-    };
-
+    let local_addr = SocketAddrV4::try_from(local_addr).unwrap();
     assert_eq!(peer_addr.ip(), local_addr.ip());
 }
 
@@ -652,15 +585,9 @@ fn net_dgram_v6_connect_sendto_any() {
     assert_eq!(request, &response[..n]);
 
     let peer_addr = from.expect("peer address should be available");
-    let peer_addr = match peer_addr {
-        SocketAddrAny::V6(v6) => v6,
-        other => panic!("unexpected socket address {:?}", other),
-    };
+    let peer_addr = SocketAddrV6::try_from(peer_addr).unwrap();
 
-    let local_addr = match local_addr {
-        SocketAddrAny::V6(v6) => v6,
-        other => panic!("unexpected socket address {:?}", other),
-    };
+    let local_addr = SocketAddrV6::try_from(local_addr).unwrap();
 
     assert_eq!(peer_addr.ip(), local_addr.ip());
 }
@@ -695,15 +622,9 @@ fn net_dgram_v6_sendto_any() {
     assert_eq!(request, &response[..n]);
 
     let peer_addr = from.expect("peer address should be available");
-    let peer_addr = match peer_addr {
-        SocketAddrAny::V6(v6) => v6,
-        other => panic!("unexpected socket address {:?}", other),
-    };
+    let peer_addr = SocketAddrV6::try_from(peer_addr).unwrap();
 
-    let local_addr = match local_addr {
-        SocketAddrAny::V6(v6) => v6,
-        other => panic!("unexpected socket address {:?}", other),
-    };
+    let local_addr = SocketAddrV6::try_from(local_addr).unwrap();
 
     assert_eq!(peer_addr.ip(), local_addr.ip());
 }

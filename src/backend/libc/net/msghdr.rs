@@ -7,24 +7,24 @@ use crate::backend::c;
 use crate::backend::conv::{msg_control_len, msg_iov_len};
 
 use crate::io::{self, IoSlice, IoSliceMut};
+use crate::net::SocketAddrBuf;
 use crate::net::{addr::SocketAddrArg, RecvAncillaryBuffer, SendAncillaryBuffer};
 
-use core::mem::{size_of, zeroed, MaybeUninit};
+use core::mem::zeroed;
 
 /// Create a message header intended to receive a datagram.
 pub(crate) fn with_recv_msghdr<R>(
-    name: &mut MaybeUninit<c::sockaddr_storage>,
+    name: &mut SocketAddrBuf,
     iov: &mut [IoSliceMut<'_>],
     control: &mut RecvAncillaryBuffer<'_>,
     f: impl FnOnce(&mut c::msghdr) -> io::Result<R>,
 ) -> io::Result<R> {
     control.clear();
 
-    let namelen = size_of::<c::sockaddr_storage>() as c::socklen_t;
     let mut msghdr = {
         let mut h = zero_msghdr();
-        h.msg_name = name.as_mut_ptr().cast();
-        h.msg_namelen = namelen;
+        h.msg_name = name.storage.as_mut_ptr().cast();
+        h.msg_namelen = name.len;
         h.msg_iov = iov.as_mut_ptr().cast();
         h.msg_iovlen = msg_iov_len(iov.len());
         h.msg_control = control.as_control_ptr().cast();
@@ -40,6 +40,8 @@ pub(crate) fn with_recv_msghdr<R>(
             control.set_control_len(msghdr.msg_controllen.try_into().unwrap_or(usize::MAX));
         }
     }
+
+    name.len = msghdr.msg_namelen;
 
     res
 }
