@@ -8,7 +8,7 @@
 use rustix::fs::{unlinkat, AtFlags, CWD};
 use rustix::io::{read, write};
 use rustix::net::{
-    accept, bind_unix, connect_unix, listen, socket, AddressFamily, SocketAddrUnix, SocketType,
+    accept, bind, connect, listen, socket, AddressFamily, SocketAddrUnix, SocketType,
 };
 use rustix::path::DecInt;
 use std::path::Path;
@@ -22,7 +22,7 @@ fn server(ready: Arc<(Mutex<bool>, Condvar)>, path: &Path) {
     let connection_socket = socket(AddressFamily::UNIX, SocketType::SEQPACKET, None).unwrap();
 
     let name = SocketAddrUnix::new(path).unwrap();
-    bind_unix(&connection_socket, &name).unwrap();
+    bind(&connection_socket, &name).unwrap();
     listen(&connection_socket, 1).unwrap();
 
     {
@@ -69,7 +69,7 @@ fn client(ready: Arc<(Mutex<bool>, Condvar)>, path: &Path, runs: &[(&[&str], i32
 
     for (args, sum) in runs {
         let data_socket = socket(AddressFamily::UNIX, SocketType::SEQPACKET, None).unwrap();
-        connect_unix(&data_socket, &addr).unwrap();
+        connect(&data_socket, &addr).unwrap();
 
         for arg in *args {
             write(&data_socket, arg.as_bytes()).unwrap();
@@ -84,7 +84,7 @@ fn client(ready: Arc<(Mutex<bool>, Condvar)>, path: &Path, runs: &[(&[&str], i32
     }
 
     let data_socket = socket(AddressFamily::UNIX, SocketType::SEQPACKET, None).unwrap();
-    connect_unix(&data_socket, &addr).unwrap();
+    connect(&data_socket, &addr).unwrap();
     write(&data_socket, b"exit").unwrap();
 }
 
@@ -131,7 +131,7 @@ fn do_test_unix_msg(addr: SocketAddrUnix) {
 
     let server = {
         let connection_socket = socket(AddressFamily::UNIX, SocketType::SEQPACKET, None).unwrap();
-        bind_unix(&connection_socket, &addr).unwrap();
+        bind(&connection_socket, &addr).unwrap();
         listen(&connection_socket, 1).unwrap();
 
         move || {
@@ -184,7 +184,7 @@ fn do_test_unix_msg(addr: SocketAddrUnix) {
 
         for (args, sum) in runs {
             let data_socket = socket(AddressFamily::UNIX, SocketType::SEQPACKET, None).unwrap();
-            connect_unix(&data_socket, &addr).unwrap();
+            connect(&data_socket, &addr).unwrap();
 
             for arg in *args {
                 sendmsg(
@@ -223,7 +223,7 @@ fn do_test_unix_msg(addr: SocketAddrUnix) {
         }
 
         let data_socket = socket(AddressFamily::UNIX, SocketType::SEQPACKET, None).unwrap();
-        connect_unix(&data_socket, &addr).unwrap();
+        connect(&data_socket, &addr).unwrap();
         sendmsg(
             &data_socket,
             &[IoSlice::new(b"exit")],
@@ -252,16 +252,16 @@ fn do_test_unix_msg(addr: SocketAddrUnix) {
 }
 
 /// Similar to `do_test_unix_msg` but uses an unconnected socket and
-/// `sendmsg_unix` instead of `sendmsg`.
+/// `sendmsg_addr` instead of `sendmsg`.
 #[cfg(not(any(target_os = "espidf", target_os = "redox", target_os = "wasi")))]
 fn do_test_unix_msg_unconnected(addr: SocketAddrUnix) {
     use rustix::io::{IoSlice, IoSliceMut};
-    use rustix::net::{recvmsg, sendmsg_unix, RecvFlags, ReturnFlags, SendFlags};
+    use rustix::net::{recvmsg, sendmsg_addr, RecvFlags, ReturnFlags, SendFlags};
 
     let server = {
         let runs: &[i32] = &[3, 184, 187, 0];
         let data_socket = socket(AddressFamily::UNIX, SocketType::DGRAM, None).unwrap();
-        bind_unix(&data_socket, &addr).unwrap();
+        bind(&data_socket, &addr).unwrap();
 
         move || {
             let mut buffer = vec![0; BUFFER_SIZE];
@@ -310,7 +310,7 @@ fn do_test_unix_msg_unconnected(addr: SocketAddrUnix) {
             let data_socket = socket(AddressFamily::UNIX, SocketType::DGRAM, None).unwrap();
 
             for arg in *args {
-                sendmsg_unix(
+                sendmsg_addr(
                     &data_socket,
                     &addr,
                     &[IoSlice::new(arg.as_bytes())],
@@ -319,7 +319,7 @@ fn do_test_unix_msg_unconnected(addr: SocketAddrUnix) {
                 )
                 .unwrap();
             }
-            sendmsg_unix(
+            sendmsg_addr(
                 &data_socket,
                 &addr,
                 &[IoSlice::new(b"sum")],
@@ -330,7 +330,7 @@ fn do_test_unix_msg_unconnected(addr: SocketAddrUnix) {
         }
 
         let data_socket = socket(AddressFamily::UNIX, SocketType::DGRAM, None).unwrap();
-        sendmsg_unix(
+        sendmsg_addr(
             &data_socket,
             &addr,
             &[IoSlice::new(b"exit")],
@@ -441,7 +441,7 @@ fn test_unix_msg_with_scm_rights() {
         let connection_socket = socket(AddressFamily::UNIX, SocketType::SEQPACKET, None).unwrap();
 
         let name = SocketAddrUnix::new(&path).unwrap();
-        bind_unix(&connection_socket, &name).unwrap();
+        bind(&connection_socket, &name).unwrap();
         listen(&connection_socket, 1).unwrap();
 
         move || {
@@ -520,7 +520,7 @@ fn test_unix_msg_with_scm_rights() {
 
         for (args, sum) in runs {
             let data_socket = socket(AddressFamily::UNIX, SocketType::SEQPACKET, None).unwrap();
-            connect_unix(&data_socket, &addr).unwrap();
+            connect(&data_socket, &addr).unwrap();
 
             for arg in *args {
                 sendmsg(
@@ -563,7 +563,7 @@ fn test_unix_msg_with_scm_rights() {
         let mut cmsg_buffer = SendAncillaryBuffer::new(&mut space);
         assert!(cmsg_buffer.push(msg));
 
-        connect_unix(&data_socket, &addr).unwrap();
+        connect(&data_socket, &addr).unwrap();
         sendmsg(
             &data_socket,
             &[IoSlice::new(b"exit")],
@@ -681,7 +681,7 @@ fn test_unix_msg_with_combo() {
         let connection_socket = socket(AddressFamily::UNIX, SocketType::SEQPACKET, None).unwrap();
 
         let name = SocketAddrUnix::new(&path).unwrap();
-        bind_unix(&connection_socket, &name).unwrap();
+        bind(&connection_socket, &name).unwrap();
         listen(&connection_socket, 1).unwrap();
 
         move || {
@@ -779,7 +779,7 @@ fn test_unix_msg_with_combo() {
 
         for (args, sum) in runs {
             let data_socket = socket(AddressFamily::UNIX, SocketType::SEQPACKET, None).unwrap();
-            connect_unix(&data_socket, &addr).unwrap();
+            connect(&data_socket, &addr).unwrap();
 
             for arg in *args {
                 sendmsg(
@@ -828,7 +828,7 @@ fn test_unix_msg_with_combo() {
         let msg = SendAncillaryMessage::ScmRights(&we);
         assert!(cmsg_buffer.push(msg));
 
-        connect_unix(&data_socket, &addr).unwrap();
+        connect(&data_socket, &addr).unwrap();
         sendmsg(
             &data_socket,
             &[IoSlice::new(b"exit")],

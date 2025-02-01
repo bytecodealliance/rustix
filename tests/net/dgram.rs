@@ -1,11 +1,12 @@
 //! Tests similar to connect_bind_send.rs, but operating on datagram sockets.
 
 use rustix::net::{
-    AddressFamily, Ipv6Addr, RecvFlags, SendFlags, SocketAddrV4, SocketAddrV6, SocketType,
+    AddressFamily, Ipv6Addr, RecvFlags, SendFlags, SocketAddrAny, SocketAddrV4, SocketAddrV6,
+    SocketType,
 };
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 
-/// Test `connect_any`.
+/// Test `connect` with `SocketAddrAny`.
 #[test]
 fn net_dgram_v4_connect_any() {
     crate::init();
@@ -18,7 +19,7 @@ fn net_dgram_v4_connect_any() {
     let local_addr = rustix::net::getsockname(&listener).unwrap();
 
     let sender = rustix::net::socket(AddressFamily::INET, SocketType::DGRAM, None).unwrap();
-    rustix::net::connect_any(&sender, &local_addr).expect("connect");
+    rustix::net::connect(&sender, &local_addr).expect("connect");
     let request = b"Hello, World!!!";
     let n = rustix::net::send(&sender, request, SendFlags::empty()).expect("send");
     drop(sender);
@@ -35,7 +36,7 @@ fn net_dgram_v4_connect_any() {
     assert_eq!(request, &response[..n]);
 }
 
-/// Test `connect_any` using `accept_with`.
+/// Test `connect` with `SocketAddrAny` using `accept_with`.
 #[cfg(not(any(apple, windows, target_os = "haiku")))]
 #[test]
 fn net_dgram_v4_connect_any_accept_with() {
@@ -49,7 +50,7 @@ fn net_dgram_v4_connect_any_accept_with() {
     let local_addr = rustix::net::getsockname(&listener).unwrap();
 
     let sender = rustix::net::socket(AddressFamily::INET, SocketType::DGRAM, None).unwrap();
-    rustix::net::connect_any(&sender, &local_addr).expect("connect");
+    rustix::net::connect(&sender, &local_addr).expect("connect");
     let request = b"Hello, World, with flags!!!";
     let n = rustix::net::send(&sender, request, SendFlags::empty()).expect("send");
     drop(sender);
@@ -79,7 +80,7 @@ fn net_dgram_v6_connect_any() {
     let local_addr = rustix::net::getsockname(&listener).unwrap();
 
     let sender = rustix::net::socket(AddressFamily::INET6, SocketType::DGRAM, None).unwrap();
-    rustix::net::connect_any(&sender, &local_addr).expect("connect");
+    rustix::net::connect(&sender, &local_addr).expect("connect");
     let request = b"Hello, World!!!";
     let n = rustix::net::send(&sender, request, SendFlags::empty()).expect("send");
     drop(sender);
@@ -110,7 +111,7 @@ fn net_dgram_v6_connect_any_accept_with() {
     let local_addr = rustix::net::getsockname(&listener).unwrap();
 
     let sender = rustix::net::socket(AddressFamily::INET6, SocketType::DGRAM, None).unwrap();
-    rustix::net::connect_any(&sender, &local_addr).expect("connect");
+    rustix::net::connect(&sender, &local_addr).expect("connect");
     let request = b"Hello, World, with flags!!!";
     let n = rustix::net::send(&sender, request, SendFlags::empty()).expect("send");
     drop(sender);
@@ -197,7 +198,7 @@ fn net_dgram_v4_connect_unspec() {
 
     let socket = rustix::net::socket(AddressFamily::INET, SocketType::DGRAM, None).unwrap();
 
-    rustix::net::connect_v4(&socket, &localhost_addr).expect("connect_v4");
+    rustix::net::connect(&socket, &localhost_addr).expect("connect_v4");
     assert_eq!(getsockname_v4(&socket).unwrap().ip(), &Ipv4Addr::LOCALHOST);
     assert_eq!(getpeername_v4(&socket).unwrap(), localhost_addr);
 
@@ -213,7 +214,7 @@ fn net_dgram_v4_connect_unspec() {
     );
     assert_eq!(getpeername_v4(&socket), Err(rustix::io::Errno::NOTCONN));
 
-    rustix::net::connect_v4(&socket, &localhost_addr).expect("connect_v4");
+    rustix::net::connect(&socket, &localhost_addr).expect("connect_v4");
     assert_eq!(getsockname_v4(&socket).unwrap().ip(), &Ipv4Addr::LOCALHOST);
     assert_eq!(getpeername_v4(&socket).unwrap(), localhost_addr);
 
@@ -239,7 +240,7 @@ fn net_dgram_v6_connect_unspec() {
 
     let socket = rustix::net::socket(AddressFamily::INET6, SocketType::DGRAM, None).unwrap();
 
-    rustix::net::connect_v6(&socket, &localhost_addr).expect("connect_v6");
+    rustix::net::connect(&socket, &localhost_addr).expect("connect_v6");
     assert_eq!(getsockname_v6(&socket).unwrap().ip(), &Ipv6Addr::LOCALHOST);
     assert_eq!(getpeername_v6(&socket).unwrap(), localhost_addr);
 
@@ -255,7 +256,7 @@ fn net_dgram_v6_connect_unspec() {
     );
     assert_eq!(getpeername_v6(&socket), Err(rustix::io::Errno::NOTCONN));
 
-    rustix::net::connect_v6(&socket, &localhost_addr).expect("connect_v6");
+    rustix::net::connect(&socket, &localhost_addr).expect("connect_v6");
     assert_eq!(getsockname_v6(&socket).unwrap().ip(), &Ipv6Addr::LOCALHOST);
     assert_eq!(getpeername_v6(&socket).unwrap(), localhost_addr);
 
@@ -271,19 +272,19 @@ fn net_dgram_v6_connect_unspec() {
     }
 }
 
-/// Test `bind_any`.
+/// Test `bind` with `SocketAddrAny`.
 #[test]
 fn net_dgram_v4_bind_any() {
     crate::init();
 
     let localhost = Ipv4Addr::LOCALHOST;
-    let addr = SocketAddrV4::new(localhost, 0).into();
+    let addr = SocketAddrAny::from(SocketAddrV4::new(localhost, 0));
     let listener = rustix::net::socket(AddressFamily::INET, SocketType::DGRAM, None).unwrap();
-    rustix::net::bind_any(&listener, &addr).expect("bind");
+    rustix::net::bind(&listener, &addr).expect("bind");
 
     let local_addr = rustix::net::getsockname(&listener).unwrap();
     let sender = rustix::net::socket(AddressFamily::INET, SocketType::DGRAM, None).unwrap();
-    rustix::net::connect_any(&sender, &local_addr).expect("connect");
+    rustix::net::connect(&sender, &local_addr).expect("connect");
     let request = b"Hello, World!!!";
     let n = rustix::net::send(&sender, request, SendFlags::empty()).expect("send");
     drop(sender);
@@ -306,13 +307,13 @@ fn net_dgram_v6_bind_any() {
     crate::init();
 
     let localhost = Ipv6Addr::LOCALHOST;
-    let addr = SocketAddrV6::new(localhost, 0, 0, 0).into();
+    let addr = SocketAddrAny::from(SocketAddrV6::new(localhost, 0, 0, 0));
     let listener = rustix::net::socket(AddressFamily::INET6, SocketType::DGRAM, None).unwrap();
-    rustix::net::bind_any(&listener, &addr).expect("bind");
+    rustix::net::bind(&listener, &addr).expect("bind");
 
     let local_addr = rustix::net::getsockname(&listener).unwrap();
     let sender = rustix::net::socket(AddressFamily::INET6, SocketType::DGRAM, None).unwrap();
-    rustix::net::connect_any(&sender, &local_addr).expect("connect");
+    rustix::net::connect(&sender, &local_addr).expect("connect");
     let request = b"Hello, World!!!";
     let n = rustix::net::send(&sender, request, SendFlags::empty()).expect("send");
     drop(sender);
@@ -342,7 +343,7 @@ fn net_dgram_v4_connect_sendto() {
 
     let local_addr = rustix::net::getsockname(&listener).unwrap();
     let sender = rustix::net::socket(AddressFamily::INET, SocketType::DGRAM, None).unwrap();
-    rustix::net::connect_any(&sender, &local_addr).expect("connect");
+    rustix::net::connect(&sender, &local_addr).expect("connect");
     let request = b"Hello, World!!!";
     let local_addr = SocketAddrV4::try_from(local_addr).unwrap();
     let n = rustix::net::sendto(&sender, request, SendFlags::empty(), &local_addr).expect("send");
@@ -418,7 +419,7 @@ fn net_dgram_v6_connect_sendto() {
 
     let local_addr = rustix::net::getsockname(&listener).unwrap();
     let sender = rustix::net::socket(AddressFamily::INET6, SocketType::DGRAM, None).unwrap();
-    rustix::net::connect_any(&sender, &local_addr).expect("connect");
+    rustix::net::connect(&sender, &local_addr).expect("connect");
     let request = b"Hello, World!!!";
     let local_addr = SocketAddrV6::try_from(local_addr).unwrap();
     let n = rustix::net::sendto(&sender, request, SendFlags::empty(), &local_addr).expect("send");
@@ -492,10 +493,9 @@ fn net_dgram_v4_connect_sendto_any() {
 
     let local_addr = rustix::net::getsockname(&listener).unwrap();
     let sender = rustix::net::socket(AddressFamily::INET, SocketType::DGRAM, None).unwrap();
-    rustix::net::connect_any(&sender, &local_addr).expect("connect");
+    rustix::net::connect(&sender, &local_addr).expect("connect");
     let request = b"Hello, World!!!";
-    let n =
-        rustix::net::sendto_any(&sender, request, SendFlags::empty(), &local_addr).expect("send");
+    let n = rustix::net::sendto(&sender, request, SendFlags::empty(), &local_addr).expect("send");
     drop(sender);
 
     // Not strictly required, but it makes the test simpler.
@@ -530,8 +530,7 @@ fn net_dgram_v4_sendto_any() {
     let local_addr = rustix::net::getsockname(&listener).unwrap();
     let sender = rustix::net::socket(AddressFamily::INET, SocketType::DGRAM, None).unwrap();
     let request = b"Hello, World!!!";
-    let n =
-        rustix::net::sendto_any(&sender, request, SendFlags::empty(), &local_addr).expect("send");
+    let n = rustix::net::sendto(&sender, request, SendFlags::empty(), &local_addr).expect("send");
     drop(sender);
 
     // Not strictly required, but it makes the test simpler.
@@ -566,10 +565,9 @@ fn net_dgram_v6_connect_sendto_any() {
 
     let local_addr = rustix::net::getsockname(&listener).unwrap();
     let sender = rustix::net::socket(AddressFamily::INET6, SocketType::DGRAM, None).unwrap();
-    rustix::net::connect_any(&sender, &local_addr).expect("connect");
+    rustix::net::connect(&sender, &local_addr).expect("connect");
     let request = b"Hello, World!!!";
-    let n =
-        rustix::net::sendto_any(&sender, request, SendFlags::empty(), &local_addr).expect("send");
+    let n = rustix::net::sendto(&sender, request, SendFlags::empty(), &local_addr).expect("send");
     drop(sender);
 
     // Not strictly required, but it makes the test simpler.
@@ -605,8 +603,7 @@ fn net_dgram_v6_sendto_any() {
     let local_addr = rustix::net::getsockname(&listener).unwrap();
     let sender = rustix::net::socket(AddressFamily::INET6, SocketType::DGRAM, None).unwrap();
     let request = b"Hello, World!!!";
-    let n =
-        rustix::net::sendto_any(&sender, request, SendFlags::empty(), &local_addr).expect("send");
+    let n = rustix::net::sendto(&sender, request, SendFlags::empty(), &local_addr).expect("send");
     drop(sender);
 
     // Not strictly required, but it makes the test simpler.
@@ -641,7 +638,7 @@ fn net_dgram_v4_acceptfrom() {
 
     let local_addr = rustix::net::getsockname(&listener).unwrap();
     let sender = rustix::net::socket(AddressFamily::INET, SocketType::DGRAM, None).unwrap();
-    rustix::net::connect_any(&sender, &local_addr).expect("connect");
+    rustix::net::connect(&sender, &local_addr).expect("connect");
     let request = b"Hello, World!!!";
     let n = rustix::net::send(&sender, request, SendFlags::empty()).expect("send");
     drop(sender);
@@ -670,7 +667,7 @@ fn net_dgram_v6_acceptfrom() {
 
     let local_addr = rustix::net::getsockname(&listener).unwrap();
     let sender = rustix::net::socket(AddressFamily::INET6, SocketType::DGRAM, None).unwrap();
-    rustix::net::connect_any(&sender, &local_addr).expect("connect");
+    rustix::net::connect(&sender, &local_addr).expect("connect");
     let request = b"Hello, World!!!";
     let n = rustix::net::send(&sender, request, SendFlags::empty()).expect("send");
     drop(sender);

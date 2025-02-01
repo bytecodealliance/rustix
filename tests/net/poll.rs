@@ -4,7 +4,7 @@
 
 use rustix::event::{poll, PollFd, PollFlags};
 use rustix::net::{
-    accept, bind_v6, connect_v6, getsockname, listen, recv, send, socket, AddressFamily, Ipv6Addr,
+    accept, bind, connect, getsockname, listen, recv, send, socket, AddressFamily, Ipv6Addr,
     RecvFlags, SendFlags, SocketAddrV6, SocketType,
 };
 use std::sync::{Arc, Condvar, Mutex};
@@ -16,7 +16,7 @@ fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
     let connection_socket = socket(AddressFamily::INET6, SocketType::STREAM, None).unwrap();
 
     let name = SocketAddrV6::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1), 0, 0, 0);
-    bind_v6(&connection_socket, &name).unwrap();
+    bind(&connection_socket, &name).unwrap();
 
     let who = getsockname(&connection_socket).unwrap();
     let who = SocketAddrV6::try_from(who).unwrap();
@@ -68,7 +68,7 @@ fn client(ready: Arc<(Mutex<u16>, Condvar)>) {
     let mut buffer = vec![0; BUFFER_SIZE];
 
     let data_socket = socket(AddressFamily::INET6, SocketType::STREAM, None).unwrap();
-    connect_v6(&data_socket, &addr).unwrap();
+    connect(&data_socket, &addr).unwrap();
 
     let mut fds = [PollFd::new(&data_socket, PollFlags::OUT)];
     assert_eq!(poll(&mut fds, None).unwrap(), 1);

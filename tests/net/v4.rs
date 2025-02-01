@@ -7,7 +7,7 @@
 #[cfg(not(target_os = "redox"))]
 use rustix::net::ReturnFlags;
 use rustix::net::{
-    accept, bind_v4, connect_v4, getsockname, listen, recv, send, socket, AddressFamily, Ipv4Addr,
+    accept, bind, connect, getsockname, listen, recv, send, socket, AddressFamily, Ipv4Addr,
     RecvFlags, SendFlags, SocketAddrV4, SocketType,
 };
 use std::sync::{Arc, Condvar, Mutex};
@@ -19,7 +19,7 @@ fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
     let connection_socket = socket(AddressFamily::INET, SocketType::STREAM, None).unwrap();
 
     let name = SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), 0);
-    bind_v4(&connection_socket, &name).unwrap();
+    bind(&connection_socket, &name).unwrap();
 
     let who = getsockname(&connection_socket).unwrap();
     let who = SocketAddrV4::try_from(who).unwrap();
@@ -55,7 +55,7 @@ fn client(ready: Arc<(Mutex<u16>, Condvar)>) {
     let mut buffer = vec![0; BUFFER_SIZE];
 
     let data_socket = socket(AddressFamily::INET, SocketType::STREAM, None).unwrap();
-    connect_v4(&data_socket, &addr).unwrap();
+    connect(&data_socket, &addr).unwrap();
 
     send(&data_socket, b"hello, world", SendFlags::empty()).unwrap();
 
@@ -98,7 +98,7 @@ fn test_v4_msg() {
         let connection_socket = socket(AddressFamily::INET, SocketType::STREAM, None).unwrap();
 
         let name = SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), 0);
-        bind_v4(&connection_socket, &name).unwrap();
+        bind(&connection_socket, &name).unwrap();
 
         let who = getsockname(&connection_socket).unwrap();
         let who = SocketAddrV4::try_from(who).unwrap();
@@ -150,7 +150,7 @@ fn test_v4_msg() {
         let mut buffer = vec![0; BUFFER_SIZE];
 
         let data_socket = socket(AddressFamily::INET, SocketType::STREAM, None).unwrap();
-        connect_v4(&data_socket, &addr).unwrap();
+        connect(&data_socket, &addr).unwrap();
 
         sendmsg(
             &data_socket,
