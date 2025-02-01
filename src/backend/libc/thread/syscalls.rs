@@ -27,11 +27,7 @@ use crate::thread::{NanosleepRelativeResult, Timespec};
 use crate::timespec::LibcTimespec;
 #[cfg(not(fix_y2038))]
 use crate::timespec::{as_libc_timespec_mut_ptr, as_libc_timespec_ptr};
-#[cfg(all(
-    linux_kernel,
-    target_pointer_width = "32",
-    not(any(target_arch = "aarch64", target_arch = "x86_64"))
-))]
+#[cfg(linux_kernel)]
 use crate::utils::option_as_ptr;
 use core::mem::MaybeUninit;
 #[cfg(linux_kernel)]
@@ -651,6 +647,42 @@ unsafe fn futex_old_timespec(
         uaddr2,
         val3,
     ) as isize)
+}
+
+#[cfg(linux_kernel)]
+pub(crate) fn futex_waitv(
+    waiters: &[futex::Wait],
+    flags: futex::WaitvFlags,
+    timeout: Option<&Timespec>,
+    clockid: ClockId,
+) -> io::Result<usize> {
+    use futex::Wait as FutexWait;
+    use linux_raw_sys::general::{__kernel_clockid_t as clockid_t, __kernel_timespec as timespec};
+    syscall! {
+        fn futex_waitv(
+            waiters: *const FutexWait,
+            nr_futexes: c::c_uint,
+            flags: c::c_uint,
+            timeout: *const timespec,
+            clockid: clockid_t
+        ) via SYS_futex_waitv -> c::c_int
+    }
+
+    let nr_futexes: c::c_uint = waiters.len().try_into().map_err(|_| io::Errno::INVAL)?;
+
+    #[cfg(test)]
+    assert_eq_size!(timespec, Timespec);
+
+    unsafe {
+        ret_c_int(futex_waitv(
+            waiters.as_ptr(),
+            nr_futexes,
+            flags.bits(),
+            option_as_ptr(timeout).cast(),
+            clockid as _,
+        ))
+        .map(|n| n as usize)
+    }
 }
 
 #[cfg(linux_kernel)]

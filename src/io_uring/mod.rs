@@ -35,6 +35,7 @@ use core::ptr::{null_mut, write_bytes};
 use linux_raw_sys::net;
 
 // Export types used in io_uring APIs.
+pub use crate::clockid::ClockId;
 pub use crate::event::epoll::{
     Event as EpollEvent, EventData as EpollEventData, EventFlags as EpollEventFlags,
 };
@@ -44,6 +45,10 @@ pub use crate::fs::{
 };
 pub use crate::io::ReadWriteFlags;
 pub use crate::net::{RecvFlags, SendFlags, SocketFlags};
+pub use crate::thread::futex::{
+    Wait as FutexWait, WaitFlags as FutexWaitFlags, WaitPtr as FutexWaitPtr,
+    WaitvFlags as FutexWaitvFlags,
+};
 pub use crate::timespec::{Nsecs, Secs, Timespec};
 pub use linux_raw_sys::general::sigset_t;
 
@@ -420,6 +425,15 @@ pub enum IoringOp {
 
     /// `IORING_OP_SENDMSG_ZC`
     SendmsgZc = sys::io_uring_op::IORING_OP_SENDMSG_ZC as _,
+
+    /// `IORING_OP_FUTEX_WAIT`
+    FutexWait = sys::io_uring_op::IORING_OP_FUTEX_WAIT as _,
+
+    /// `IORING_OP_FUTEX_WAKE`
+    FutexWake = sys::io_uring_op::IORING_OP_FUTEX_WAKE as _,
+
+    /// `IORING_OP_FUTEX_WAITV`
+    FutexWaitv = sys::io_uring_op::IORING_OP_FUTEX_WAITV as _,
 }
 
 impl Default for IoringOp {
@@ -654,6 +668,22 @@ bitflags::bitflags! {
 
         /// `IORING_MSG_RING_FLAGS_PASS`
         const FLAGS_PASS = sys::IORING_MSG_RING_FLAGS_PASS;
+
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
+        const _ = !0;
+    }
+}
+
+bitflags::bitflags! {
+    /// `IORING_URING_CMD_*` flags for use with [`io_uring_sqe`].
+    #[repr(transparent)]
+    #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct IoringUringCmdFlags: u32 {
+        /// `IORING_URING_CMD_FIXED`
+        const FIXED = sys::IORING_URING_CMD_FIXED;
+
+        /// `IORING_URING_CMD_MASK`
+        const MASK = sys::IORING_URING_CMD_MASK;
 
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
@@ -969,6 +999,12 @@ impl Default for io_uring_ptr {
     }
 }
 
+impl core::fmt::Debug for io_uring_ptr {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        self.ptr.fmt(f)
+    }
+}
+
 /// User data in the io_uring API.
 ///
 /// `io_uring`'s native API represents `user_data` fields as `u64` values. In
@@ -1147,6 +1183,8 @@ pub union op_flags_union {
     pub hardlink_flags: AtFlags,
     pub xattr_flags: XattrFlags,
     pub msg_ring_flags: IoringMsgringFlags,
+    pub uring_cmd_flags: IoringUringCmdFlags,
+    pub futex_flags: FutexWaitvFlags,
 }
 
 #[allow(missing_docs)]
