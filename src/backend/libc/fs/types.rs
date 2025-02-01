@@ -877,7 +877,7 @@ pub enum FlockOperation {
 ///
 /// [`statat`]: crate::fs::statat
 /// [`fstat`]: crate::fs::fstat
-#[cfg(not(any(linux_like, target_os = "hurd")))]
+#[cfg(not(any(linux_like, target_os = "hurd", target_os = "netbsd")))]
 pub type Stat = c::stat;
 
 /// `struct stat` for use with [`statat`] and [`fstat`].
@@ -919,6 +919,40 @@ pub struct Stat {
     pub st_ctime: i64,
     pub st_ctime_nsec: u32,
     pub st_ino: u64,
+}
+
+/// `struct stat` for use with [`statat`] and [`fstat`].
+///
+/// [`statat`]: crate::fs::statat
+/// [`fstat`]: crate::fs::fstat
+// NetBSD's `st_mtime_nsec` is named `st_mtimensec` so we declare our own
+// `Stat` so that we can be consistent with other platforms.
+#[cfg(target_os = "netbsd")]
+#[derive(Debug, Copy, Clone)]
+#[allow(missing_docs)]
+#[repr(C)]
+pub struct Stat {
+    pub st_dev: c::dev_t,
+    pub st_mode: c::mode_t,
+    pub st_ino: c::ino_t,
+    pub st_nlink: c::nlink_t,
+    pub st_uid: c::uid_t,
+    pub st_gid: c::gid_t,
+    pub st_rdev: c::dev_t,
+    pub st_atime: c::time_t,
+    pub st_atime_nsec: c::c_long,
+    pub st_mtime: c::time_t,
+    pub st_mtime_nsec: c::c_long,
+    pub st_ctime: c::time_t,
+    pub st_ctime_nsec: c::c_long,
+    pub st_birthtime: c::time_t,
+    pub st_birthtime_nsec: c::c_long,
+    pub st_size: c::off_t,
+    pub st_blocks: c::blkcnt_t,
+    pub st_blksize: c::blksize_t,
+    pub st_flags: u32,
+    pub st_gen: u32,
+    pub st_spare: [u32; 2],
 }
 
 /// `struct statfs` for use with [`statfs`] and [`fstatfs`].

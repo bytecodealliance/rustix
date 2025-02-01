@@ -584,15 +584,14 @@ pub enum FlockOperation {
 ///
 /// [`statat`]: crate::fs::statat
 /// [`fstat`]: crate::fs::fstat
-// On 32-bit, and mips64, Linux's `struct stat64` has a 32-bit `st_mtime` and
-// friends, so we use our own struct, populated from `statx` where possible, to
-// avoid the y2038 bug.
+// On 32-bit with `struct stat64` and mips64 with `struct stat`, Linux's
+// `st_mtime` and friends are 32-bit, so we use our own struct, populated from
+// `statx` where possible, to avoid the y2038 bug.
 #[cfg(any(
     target_pointer_width = "32",
     target_arch = "mips64",
     target_arch = "mips64r6"
 ))]
-#[repr(C)]
 #[derive(Debug, Copy, Clone)]
 #[allow(missing_docs)]
 #[non_exhaustive]
@@ -636,11 +635,11 @@ pub struct Stat {
     pub st_size: ffi::c_long,
     pub st_blksize: ffi::c_long,
     pub st_blocks: ffi::c_long,
-    pub st_atime: ffi::c_ulong,
+    pub st_atime: ffi::c_long,
     pub st_atime_nsec: ffi::c_ulong,
-    pub st_mtime: ffi::c_ulong,
+    pub st_mtime: ffi::c_long,
     pub st_mtime_nsec: ffi::c_ulong,
-    pub st_ctime: ffi::c_ulong,
+    pub st_ctime: ffi::c_long,
     pub st_ctime_nsec: ffi::c_ulong,
     pub(crate) __unused: [ffi::c_long; 3],
 }
@@ -698,7 +697,7 @@ pub struct Stat {
     pub(crate) __unused4: ffi::c_uint,
     pub(crate) __unused5: ffi::c_uint,
 }
-// This follows `stat64`.
+// This follows `stat`. powerpc64 defines a `stat64` but it's not used.
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 #[allow(missing_docs)]
@@ -715,11 +714,11 @@ pub struct Stat {
     pub st_size: ffi::c_long,
     pub st_blksize: ffi::c_ulong,
     pub st_blocks: ffi::c_ulong,
-    pub st_atime: ffi::c_ulong,
+    pub st_atime: ffi::c_long,
     pub st_atime_nsec: ffi::c_ulong,
-    pub st_mtime: ffi::c_ulong,
+    pub st_mtime: ffi::c_long,
     pub st_mtime_nsec: ffi::c_ulong,
-    pub st_ctime: ffi::c_ulong,
+    pub st_ctime: ffi::c_long,
     pub st_ctime_nsec: ffi::c_ulong,
     pub(crate) __unused4: ffi::c_ulong,
     pub(crate) __unused5: ffi::c_ulong,
@@ -739,12 +738,12 @@ pub struct Stat {
     pub st_gid: ffi::c_uint,
     pub(crate) __pad1: ffi::c_uint,
     pub st_rdev: ffi::c_ulong,
-    pub st_size: ffi::c_ulong,
-    pub st_atime: ffi::c_ulong,
+    pub st_size: ffi::c_long, // Linux has `c_ulong` but we make it signed.
+    pub st_atime: ffi::c_long,
     pub st_atime_nsec: ffi::c_ulong,
-    pub st_mtime: ffi::c_ulong,
+    pub st_mtime: ffi::c_long,
     pub st_mtime_nsec: ffi::c_ulong,
-    pub st_ctime: ffi::c_ulong,
+    pub st_ctime: ffi::c_long,
     pub st_ctime_nsec: ffi::c_ulong,
     pub st_blksize: ffi::c_ulong,
     pub st_blocks: ffi::c_long,

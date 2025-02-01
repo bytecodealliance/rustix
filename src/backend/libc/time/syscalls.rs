@@ -130,7 +130,10 @@ pub(crate) fn clock_gettime(id: ClockId) -> Timespec {
             as_libc_timespec_mut_ptr(&mut timespec),
         ))
         .unwrap();
-        timespec.assume_init()
+        let timespec = timespec.assume_init();
+        #[cfg(apple)]
+        let timespec = fix_negative_timespec_nsecs(timespec);
+        timespec
     }
 }
 
@@ -220,8 +223,10 @@ pub(crate) fn clock_gettime_dynamic(id: DynamicClockId<'_>) -> io::Result<Timesp
             id as c::clockid_t,
             as_libc_timespec_mut_ptr(&mut timespec),
         ))?;
-
-        Ok(timespec.assume_init())
+        let timespec = timespec.assume_init();
+        #[cfg(apple)]
+        let timespec = fix_negative_timespec_nsecs(timespec);
+        Ok(timespec)
     }
 }
 
@@ -475,4 +480,11 @@ fn timerfd_gettime_old(fd: BorrowedFd<'_>) -> io::Result<Itimerspec> {
             tv_nsec: old_result.it_interval.tv_nsec as _,
         },
     })
+}
+
+/// See [`crate::timespec::fix_negative_nsecs`] for details.
+#[cfg(apple)]
+fn fix_negative_timespec_nsecs(mut ts: Timespec) -> Timespec {
+    ts.tv_nsec = crate::timespec::fix_negative_nsecs(&mut ts.tv_sec, ts.tv_nsec as _) as _;
+    ts
 }
