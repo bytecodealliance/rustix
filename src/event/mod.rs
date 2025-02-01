@@ -19,6 +19,7 @@ pub mod port;
 #[cfg(any(bsd, linux_kernel, windows, target_os = "wasi"))]
 mod select;
 
+pub use crate::timespec::{Nsecs, Secs, Timespec};
 #[cfg(any(
     linux_kernel,
     target_os = "freebsd",

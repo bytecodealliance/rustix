@@ -7,9 +7,11 @@
 use crate::backend::c;
 #[allow(unused)]
 use crate::ffi;
+#[cfg(not(fix_y2038))]
+use core::ptr::null;
 
 /// `struct timespec`
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Default)]
 #[repr(C)]
 pub struct Timespec {
     /// Seconds.
@@ -97,6 +99,14 @@ pub(crate) fn as_libc_timespec_mut_ptr(
         assert_eq_size!(Timespec, c::timespec);
     }
     timespec.as_mut_ptr().cast::<c::timespec>()
+}
+
+#[cfg(not(fix_y2038))]
+pub(crate) fn option_as_libc_timespec_ptr(timespec: Option<&Timespec>) -> *const c::timespec {
+    match timespec {
+        None => null(),
+        Some(timespec) => as_libc_timespec_ptr(timespec),
+    }
 }
 
 #[test]

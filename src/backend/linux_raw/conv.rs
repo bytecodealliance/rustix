@@ -232,7 +232,6 @@ pub(super) fn opt_mut<T: Sized, Num: ArgNumber>(t: Option<&mut T>) -> ArgReg<'_,
 
 /// Convert an optional immutable reference into a `usize` for passing to a
 /// syscall.
-#[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
 #[inline]
 pub(super) fn opt_ref<T: Sized, Num: ArgNumber>(t: Option<&T>) -> ArgReg<'_, Num> {
     // This optimizes into the equivalent of `transmute(t)`, and has the

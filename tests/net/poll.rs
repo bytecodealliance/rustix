@@ -36,7 +36,7 @@ fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
     let data_socket = accept(&connection_socket).unwrap();
 
     let mut fds = [PollFd::new(&data_socket, PollFlags::IN)];
-    assert_eq!(poll(&mut fds, -1).unwrap(), 1);
+    assert_eq!(poll(&mut fds, None).unwrap(), 1);
     assert!(fds[0].revents().intersects(PollFlags::IN));
     assert!(!fds[0].revents().intersects(PollFlags::OUT));
 
@@ -49,7 +49,7 @@ fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
     }
 
     let mut fds = [PollFd::new(&data_socket, PollFlags::OUT)];
-    assert_eq!(poll(&mut fds, -1).unwrap(), 1);
+    assert_eq!(poll(&mut fds, None).unwrap(), 1);
     assert!(!fds[0].revents().intersects(PollFlags::IN));
     assert!(fds[0].revents().intersects(PollFlags::OUT));
 
@@ -73,14 +73,14 @@ fn client(ready: Arc<(Mutex<u16>, Condvar)>) {
     connect_v6(&data_socket, &addr).unwrap();
 
     let mut fds = [PollFd::new(&data_socket, PollFlags::OUT)];
-    assert_eq!(poll(&mut fds, -1).unwrap(), 1);
+    assert_eq!(poll(&mut fds, None).unwrap(), 1);
     assert!(!fds[0].revents().intersects(PollFlags::IN));
     assert!(fds[0].revents().intersects(PollFlags::OUT));
 
     send(&data_socket, b"hello, world", SendFlags::empty()).unwrap();
 
     let mut fds = [PollFd::new(&data_socket, PollFlags::IN)];
-    assert_eq!(poll(&mut fds, -1).unwrap(), 1);
+    assert_eq!(poll(&mut fds, None).unwrap(), 1);
     assert!(fds[0].revents().intersects(PollFlags::IN));
     assert!(!fds[0].revents().intersects(PollFlags::OUT));
 

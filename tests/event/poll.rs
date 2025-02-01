@@ -8,6 +8,7 @@ use {rustix::event::poll, rustix::io::retry_on_intr};
 #[cfg(not(any(windows, target_os = "wasi")))]
 #[test]
 fn test_poll() {
+    use rustix::event::Timespec;
     use rustix::io::{read, write};
     use rustix::pipe::pipe;
 
@@ -17,7 +18,7 @@ fn test_poll() {
     assert_eq!(poll_fds[0].as_fd().as_raw_fd(), reader.as_fd().as_raw_fd());
 
     // `poll` should say there's nothing ready to be read from the pipe.
-    let num = retry_on_intr(|| poll(&mut poll_fds, 0)).unwrap();
+    let num = retry_on_intr(|| poll(&mut poll_fds, Some(&Timespec::default()))).unwrap();
     assert_eq!(num, 0);
     assert!(poll_fds[0].revents().is_empty());
     assert_eq!(poll_fds[0].as_fd().as_raw_fd(), reader.as_fd().as_raw_fd());
@@ -26,7 +27,7 @@ fn test_poll() {
     assert_eq!(retry_on_intr(|| write(&writer, b"a")).unwrap(), 1);
 
     // `poll` should now say there's data to be read.
-    let num = retry_on_intr(|| poll(&mut poll_fds, -1)).unwrap();
+    let num = retry_on_intr(|| poll(&mut poll_fds, None)).unwrap();
     assert_eq!(num, 1);
     assert_eq!(poll_fds[0].revents(), PollFlags::IN);
     assert_eq!(poll_fds[0].as_fd().as_raw_fd(), reader.as_fd().as_raw_fd());
@@ -43,7 +44,7 @@ fn test_poll() {
     assert_eq!(poll_fds[0].as_fd().as_raw_fd(), reader.as_fd().as_raw_fd());
 
     // Poll should now say there's no more data to be read.
-    let num = retry_on_intr(|| poll(&mut poll_fds, 0)).unwrap();
+    let num = retry_on_intr(|| poll(&mut poll_fds, Some(&Timespec::default()))).unwrap();
     assert_eq!(num, 0);
     assert!(poll_fds[0].revents().is_empty());
     assert_eq!(poll_fds[0].as_fd().as_raw_fd(), reader.as_fd().as_raw_fd());
