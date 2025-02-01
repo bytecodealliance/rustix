@@ -586,7 +586,7 @@ pub unsafe fn brk(addr: *mut c_void) -> io::Result<*mut c_void> {
 ///
 /// See [`sigrt`] for a convenient way to construct `SIGRTMIN + n` values.
 #[cfg(linux_raw)]
-pub const SIGRTMIN: u32 = linux_raw_sys::general::SIGRTMIN;
+pub const SIGRTMIN: i32 = linux_raw_sys::general::SIGRTMIN as i32;
 
 /// `SIGRTMAX`—The last of the raw OS “real-time” signal range.
 ///
@@ -595,7 +595,7 @@ pub const SIGRTMIN: u32 = linux_raw_sys::general::SIGRTMIN;
 /// won't share a process with a libc (perhaps because you yourself are
 /// implementing a libc).
 #[cfg(linux_raw)]
-pub const SIGRTMAX: u32 = {
+pub const SIGRTMAX: i32 = {
     // Use the actual `SIGRTMAX` value on platforms which define it.
     #[cfg(not(any(
         target_arch = "arm",
@@ -604,7 +604,7 @@ pub const SIGRTMAX: u32 = {
         target_arch = "x86_64",
     )))]
     {
-        linux_raw_sys::general::SIGRTMAX
+        linux_raw_sys::general::SIGRTMAX as i32
     }
 
     // On platforms that don't, derive it from `_NSIG`.
@@ -615,7 +615,7 @@ pub const SIGRTMAX: u32 = {
         target_arch = "x86_64",
     ))]
     {
-        linux_raw_sys::general::_NSIG - 1
+        linux_raw_sys::general::_NSIG as i32 - 1
     }
 };
 
@@ -627,14 +627,14 @@ pub const SIGRTMAX: u32 = {
 /// implementing a libc).
 #[cfg(linux_raw)]
 #[doc(alias = "SIGRTMIN")]
-pub fn sigrt(n: u32) -> Option<Signal> {
+pub fn sigrt(n: i32) -> Option<Signal> {
     let sig = SIGRTMIN.wrapping_add(n);
     if (SIGRTMIN..=SIGRTMAX).contains(&sig) {
         // SAFETY: We've checked that `sig` is in the expected range. It could
         // still conflict with libc's reserved values, however users of the
         // `runtime` module here must already know that there's no other libc
         // to conflict with.
-        Some(unsafe { Signal::from_raw_unchecked(sig as i32) })
+        Some(unsafe { Signal::from_raw_unchecked(sig) })
     } else {
         None
     }

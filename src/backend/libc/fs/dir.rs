@@ -1,4 +1,10 @@
-#[cfg(not(any(solarish, target_os = "haiku", target_os = "nto", target_os = "vita")))]
+#[cfg(not(any(
+    solarish,
+    target_os = "aix",
+    target_os = "haiku",
+    target_os = "nto",
+    target_os = "vita"
+)))]
 use super::types::FileType;
 use crate::backend::c;
 use crate::backend::conv::owned_fd;

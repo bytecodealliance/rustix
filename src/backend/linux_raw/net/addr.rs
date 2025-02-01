@@ -194,6 +194,14 @@ impl fmt::Debug for SocketAddrUnix {
 #[repr(transparent)]
 pub struct SocketAddrStorage(c::sockaddr_storage);
 
+// SAFETY: Bindgen adds a union with a raw pointer for alignment but it's never
+// used. `sockaddr_storage` is just a bunch of bytes and it doesn't hold
+// pointers.
+unsafe impl Send for SocketAddrStorage {}
+
+// SAFETY: Same as with `Send`.
+unsafe impl Sync for SocketAddrStorage {}
+
 impl SocketAddrStorage {
     /// Return a socket addr storage initialized to all zero bytes. The
     /// `sa_family` is set to `AddressFamily::UNSPEC`.
