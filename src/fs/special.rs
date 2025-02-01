@@ -58,7 +58,7 @@ mod tests {
         assert!(CWD.as_raw_fd() != -1);
         #[cfg(linux_kernel)]
         #[cfg(feature = "io_uring")]
-        assert!(CWD.as_raw_fd() != linux_raw_sys::io_uring::IORING_REGISTER_FILES_SKIP);
+        assert!(CWD.as_raw_fd() != crate::io_uring::IORING_REGISTER_FILES_SKIP.as_raw_fd());
     }
 
     #[test]
@@ -68,6 +68,6 @@ mod tests {
         assert!(ABS.as_raw_fd() != c::AT_FDCWD);
         #[cfg(linux_kernel)]
         #[cfg(feature = "io_uring")]
-        assert!(ABS.as_raw_fd() != linux_raw_sys::io_uring::IORING_REGISTER_FILES_SKIP);
+        assert!(ABS.as_raw_fd() != crate::io_uring::IORING_REGISTER_FILES_SKIP.as_raw_fd());
     }
 }

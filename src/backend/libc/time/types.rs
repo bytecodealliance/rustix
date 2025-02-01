@@ -50,24 +50,24 @@ impl From<Itimerspec> for LibcItimerspec {
 
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
 #[cfg(not(fix_y2038))]
-pub(crate) fn as_libc_itimerspec_ptr(itimerspec: &Itimerspec) -> *const libc::itimerspec {
+pub(crate) fn as_libc_itimerspec_ptr(itimerspec: &Itimerspec) -> *const c::itimerspec {
     #[cfg(test)]
     {
-        assert_eq_size!(Itimerspec, libc::itimerspec);
+        assert_eq_size!(Itimerspec, c::itimerspec);
     }
-    crate::utils::as_ptr(itimerspec).cast::<libc::itimerspec>()
+    crate::utils::as_ptr(itimerspec).cast::<c::itimerspec>()
 }
 
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
 #[cfg(not(fix_y2038))]
 pub(crate) fn as_libc_itimerspec_mut_ptr(
     itimerspec: &mut core::mem::MaybeUninit<Itimerspec>,
-) -> *mut libc::itimerspec {
+) -> *mut c::itimerspec {
     #[cfg(test)]
     {
-        assert_eq_size!(Itimerspec, libc::itimerspec);
+        assert_eq_size!(Itimerspec, c::itimerspec);
     }
-    itimerspec.as_mut_ptr().cast::<libc::itimerspec>()
+    itimerspec.as_mut_ptr().cast::<c::itimerspec>()
 }
 
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]

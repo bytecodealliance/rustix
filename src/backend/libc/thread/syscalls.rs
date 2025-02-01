@@ -665,7 +665,7 @@ pub(crate) fn setgroups_thread(groups: &[crate::ugid::Gid]) -> io::Result<()> {
 #[cfg(any(linux_kernel, target_os = "dragonfly"))]
 #[inline]
 pub(crate) fn sched_getcpu() -> usize {
-    let r = unsafe { libc::sched_getcpu() };
+    let r = unsafe { c::sched_getcpu() };
     debug_assert!(r >= 0);
     r as usize
 }
