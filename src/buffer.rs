@@ -109,6 +109,7 @@ impl<'a, T, const N: usize> private::Sealed<T> for &'a mut [MaybeUninit<T>; N] {
     }
 }
 
+#[cfg(feature = "alloc")]
 impl<'a, T> private::Sealed<T> for &'a mut Vec<MaybeUninit<T>> {
     type Result = (&'a mut [T], &'a mut [MaybeUninit<T>]);
 
@@ -233,6 +234,7 @@ mod tests {
     use super::*;
 
     #[test]
+    #[cfg(not(windows))]
     fn test_buffer() {
         use crate::io::read;
         use core::mem::MaybeUninit;
