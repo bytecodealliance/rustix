@@ -18,21 +18,18 @@ use crate::io::ReadWriteFlags;
 use crate::io::{self, FdFlags};
 use crate::ioctl::{IoctlOutput, RawOpcode};
 use core::cmp::min;
-use core::mem::MaybeUninit;
 #[cfg(not(any(target_os = "espidf", target_os = "horizon")))]
 use {
     crate::backend::MAX_IOV,
     crate::io::{IoSlice, IoSliceMut},
 };
 
-pub(crate) fn read(fd: BorrowedFd<'_>, buf: &mut [MaybeUninit<u8>]) -> io::Result<usize> {
-    unsafe {
-        ret_usize(c::read(
-            borrowed_fd(fd),
-            buf.as_mut_ptr().cast(),
-            min(buf.len(), READ_LIMIT),
-        ))
-    }
+pub(crate) unsafe fn read(fd: BorrowedFd<'_>, buf: (*mut u8, usize)) -> io::Result<usize> {
+    ret_usize(c::read(
+        borrowed_fd(fd),
+        buf.0.cast(),
+        min(buf.1, READ_LIMIT),
+    ))
 }
 
 pub(crate) fn write(fd: BorrowedFd<'_>, buf: &[u8]) -> io::Result<usize> {
