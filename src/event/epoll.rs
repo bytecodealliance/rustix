@@ -75,6 +75,7 @@
 use super::epoll;
 pub use crate::backend::event::epoll::*;
 use crate::backend::event::syscalls;
+use crate::buffer::split_init;
 use crate::fd::{AsFd, OwnedFd};
 use crate::io;
 #[cfg(feature = "alloc")]
@@ -83,6 +84,7 @@ use crate::timespec::Timespec;
 use alloc::vec::Vec;
 use core::ffi::c_void;
 use core::hash::{Hash, Hasher};
+use core::mem::MaybeUninit;
 
 /// `epoll_create1(flags)`—Creates a new epoll object.
 ///
@@ -198,6 +200,9 @@ pub fn delete<EpollFd: AsFd, SourceFd: AsFd>(epoll: EpollFd, source: SourceFd) -
 /// [`io::Errno::INVAL`]. Enable the "linux_5_11" feature to enable the full
 /// range of timeouts.
 ///
+/// This takes a `&mut [Event]` which Rust requires to contain initialized
+/// memory. To use an uninitialized buffer, use [`wait_uninit`].
+///
 /// # References
 ///  - [Linux]
 ///  - [illumos]
@@ -221,6 +226,27 @@ pub fn wait<EpollFd: AsFd>(
     }
 
     Ok(())
+}
+
+/// `epoll_wait(self, events, timeout)`—Waits for registered events of
+/// interest.
+///
+/// This is identical to [`wait`], except that it can write the events into
+/// uninitialized memory. It returns the slice that was initialized by this
+/// function and the slice that remains uninitialized.
+#[doc(alias = "epoll_wait")]
+#[inline]
+pub fn wait_uninit<EpollFd: AsFd>(
+    epoll: EpollFd,
+    event_list: &mut [MaybeUninit<Event>],
+    timeout: crate::ffi::c_int,
+) -> io::Result<(&mut [Event], &mut [MaybeUninit<Event>])> {
+    // SAFETY: We're calling `epoll_wait` via FFI and we know how it
+    // behaves.
+    unsafe {
+        let nfds = syscalls::epoll_wait(epoll.as_fd(), event_list, timeout)?;
+        Ok(split_init(event_list, nfds))
+    }
 }
 
 /// A record of an event that occurred.

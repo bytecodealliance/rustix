@@ -6,6 +6,7 @@ use rustix::net::{
 };
 use std::collections::HashMap;
 use std::ffi::c_void;
+use std::mem::MaybeUninit;
 use std::sync::{Arc, Condvar, Mutex};
 use std::thread;
 
@@ -64,6 +65,62 @@ fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
     }
 }
 
+fn server_uninit(ready: Arc<(Mutex<u16>, Condvar)>) {
+    let listen_sock = socket(AddressFamily::INET, SocketType::STREAM, None).unwrap();
+    bind_v4(&listen_sock, &SocketAddrV4::new(Ipv4Addr::LOCALHOST, 0)).unwrap();
+    listen(&listen_sock, 1).unwrap();
+
+    let who = match getsockname(&listen_sock).unwrap() {
+        SocketAddrAny::V4(addr) => addr,
+        _ => panic!(),
+    };
+
+    {
+        let (lock, cvar) = &*ready;
+        let mut port = lock.lock().unwrap();
+        *port = who.port();
+        cvar.notify_all();
+    }
+
+    let epoll = epoll::create(epoll::CreateFlags::CLOEXEC).unwrap();
+
+    epoll::add(
+        &epoll,
+        &listen_sock,
+        epoll::EventData::new_u64(1),
+        epoll::EventFlags::IN,
+    )
+    .unwrap();
+
+    let mut next_data = epoll::EventData::new_u64(2);
+    let mut targets = HashMap::new();
+
+    let mut event_list = [MaybeUninit::uninit(); 4];
+    loop {
+        let (init, _) = epoll::wait_uninit(&epoll, &mut event_list, -1).unwrap();
+        for event in init {
+            let target = event.data;
+            if target.u64() == 1 {
+                let conn_sock = accept(&listen_sock).unwrap();
+                ioctl_fionbio(&conn_sock, true).unwrap();
+                epoll::add(
+                    &epoll,
+                    &conn_sock,
+                    next_data,
+                    epoll::EventFlags::OUT | epoll::EventFlags::ET,
+                )
+                .unwrap();
+                targets.insert(next_data, conn_sock);
+                next_data = epoll::EventData::new_u64(next_data.u64() + 1);
+            } else {
+                let target = targets.remove(&target).unwrap();
+                write(&target, b"hello\n").unwrap();
+                epoll::delete(&epoll, &target).unwrap();
+            }
+        }
+    }
+}
+
 fn client(ready: Arc<(Mutex<u16>, Condvar)>) {
     let port = {
         let (lock, cvar) = &*ready;
@@ -95,6 +152,26 @@ fn test_epoll() {
         .name("server".to_string())
         .spawn(move || {
             server(ready);
+        })
+        .unwrap();
+    let client = thread::Builder::new()
+        .name("client".to_string())
+        .spawn(move || {
+            client(ready_clone);
+        })
+        .unwrap();
+    client.join().unwrap();
+}
+
+#[test]
+fn test_epoll_uninit() {
+    let ready = Arc::new((Mutex::new(0_u16), Condvar::new()));
+    let ready_clone = Arc::clone(&ready);
+
+    let _server = thread::Builder::new()
+        .name("server".to_string())
+        .spawn(move || {
+            server_uninit(ready);
         })
         .unwrap();
     let client = thread::Builder::new()

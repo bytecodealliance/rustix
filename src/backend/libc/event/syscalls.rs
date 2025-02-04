@@ -4,7 +4,6 @@ use crate::backend::c;
 #[cfg(any(linux_kernel, solarish, target_os = "redox"))]
 use crate::backend::conv::ret;
 use crate::backend::conv::ret_c_int;
-#[cfg(feature = "alloc")]
 #[cfg(any(linux_kernel, target_os = "illumos", target_os = "redox"))]
 use crate::backend::conv::ret_u32;
 #[cfg(solarish)]
@@ -27,7 +26,7 @@ use crate::utils::as_ptr;
 #[cfg(any(
     all(feature = "alloc", bsd),
     solarish,
-    all(feature = "alloc", any(linux_kernel, target_os = "redox")),
+    all(any(linux_kernel, target_os = "redox")),
 ))]
 use core::mem::MaybeUninit;
 #[cfg(any(
@@ -512,7 +511,6 @@ pub(crate) fn epoll_del(epoll: BorrowedFd<'_>, source: BorrowedFd<'_>) -> io::Re
 }
 
 #[inline]
-#[cfg(feature = "alloc")]
 #[cfg(any(linux_kernel, target_os = "illumos", target_os = "redox"))]
 pub(crate) fn epoll_wait(
     epoll: BorrowedFd<'_>,
