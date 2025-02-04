@@ -32,14 +32,14 @@ impl Flock {
         }
     }
 
-    pub(crate) const fn as_raw(&self) -> c::flock {
-        c::flock {
-            l_start: self.start as _,
-            l_len: self.length as _,
-            l_pid: unsafe { transmute(self.pid) },
-            l_type: self.typ as _,
-            l_whence: self.offset_type as _,
-        }
+    pub(crate) fn as_raw(&self) -> c::flock {
+        let mut f: c::flock = unsafe { core::mem::zeroed() };
+        f.l_start = self.start as _;
+        f.l_len = self.length as _;
+        f.l_pid = unsafe { transmute(self.pid) };
+        f.l_type = self.typ as _;
+        f.l_whence = self.offset_type as _;
+        f
     }
 }
 
