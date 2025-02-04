@@ -8,6 +8,9 @@ use core::mem::MaybeUninit;
 use core::slice;
 
 /// A memory buffer that may be uninitialized.
+///
+/// If you see errors like "move occurs because `x.y` has type `&mut [u8]`,
+/// which does not implement the `Copy` trait", replace `x.y` with `&mut *x.y`.
 pub trait Buffer<T>: private::Sealed<T> {}
 
 // Implement `Buffer` for all the types that implement `Sealed`.
@@ -15,8 +18,10 @@ impl<T> Buffer<T> for &mut [T] {}
 impl<T, const N: usize> Buffer<T> for &mut [T; N] {}
 #[cfg(feature = "alloc")]
 impl<T> Buffer<T> for &mut Vec<T> {}
-impl<'a, T> Buffer<T> for &'a mut [MaybeUninit<T>] {}
-impl<'a, T, const N: usize> Buffer<T> for &'a mut [MaybeUninit<T>; N] {}
+impl<T> Buffer<T> for &mut [MaybeUninit<T>] {}
+impl<T, const N: usize> Buffer<T> for &mut [MaybeUninit<T>; N] {}
+#[cfg(feature = "alloc")]
+impl<T> Buffer<T> for &mut Vec<MaybeUninit<T>> {}
 #[cfg(feature = "alloc")]
 impl<'a, T> Buffer<T> for Extend<'a, T> {}
 
@@ -104,34 +109,86 @@ impl<'a, T, const N: usize> private::Sealed<T> for &'a mut [MaybeUninit<T>; N] {
     }
 }
 
+impl<'a, T> private::Sealed<T> for &'a mut Vec<MaybeUninit<T>> {
+    type Result = (&'a mut [T], &'a mut [MaybeUninit<T>]);
+
+    #[inline]
+    fn as_raw_parts_mut(&mut self) -> (*mut T, usize) {
+        (self.as_mut_ptr().cast(), self.len())
+    }
+
+    #[inline]
+    unsafe fn finish(self, len: usize) -> Self::Result {
+        let (init, uninit) = self.split_at_mut(len);
+
+        // SAFETY: The user asserts that the slice is now initialized.
+        let init = slice::from_raw_parts_mut(init.as_mut_ptr().cast::<T>(), init.len());
+
+        (init, uninit)
+    }
+}
+
 /// A type that implements [`Buffer`] by appending to a `Vec`, up to its
 /// capacity.
 ///
-/// Because this uses the capacity, and never reallocates, it's a good idea to
-/// reserve some space in a `Vec` before using this!
+/// Because this uses the capacity, and never reallocates, the `Vec` should
+/// have some non-empty spare capacity.
 #[cfg(feature = "alloc")]
 pub struct Extend<'a, T>(&'a mut Vec<T>);
 
-/// Construct an [`Extend`].
+/// Construct an [`Extend`], which implements [`Buffer`].
+///
+/// This wraps a `Vec` and uses the spare capacity of the `Vec` as the buffer
+/// to receive data in, automaically resizing the `Vec` to include the
+/// received elements.
+///
+/// This uses the existing capacity, and never allocates, so the `Vec` should
+/// have some non-empty spare capacity!
+///
+/// # Examples
+///
+/// ```
+/// # fn test(input: &std::fs::File) -> rustix::io::Result<()> {
+/// use rustix::io::{read, Errno};
+/// use rustix::buffer::extend;
+///
+/// let mut buf = Vec::with_capacity(1024);
+/// match read(input, extend(&mut buf)) {
+///     Ok(0) => { /* end of stream */ }
+///     Ok(n) => { /* `buf` is now `n` bytes longer */ }
+///     Err(Errno::INTR) => { /* `buf` is unmodified */ }
+///     Err(e) => { return Err(e); }
+/// }
+///
+/// # Ok(())
+/// # }
+/// ```
 #[cfg(feature = "alloc")]
-pub fn extend<T>(v: &mut Vec<T>) -> Extend<T> {
+pub fn extend<'a, T>(v: &'a mut Vec<T>) -> Extend<'a, T> {
     Extend(v)
 }
 
 #[cfg(feature = "alloc")]
 impl<'a, T> private::Sealed<T> for Extend<'a, T> {
-    /// The mutated `Vec` reflects the number of bytes read.
-    type Result = ();
+    /// The mutated `Vec` reflects the number of bytes read. We also return
+    /// this number, and a value of 0 indicates the end of the stream has
+    /// been reached.
+    type Result = usize;
 
     #[inline]
     fn as_raw_parts_mut(&mut self) -> (*mut T, usize) {
         let spare = self.0.spare_capacity_mut();
+
+        debug_assert!(!spare.is_empty(), "`extend` uses spare capacity, and never allocates new memory, so the `Vec` passed to it should have some spare capacity.");
+
         (spare.as_mut_ptr().cast(), spare.len())
     }
 
     #[inline]
     unsafe fn finish(self, len: usize) -> Self::Result {
+        // We initialized `len` elements; extend the `Vec` to include them.
         self.0.set_len(self.0.len() + len);
+        len
     }
 }
 
@@ -174,6 +231,64 @@ mod private {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_buffer() {
+        use crate::io::read;
+        use core::mem::MaybeUninit;
+
+        let input = std::fs::File::open("Cargo.toml").unwrap();
+
+        let mut buf = vec![0_u8; 3];
+        buf.reserve(32);
+        let _x: usize = read(&input, extend(&mut buf)).unwrap();
+        let _x: (&mut [u8], &mut [MaybeUninit<u8>]) =
+            read(&input, buf.spare_capacity_mut()).unwrap();
+        let _x: usize = read(&input, &mut buf).unwrap();
+        let _x: usize = read(&input, &mut *buf).unwrap();
+        let _x: usize = read(&input, &mut buf[..]).unwrap();
+        let _x: usize = read(&input, &mut (*buf)[..]).unwrap();
+
+        let mut buf = [0, 0, 0];
+        let _x: usize = read(&input, &mut buf).unwrap();
+        let _x: usize = read(&input, &mut buf[..]).unwrap();
+
+        let mut buf = [
+            MaybeUninit::uninit(),
+            MaybeUninit::uninit(),
+            MaybeUninit::uninit(),
+        ];
+        let _x: (&mut [u8], &mut [MaybeUninit<u8>]) = read(&input, &mut buf).unwrap();
+        let _x: (&mut [u8], &mut [MaybeUninit<u8>]) = read(&input, &mut buf[..]).unwrap();
+
+        let mut buf = vec![
+            MaybeUninit::uninit(),
+            MaybeUninit::uninit(),
+            MaybeUninit::uninit(),
+        ];
+        let _x: (&mut [u8], &mut [MaybeUninit<u8>]) = read(&input, &mut buf).unwrap();
+        let _x: (&mut [u8], &mut [MaybeUninit<u8>]) = read(&input, &mut buf[..]).unwrap();
+
+        // This is reduced from src/fs/inotify.rs line 177.
+        struct Wrapper<'a>(&'a mut [u8]);
+        impl<'a> Wrapper<'a> {
+            fn read(&mut self) {
+                let input = std::fs::File::open("Cargo.toml").unwrap();
+
+                // Ideally we'd write this.
+                //let _x: usize = read(&input, self.0).unwrap();
+                // But we need to write this instead.
+                let _x: usize = read(&input, &mut *self.0).unwrap();
+            }
+        }
+        let mut buf = vec![0_u8; 3];
+        let mut wrapper = Wrapper(&mut buf);
+        wrapper.read();
+
+        // Why does this get two error messages?
+        //let mut buf = [0, 0, 0];
+        //let _x = read(&input, buf).unwrap();
+    }
 
     #[test]
     fn test_split_init() {
