@@ -9,8 +9,8 @@ use core::slice;
 
 /// A memory buffer that may be uninitialized.
 ///
-/// If you see errors like "move occurs because `x.y` has type `&mut [u8]`,
-/// which does not implement the `Copy` trait", replace `x.y` with `&mut *x.y`.
+/// If you see errors like "move occurs because `x` has type `&mut [u8]`,
+/// which does not implement the `Copy` trait", replace `x` with `&mut *x`.
 pub trait Buffer<T>: private::Sealed<T> {}
 
 // Implement `Buffer` for all the types that implement `Sealed`.
