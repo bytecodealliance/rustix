@@ -184,11 +184,20 @@ pub(crate) const CLONE_CHILD_SETTID: c_int = linux_raw_sys::general::CLONE_CHILD
 #[cfg(feature = "process")]
 pub(crate) use linux_raw_sys::{
     general::{
-        CLD_CONTINUED, CLD_DUMPED, CLD_EXITED, CLD_KILLED, CLD_STOPPED, CLD_TRAPPED,
-        O_NONBLOCK as PIDFD_NONBLOCK, P_ALL, P_PGID, P_PID, P_PIDFD,
+        CLD_CONTINUED, CLD_DUMPED, CLD_EXITED, CLD_KILLED, CLD_STOPPED, CLD_TRAPPED, F_RDLCK,
+        F_UNLCK, F_WRLCK, O_NONBLOCK as PIDFD_NONBLOCK, P_ALL, P_PGID, P_PID, P_PIDFD, SEEK_CUR,
+        SEEK_END, SEEK_SET,
     },
     ioctl::TIOCSCTTY,
 };
+
+#[cfg(feature = "process")]
+#[cfg(target_pointer_width = "32")]
+pub(crate) use linux_raw_sys::general::{flock64 as flock, F_GETLK64 as F_GETLK};
+
+#[cfg(feature = "process")]
+#[cfg(target_pointer_width = "64")]
+pub(crate) use linux_raw_sys::general::{flock, F_GETLK};
 
 #[cfg(feature = "pty")]
 pub(crate) use linux_raw_sys::ioctl::TIOCGPTPEER;

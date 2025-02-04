@@ -18,8 +18,8 @@ use crate::ffi::CStr;
 use crate::io;
 use crate::pid::RawPid;
 use crate::process::{
-    Pid, PidfdFlags, PidfdGetfdFlags, Resource, Rlimit, Uid, WaitId, WaitIdOptions, WaitIdStatus,
-    WaitOptions, WaitStatus,
+    Flock, Pid, PidfdFlags, PidfdGetfdFlags, Resource, Rlimit, Uid, WaitId, WaitIdOptions,
+    WaitIdStatus, WaitOptions, WaitStatus,
 };
 use crate::signal::Signal;
 use core::mem::MaybeUninit;
@@ -517,5 +517,34 @@ pub(crate) fn getgroups(buf: &mut [Gid]) -> io::Result<usize> {
             c_int(len),
             slice_just_addr_mut(buf)
         ))
+    }
+}
+
+#[inline]
+pub(crate) fn fcntl_getlk(fd: BorrowedFd<'_>, lock: &Flock) -> io::Result<Option<Flock>> {
+    let mut curr_lock: c::flock = lock.as_raw();
+    #[cfg(target_pointer_width = "32")]
+    unsafe {
+        ret(syscall_readonly!(
+            __NR_fcntl64,
+            fd,
+            c_uint(c::F_GETLK),
+            by_ref(&mut curr_lock)
+        ))?
+    }
+    #[cfg(target_pointer_width = "64")]
+    unsafe {
+        ret(syscall_readonly!(
+            __NR_fcntl,
+            fd,
+            c_uint(c::F_GETLK),
+            by_ref(&mut curr_lock)
+        ))?
+    }
+
+    if curr_lock.l_pid == Pid::as_raw(lock.pid) {
+        Ok(None)
+    } else {
+        Ok(Some(unsafe { Flock::from_raw_unchecked(curr_lock) }))
     }
 }
