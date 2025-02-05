@@ -1,9 +1,8 @@
-use rustix::fd::BorrowedFd;
+use rustix::fd::{AsRawFd, BorrowedFd};
 use rustix::fs::{fcntl_lock, FlockOperation};
 use rustix::process::{fcntl_getlk, getppid, Flock, FlockType};
 use std::fs::File;
 use std::io::ErrorKind;
-use std::os::fd::AsRawFd;
 use std::os::unix::process::CommandExt;
 use std::process::Command;
 
