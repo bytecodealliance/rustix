@@ -50,7 +50,7 @@ impl From<FlockType> for Flock {
             length: 0,
             pid: None,
             typ: value,
-            offset_type: FlockOffsetType::Seek,
+            offset_type: FlockOffsetType::Set,
         }
     }
 }
@@ -76,7 +76,7 @@ pub enum FlockType {
 #[repr(i16)]
 pub enum FlockOffsetType {
     /// `F_SEEK_SET`
-    Seek = c::SEEK_SET as _,
+    Set = c::SEEK_SET as _,
     /// `F_SEEK_CUR`
     Current = c::SEEK_CUR as _,
     /// `F_SEEK_END`
