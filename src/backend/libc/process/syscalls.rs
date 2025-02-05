@@ -666,7 +666,6 @@ pub(crate) fn getgroups(buf: &mut [Gid]) -> io::Result<usize> {
 )))]
 #[inline]
 pub(crate) fn fcntl_getlk(fd: BorrowedFd<'_>, lock: &Flock) -> io::Result<Option<Flock>> {
-    #[cfg(target_os = "macos")]
     if lock.typ == crate::process::FlockType::Unlocked {
         return Err(io::Errno::INVAL);
     }
