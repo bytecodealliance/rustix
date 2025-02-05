@@ -11,7 +11,7 @@ use crate::ffi;
 use core::ptr::null;
 
 /// `struct timespec`
-#[derive(Debug, Clone, Copy, Default)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord)]
 #[repr(C)]
 pub struct Timespec {
     /// Seconds.
