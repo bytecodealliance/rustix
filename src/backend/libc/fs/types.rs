@@ -338,6 +338,20 @@ bitflags! {
         #[cfg(any(linux_kernel, solarish))]
         const LARGEFILE = bitcast!(c::O_LARGEFILE);
 
+        /// `O_ASYNC`, `FASYNC`
+        ///
+        /// Note that this flag can't be used with [`rustix::fs::open`] family of functions, use
+        /// [`rustix::fs::fcntl_setfl`] instead
+        #[cfg(not(any(
+            target_os = "aix",
+            target_os = "espidf",
+            target_os = "haiku",
+            target_os = "wasi",
+            target_os = "vita",
+            solarish
+        )))]
+        const ASYNC = bitcast!(c::O_ASYNC);
+
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }

@@ -257,6 +257,12 @@ bitflags! {
         /// It will may be reported in return of `fcntl_getfl`, though.
         const LARGEFILE = linux_raw_sys::general::O_LARGEFILE;
 
+        /// `O_ASYNC`, `FASYNC`
+        ///
+        /// Note that this flag can't be used with [`rustix::fs::open`] family of functions, use
+        /// [`rustix::fs::fcntl_setfl`] instead
+        const ASYNC = linux_raw_sys::general::FASYNC;
+
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
