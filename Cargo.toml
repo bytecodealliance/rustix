@@ -99,6 +99,7 @@ targets = [
     "wasm32-unknown-emscripten",
     "wasm32-wasip1",
 ]
+rustdoc-args = ["--cfg", "document_experimental_runtime_api"]
 
 [features]
 
