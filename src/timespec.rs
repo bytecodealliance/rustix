@@ -3,6 +3,10 @@
 
 #![allow(dead_code)]
 
+use core::num::TryFromIntError;
+use core::ops::{Add, AddAssign, Neg, Sub, SubAssign};
+use core::time::Duration;
+
 #[cfg(not(fix_y2038))]
 use crate::backend::c;
 #[allow(unused)]
@@ -39,6 +43,149 @@ pub type Nsecs = i64;
     not(all(target_arch = "x86_64", target_pointer_width = "32"))
 ))]
 pub type Nsecs = ffi::c_long;
+
+impl Timespec {
+    /// Checked `Timespec` addition. Returns `None` if overflow occurred.
+    ///
+    /// # Panics
+    ///
+    /// If `0 <= .tv_nsec < 1_000_000_000` doesn't hold, this function may panic or return
+    /// unexpected results.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use rustix::event::Timespec;
+    ///
+    /// assert_eq!(
+    ///     Timespec { tv_sec: 1, tv_nsec: 2 }.checked_add(Timespec { tv_sec: 30, tv_nsec: 40 }),
+    ///     Some(Timespec { tv_sec: 31, tv_nsec: 42 })
+    /// );
+    /// assert_eq!(
+    ///     Timespec { tv_sec: 0, tv_nsec: 999_999_999 }.checked_add(Timespec { tv_sec: 0, tv_nsec: 2 }),
+    ///     Some(Timespec { tv_sec: 1, tv_nsec: 1 })
+    /// );
+    /// assert_eq!(
+    ///     Timespec { tv_sec: i64::MAX, tv_nsec: 999_999_999 }.checked_add(Timespec { tv_sec: 0, tv_nsec: 1 }),
+    ///     None
+    /// );
+    /// ```
+    pub const fn checked_add(self, rhs: Self) -> Option<Self> {
+        if let Some(mut tv_sec) = self.tv_sec.checked_add(rhs.tv_sec) {
+            let mut tv_nsec = self.tv_nsec + rhs.tv_nsec;
+            if tv_nsec >= 1_000_000_000 {
+                tv_nsec -= 1_000_000_000;
+                if let Some(carried_sec) = tv_sec.checked_add(1) {
+                    tv_sec = carried_sec;
+                } else {
+                    return None;
+                }
+            }
+            Some(Timespec { tv_sec, tv_nsec })
+        } else {
+            None
+        }
+    }
+
+    /// Checked `Timespec` subtraction. Returns `None` if overflow occurred.
+    ///
+    /// # Panics
+    ///
+    /// If `0 <= .tv_nsec < 1_000_000_000` doesn't hold, this function may panic or return
+    /// unexpected results.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use rustix::event::Timespec;
+    ///
+    /// assert_eq!(
+    ///     Timespec { tv_sec: 31, tv_nsec: 42 }.checked_sub(Timespec { tv_sec: 30, tv_nsec: 40 }),
+    ///     Some(Timespec { tv_sec: 1, tv_nsec: 2 })
+    /// );
+    /// assert_eq!(
+    ///     Timespec { tv_sec: 1, tv_nsec: 1 }.checked_sub(Timespec { tv_sec: 0, tv_nsec: 2 }),
+    ///     Some(Timespec { tv_sec: 0, tv_nsec: 999_999_999 })
+    /// );
+    /// assert_eq!(
+    ///     Timespec { tv_sec: i64::MIN, tv_nsec: 0 }.checked_sub(Timespec { tv_sec: 0, tv_nsec: 1 }),
+    ///     None
+    /// );
+    /// ```
+    pub const fn checked_sub(self, rhs: Self) -> Option<Self> {
+        if let Some(mut tv_sec) = self.tv_sec.checked_sub(rhs.tv_sec) {
+            let mut tv_nsec = self.tv_nsec - rhs.tv_nsec;
+            if tv_nsec < 0 {
+                tv_nsec += 1_000_000_000;
+                if let Some(borrowed_sec) = tv_sec.checked_sub(1) {
+                    tv_sec = borrowed_sec;
+                } else {
+                    return None;
+                }
+            }
+            Some(Timespec { tv_sec, tv_nsec })
+        } else {
+            None
+        }
+    }
+}
+
+impl TryFrom<Timespec> for Duration {
+    type Error = TryFromIntError;
+
+    fn try_from(ts: Timespec) -> Result<Duration, Self::Error> {
+        Ok(Duration::new(ts.tv_sec.try_into()?, ts.tv_nsec as _))
+    }
+}
+
+impl TryFrom<Duration> for Timespec {
+    type Error = TryFromIntError;
+
+    fn try_from(dur: Duration) -> Result<Timespec, Self::Error> {
+        Ok(Timespec {
+            tv_sec: dur.as_secs().try_into()?,
+            tv_nsec: dur.subsec_nanos() as _,
+        })
+    }
+}
+
+impl Add for Timespec {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self {
+        self.checked_add(rhs)
+            .expect("overflow when adding timespecs")
+    }
+}
+
+impl AddAssign for Timespec {
+    fn add_assign(&mut self, rhs: Self) {
+        *self = *self + rhs;
+    }
+}
+
+impl Sub for Timespec {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self {
+        self.checked_sub(rhs)
+            .expect("overflow when subtracting timespecs")
+    }
+}
+
+impl SubAssign for Timespec {
+    fn sub_assign(&mut self, rhs: Self) {
+        *self = *self - rhs;
+    }
+}
+
+impl Neg for Timespec {
+    type Output = Self;
+
+    fn neg(self) -> Self {
+        Self::default() - self
+    }
+}
 
 /// On 32-bit glibc platforms, `timespec` has anonymous padding fields, which
 /// Rust doesn't support yet (see `unnamed_fields`), so we define our own
