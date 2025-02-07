@@ -164,6 +164,11 @@ pub mod yet {
 /// Rustix's codebase includes experimental implementations of these functions,
 /// however they are not yet publicly exposed because their API might need more
 /// work and/or they don't yet have a libc backend implementation.
+///
+/// See [#1314] for more information, and please leave comments if there are
+/// specific functions you're interested in.
+///
+/// [#1314]: https://github.com/bytecodealliance/rustix/issues/1314
 pub mod quite_yet {
     not_implemented!(_exit);
     not_implemented!(_Exit);
