@@ -221,7 +221,6 @@ pub mod higher_level {
     not_implemented!(execv);
     not_implemented!(execvp);
     not_implemented!(execvpe);
-    not_implemented!(execvpe);
     not_implemented!(wordexp);
 
     /// See [rustix-openpty](https://github.com/sunfishcode/rustix-openpty).
