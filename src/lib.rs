@@ -398,3 +398,6 @@ mod timespec;
     all(linux_kernel, feature = "net")
 ))]
 mod ugid;
+
+#[cfg(doc)]
+pub mod not_implemented;

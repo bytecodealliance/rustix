@@ -58,10 +58,16 @@ use core::ffi::c_void;
 pub use crate::signal::Signal;
 
 /// `sigaction`
+///
+/// If we want to expose this in public APIs, we should encapsulate the
+/// `linux_raw_sys` type.
 #[cfg(linux_raw)]
 pub type Sigaction = linux_raw_sys::general::kernel_sigaction;
 
 /// `stack_t`
+///
+/// If we want to expose this in public APIs, we should encapsulate the
+/// `linux_raw_sys` type.
 #[cfg(linux_raw)]
 pub type Stack = linux_raw_sys::general::stack_t;
 
@@ -72,10 +78,16 @@ pub type Stack = linux_raw_sys::general::stack_t;
 /// `linux_raw_sys::general::SIGRTMIN` to what the libc thinks `SIGRTMIN` is.
 /// Unless you are implementing the libc. Which you may indeed be doing, if
 /// you're reading this.
+///
+/// If we want to expose this in public APIs, we should encapsulate the
+/// `linux_raw_sys` type.
 #[cfg(linux_raw)]
 pub type Sigset = linux_raw_sys::general::kernel_sigset_t;
 
 /// `siginfo_t`
+///
+/// If we want to expose this in public APIs, we should encapsulate the
+/// `linux_raw_sys` type.
 #[cfg(linux_raw)]
 pub type Siginfo = linux_raw_sys::general::siginfo_t;
 
