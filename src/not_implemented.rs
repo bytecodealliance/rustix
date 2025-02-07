@@ -16,12 +16,15 @@ macro_rules! not_implemented {
 /// Memory-allocation functions are out of scope for rustix.
 ///
 /// It is possible to implement `malloc`, `free`, and similar functions in
-/// Rust, however rustix itself is focused on syscall-like functions.
+/// Rust, however rustix itself is focused on syscall-like functions. This
+/// module contains an incomplete list of such functions.
 ///
 /// There are several allocator implementations for Rust; one of them is
 /// [dlmalloc]. For a rustix-based implementation, see [rustix-dlmalloc].
+/// Another allocator implementaion is [talc].
 ///
 /// [dlmalloc]: https://crates.io/crates/dlmalloc
+/// [talc]: https://crates.io/crates/talc
 /// [rustix-dlmalloc]: https://github.com/sunfishcode/rustix-dlmalloc
 pub mod memory_allocation {
     not_implemented!(malloc);
@@ -42,6 +45,7 @@ pub mod memory_allocation {
 /// a process, and so on, and libc expects to own the one of each of those
 /// things. And libc implementations may expect to be involved in signal
 /// handling. So, these functions are believed to be out of scope for rustix.
+/// This module contains an incomplete list of such functions.
 ///
 /// It would be possible to make a rust library which provides safe or
 /// ergonomic wrappers around these libc functions, however that is out of
@@ -55,7 +59,7 @@ pub mod memory_allocation {
 /// If you are otherwise writing Rust code which you know will not share a
 /// process with a libc, perhaps because you are writing a libc or similar
 /// yourself, rustix's codebase does include experimental implementations of
-/// the primitives needed to implement these functions.
+/// the primitives needed to implement most of these functions.
 ///
 /// [Eyra]: https://github.com/sunfishcode/eyra?tab=readme-ov-file#eyra
 /// [origin]: https://github.com/sunfishcode/origin?tab=readme-ov-file#origin
@@ -63,10 +67,6 @@ pub mod libc_internals {
     not_implemented!(exit);
     not_implemented!(fork);
     not_implemented!(brk);
-    not_implemented!(pthread_create);
-    not_implemented!(pthread_mutex_init);
-    not_implemented!(pthread_setschedparam);
-    not_implemented!(pthread_setschedprio);
     not_implemented!(sigaction);
     not_implemented!(sigaltstack);
     not_implemented!(sigprocmask);
@@ -77,6 +77,130 @@ pub mod libc_internals {
     not_implemented!(set_tid_address);
     not_implemented!(tkill);
     not_implemented!(sched_setscheduler);
+    not_implemented!(rseq);
+
+    not_implemented!(pthread_atfork);
+    not_implemented!(pthread_attr_destroy);
+    not_implemented!(pthread_attr_getaffinity_np);
+    not_implemented!(pthread_attr_getdetachstate);
+    not_implemented!(pthread_attr_getguardsize);
+    not_implemented!(pthread_attr_getinheritsched);
+    not_implemented!(pthread_attr_getschedparam);
+    not_implemented!(pthread_attr_getschedpolicy);
+    not_implemented!(pthread_attr_getscope);
+    not_implemented!(pthread_attr_getsigmask_np);
+    not_implemented!(pthread_attr_getstack);
+    not_implemented!(pthread_attr_getstackaddr);
+    not_implemented!(pthread_attr_getstacksize);
+    not_implemented!(pthread_attr_init);
+    not_implemented!(pthread_attr_setaffinity_np);
+    not_implemented!(pthread_attr_setdetachstate);
+    not_implemented!(pthread_attr_setguardsize);
+    not_implemented!(pthread_attr_setinheritsched);
+    not_implemented!(pthread_attr_setschedparam);
+    not_implemented!(pthread_attr_setschedpolicy);
+    not_implemented!(pthread_attr_setscope);
+    not_implemented!(pthread_attr_setsigmask_np);
+    not_implemented!(pthread_attr_setstack);
+    not_implemented!(pthread_attr_setstackaddr);
+    not_implemented!(pthread_attr_setstacksize);
+    not_implemented!(pthread_barrierattr_destroy);
+    not_implemented!(pthread_barrierattr_getpshared);
+    not_implemented!(pthread_barrierattr_init);
+    not_implemented!(pthread_barrierattr_setpshared);
+    not_implemented!(pthread_barrier_destroy);
+    not_implemented!(pthread_barrier_wait);
+    not_implemented!(pthread_cancel);
+    not_implemented!(pthread_cleanup_pop);
+    not_implemented!(pthread_cleanup_pop_restore_np);
+    not_implemented!(pthread_cleanup_push);
+    not_implemented!(pthread_cleanup_push_defer_np);
+    not_implemented!(pthread_condattr_destroy);
+    not_implemented!(pthread_condattr_getclock);
+    not_implemented!(pthread_condattr_getpshared);
+    not_implemented!(pthread_condattr_init);
+    not_implemented!(pthread_condattr_setclock);
+    not_implemented!(pthread_condattr_setpshared);
+    not_implemented!(pthread_cond_broadcast);
+    not_implemented!(pthread_cond_destroy);
+    not_implemented!(pthread_cond_signal);
+    not_implemented!(pthread_cond_timedwait);
+    not_implemented!(pthread_create);
+    not_implemented!(pthread_detach);
+    not_implemented!(pthread_equal);
+    not_implemented!(pthread_exit);
+    not_implemented!(pthread_getaffinity_np);
+    not_implemented!(pthread_getattr_default_np);
+    not_implemented!(pthread_getattr_np);
+    not_implemented!(pthread_getconcurrency);
+    not_implemented!(pthread_getcpuclockid);
+    not_implemented!(pthread_getname_np);
+    not_implemented!(pthread_getschedparam);
+    not_implemented!(pthread_getspecific);
+    not_implemented!(pthread_join);
+    not_implemented!(pthread_key_create);
+    not_implemented!(pthread_key_delete);
+    not_implemented!(pthread_kill);
+    not_implemented!(pthread_kill_other_threads_np);
+    not_implemented!(pthread_mutexattr_destroy);
+    not_implemented!(pthread_mutexattr_getprioceiling);
+    not_implemented!(pthread_mutexattr_getprotocol);
+    not_implemented!(pthread_mutexattr_getpshared);
+    not_implemented!(pthread_mutexattr_getrobust);
+    not_implemented!(pthread_mutexattr_getrobust_np);
+    not_implemented!(pthread_mutexattr_gettype);
+    not_implemented!(pthread_mutexattr_init);
+    not_implemented!(pthread_mutexattr_setprioceiling);
+    not_implemented!(pthread_mutexattr_setprotocol);
+    not_implemented!(pthread_mutexattr_setpshared);
+    not_implemented!(pthread_mutexattr_setrobust);
+    not_implemented!(pthread_mutexattr_setrobust_np);
+    not_implemented!(pthread_mutexattr_settype);
+    not_implemented!(pthread_mutex_consistent);
+    not_implemented!(pthread_mutex_consistent_np);
+    not_implemented!(pthread_mutex_destroy);
+    not_implemented!(pthread_mutex_getprioceiling);
+    not_implemented!(pthread_mutex_init);
+    not_implemented!(pthread_mutex_lock);
+    not_implemented!(pthread_mutex_setprioceiling);
+    not_implemented!(pthread_mutex_timedlock);
+    not_implemented!(pthread_mutex_trylock);
+    not_implemented!(pthread_once);
+    not_implemented!(pthread_rwlockattr_destroy);
+    not_implemented!(pthread_rwlockattr_getkind_np);
+    not_implemented!(pthread_rwlockattr_getpshared);
+    not_implemented!(pthread_rwlockattr_init);
+    not_implemented!(pthread_rwlockattr_setkind_np);
+    not_implemented!(pthread_rwlockattr_setpshared);
+    not_implemented!(pthread_rwlock_destroy);
+    not_implemented!(pthread_rwlock_rdlock);
+    not_implemented!(pthread_rwlock_timedrdlock);
+    not_implemented!(pthread_rwlock_timedwrlock);
+    not_implemented!(pthread_rwlock_tryrdlock);
+    not_implemented!(pthread_rwlock_trywrlock);
+    not_implemented!(pthread_rwlock_unlock);
+    not_implemented!(pthread_rwlock_wrlock);
+    not_implemented!(pthread_self);
+    not_implemented!(pthread_setaffinity_np);
+    not_implemented!(pthread_setattr_default_np);
+    not_implemented!(pthread_setcancelstate);
+    not_implemented!(pthread_setcanceltype);
+    not_implemented!(pthread_setconcurrency);
+    not_implemented!(pthread_setname_np);
+    not_implemented!(pthread_setschedparam);
+    not_implemented!(pthread_setschedprio);
+    not_implemented!(pthread_setspecific);
+    not_implemented!(pthread_sigmask);
+    not_implemented!(pthread_sigqueue);
+    not_implemented!(pthread_spin_destroy);
+    not_implemented!(pthread_spin_init);
+    not_implemented!(pthread_spin_lock);
+    not_implemented!(pthread_spin_trylock);
+    not_implemented!(pthread_spin_unlock);
+    not_implemented!(pthread_testcancel);
+    not_implemented!(pthread_timedjoin_np);
+    not_implemented!(pthread_tryjoin_np);
+    not_implemented!(pthread_yield);
 }
 
 /// Functions which provide higher-level functionality are out of scope for
@@ -85,7 +209,8 @@ pub mod libc_internals {
 /// These functions are provided by typical libc implementations, but are
 /// higher-level than the simple syscall-like functions that rustix focuses
 /// on. They could be implemented as a separate library built on top of rustix,
-/// rather than being part of rustix itself.
+/// rather than being part of rustix itself. This module contains an incomplete
+/// list of such functions.
 pub mod higher_level {
     not_implemented!(getpwent);
     not_implemented!(getpwuid);
@@ -128,7 +253,8 @@ pub mod higher_level {
 /// These functions are not yet implemented in rustix, but probably could be.
 ///
 /// These are functions that users have asked about, and which probably are
-/// in scope for rustix, but are not yet implemented.
+/// in scope for rustix, but are not yet implemented. This module contains an
+/// incomplete list of such functions.
 pub mod yet {
     not_implemented!(tgkill);
     not_implemented!(raise);
