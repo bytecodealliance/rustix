@@ -93,6 +93,11 @@ pub mod higher_level {
     not_implemented!(getpwuid_r);
     not_implemented!(getpwnam_r);
     not_implemented!(gethostbyname);
+    not_implemented!(execv);
+    not_implemented!(execvp);
+    not_implemented!(execvpe);
+    not_implemented!(execvpe);
+    not_implemented!(wordexp);
 
     /// See [rustix-openpty](https://github.com/sunfishcode/rustix-openpty).
     pub fn closefrom() {
