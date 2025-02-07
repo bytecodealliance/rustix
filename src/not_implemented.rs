@@ -7,8 +7,10 @@
 macro_rules! not_implemented {
     ($func:ident) => {
         /// See the [module comment](self).
-        pub fn $func() { unimplemented!() }
-    }
+        pub fn $func() {
+            unimplemented!()
+        }
+    };
 }
 
 /// Memory-allocation functions are out of scope for rustix.
@@ -79,7 +81,7 @@ pub mod libc_internals {
 
 /// Functions which provide higher-level functionality are out of scope for
 /// rustix.
-/// 
+///
 /// These functions are provided by typical libc implementations, but are
 /// higher-level than the simple syscall-like functions that rustix focuses
 /// on. They could be implemented as a separate library built on top of rustix,
@@ -93,11 +95,17 @@ pub mod higher_level {
     not_implemented!(gethostbyname);
 
     /// See [rustix-openpty](https://github.com/sunfishcode/rustix-openpty).
-    pub fn closefrom() { unimplemented!() }
+    pub fn closefrom() {
+        unimplemented!()
+    }
     /// See [rustix-openpty](https://github.com/sunfishcode/rustix-openpty).
-    pub fn login_tty() { unimplemented!() }
+    pub fn login_tty() {
+        unimplemented!()
+    }
     /// See [rustix-openpty](https://github.com/sunfishcode/rustix-openpty).
-    pub fn openpty() { unimplemented!() }
+    pub fn openpty() {
+        unimplemented!()
+    }
 
     /// See [`std::io::IsTerminal`].
     ///
@@ -107,7 +115,9 @@ pub mod higher_level {
     /// [`std::io::IsTerminal`]: https://doc.rust-lang.org/stable/std/io/trait.IsTerminal.html
     /// [is-terminal]: https://crates.io/crates/is-terminal
     /// [rustix-is-terminal]: https://github.com/sunfishcode/rustix-is-terminal
-    pub fn isatty() { unimplemented!() }
+    pub fn isatty() {
+        unimplemented!()
+    }
 }
 
 /// These functions are not yet implemented in rustix, but probably could be.
@@ -166,5 +176,7 @@ pub mod quite_yet {
     /// For now, use `rustix::process::uname().nodename()` instead.
     ///
     /// See also the [module comment](self).
-    pub fn gethostname() { unimplemented!() }
+    pub fn gethostname() {
+        unimplemented!()
+    }
 }
