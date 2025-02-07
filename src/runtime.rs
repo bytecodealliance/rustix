@@ -362,6 +362,10 @@ pub enum Fork {
 /// `execveat(dirfd, path.as_c_str(), argv, envp, flags)`—Execute a new
 /// command using the current process.
 ///
+/// Taking raw-pointers-to-raw-pointers is convenient for c-scape, but we
+/// should think about potentially a more Rust-idiomatic API if this is ever
+/// made public.
+///
 /// # Safety
 ///
 /// The `argv` and `envp` pointers must point to NUL-terminated arrays, and
@@ -386,6 +390,10 @@ pub unsafe fn execveat<Fd: AsFd>(
 
 /// `execve(path.as_c_str(), argv, envp)`—Execute a new command using the
 /// current process.
+///
+/// Taking raw-pointers-to-raw-pointers is convenient for c-scape, but we
+/// should think about potentially a more Rust-idiomatic API if this is ever
+/// made public.
 ///
 /// # Safety
 ///
@@ -478,6 +486,9 @@ pub unsafe fn sigprocmask(how: How, set: Option<&Sigset>) -> io::Result<Sigset> 
 
 /// `sigpending()`—Query the pending signals.
 ///
+/// If this is ever exposed publicly, we should think about whether it should
+/// mask out signals reserved by libc.
+///
 /// # References
 ///  - [Linux `sigpending`]
 ///
@@ -488,6 +499,9 @@ pub fn sigpending() -> Sigset {
 }
 
 /// `sigsuspend(set)`—Suspend the calling thread and wait for signals.
+///
+/// If this is ever exposed publicly, we should think about whether it should
+/// be made to fail if given signals reserved by libc.
 ///
 /// # References
 ///  - [Linux `sigsuspend`]
