@@ -14,12 +14,18 @@ use crate::{backend, io};
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/mount.2.html
 #[inline]
-pub fn mount<'a, Source: path::Arg, Target: path::Arg, Fs: path::Arg>(
+pub fn mount<
+    'a,
+    Source: path::Arg,
+    Target: path::Arg,
+    Fs: path::Arg,
+    Data: Into<Option<&'a CStr>>,
+>(
     source: Source,
     target: Target,
     file_system_type: Fs,
     flags: MountFlags,
-    data: impl Into<Option<&'a CStr>>,
+    data: Data,
 ) -> io::Result<()> {
     source.into_with_c_str(|source| {
         target.into_with_c_str(|target| {
