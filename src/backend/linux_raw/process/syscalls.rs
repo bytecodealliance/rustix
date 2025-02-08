@@ -525,7 +525,7 @@ pub(crate) fn fcntl_getlk(fd: BorrowedFd<'_>, lock: &Flock) -> io::Result<Option
     let mut curr_lock: c::flock = lock.as_raw();
     #[cfg(target_pointer_width = "32")]
     unsafe {
-        ret(syscall_readonly!(
+        ret(syscall!(
             __NR_fcntl64,
             fd,
             c_uint(c::F_GETLK64),
@@ -534,7 +534,7 @@ pub(crate) fn fcntl_getlk(fd: BorrowedFd<'_>, lock: &Flock) -> io::Result<Option
     }
     #[cfg(target_pointer_width = "64")]
     unsafe {
-        ret(syscall_readonly!(
+        ret(syscall!(
             __NR_fcntl,
             fd,
             c_uint(c::F_GETLK),
