@@ -14,12 +14,12 @@ use crate::{backend, io};
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/mount.2.html
 #[inline]
-pub fn mount<Source: path::Arg, Target: path::Arg, Fs: path::Arg, Data: path::Arg>(
+pub fn mount<'a, Source: path::Arg, Target: path::Arg, Fs: path::Arg>(
     source: Source,
     target: Target,
     file_system_type: Fs,
     flags: MountFlags,
-    data: impl Into<Option<Data>>,
+    data: impl Into<Option<&'a CStr>>,
 ) -> io::Result<()> {
     source.into_with_c_str(|source| {
         target.into_with_c_str(|target| {
@@ -33,41 +33,6 @@ pub fn mount<Source: path::Arg, Target: path::Arg, Fs: path::Arg, Data: path::Ar
                         data,
                     )
                 })
-            })
-        })
-    })
-}
-
-/// `mount2(source, target, filesystemtype, mountflags, data)`
-///
-/// This is same as the [`mount`], except it adds support for the source,
-/// target, and data being omitted, and the data is passed as a `CStr` rather
-/// than a `path::Arg`.
-///
-/// # References
-///  - [Linux]
-///
-/// [Linux]: https://man7.org/linux/man-pages/man2/mount.2.html
-#[inline]
-#[deprecated(note = "This API was added in error, use the expressive mount APIs instead.")]
-#[doc(hidden)]
-pub fn mount2<Source: path::Arg, Target: path::Arg, Fs: path::Arg>(
-    source: Option<Source>,
-    target: Target,
-    file_system_type: Option<Fs>,
-    flags: MountFlags,
-    data: Option<&CStr>,
-) -> io::Result<()> {
-    option_into_with_c_str(source, |source| {
-        target.into_with_c_str(|target| {
-            option_into_with_c_str(file_system_type, |file_system_type| {
-                backend::mount::syscalls::mount(
-                    source,
-                    target,
-                    file_system_type,
-                    MountFlagsArg(flags.bits()),
-                    data,
-                )
             })
         })
     })
