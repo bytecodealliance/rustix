@@ -193,7 +193,7 @@ pub(crate) use linux_raw_sys::{
 
 #[cfg(feature = "process")]
 #[cfg(target_pointer_width = "32")]
-pub(crate) use linux_raw_sys::general::{flock64 as flock, F_GETLK64 as F_GETLK};
+pub(crate) use linux_raw_sys::general::{flock64 as flock, F_GETLK64};
 
 #[cfg(feature = "process")]
 #[cfg(target_pointer_width = "64")]

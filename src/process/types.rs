@@ -10,9 +10,9 @@ use core::mem::transmute;
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Flock {
     /// Starting offset for lock
-    pub start: isize,
+    pub start: u64,
     /// Number of bytes to lock
-    pub length: isize,
+    pub length: u64,
     /// PID of process blocking our lock. If set to `None`, it refers to the current process
     pub pid: Option<Pid>,
     /// Type of lock

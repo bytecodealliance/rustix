@@ -528,7 +528,7 @@ pub(crate) fn fcntl_getlk(fd: BorrowedFd<'_>, lock: &Flock) -> io::Result<Option
         ret(syscall_readonly!(
             __NR_fcntl64,
             fd,
-            c_uint(c::F_GETLK),
+            c_uint(c::F_GETLK64),
             by_ref(&mut curr_lock)
         ))?
     }
@@ -542,7 +542,8 @@ pub(crate) fn fcntl_getlk(fd: BorrowedFd<'_>, lock: &Flock) -> io::Result<Option
         ))?
     }
 
-    if curr_lock.l_pid == Pid::as_raw(lock.pid) {
+    // If no blocking lock is found, `fcntl(GETLK, ..)` sets `l_type` to `F_UNLCK`
+    if curr_lock.l_type == c::F_UNLCK as _ {
         Ok(None)
     } else {
         Ok(Some(unsafe { Flock::from_raw_unchecked(curr_lock) }))

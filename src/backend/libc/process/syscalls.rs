@@ -673,7 +673,8 @@ pub(crate) fn fcntl_getlk(fd: BorrowedFd<'_>, lock: &Flock) -> io::Result<Option
     let mut curr_lock: c::flock = lock.as_raw();
     unsafe { ret(c::fcntl(borrowed_fd(fd), c::F_GETLK, &mut curr_lock))? };
 
-    if curr_lock.l_pid == Pid::as_raw(lock.pid) {
+    // If no blocking lock is found, `fcntl(GETLK, ..)` sets `l_type` to `F_UNLCK`
+    if curr_lock.l_type == c::F_UNLCK as _ {
         Ok(None)
     } else {
         Ok(Some(unsafe { Flock::from_raw_unchecked(curr_lock) }))

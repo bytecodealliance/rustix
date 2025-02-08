@@ -2,7 +2,7 @@ use super::Flock;
 use crate::fd::AsFd;
 use crate::{backend, io};
 
-/// `fcntl(fd, F_GETLK)`—Get the first lock that blocks the lock description pointed to by the argument `lock`.
+/// `fcntl(fd, F_GETLK)`—Get the first lock that blocks the lock description pointed to by the argument `lock`. If no such lock is found, then `None` is returned
 ///
 /// # References
 ///  - [POSIX]
