@@ -1244,7 +1244,7 @@ pub(crate) fn fadvise(fd: BorrowedFd<'_>, offset: u64, len: u64, advice: Advice)
     // the length so that we only operate on the range that doesn't overflow.
     #[cfg(target_os = "freebsd")]
     let len = if len > 0 && offset.checked_add(len).is_none() {
-        i64::MAX - offset + 1
+        i64::MAX - offset
     } else {
         len
     };
