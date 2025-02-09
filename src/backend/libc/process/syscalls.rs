@@ -666,12 +666,6 @@ pub(crate) fn getgroups(buf: &mut [Gid]) -> io::Result<usize> {
 )))]
 #[inline]
 pub(crate) fn fcntl_getlk(fd: BorrowedFd<'_>, lock: &Flock) -> io::Result<Option<Flock>> {
-    // In order to guarantee consistent behavior across all POSIX platforms, return `EINVAL` when
-    // `flock.l_type` is `F_UNLCK`
-    if lock.typ == crate::process::FlockType::Unlocked {
-        return Err(io::Errno::INVAL);
-    }
-
     let mut curr_lock: c::flock = lock.as_raw();
     unsafe { ret(c::fcntl(borrowed_fd(fd), c::F_GETLK, &mut curr_lock))? };
 

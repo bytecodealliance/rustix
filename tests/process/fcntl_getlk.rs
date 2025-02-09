@@ -14,9 +14,6 @@ fn test_fcntl_getlk() {
     fcntl_lock(&f, FlockOperation::Unlock).unwrap();
     unsafe {
         child_process(&f, |fd| {
-            let err = fcntl_getlk(&fd, &Flock::from(FlockType::Unlocked)).unwrap_err();
-            assert_eq!(err.kind(), ErrorKind::InvalidInput);
-
             let lock = fcntl_getlk(&fd, &Flock::from(FlockType::ReadLock)).unwrap();
             assert_eq!(lock, None);
 
@@ -28,9 +25,6 @@ fn test_fcntl_getlk() {
     fcntl_lock(&f, FlockOperation::LockShared).unwrap();
     unsafe {
         child_process(&f, |fd| {
-            let err = fcntl_getlk(&fd, &Flock::from(FlockType::Unlocked)).unwrap_err();
-            assert_eq!(err.kind(), ErrorKind::InvalidInput);
-
             let lock = fcntl_getlk(&fd, &Flock::from(FlockType::ReadLock)).unwrap();
             assert_eq!(lock, None);
 
@@ -42,9 +36,6 @@ fn test_fcntl_getlk() {
     fcntl_lock(&f, FlockOperation::LockExclusive).unwrap();
     unsafe {
         child_process(&f, |fd| {
-            let err = fcntl_getlk(&fd, &Flock::from(FlockType::Unlocked)).unwrap_err();
-            assert_eq!(err.kind(), ErrorKind::InvalidInput);
-
             let lock = fcntl_getlk(&fd, &Flock::from(FlockType::ReadLock)).unwrap();
             assert_eq!(lock.and_then(|l| l.pid), getppid());
 
