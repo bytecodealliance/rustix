@@ -1229,6 +1229,10 @@ pub(crate) fn fadvise(fd: BorrowedFd<'_>, offset: u64, len: u64, advice: Advice)
     // [Rust convention]: https://doc.rust-lang.org/stable/std/io/enum.SeekFrom.html#variant.Start
     #[cfg(target_os = "freebsd")]
     if offset < 0 {
+        if len < 0 {
+            return Err(io::Errno::INVAL);
+        }
+
         return fadvise_noop(fd);
 
         #[cold]
