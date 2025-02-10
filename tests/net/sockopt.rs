@@ -526,7 +526,7 @@ fn test_socketopts_ip_mtu() {
 fn test_socketopts_ipv6_mtu() {
     crate::init();
 
-    let s = rustix::net::socket(AddressFamily::INET, SocketType::DGRAM, None).unwrap();
+    let s = rustix::net::socket(AddressFamily::INET6, SocketType::DGRAM, None).unwrap();
     rustix::net::bind(&s, &"[::1]:0".parse().unwrap()).unwrap();
     rustix::net::connect(&s, &"[::1]:0".parse().unwrap()).unwrap();
     assert!(rustix::net::sockopt::ipv6_mtu(&s).unwrap() > 0);
