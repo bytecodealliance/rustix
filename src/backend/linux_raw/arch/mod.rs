@@ -308,7 +308,7 @@ macro_rules! syscall_readonly {
 }
 
 /// Like `syscall`, but indicates that the syscall does not return.
-#[cfg(feature = "runtime")]
+#[cfg(any(feature = "runtime", feature = "process"))]
 macro_rules! syscall_noreturn {
     ($nr:ident, $a0:expr) => {
         $crate::backend::arch::choose::syscall1_noreturn(
