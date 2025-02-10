@@ -518,7 +518,15 @@ fn test_socketopts_ip_mtu() {
     let s = rustix::net::socket(AddressFamily::INET, SocketType::DGRAM, None).unwrap();
     rustix::net::bind(&s, &"127.0.0.1:0".parse().unwrap()).unwrap();
     rustix::net::connect(&s, &"127.0.0.1:0".parse().unwrap()).unwrap();
-    assert!(rustix::net::sockopt::ip_mtu(&s).unwrap() > 0);
+    match sockopt::ip_mtu(&s) {
+        Ok(mtu) => {
+            assert!(mtu > 0);
+        }
+        Err(e) if e.to_string().contains("Protocol not available") => {
+            // Skip test on unsupported platforms
+        }
+        Err(e) => panic!("{e}"),
+    }
 }
 
 #[cfg(linux_kernel)]
@@ -529,7 +537,16 @@ fn test_socketopts_ipv6_mtu() {
     let s = rustix::net::socket(AddressFamily::INET6, SocketType::DGRAM, None).unwrap();
     rustix::net::bind(&s, &"[::1]:0".parse().unwrap()).unwrap();
     rustix::net::connect(&s, &"[::1]:0".parse().unwrap()).unwrap();
-    assert!(rustix::net::sockopt::ipv6_mtu(&s).unwrap() > 0);
+
+    match sockopt::ipv6_mtu(&s) {
+        Ok(mtu) => {
+            assert!(mtu > 0);
+        }
+        Err(e) if e.to_string().contains("Protocol not available") => {
+            // Skip test on unsupported platforms
+        }
+        Err(e) => panic!("{e}"),
+    }
 }
 
 #[test]
