@@ -647,6 +647,30 @@ pub fn ipv6_v6only<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
     backend::net::sockopt::ipv6_v6only(fd.as_fd())
 }
 
+/// `getsockopt(fd, IPPROTO_IP, IP_MTU)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_ip_-and-set_ip_-functions
+#[inline]
+#[cfg(linux_kernel)]
+#[doc(alias = "IP_MTU")]
+pub fn ip_mtu<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
+    backend::net::sockopt::ip_mtu(fd.as_fd())
+}
+
+/// `getsockopt(fd, IPPROTO_IPV6, IPV6_MTU)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_ip_-and-set_ip_-functions
+#[inline]
+#[cfg(linux_kernel)]
+#[doc(alias = "IPV6_MTU")]
+pub fn ipv6_mtu<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
+    backend::net::sockopt::ipv6_mtu(fd.as_fd())
+}
+
 /// `setsockopt(fd, IPPROTO_IP, IP_MULTICAST_IF, value)`
 ///
 /// See the [module-level documentation] for more.

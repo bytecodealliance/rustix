@@ -480,6 +480,18 @@ pub(crate) fn ipv6_v6only(fd: BorrowedFd<'_>) -> io::Result<bool> {
     getsockopt(fd, c::IPPROTO_IPV6, c::IPV6_V6ONLY).map(to_bool)
 }
 
+#[cfg(linux_kernel)]
+#[inline]
+pub(crate) fn ip_mtu(fd: BorrowedFd<'_>) -> io::Result<u32> {
+    getsockopt(fd, c::IPPROTO_IP, c::IP_MTU)
+}
+
+#[cfg(linux_kernel)]
+#[inline]
+pub(crate) fn ipv6_mtu(fd: BorrowedFd<'_>) -> io::Result<u32> {
+    getsockopt(fd, c::IPPROTO_IPV6, c::IPV6_MTU)
+}
+
 #[inline]
 pub(crate) fn set_ip_multicast_if(fd: BorrowedFd<'_>, value: &Ipv4Addr) -> io::Result<()> {
     setsockopt(fd, c::IPPROTO_IP, c::IP_MULTICAST_IF, to_imr_addr(value))
