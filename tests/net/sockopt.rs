@@ -510,6 +510,28 @@ fn test_sockopts_ipv6() {
     test_sockopts_tcp(&s);
 }
 
+#[cfg(linux_kernel)]
+#[test]
+fn test_socketopts_ip_mtu() {
+    crate::init();
+
+    let s = rustix::net::socket(AddressFamily::INET, SocketType::DGRAM, None).unwrap();
+    rustix::net::bind(&s, &"127.0.0.1:0".parse().unwrap()).unwrap();
+    rustix::net::connect(&s, &"127.0.0.1:0".parse().unwrap()).unwrap();
+    assert!(rustix::net::sockopt::ip_mtu(&s).unwrap() > 0);
+}
+
+#[cfg(linux_kernel)]
+#[test]
+fn test_socketopts_ipv6_mtu() {
+    crate::init();
+
+    let s = rustix::net::socket(AddressFamily::INET, SocketType::DGRAM, None).unwrap();
+    rustix::net::bind(&s, &"[::1]:0".parse().unwrap()).unwrap();
+    rustix::net::connect(&s, &"[::1]:0".parse().unwrap()).unwrap();
+    assert!(rustix::net::sockopt::ipv6_mtu(&s).unwrap() > 0);
+}
+
 #[test]
 fn test_sockopts_multicast_ifv4() {
     crate::init();

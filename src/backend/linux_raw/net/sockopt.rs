@@ -449,6 +449,16 @@ pub(crate) fn ipv6_v6only(fd: BorrowedFd<'_>) -> io::Result<bool> {
 }
 
 #[inline]
+pub(crate) fn ip_mtu(fd: BorrowedFd<'_>) -> io::Result<u32> {
+    getsockopt(fd, c::IPPROTO_IP, c::IP_MTU)
+}
+
+#[inline]
+pub(crate) fn ipv6_mtu(fd: BorrowedFd<'_>) -> io::Result<u32> {
+    getsockopt(fd, c::IPPROTO_IPV6, c::IPV6_MTU)
+}
+
+#[inline]
 pub(crate) fn set_ip_multicast_if_with_ifindex(
     fd: BorrowedFd<'_>,
     multiaddr: &Ipv4Addr,
