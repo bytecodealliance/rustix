@@ -28,7 +28,7 @@ use core::time::Duration;
 use linux_raw_sys::xdp::{xdp_mmap_offsets, xdp_statistics, xdp_statistics_v1};
 use linux_raw_sys::{
     general::{__kernel_old_timeval, __kernel_sock_timeval},
-    net::{IPV6_MULTICAST_IF, IP_MULTICAST_IF},
+    net::{IPV6_MTU, IPV6_MULTICAST_IF, IP_MTU, IP_MULTICAST_IF},
 };
 #[cfg(target_arch = "x86")]
 use {
@@ -450,12 +450,12 @@ pub(crate) fn ipv6_v6only(fd: BorrowedFd<'_>) -> io::Result<bool> {
 
 #[inline]
 pub(crate) fn ip_mtu(fd: BorrowedFd<'_>) -> io::Result<u32> {
-    getsockopt(fd, c::IPPROTO_IP, c::IP_MTU)
+    getsockopt(fd, c::IPPROTO_IP, IP_MTU)
 }
 
 #[inline]
 pub(crate) fn ipv6_mtu(fd: BorrowedFd<'_>) -> io::Result<u32> {
-    getsockopt(fd, c::IPPROTO_IPV6, c::IPV6_MTU)
+    getsockopt(fd, c::IPPROTO_IPV6, IPV6_MTU)
 }
 
 #[inline]
