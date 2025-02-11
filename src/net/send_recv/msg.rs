@@ -2,6 +2,8 @@
 
 #![allow(unsafe_code)]
 
+#[cfg(target_os = "linux")]
+use crate::backend::net::msghdr::{with_msghdr, with_noaddr_msghdr};
 use crate::backend::{self, c};
 use crate::fd::{AsFd, BorrowedFd, OwnedFd};
 use crate::io::{self, IoSlice, IoSliceMut};
@@ -591,6 +593,55 @@ impl<'buf> Iterator for AncillaryDrain<'buf> {
 
 impl FusedIterator for AncillaryDrain<'_> {}
 
+/// An ABI-compatible wrapper for `mmsghdr`, for sending multiple messages with
+/// [sendmmsg].
+#[cfg(target_os = "linux")]
+#[repr(transparent)]
+pub struct MMsgHdr<'a> {
+    raw: c::mmsghdr,
+    _phantom: PhantomData<&'a mut ()>,
+}
+
+#[cfg(target_os = "linux")]
+impl<'a> MMsgHdr<'a> {
+    /// Constructs a new message with no destination address.
+    pub fn new(iov: &'a [IoSlice<'_>], control: &'a mut SendAncillaryBuffer<'_, '_, '_>) -> Self {
+        with_noaddr_msghdr(iov, control, Self::wrap)
+    }
+
+    /// Constructs a new message to a specific address.
+    ///
+    /// The lifetime of `addr` (and the underlying
+    /// [SocketAddrStorage](crate::net::addr::SocketAddrStorage)) must be valid
+    /// until the call to [sendmmsg], so types implementing
+    /// [SocketAddrArg](crate::net::addr::SocketAddrArg) can't be used here
+    /// without first being converted using
+    /// [SocketAddrArg::as_any](crate::net::addr::SocketAddrArg::as_any).
+    pub fn new_with_addr(
+        addr: &'a SocketAddrAny,
+        iov: &'a [IoSlice<'_>],
+        control: &'a mut SendAncillaryBuffer<'_, '_, '_>,
+    ) -> MMsgHdr<'a> {
+        with_msghdr(addr, iov, control, Self::wrap)
+    }
+
+    fn wrap(msg_hdr: c::msghdr) -> Self {
+        Self {
+            raw: c::mmsghdr {
+                msg_hdr,
+                msg_len: 0,
+            },
+            _phantom: PhantomData,
+        }
+    }
+
+    /// Returns the number of bytes sent. This will return 0 until after a
+    /// successful call to [sendmmsg].
+    pub fn bytes_sent(&self) -> usize {
+        self.raw.msg_len as _
+    }
+}
+
 /// `sendmsg(msghdr)`—Sends a message on a socket.
 ///
 /// This function is for use on connected sockets, as it doesn't have
@@ -654,6 +705,22 @@ pub fn sendmsg_addr(
     flags: SendFlags,
 ) -> io::Result<usize> {
     backend::net::syscalls::sendmsg_addr(socket.as_fd(), addr, iov, control, flags)
+}
+
+/// `sendmmsg(msghdr)`—Sends multiple messages on a socket.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/sendmmsg.2.html
+#[inline]
+#[cfg(target_os = "linux")]
+pub fn sendmmsg(
+    socket: impl AsFd,
+    msgs: &mut [MMsgHdr<'_>],
+    flags: SendFlags,
+) -> io::Result<usize> {
+    backend::net::syscalls::sendmmsg(socket.as_fd(), msgs, flags)
 }
 
 /// `recvmsg(msghdr)`—Receives a message from a socket.

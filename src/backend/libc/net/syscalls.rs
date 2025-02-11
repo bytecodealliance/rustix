@@ -3,9 +3,13 @@
 use super::read_sockaddr::initialize_family_to_unspec;
 use super::send_recv::{RecvFlags, SendFlags};
 use crate::backend::c;
+#[cfg(target_os = "linux")]
+use crate::backend::conv::ret_u32;
 use crate::backend::conv::{borrowed_fd, ret, ret_owned_fd, ret_send_recv, send_recv_len};
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io;
+#[cfg(target_os = "linux")]
+use crate::net::MMsgHdr;
 use crate::net::SocketAddrBuf;
 use crate::net::{
     addr::SocketAddrArg, AddressFamily, Protocol, Shutdown, SocketAddrAny, SocketFlags, SocketType,
@@ -229,6 +233,23 @@ pub(crate) fn sendmsg_addr(
             bitflags_bits!(msg_flags),
         ))
     })
+}
+
+#[cfg(target_os = "linux")]
+pub(crate) fn sendmmsg(
+    sockfd: BorrowedFd<'_>,
+    msgs: &mut [MMsgHdr<'_>],
+    flags: SendFlags,
+) -> io::Result<usize> {
+    unsafe {
+        ret_u32(c::sendmmsg(
+            borrowed_fd(sockfd),
+            msgs.as_mut_ptr() as _,
+            msgs.len().try_into().unwrap_or(c::c_uint::MAX),
+            bitflags_bits!(flags),
+        ))
+        .map(|ret| ret as usize)
+    }
 }
 
 #[cfg(not(any(
