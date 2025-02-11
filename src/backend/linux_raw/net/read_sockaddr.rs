@@ -4,6 +4,7 @@
 
 use crate::backend::c;
 use crate::io::Errno;
+use crate::net::addr::SocketAddrLen;
 use crate::net::netlink::SocketAddrNetlink;
 #[cfg(target_os = "linux")]
 use crate::net::xdp::{SockaddrXdpFlags, SocketAddrXdp};
@@ -50,7 +51,7 @@ pub(crate) unsafe fn initialize_family_to_unspec(storage: *mut c::sockaddr) {
 
 /// Check if a socket address returned from the OS is considered non-empty.
 #[inline]
-pub(crate) unsafe fn sockaddr_nonempty(_storage: *const c::sockaddr, len: c::socklen_t) -> bool {
+pub(crate) unsafe fn sockaddr_nonempty(_storage: *const c::sockaddr, len: SocketAddrLen) -> bool {
     len != 0
 }
 

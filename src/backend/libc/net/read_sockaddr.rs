@@ -8,6 +8,7 @@ use crate::backend::c;
 #[cfg(not(windows))]
 use crate::ffi::CStr;
 use crate::io::Errno;
+use crate::net::addr::SocketAddrLen;
 #[cfg(linux_kernel)]
 use crate::net::netlink::SocketAddrNetlink;
 #[cfg(target_os = "linux")]
@@ -113,7 +114,7 @@ unsafe fn read_sun_path0(storage: *const c::sockaddr) -> u8 {
 ///
 /// `storage` must point to a valid socket address returned from the OS.
 #[inline]
-pub(crate) unsafe fn sockaddr_nonempty(storage: *const c::sockaddr, len: c::socklen_t) -> bool {
+pub(crate) unsafe fn sockaddr_nonempty(storage: *const c::sockaddr, len: SocketAddrLen) -> bool {
     if len == 0 {
         return false;
     }
