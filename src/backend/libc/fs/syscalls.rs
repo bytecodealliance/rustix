@@ -1217,15 +1217,35 @@ pub(crate) fn fadvise(fd: BorrowedFd<'_>, offset: u64, len: u64, advice: Advice)
     let offset = offset as i64;
     let len = len as i64;
 
-    // FreeBSD returns `EINVAL` on invalid offsets; emulate the POSIX behavior.
+    // Our public API uses `u64` following the [Rust convention], but the
+    // underlying host APIs use a signed `off_t`. Converting these values may
+    // turn a very large value into a negative value.
+    //
+    // On FreeBSD, this could cause `posix_fadvise` to fail with
+    // `Errrno::INVAL`. Because we don't expose the signed type in our API, we
+    // also avoid exposing this artifact of casting an unsigned value to the
+    // signed type. To do this, we use a no-op call in this case.
+    //
+    // [Rust convention]: https://doc.rust-lang.org/stable/std/io/enum.SeekFrom.html#variant.Start
     #[cfg(target_os = "freebsd")]
-    let offset = if (offset as i64) < 0 {
-        i64::MAX
-    } else {
-        offset
-    };
+    if offset < 0 {
+        if len < 0 {
+            return Err(io::Errno::INVAL);
+        }
 
-    // FreeBSD returns `EINVAL` on overflow; emulate the POSIX behavior.
+        return fadvise_noop(fd);
+
+        #[cold]
+        fn fadvise_noop(fd: BorrowedFd<'_>) -> io::Result<()> {
+            // Us an `fcntl` to report `Errno::EBADF` if needed, but otherwise
+            // do nothing.
+            fcntl_getfl(fd).map(|_| ())
+        }
+    }
+
+    // Similarly, on FreeBSD, if `offset + len` would overflow an `off_t` in
+    // a way that users using a `u64` interface wouldn't be aware of, reduce
+    // the length so that we only operate on the range that doesn't overflow.
     #[cfg(target_os = "freebsd")]
     let len = if len > 0 && offset.checked_add(len).is_none() {
         i64::MAX - offset
