@@ -1005,7 +1005,7 @@ pub mod netlink {
         crate::backend::c,
         crate::backend::net::read_sockaddr::read_sockaddr_netlink,
         crate::net::{
-            addr::{call_with_sockaddr, SocketAddrArg, SocketAddrOpaque},
+            addr::{call_with_sockaddr, SocketAddrArg, SocketAddrLen, SocketAddrOpaque},
             SocketAddrAny,
         },
         core::mem,
@@ -1170,7 +1170,10 @@ pub mod netlink {
     #[cfg(linux_kernel)]
     #[allow(unsafe_code)]
     unsafe impl SocketAddrArg for SocketAddrNetlink {
-        fn with_sockaddr<R>(&self, f: impl FnOnce(*const SocketAddrOpaque, usize) -> R) -> R {
+        fn with_sockaddr<R>(
+            &self,
+            f: impl FnOnce(*const SocketAddrOpaque, SocketAddrLen) -> R,
+        ) -> R {
             let mut addr: c::sockaddr_nl = unsafe { mem::zeroed() };
             addr.nl_family = c::AF_NETLINK as _;
             addr.nl_pid = self.pid;
@@ -1624,7 +1627,7 @@ bitflags! {
 pub mod xdp {
     use crate::backend::net::read_sockaddr::read_sockaddr_xdp;
     use crate::net::{
-        addr::{call_with_sockaddr, SocketAddrArg, SocketAddrOpaque},
+        addr::{call_with_sockaddr, SocketAddrArg, SocketAddrLen, SocketAddrOpaque},
         SocketAddrAny,
     };
 
@@ -1769,7 +1772,10 @@ pub mod xdp {
 
     #[allow(unsafe_code)]
     unsafe impl SocketAddrArg for SocketAddrXdp {
-        fn with_sockaddr<R>(&self, f: impl FnOnce(*const SocketAddrOpaque, usize) -> R) -> R {
+        fn with_sockaddr<R>(
+            &self,
+            f: impl FnOnce(*const SocketAddrOpaque, SocketAddrLen) -> R,
+        ) -> R {
             let addr = c::sockaddr_xdp {
                 sxdp_family: c::AF_XDP as _,
                 sxdp_flags: self.flags().bits(),

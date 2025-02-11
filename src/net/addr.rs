@@ -28,6 +28,12 @@ pub struct SocketAddrOpaque {
     _data: [u8; 0],
 }
 
+/// A type for the length of a socket address.
+///
+/// This type will always be big enough to hold any socket address, but never
+/// bigger than `usize`.
+pub type SocketAddrLen = u32;
+
 /// A trait abstracting over the types that can be passed as a `sockaddr`.
 ///
 /// # Safety
@@ -44,13 +50,17 @@ pub unsafe trait SocketAddrArg {
     ///     C type can pass it directly without a copy.
     ///   * Other socket types can construct their C-compatible struct on the
     ///     stack and call the closure with a pointer to it.
-    fn with_sockaddr<R>(&self, f: impl FnOnce(*const SocketAddrOpaque, usize) -> R) -> R;
+    fn with_sockaddr<R>(&self, f: impl FnOnce(*const SocketAddrOpaque, SocketAddrLen) -> R) -> R;
 
     /// Convert to `SocketAddrAny`.
     fn as_any(&self) -> SocketAddrAny {
         self.with_sockaddr(|ptr, len| unsafe {
             let mut storage = MaybeUninit::<SocketAddrStorage>::uninit();
-            ptr::copy_nonoverlapping(ptr.cast::<u8>(), storage.as_mut_ptr().cast::<u8>(), len);
+            ptr::copy_nonoverlapping(
+                ptr.cast::<u8>(),
+                storage.as_mut_ptr().cast::<u8>(),
+                len as usize,
+            );
             SocketAddrAny::new(storage, len)
         })
     }
@@ -59,15 +69,15 @@ pub unsafe trait SocketAddrArg {
 /// Helper for implementing SocketAddrArg::with_sockaddr
 pub(crate) fn call_with_sockaddr<A, R>(
     addr: &A,
-    f: impl FnOnce(*const SocketAddrOpaque, usize) -> R,
+    f: impl FnOnce(*const SocketAddrOpaque, SocketAddrLen) -> R,
 ) -> R {
     let ptr = (addr as *const A).cast();
-    let len = size_of::<A>();
+    let len = size_of::<A>() as SocketAddrLen;
     f(ptr, len)
 }
 
 unsafe impl SocketAddrArg for super::SocketAddr {
-    fn with_sockaddr<R>(&self, f: impl FnOnce(*const SocketAddrOpaque, usize) -> R) -> R {
+    fn with_sockaddr<R>(&self, f: impl FnOnce(*const SocketAddrOpaque, SocketAddrLen) -> R) -> R {
         match self {
             SocketAddr::V4(v4) => v4.with_sockaddr(f),
             SocketAddr::V6(v6) => v6.with_sockaddr(f),
@@ -76,23 +86,39 @@ unsafe impl SocketAddrArg for super::SocketAddr {
 }
 
 unsafe impl SocketAddrArg for SocketAddrV4 {
-    fn with_sockaddr<R>(&self, f: impl FnOnce(*const SocketAddrOpaque, usize) -> R) -> R {
+    fn with_sockaddr<R>(&self, f: impl FnOnce(*const SocketAddrOpaque, SocketAddrLen) -> R) -> R {
         call_with_sockaddr(&encode_sockaddr_v4(self), f)
     }
 }
 
 unsafe impl SocketAddrArg for SocketAddrV6 {
-    fn with_sockaddr<R>(&self, f: impl FnOnce(*const SocketAddrOpaque, usize) -> R) -> R {
+    fn with_sockaddr<R>(&self, f: impl FnOnce(*const SocketAddrOpaque, SocketAddrLen) -> R) -> R {
         call_with_sockaddr(&encode_sockaddr_v6(self), f)
     }
 }
 
 #[cfg(unix)]
 unsafe impl SocketAddrArg for SocketAddrUnix {
-    fn with_sockaddr<R>(&self, f: impl FnOnce(*const SocketAddrOpaque, usize) -> R) -> R {
+    fn with_sockaddr<R>(&self, f: impl FnOnce(*const SocketAddrOpaque, SocketAddrLen) -> R) -> R {
         f(
             (&self.unix as *const crate::backend::c::sockaddr_un).cast(),
-            self.addr_len() as usize,
+            self.addr_len(),
         )
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::backend::c;
+
+    #[test]
+    fn test_layouts() {
+        assert_eq_size!(SocketAddrLen, c::socklen_t);
+        assert_eq!(
+            memoffset::span_of!(c::msghdr, msg_namelen).len(),
+            size_of::<SocketAddrLen>()
+        );
+        assert!(size_of::<SocketAddrLen>() <= size_of::<usize>());
     }
 }

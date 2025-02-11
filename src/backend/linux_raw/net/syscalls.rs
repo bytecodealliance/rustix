@@ -21,7 +21,6 @@ use crate::net::{
     addr::SocketAddrArg, AddressFamily, Protocol, RecvAncillaryBuffer, RecvMsg,
     SendAncillaryBuffer, Shutdown, SocketAddrAny, SocketFlags, SocketType,
 };
-use c::socklen_t;
 use core::mem::MaybeUninit;
 #[cfg(target_arch = "x86")]
 use {
@@ -421,7 +420,7 @@ pub(crate) fn sendto(
                 buf_len,
                 flags,
                 raw_arg(addr_ptr as *mut _),
-                socklen_t(addr_len as socklen_t)
+                socklen_t(addr_len)
             ))
         }
         #[cfg(target_arch = "x86")]
@@ -435,7 +434,7 @@ pub(crate) fn sendto(
                     buf_len,
                     flags.into(),
                     raw_arg(addr_ptr as *mut _),
-                    socklen_t(addr_len as socklen_t)
+                    socklen_t(addr_len)
                 ])
             ))
         }
@@ -603,7 +602,7 @@ pub(crate) fn bind(fd: BorrowedFd<'_>, addr: &impl SocketAddrArg) -> io::Result<
                 __NR_bind,
                 fd,
                 raw_arg(addr_ptr as *mut _),
-                socklen_t(addr_len as socklen_t)
+                socklen_t(addr_len)
             ))
         }
         #[cfg(target_arch = "x86")]
@@ -614,7 +613,7 @@ pub(crate) fn bind(fd: BorrowedFd<'_>, addr: &impl SocketAddrArg) -> io::Result<
                 slice_just_addr::<ArgReg<'_, SocketArg>, _>(&[
                     fd.into(),
                     raw_arg(addr_ptr as *mut _),
-                    socklen_t(addr_len as socklen_t)
+                    socklen_t(addr_len)
                 ])
             ))
         }
@@ -630,7 +629,7 @@ pub(crate) fn connect(fd: BorrowedFd<'_>, addr: &impl SocketAddrArg) -> io::Resu
                 __NR_connect,
                 fd,
                 raw_arg(addr_ptr as *mut _),
-                socklen_t(addr_len as socklen_t)
+                socklen_t(addr_len)
             ))
         }
         #[cfg(target_arch = "x86")]
@@ -641,7 +640,7 @@ pub(crate) fn connect(fd: BorrowedFd<'_>, addr: &impl SocketAddrArg) -> io::Resu
                 slice_just_addr::<ArgReg<'_, SocketArg>, _>(&[
                     fd.into(),
                     raw_arg(addr_ptr as *mut _),
-                    socklen_t(addr_len as socklen_t)
+                    socklen_t(addr_len)
                 ])
             ))
         }

@@ -6,7 +6,7 @@ use crate::{
     backend::{c, net::read_sockaddr},
     io::Errno,
     net::{
-        addr::{SocketAddrArg, SocketAddrOpaque, SocketAddrStorage},
+        addr::{SocketAddrArg, SocketAddrLen, SocketAddrOpaque, SocketAddrStorage},
         AddressFamily, SocketAddr, SocketAddrV4, SocketAddrV6,
     },
 };
@@ -14,7 +14,7 @@ use crate::{
 use core::fmt;
 use core::{
     mem::{size_of, MaybeUninit},
-    num::NonZeroUsize,
+    num::NonZeroU32,
 };
 
 /// Temporary buffer for creating a `SocketAddrAny` from a
@@ -78,7 +78,7 @@ pub struct SocketAddrAny {
     // * `len` is at least `size_of::<backend::c::sa_family_t>()`
     // * `len` is at most `size_of::<SocketAddrStorage>()`
     // * The first `len` bytes of `storage` are initialized.
-    pub(crate) len: NonZeroUsize,
+    pub(crate) len: NonZeroU32,
     pub(crate) storage: MaybeUninit<SocketAddrStorage>,
 }
 
@@ -96,17 +96,17 @@ impl SocketAddrAny {
     /// * `storage` must contain a valid socket address.
     /// * `len` bytes must be initialized.
     #[inline]
-    pub unsafe fn new(storage: MaybeUninit<SocketAddrStorage>, len: usize) -> Self {
-        assert!(len >= core::mem::size_of::<read_sockaddr::sockaddr_header>());
-        assert!(len <= core::mem::size_of::<SocketAddrStorage>());
-        let len = NonZeroUsize::new_unchecked(len);
+    pub unsafe fn new(storage: MaybeUninit<SocketAddrStorage>, len: SocketAddrLen) -> Self {
+        assert!(len as usize >= core::mem::size_of::<read_sockaddr::sockaddr_header>());
+        assert!(len as usize <= core::mem::size_of::<SocketAddrStorage>());
+        let len = NonZeroU32::new_unchecked(len);
         Self { storage, len }
     }
 
     /// Gets the initialized part of the storage as bytes.
     #[inline]
     fn bytes(&self) -> &[u8] {
-        let len = self.len.get();
+        let len = self.len.get() as usize;
         unsafe { core::slice::from_raw_parts(self.storage.as_ptr().cast(), len) }
     }
 
@@ -134,7 +134,7 @@ impl SocketAddrAny {
 
     /// Returns the length of the encoded sockaddr.
     #[inline]
-    pub fn len(&self) -> usize {
+    pub fn len(&self) -> SocketAddrLen {
         self.len.get()
     }
 }
@@ -208,7 +208,7 @@ impl fmt::Debug for SocketAddrAny {
 }
 
 unsafe impl SocketAddrArg for SocketAddrAny {
-    fn with_sockaddr<R>(&self, f: impl FnOnce(*const SocketAddrOpaque, usize) -> R) -> R {
+    fn with_sockaddr<R>(&self, f: impl FnOnce(*const SocketAddrOpaque, SocketAddrLen) -> R) -> R {
         f(self.as_ptr().cast(), self.len())
     }
 }

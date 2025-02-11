@@ -169,7 +169,7 @@ impl SocketAddrUnix {
 
     #[inline]
     fn bytes(&self) -> Option<&[u8]> {
-        let len = self.len() as usize;
+        let len = self.len();
         if len != 0 {
             let bytes = &self.unix.sun_path[..len - offsetof_sun_path()];
             // SAFETY: `from_raw_parts` to convert from `&[c_char]` to `&[u8]`.
