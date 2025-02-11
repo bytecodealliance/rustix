@@ -4,7 +4,7 @@
 
 #![cfg(not(target_os = "wasi"))]
 
-#[cfg(not(target_os = "redox"))]
+#[cfg(not(any(windows, target_os = "espidf", target_os = "redox", target_os = "wasi")))]
 use rustix::net::ReturnFlags;
 use rustix::net::{
     accept, bind, connect, getsockname, listen, recv, send, socket, AddressFamily, Ipv4Addr,
