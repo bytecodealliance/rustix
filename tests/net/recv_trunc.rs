@@ -15,11 +15,11 @@ fn net_recv_uninit_trunc() {
     let name = SocketAddrUnix::new(&path).unwrap();
 
     let receiver = rustix::net::socket(AddressFamily::UNIX, SocketType::DGRAM, None).unwrap();
-    rustix::net::bind_unix(&receiver, &name).expect("bind");
+    rustix::net::bind(&receiver, &name).expect("bind");
 
     let sender = rustix::net::socket(AddressFamily::UNIX, SocketType::DGRAM, None).unwrap();
     let request = b"Hello, World!!!";
-    let n = rustix::net::sendto_unix(&sender, request, SendFlags::empty(), &name).expect("send");
+    let n = rustix::net::sendto(&sender, request, SendFlags::empty(), &name).expect("send");
     assert_eq!(n, request.len());
 
     // Test with `RecvFlags::TRUNC`, which is not supported on Apple, illumos, or NetBSD.
@@ -35,8 +35,7 @@ fn net_recv_uninit_trunc() {
         assert!(uninit.is_empty());
 
         // Send the message again.
-        let n =
-            rustix::net::sendto_unix(&sender, request, SendFlags::empty(), &name).expect("send");
+        let n = rustix::net::sendto(&sender, request, SendFlags::empty(), &name).expect("send");
         assert_eq!(n, request.len());
 
         // Check the `length`.
@@ -68,7 +67,7 @@ fn net_recvmsg_trunc() {
     let name = SocketAddrUnix::new(&path).unwrap();
 
     let receiver = rustix::net::socket(AddressFamily::UNIX, SocketType::DGRAM, None).unwrap();
-    rustix::net::bind_unix(&receiver, &name).expect("bind");
+    rustix::net::bind(&receiver, &name).expect("bind");
 
     let sender = rustix::net::socket(AddressFamily::UNIX, SocketType::DGRAM, None).unwrap();
     let request = b"Hello, World!!!";
@@ -76,8 +75,7 @@ fn net_recvmsg_trunc() {
     // Test with `RecvFlags::TRUNC`, which is not supported on Apple, illumos, or NetBSD.
     #[cfg(not(any(apple, solarish, target_os = "netbsd")))]
     {
-        let n =
-            rustix::net::sendto_unix(&sender, request, SendFlags::empty(), &name).expect("send");
+        let n = rustix::net::sendto(&sender, request, SendFlags::empty(), &name).expect("send");
         assert_eq!(n, request.len());
 
         let mut response = [0_u8; 5];
@@ -96,8 +94,7 @@ fn net_recvmsg_trunc() {
         assert_eq!(result.flags, ReturnFlags::TRUNC);
 
         // Send the message again.
-        let n =
-            rustix::net::sendto_unix(&sender, request, SendFlags::empty(), &name).expect("send");
+        let n = rustix::net::sendto(&sender, request, SendFlags::empty(), &name).expect("send");
         assert_eq!(n, request.len());
 
         // This time receive it with `TRUNC` and a big enough buffer.
@@ -118,7 +115,7 @@ fn net_recvmsg_trunc() {
     }
 
     // Send the message again.
-    let n = rustix::net::sendto_unix(&sender, request, SendFlags::empty(), &name).expect("send");
+    let n = rustix::net::sendto(&sender, request, SendFlags::empty(), &name).expect("send");
     assert_eq!(n, request.len());
 
     // This time receive it without `TRUNC` but a big enough buffer.
@@ -138,7 +135,7 @@ fn net_recvmsg_trunc() {
     assert_eq!(result.flags, ReturnFlags::empty());
 
     // Send the message again.
-    let n = rustix::net::sendto_unix(&sender, request, SendFlags::empty(), &name).expect("send");
+    let n = rustix::net::sendto(&sender, request, SendFlags::empty(), &name).expect("send");
     assert_eq!(n, request.len());
 
     // This time receive it without `TRUNC` and a small buffer.

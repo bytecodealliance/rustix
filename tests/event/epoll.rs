@@ -1,8 +1,8 @@
 use rustix::event::epoll;
 use rustix::io::{ioctl_fionbio, read, write};
 use rustix::net::{
-    accept, bind_v4, connect_v4, getsockname, listen, socket, AddressFamily, Ipv4Addr,
-    SocketAddrAny, SocketAddrV4, SocketType,
+    accept, bind, connect, getsockname, listen, socket, AddressFamily, Ipv4Addr, SocketAddrV4,
+    SocketType,
 };
 use std::collections::HashMap;
 use std::ffi::c_void;
@@ -13,13 +13,10 @@ const BUFFER_SIZE: usize = 20;
 
 fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
     let listen_sock = socket(AddressFamily::INET, SocketType::STREAM, None).unwrap();
-    bind_v4(&listen_sock, &SocketAddrV4::new(Ipv4Addr::LOCALHOST, 0)).unwrap();
+    bind(&listen_sock, &SocketAddrV4::new(Ipv4Addr::LOCALHOST, 0)).unwrap();
     listen(&listen_sock, 1).unwrap();
 
-    let who = match getsockname(&listen_sock).unwrap() {
-        SocketAddrAny::V4(addr) => addr,
-        _ => panic!(),
-    };
+    let who = SocketAddrV4::try_from(getsockname(&listen_sock).unwrap()).unwrap();
 
     {
         let (lock, cvar) = &*ready;
@@ -82,7 +79,7 @@ fn client(ready: Arc<(Mutex<u16>, Condvar)>) {
 
     for _ in 0..16 {
         let data_socket = socket(AddressFamily::INET, SocketType::STREAM, None).unwrap();
-        connect_v4(&data_socket, &addr).unwrap();
+        connect(&data_socket, &addr).unwrap();
 
         let nread = read(&data_socket, &mut buffer).unwrap();
         assert_eq!(String::from_utf8_lossy(&buffer[..nread]), "hello\n");

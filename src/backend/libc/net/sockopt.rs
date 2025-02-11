@@ -47,9 +47,9 @@ use crate::net::Protocol;
     target_env = "newlib"
 ))]
 use crate::net::RawProtocol;
-use crate::net::{Ipv4Addr, Ipv6Addr, SocketType};
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
-use crate::net::{SocketAddrAny, SocketAddrStorage, SocketAddrV4};
+use crate::net::SocketAddrV4;
+use crate::net::{Ipv4Addr, Ipv6Addr, SocketType};
 #[cfg(linux_kernel)]
 use crate::net::{SocketAddrV6, UCred};
 use crate::utils::as_mut_ptr;
@@ -822,16 +822,10 @@ pub(crate) fn ipv6_freebind(fd: BorrowedFd<'_>) -> io::Result<bool> {
 pub(crate) fn ip_original_dst(fd: BorrowedFd<'_>) -> io::Result<SocketAddrV4> {
     let level = c::IPPROTO_IP;
     let optname = c::SO_ORIGINAL_DST;
-    let mut value = MaybeUninit::<SocketAddrStorage>::uninit();
-    let mut optlen = core::mem::size_of_val(&value).try_into().unwrap();
 
-    getsockopt_raw(fd, level, optname, &mut value, &mut optlen)?;
-
-    let any = unsafe { SocketAddrAny::read(value.as_ptr(), optlen as usize)? };
-    match any {
-        SocketAddrAny::V4(v4) => Ok(v4),
-        _ => unreachable!(),
-    }
+    let mut addr = crate::net::SocketAddrBuf::new();
+    getsockopt_raw(fd, level, optname, &mut addr.storage, &mut addr.len)?;
+    Ok(unsafe { addr.into_any() }.try_into().unwrap())
 }
 
 #[cfg(linux_kernel)]
@@ -839,16 +833,10 @@ pub(crate) fn ip_original_dst(fd: BorrowedFd<'_>) -> io::Result<SocketAddrV4> {
 pub(crate) fn ipv6_original_dst(fd: BorrowedFd<'_>) -> io::Result<SocketAddrV6> {
     let level = c::IPPROTO_IPV6;
     let optname = c::IP6T_SO_ORIGINAL_DST;
-    let mut value = MaybeUninit::<SocketAddrStorage>::uninit();
-    let mut optlen = core::mem::size_of_val(&value).try_into().unwrap();
 
-    getsockopt_raw(fd, level, optname, &mut value, &mut optlen)?;
-
-    let any = unsafe { SocketAddrAny::read(value.as_ptr(), optlen as usize)? };
-    match any {
-        SocketAddrAny::V6(v6) => Ok(v6),
-        _ => unreachable!(),
-    }
+    let mut addr = crate::net::SocketAddrBuf::new();
+    getsockopt_raw(fd, level, optname, &mut addr.storage, &mut addr.len)?;
+    Ok(unsafe { addr.into_any() }.try_into().unwrap())
 }
 
 #[cfg(not(any(

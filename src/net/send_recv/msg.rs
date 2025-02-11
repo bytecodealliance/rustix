@@ -5,6 +5,7 @@
 use crate::backend::{self, c};
 use crate::fd::{AsFd, BorrowedFd, OwnedFd};
 use crate::io::{self, IoSlice, IoSliceMut};
+use crate::net::addr::SocketAddrArg;
 #[cfg(linux_kernel)]
 use crate::net::UCred;
 #[cfg(feature = "std")]
@@ -16,7 +17,7 @@ use core::mem::{align_of, size_of, size_of_val, take};
 use core::ptr::addr_of;
 use core::{ptr, slice};
 
-use super::{RecvFlags, ReturnFlags, SendFlags, SocketAddrAny, SocketAddrV4, SocketAddrV6};
+use super::{RecvFlags, ReturnFlags, SendFlags, SocketAddrAny};
 
 /// Macro for defining the amount of space to allocate in a buffer for use with
 /// [`RecvAncillaryBuffer::new`] and [`SendAncillaryBuffer::new`].
@@ -121,8 +122,7 @@ pub const fn __cmsg_aligned_space(len: usize) -> usize {
     unsafe { c::CMSG_SPACE(converted_len) as usize }
 }
 
-/// Ancillary message for [`sendmsg`], [`sendmsg_v4`], [`sendmsg_v6`],
-/// [`sendmsg_unix`], and [`sendmsg_any`].
+/// Ancillary message for [`sendmsg`] and [`sendmsg_addr`].
 #[non_exhaustive]
 pub enum SendAncillaryMessage<'slice, 'fd> {
     /// Send file descriptors.
@@ -159,8 +159,7 @@ pub enum RecvAncillaryMessage<'a> {
     ScmCredentials(UCred),
 }
 
-/// Buffer for sending ancillary messages with [`sendmsg`], [`sendmsg_v4`],
-/// [`sendmsg_v6`], [`sendmsg_unix`], and [`sendmsg_any`].
+/// Buffer for sending ancillary messages with [`sendmsg`] and [`sendmsg_addr`].
 ///
 /// Use the [`push`] function to add messages to send.
 ///
@@ -595,8 +594,7 @@ impl FusedIterator for AncillaryDrain<'_> {}
 /// `sendmsg(msghdr)`—Sends a message on a socket.
 ///
 /// This function is for use on connected sockets, as it doesn't have
-/// a way to specify an address. See the [`sendmsg_v4`], [`sendmsg_v6`]
-/// [`sendmsg_unix`], [`sendmsg_xdp`], and [`sendmsg_any`] to send
+/// a way to specify an address. See [`sendmsg_addr`] to send
 /// messages on unconnected sockets.
 ///
 /// # References
@@ -627,119 +625,6 @@ pub fn sendmsg<Fd: AsFd>(
     backend::net::syscalls::sendmsg(socket.as_fd(), iov, control, flags)
 }
 
-/// `sendmsg(msghdr)`—Sends a message on a socket to a specific IPv4 address.
-///
-/// # References
-///  - [POSIX]
-///  - [Linux]
-///  - [Apple]
-///  - [FreeBSD]
-///  - [NetBSD]
-///  - [OpenBSD]
-///  - [DragonFly BSD]
-///  - [illumos]
-///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/sendmsg.html
-/// [Linux]: https://man7.org/linux/man-pages/man2/sendmsg.2.html
-/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/sendmsg.2.html
-/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=sendmsg&sektion=2
-/// [NetBSD]: https://man.netbsd.org/sendmsg.2
-/// [OpenBSD]: https://man.openbsd.org/sendmsg.2
-/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=sendmsg&section=2
-/// [illumos]: https://illumos.org/man/3SOCKET/sendmsg
-#[inline]
-pub fn sendmsg_v4<Fd: AsFd>(
-    socket: Fd,
-    addr: &SocketAddrV4,
-    iov: &[IoSlice<'_>],
-    control: &mut SendAncillaryBuffer<'_, '_, '_>,
-    flags: SendFlags,
-) -> io::Result<usize> {
-    backend::net::syscalls::sendmsg_v4(socket.as_fd(), addr, iov, control, flags)
-}
-
-/// `sendmsg(msghdr)`—Sends a message on a socket to a specific IPv6 address.
-///
-/// # References
-///  - [POSIX]
-///  - [Linux]
-///  - [Apple]
-///  - [FreeBSD]
-///  - [NetBSD]
-///  - [OpenBSD]
-///  - [DragonFly BSD]
-///  - [illumos]
-///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/sendmsg.html
-/// [Linux]: https://man7.org/linux/man-pages/man2/sendmsg.2.html
-/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/sendmsg.2.html
-/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=sendmsg&sektion=2
-/// [NetBSD]: https://man.netbsd.org/sendmsg.2
-/// [OpenBSD]: https://man.openbsd.org/sendmsg.2
-/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=sendmsg&section=2
-/// [illumos]: https://illumos.org/man/3SOCKET/sendmsg
-#[inline]
-pub fn sendmsg_v6<Fd: AsFd>(
-    socket: Fd,
-    addr: &SocketAddrV6,
-    iov: &[IoSlice<'_>],
-    control: &mut SendAncillaryBuffer<'_, '_, '_>,
-    flags: SendFlags,
-) -> io::Result<usize> {
-    backend::net::syscalls::sendmsg_v6(socket.as_fd(), addr, iov, control, flags)
-}
-
-/// `sendmsg(msghdr)`—Sends a message on a socket to a specific Unix-domain
-/// address.
-///
-/// # References
-///  - [POSIX]
-///  - [Linux]
-///  - [Apple]
-///  - [FreeBSD]
-///  - [NetBSD]
-///  - [OpenBSD]
-///  - [DragonFly BSD]
-///  - [illumos]
-///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/sendmsg.html
-/// [Linux]: https://man7.org/linux/man-pages/man2/sendmsg.2.html
-/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/sendmsg.2.html
-/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=sendmsg&sektion=2
-/// [NetBSD]: https://man.netbsd.org/sendmsg.2
-/// [OpenBSD]: https://man.openbsd.org/sendmsg.2
-/// [DragonFly BSD]: https://man.dragonflybsd.org/?command=sendmsg&section=2
-/// [illumos]: https://illumos.org/man/3SOCKET/sendmsg
-#[inline]
-#[cfg(unix)]
-pub fn sendmsg_unix<Fd: AsFd>(
-    socket: Fd,
-    addr: &super::SocketAddrUnix,
-    iov: &[IoSlice<'_>],
-    control: &mut SendAncillaryBuffer<'_, '_, '_>,
-    flags: SendFlags,
-) -> io::Result<usize> {
-    backend::net::syscalls::sendmsg_unix(socket.as_fd(), addr, iov, control, flags)
-}
-
-/// `sendmsg(msghdr)`—Sends a message on a socket to a specific XDP address.
-///
-/// # References
-///  - [Linux]
-///
-/// [Linux]: https://man7.org/linux/man-pages/man2/sendmsg.2.html
-#[inline]
-#[cfg(target_os = "linux")]
-pub fn sendmsg_xdp<Fd: AsFd>(
-    socket: Fd,
-    addr: &super::SocketAddrXdp,
-    iov: &[IoSlice<'_>],
-    control: &mut SendAncillaryBuffer<'_, '_, '_>,
-    flags: SendFlags,
-) -> io::Result<usize> {
-    backend::net::syscalls::sendmsg_xdp(socket.as_fd(), addr, iov, control, flags)
-}
-
 /// `sendmsg(msghdr)`—Sends a message on a socket to a specific address.
 ///
 /// # References
@@ -752,7 +637,7 @@ pub fn sendmsg_xdp<Fd: AsFd>(
 ///  - [DragonFly BSD]
 ///  - [illumos]
 ///
-/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/sendmsg.html
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9699919799/functions/sendmsg.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/sendmsg.2.html
 /// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/sendmsg.2.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=sendmsg&sektion=2
@@ -761,30 +646,14 @@ pub fn sendmsg_xdp<Fd: AsFd>(
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=sendmsg&section=2
 /// [illumos]: https://illumos.org/man/3SOCKET/sendmsg
 #[inline]
-pub fn sendmsg_any<Fd: AsFd>(
-    socket: Fd,
-    addr: Option<&SocketAddrAny>,
+pub fn sendmsg_addr(
+    socket: impl AsFd,
+    addr: &impl SocketAddrArg,
     iov: &[IoSlice<'_>],
     control: &mut SendAncillaryBuffer<'_, '_, '_>,
     flags: SendFlags,
 ) -> io::Result<usize> {
-    match addr {
-        None => backend::net::syscalls::sendmsg(socket.as_fd(), iov, control, flags),
-        Some(SocketAddrAny::V4(addr)) => {
-            backend::net::syscalls::sendmsg_v4(socket.as_fd(), addr, iov, control, flags)
-        }
-        Some(SocketAddrAny::V6(addr)) => {
-            backend::net::syscalls::sendmsg_v6(socket.as_fd(), addr, iov, control, flags)
-        }
-        #[cfg(unix)]
-        Some(SocketAddrAny::Unix(addr)) => {
-            backend::net::syscalls::sendmsg_unix(socket.as_fd(), addr, iov, control, flags)
-        }
-        #[cfg(target_os = "linux")]
-        Some(SocketAddrAny::Xdp(addr)) => {
-            backend::net::syscalls::sendmsg_xdp(socket.as_fd(), addr, iov, control, flags)
-        }
-    }
+    backend::net::syscalls::sendmsg_addr(socket.as_fd(), addr, iov, control, flags)
 }
 
 /// `recvmsg(msghdr)`—Receives a message from a socket.

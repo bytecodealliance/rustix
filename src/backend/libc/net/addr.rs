@@ -8,6 +8,7 @@ use core::slice;
 use {
     crate::ffi::CStr,
     crate::io,
+    crate::net::addr::SocketAddrLen,
     crate::path,
     core::cmp::Ordering,
     core::fmt,
@@ -151,14 +152,14 @@ impl SocketAddrUnix {
     }
 
     #[inline]
-    pub(crate) fn addr_len(&self) -> c::socklen_t {
+    pub(crate) fn addr_len(&self) -> SocketAddrLen {
         #[cfg(not(any(bsd, target_os = "haiku")))]
         {
-            self.len
+            self.len as _
         }
         #[cfg(any(bsd, target_os = "haiku"))]
         {
-            c::socklen_t::from(self.unix.sun_len)
+            c::socklen_t::from(self.unix.sun_len) as _
         }
     }
 
@@ -169,7 +170,7 @@ impl SocketAddrUnix {
 
     #[inline]
     fn bytes(&self) -> Option<&[u8]> {
-        let len = self.len() as usize;
+        let len = self.len();
         if len != 0 {
             let bytes = &self.unix.sun_path[..len - offsetof_sun_path()];
             // SAFETY: `from_raw_parts` to convert from `&[c_char]` to `&[u8]`.
@@ -238,6 +239,7 @@ impl fmt::Debug for SocketAddrUnix {
 
 /// `struct sockaddr_storage`.
 #[repr(transparent)]
+#[derive(Copy, Clone)]
 pub struct SocketAddrStorage(c::sockaddr_storage);
 
 impl SocketAddrStorage {

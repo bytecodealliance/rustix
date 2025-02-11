@@ -1003,6 +1003,12 @@ pub mod netlink {
     use {
         super::{new_raw_protocol, Protocol},
         crate::backend::c,
+        crate::backend::net::read_sockaddr::read_sockaddr_netlink,
+        crate::net::{
+            addr::{call_with_sockaddr, SocketAddrArg, SocketAddrLen, SocketAddrOpaque},
+            SocketAddrAny,
+        },
+        core::mem,
     };
 
     /// `NETLINK_UNUSED`
@@ -1112,6 +1118,86 @@ pub mod netlink {
     /// `NETLINK_GET_STRICT_CHK`
     #[cfg(linux_kernel)]
     pub const GET_STRICT_CHK: Protocol = Protocol(new_raw_protocol(c::NETLINK_GET_STRICT_CHK as _));
+
+    /// A Netlink socket address.
+    ///
+    /// Used to bind to a Netlink socket.
+    ///
+    /// Not ABI compatible with `struct sockaddr_nl`
+    #[derive(Clone, Copy, PartialEq, PartialOrd, Eq, Ord, Hash, Debug)]
+    #[cfg(linux_kernel)]
+    pub struct SocketAddrNetlink {
+        /// Port ID
+        pid: u32,
+
+        /// Multicast groups mask
+        groups: u32,
+    }
+
+    #[cfg(linux_kernel)]
+    impl SocketAddrNetlink {
+        /// Construct a netlink address
+        #[inline]
+        pub fn new(pid: u32, groups: u32) -> Self {
+            Self { pid, groups }
+        }
+
+        /// Return port id.
+        #[inline]
+        pub fn pid(&self) -> u32 {
+            self.pid
+        }
+
+        /// Set port id.
+        #[inline]
+        pub fn set_pid(&mut self, pid: u32) {
+            self.pid = pid;
+        }
+
+        /// Return multicast groups mask.
+        #[inline]
+        pub fn groups(&self) -> u32 {
+            self.groups
+        }
+
+        /// Set multicast groups mask.
+        #[inline]
+        pub fn set_groups(&mut self, groups: u32) {
+            self.groups = groups;
+        }
+    }
+
+    #[cfg(linux_kernel)]
+    #[allow(unsafe_code)]
+    unsafe impl SocketAddrArg for SocketAddrNetlink {
+        fn with_sockaddr<R>(
+            &self,
+            f: impl FnOnce(*const SocketAddrOpaque, SocketAddrLen) -> R,
+        ) -> R {
+            let mut addr: c::sockaddr_nl = unsafe { mem::zeroed() };
+            addr.nl_family = c::AF_NETLINK as _;
+            addr.nl_pid = self.pid;
+            addr.nl_groups = self.groups;
+            call_with_sockaddr(&addr, f)
+        }
+    }
+
+    #[cfg(linux_kernel)]
+    impl From<SocketAddrNetlink> for SocketAddrAny {
+        #[inline]
+        fn from(from: SocketAddrNetlink) -> Self {
+            from.as_any()
+        }
+    }
+
+    #[cfg(linux_kernel)]
+    impl TryFrom<SocketAddrAny> for SocketAddrNetlink {
+        type Error = crate::io::Errno;
+
+        fn try_from(addr: SocketAddrAny) -> Result<Self, Self::Error> {
+            read_sockaddr_netlink(&addr)
+        }
+    }
 }
 
 /// `ETH_P_*` constants.
@@ -1539,6 +1625,12 @@ bitflags! {
 /// `AF_XDP` related types and constants.
 #[cfg(target_os = "linux")]
 pub mod xdp {
+    use crate::backend::net::read_sockaddr::read_sockaddr_xdp;
+    use crate::net::{
+        addr::{call_with_sockaddr, SocketAddrArg, SocketAddrLen, SocketAddrOpaque},
+        SocketAddrAny,
+    };
+
     use super::{bitflags, c};
 
     bitflags! {
@@ -1675,6 +1767,39 @@ pub mod xdp {
         #[inline]
         pub fn set_shared_umem_fd(&mut self, shared_umem_fd: u32) {
             self.sxdp_shared_umem_fd = shared_umem_fd;
+        }
+    }
+
+    #[allow(unsafe_code)]
+    unsafe impl SocketAddrArg for SocketAddrXdp {
+        fn with_sockaddr<R>(
+            &self,
+            f: impl FnOnce(*const SocketAddrOpaque, SocketAddrLen) -> R,
+        ) -> R {
+            let addr = c::sockaddr_xdp {
+                sxdp_family: c::AF_XDP as _,
+                sxdp_flags: self.flags().bits(),
+                sxdp_ifindex: self.interface_index(),
+                sxdp_queue_id: self.queue_id(),
+                sxdp_shared_umem_fd: self.shared_umem_fd(),
+            };
+
+            call_with_sockaddr(&addr, f)
+        }
+    }
+
+    impl From<SocketAddrXdp> for SocketAddrAny {
+        #[inline]
+        fn from(from: SocketAddrXdp) -> Self {
+            from.as_any()
+        }
+    }
+
+    impl TryFrom<SocketAddrAny> for SocketAddrXdp {
+        type Error = crate::io::Errno;
+
+        fn try_from(addr: SocketAddrAny) -> Result<Self, Self::Error> {
+            read_sockaddr_xdp(&addr)
         }
     }
 
@@ -1847,7 +1972,7 @@ fn test_sizes() {
     #[cfg(target_os = "linux")]
     use crate::backend::c;
     use crate::ffi::c_int;
-    use crate::net::SocketAddrStorage;
+    use crate::net::addr::SocketAddrStorage;
     use core::mem::transmute;
 
     // Backend code needs to cast these to `c_int` so make sure that cast isn't

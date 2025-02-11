@@ -513,11 +513,13 @@ fn test_sockopts_ipv6() {
 #[cfg(linux_kernel)]
 #[test]
 fn test_socketopts_ip_mtu() {
+    use std::net::SocketAddrV4;
+
     crate::init();
 
     let s = rustix::net::socket(AddressFamily::INET, SocketType::DGRAM, None).unwrap();
-    rustix::net::bind(&s, &"127.0.0.1:0".parse().unwrap()).unwrap();
-    rustix::net::connect(&s, &"127.0.0.1:0".parse().unwrap()).unwrap();
+    rustix::net::bind(&s, &SocketAddrV4::new(Ipv4Addr::LOCALHOST, 0)).unwrap();
+    rustix::net::connect(&s, &SocketAddrV4::new(Ipv4Addr::LOCALHOST, 0)).unwrap();
     match sockopt::ip_mtu(&s) {
         Ok(mtu) => {
             assert!(mtu > 0);
@@ -532,11 +534,13 @@ fn test_socketopts_ip_mtu() {
 #[cfg(linux_kernel)]
 #[test]
 fn test_socketopts_ipv6_mtu() {
+    use std::net::{Ipv6Addr, SocketAddrV6};
+
     crate::init();
 
     let s = rustix::net::socket(AddressFamily::INET6, SocketType::DGRAM, None).unwrap();
-    rustix::net::bind(&s, &"[::1]:0".parse().unwrap()).unwrap();
-    rustix::net::connect(&s, &"[::1]:0".parse().unwrap()).unwrap();
+    rustix::net::bind(&s, &SocketAddrV6::new(Ipv6Addr::LOCALHOST, 0, 0, 0)).unwrap();
+    rustix::net::connect(&s, &SocketAddrV6::new(Ipv6Addr::LOCALHOST, 0, 0, 0)).unwrap();
 
     match sockopt::ipv6_mtu(&s) {
         Ok(mtu) => {

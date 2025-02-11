@@ -195,7 +195,7 @@ fn test_select_with_sockets() {
     rustix::net::listen(&listener, 1).expect("listen");
     let local_addr = rustix::net::getsockname(&listener).unwrap();
     let writer = rustix::net::socket(AddressFamily::INET, SocketType::STREAM, None).unwrap();
-    rustix::net::connect_any(&writer, &local_addr).expect("connect");
+    rustix::net::connect(&writer, &local_addr).expect("connect");
     let reader = rustix::net::accept(&listener).expect("accept");
 
     let nfds = max(reader.as_raw_fd(), writer.as_raw_fd()) + 1;
@@ -290,7 +290,7 @@ fn test_select_with_maxfd_sockets() {
     rustix::net::listen(&listener, 1).expect("listen");
     let local_addr = rustix::net::getsockname(&listener).unwrap();
     let writer = rustix::net::socket(AddressFamily::INET, SocketType::STREAM, None).unwrap();
-    rustix::net::connect_any(&writer, &local_addr).expect("connect");
+    rustix::net::connect(&writer, &local_addr).expect("connect");
     let reader = rustix::net::accept(&listener).expect("accept");
 
     // Raise the fd limit to the maximum.

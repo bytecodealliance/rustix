@@ -8,6 +8,7 @@
 
 use crate::backend::c;
 use crate::ffi::CStr;
+use crate::net::addr::SocketAddrLen;
 use crate::net::AddressFamily;
 use crate::{io, path};
 use core::cmp::Ordering;
@@ -121,8 +122,8 @@ impl SocketAddrUnix {
     }
 
     #[inline]
-    pub(crate) fn addr_len(&self) -> c::socklen_t {
-        self.len
+    pub(crate) fn addr_len(&self) -> SocketAddrLen {
+        self.len as _
     }
 
     #[inline]
@@ -132,7 +133,7 @@ impl SocketAddrUnix {
 
     #[inline]
     fn bytes(&self) -> Option<&[u8]> {
-        let len = self.len() as usize;
+        let len = self.len();
         if len != 0 {
             let bytes = &self.unix.sun_path[..len - offsetof_sun_path()];
             // SAFETY: `from_raw_parts` to convert from `&[c_char]` to `&[u8]`.
@@ -192,6 +193,7 @@ impl fmt::Debug for SocketAddrUnix {
 
 /// `struct sockaddr_storage`.
 #[repr(transparent)]
+#[derive(Copy, Clone)]
 pub struct SocketAddrStorage(c::sockaddr_storage);
 
 // SAFETY: Bindgen adds a union with a raw pointer for alignment but it's never
