@@ -8,6 +8,7 @@ use core::slice;
 use {
     crate::ffi::CStr,
     crate::io,
+    crate::net::addr::SocketAddrLen,
     crate::path,
     core::cmp::Ordering,
     core::fmt,
@@ -151,14 +152,14 @@ impl SocketAddrUnix {
     }
 
     #[inline]
-    pub(crate) fn addr_len(&self) -> c::socklen_t {
+    pub(crate) fn addr_len(&self) -> SocketAddrLen {
         #[cfg(not(any(bsd, target_os = "haiku")))]
         {
-            self.len
+            self.len as _
         }
         #[cfg(any(bsd, target_os = "haiku"))]
         {
-            c::socklen_t::from(self.unix.sun_len)
+            c::socklen_t::from(self.unix.sun_len) as _
         }
     }
 

@@ -8,6 +8,7 @@
 
 use crate::backend::c;
 use crate::ffi::CStr;
+use crate::net::addr::SocketAddrLen;
 use crate::net::AddressFamily;
 use crate::{io, path};
 use core::cmp::Ordering;
@@ -121,8 +122,8 @@ impl SocketAddrUnix {
     }
 
     #[inline]
-    pub(crate) fn addr_len(&self) -> c::socklen_t {
-        self.len
+    pub(crate) fn addr_len(&self) -> SocketAddrLen {
+        self.len as _
     }
 
     #[inline]
