@@ -29,6 +29,15 @@ use crate::ffi::CStr;
 #[cfg(feature = "fs")]
 use crate::fs::Mode;
 use crate::io;
+#[cfg(not(any(
+    target_os = "emscripten",
+    target_os = "espidf",
+    target_os = "fuchsia",
+    target_os = "redox",
+    target_os = "vita",
+    target_os = "wasi"
+)))]
+use crate::process::Flock;
 #[cfg(all(feature = "alloc", not(target_os = "wasi")))]
 use crate::process::Gid;
 #[cfg(not(target_os = "wasi"))]
@@ -645,4 +654,25 @@ pub(crate) fn getgroups(buf: &mut [Gid]) -> io::Result<usize> {
     let len = buf.len().try_into().map_err(|_| io::Errno::NOMEM)?;
 
     unsafe { ret_usize(c::getgroups(len, buf.as_mut_ptr().cast()) as isize) }
+}
+
+#[cfg(not(any(
+    target_os = "emscripten",
+    target_os = "espidf",
+    target_os = "fuchsia",
+    target_os = "redox",
+    target_os = "vita",
+    target_os = "wasi"
+)))]
+#[inline]
+pub(crate) fn fcntl_getlk(fd: BorrowedFd<'_>, lock: &Flock) -> io::Result<Option<Flock>> {
+    let mut curr_lock: c::flock = lock.as_raw();
+    unsafe { ret(c::fcntl(borrowed_fd(fd), c::F_GETLK, &mut curr_lock))? };
+
+    // If no blocking lock is found, `fcntl(GETLK, ..)` sets `l_type` to `F_UNLCK`
+    if curr_lock.l_type == c::F_UNLCK as _ {
+        Ok(None)
+    } else {
+        Ok(Some(unsafe { Flock::from_raw_unchecked(curr_lock) }))
+    }
 }
