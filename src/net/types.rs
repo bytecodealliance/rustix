@@ -1169,8 +1169,10 @@ pub mod netlink {
 
     #[cfg(linux_kernel)]
     #[allow(unsafe_code)]
+    // SAFETY: `with_sockaddr` calls `f` using `call_with_sockaddr`, which
+    // handles calling `f` with the needed preconditions.
     unsafe impl SocketAddrArg for SocketAddrNetlink {
-        fn with_sockaddr<R>(
+        unsafe fn with_sockaddr<R>(
             &self,
             f: impl FnOnce(*const SocketAddrOpaque, SocketAddrLen) -> R,
         ) -> R {
@@ -1771,8 +1773,10 @@ pub mod xdp {
     }
 
     #[allow(unsafe_code)]
+    // SAFETY: `with_sockaddr` calls `f` using `call_with_sockaddr`, which
+    // handles calling `f` with the needed preconditions.
     unsafe impl SocketAddrArg for SocketAddrXdp {
-        fn with_sockaddr<R>(
+        unsafe fn with_sockaddr<R>(
             &self,
             f: impl FnOnce(*const SocketAddrOpaque, SocketAddrLen) -> R,
         ) -> R {

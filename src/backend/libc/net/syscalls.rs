@@ -19,7 +19,7 @@ use core::mem::{size_of, MaybeUninit};
 use core::ptr::null_mut;
 #[cfg(not(any(windows, target_os = "espidf", target_os = "redox", target_os = "vita")))]
 use {
-    super::msghdr::{with_msghdr, with_noaddr_msghdr, with_recv_msghdr},
+    super::msghdr::{noaddr_msghdr, with_msghdr, with_recv_msghdr},
     super::send_recv::ReturnFlags,
     crate::io::{IoSlice, IoSliceMut},
     crate::net::{RecvAncillaryBuffer, RecvMsg, SendAncillaryBuffer},
@@ -184,16 +184,18 @@ pub(crate) fn recvmsg(
 ) -> io::Result<RecvMsg> {
     let mut addr = SocketAddrBuf::new();
 
-    let (bytes, flags) = with_recv_msghdr(&mut addr, iov, control, |msghdr| {
-        let bytes = unsafe {
-            ret_send_recv(c::recvmsg(
+    // SAFETY: This passes the `msghdr` reference to the OS which reads the
+    // buffers only within the designated bounds.
+    let (bytes, flags) = unsafe {
+        with_recv_msghdr(&mut addr, iov, control, |msghdr| {
+            let bytes = ret_send_recv(c::recvmsg(
                 borrowed_fd(sockfd),
                 msghdr,
                 bitflags_bits!(msg_flags),
-            ))?
-        };
-        Ok((bytes, msghdr.msg_flags))
-    })?;
+            ))?;
+            Ok((bytes, msghdr.msg_flags))
+        })?
+    };
 
     Ok(RecvMsg {
         bytes,
@@ -209,13 +211,14 @@ pub(crate) fn sendmsg(
     control: &mut SendAncillaryBuffer<'_, '_, '_>,
     msg_flags: SendFlags,
 ) -> io::Result<usize> {
-    with_noaddr_msghdr(iov, control, |msghdr| unsafe {
+    let msghdr = noaddr_msghdr(iov, control);
+    unsafe {
         ret_send_recv(c::sendmsg(
             borrowed_fd(sockfd),
             &msghdr,
             bitflags_bits!(msg_flags),
         ))
-    })
+    }
 }
 
 #[cfg(not(any(windows, target_os = "espidf", target_os = "redox", target_os = "vita",)))]
@@ -226,13 +229,17 @@ pub(crate) fn sendmsg_addr(
     control: &mut SendAncillaryBuffer<'_, '_, '_>,
     msg_flags: SendFlags,
 ) -> io::Result<usize> {
-    with_msghdr(addr, iov, control, |msghdr| unsafe {
-        ret_send_recv(c::sendmsg(
-            borrowed_fd(sockfd),
-            &msghdr,
-            bitflags_bits!(msg_flags),
-        ))
-    })
+    // SAFETY: This passes the `msghdr` reference to the OS which reads the
+    // buffers only within the designated bounds.
+    unsafe {
+        with_msghdr(addr, iov, control, |msghdr| {
+            ret_send_recv(c::sendmsg(
+                borrowed_fd(sockfd),
+                msghdr,
+                bitflags_bits!(msg_flags),
+            ))
+        })
+    }
 }
 
 #[cfg(target_os = "linux")]

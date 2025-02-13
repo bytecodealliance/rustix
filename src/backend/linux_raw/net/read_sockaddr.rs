@@ -23,7 +23,7 @@ pub(crate) struct sockaddr_header {
 ///
 /// # Safety
 ///
-/// `storage` must point to a valid socket address returned from the OS.
+/// `storage` must point to a least an initialized `sockaddr_header`.
 #[inline]
 pub(crate) const unsafe fn read_sa_family(storage: *const c::sockaddr) -> u16 {
     // Assert that we know the layout of `sockaddr`.
@@ -44,6 +44,10 @@ pub(crate) const unsafe fn read_sa_family(storage: *const c::sockaddr) -> u16 {
 
 /// Set the `sa_family` field of a socket address to `AF_UNSPEC`, so that we
 /// can test for `AF_UNSPEC` to test whether it was stored to.
+///
+/// # Safety
+///
+/// `storage` must point to a least an initialized `sockaddr_header`.
 #[inline]
 pub(crate) unsafe fn initialize_family_to_unspec(storage: *mut c::sockaddr) {
     (*storage.cast::<sockaddr_header>()).sa_family = c::AF_UNSPEC as _;

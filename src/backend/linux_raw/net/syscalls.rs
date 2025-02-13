@@ -5,7 +5,7 @@
 //! See the `rustix::backend` module documentation for details.
 #![allow(unsafe_code, clippy::undocumented_unsafe_blocks)]
 
-use super::msghdr::{with_msghdr, with_noaddr_msghdr, with_recv_msghdr};
+use super::msghdr::{noaddr_msghdr, with_msghdr, with_recv_msghdr};
 use super::read_sockaddr::initialize_family_to_unspec;
 use super::send_recv::{RecvFlags, ReturnFlags, SendFlags};
 use crate::backend::c;
@@ -247,14 +247,15 @@ pub(crate) fn recvmsg(
 ) -> io::Result<RecvMsg> {
     let mut addr = SocketAddrBuf::new();
 
-    let (bytes, flags) = with_recv_msghdr(&mut addr, iov, control, |msghdr| {
-        #[cfg(not(target_arch = "x86"))]
-        let result =
-            unsafe { ret_usize(syscall!(__NR_recvmsg, sockfd, by_mut(msghdr), msg_flags)) };
+    // SAFETY: This passes the `msghdr` reference to the OS which reads the
+    // buffers only within the designated bounds.
+    let (bytes, flags) = unsafe {
+        with_recv_msghdr(&mut addr, iov, control, |msghdr| {
+            #[cfg(not(target_arch = "x86"))]
+            let result = ret_usize(syscall!(__NR_recvmsg, sockfd, by_mut(msghdr), msg_flags));
 
-        #[cfg(target_arch = "x86")]
-        let result = unsafe {
-            ret_usize(syscall!(
+            #[cfg(target_arch = "x86")]
+            let result = ret_usize(syscall!(
                 __NR_socketcall,
                 x86_sys(SYS_RECVMSG),
                 slice_just_addr::<ArgReg<'_, SocketArg>, _>(&[
@@ -262,11 +263,11 @@ pub(crate) fn recvmsg(
                     by_mut(msghdr),
                     msg_flags.into(),
                 ])
-            ))
-        };
+            ));
 
-        result.map(|bytes| (bytes, msghdr.msg_flags))
-    })?;
+            result.map(|bytes| (bytes, msghdr.msg_flags))
+        })?
+    };
 
     // Get the address of the sender, if any.
     Ok(RecvMsg {
@@ -283,26 +284,25 @@ pub(crate) fn sendmsg(
     control: &mut SendAncillaryBuffer<'_, '_, '_>,
     msg_flags: SendFlags,
 ) -> io::Result<usize> {
-    with_noaddr_msghdr(iov, control, |msghdr| {
-        #[cfg(not(target_arch = "x86"))]
-        let result =
-            unsafe { ret_usize(syscall!(__NR_sendmsg, sockfd, by_ref(&msghdr), msg_flags)) };
+    let msghdr = noaddr_msghdr(iov, control);
 
-        #[cfg(target_arch = "x86")]
-        let result = unsafe {
-            ret_usize(syscall!(
-                __NR_socketcall,
-                x86_sys(SYS_SENDMSG),
-                slice_just_addr::<ArgReg<'_, SocketArg>, _>(&[
-                    sockfd.into(),
-                    by_ref(&msghdr),
-                    msg_flags.into()
-                ])
-            ))
-        };
+    #[cfg(not(target_arch = "x86"))]
+    let result = unsafe { ret_usize(syscall!(__NR_sendmsg, sockfd, by_ref(&msghdr), msg_flags)) };
 
-        result
-    })
+    #[cfg(target_arch = "x86")]
+    let result = unsafe {
+        ret_usize(syscall!(
+            __NR_socketcall,
+            x86_sys(SYS_SENDMSG),
+            slice_just_addr::<ArgReg<'_, SocketArg>, _>(&[
+                sockfd.into(),
+                by_ref(&msghdr),
+                msg_flags.into()
+            ])
+        ))
+    };
+
+    result
 }
 
 #[inline]
@@ -313,26 +313,27 @@ pub(crate) fn sendmsg_addr(
     control: &mut SendAncillaryBuffer<'_, '_, '_>,
     msg_flags: SendFlags,
 ) -> io::Result<usize> {
-    with_msghdr(addr, iov, control, |msghdr| {
-        #[cfg(not(target_arch = "x86"))]
-        let result =
-            unsafe { ret_usize(syscall!(__NR_sendmsg, sockfd, by_ref(&msghdr), msg_flags)) };
+    // SAFETY: This passes the `msghdr` reference to the OS which reads the
+    // buffers only within the designated bounds.
+    unsafe {
+        with_msghdr(addr, iov, control, |msghdr| {
+            #[cfg(not(target_arch = "x86"))]
+            let result = ret_usize(syscall!(__NR_sendmsg, sockfd, by_ref(msghdr), msg_flags));
 
-        #[cfg(target_arch = "x86")]
-        let result = unsafe {
-            ret_usize(syscall!(
+            #[cfg(target_arch = "x86")]
+            let result = ret_usize(syscall!(
                 __NR_socketcall,
                 x86_sys(SYS_SENDMSG),
                 slice_just_addr::<ArgReg<'_, SocketArg>, _>(&[
                     sockfd.into(),
-                    by_ref(&msghdr),
+                    by_ref(msghdr),
                     msg_flags.into(),
                 ])
-            ))
-        };
+            ));
 
-        result
-    })
+            result
+        })
+    }
 }
 
 #[cfg(target_os = "linux")]
@@ -438,35 +439,39 @@ pub(crate) fn sendto(
 ) -> io::Result<usize> {
     let (buf_addr, buf_len) = slice(buf);
 
-    addr.with_sockaddr(|addr_ptr, addr_len| {
-        #[cfg(not(target_arch = "x86"))]
-        unsafe {
-            ret_usize(syscall_readonly!(
-                __NR_sendto,
-                fd,
-                buf_addr,
-                buf_len,
-                flags,
-                raw_arg(addr_ptr as *mut _),
-                socklen_t(addr_len)
-            ))
-        }
-        #[cfg(target_arch = "x86")]
-        unsafe {
-            ret_usize(syscall_readonly!(
-                __NR_socketcall,
-                x86_sys(SYS_SENDTO),
-                slice_just_addr::<ArgReg<'_, SocketArg>, _>(&[
-                    fd.into(),
+    // SAFETY: This passes the `addr_ptr` reference to the OS which reads the
+    // buffers only within the `addr_len` bound.
+    unsafe {
+        addr.with_sockaddr(|addr_ptr, addr_len| {
+            #[cfg(not(target_arch = "x86"))]
+            {
+                ret_usize(syscall_readonly!(
+                    __NR_sendto,
+                    fd,
                     buf_addr,
                     buf_len,
-                    flags.into(),
+                    flags,
                     raw_arg(addr_ptr as *mut _),
                     socklen_t(addr_len)
-                ])
-            ))
-        }
-    })
+                ))
+            }
+            #[cfg(target_arch = "x86")]
+            {
+                ret_usize(syscall_readonly!(
+                    __NR_socketcall,
+                    x86_sys(SYS_SENDTO),
+                    slice_just_addr::<ArgReg<'_, SocketArg>, _>(&[
+                        fd.into(),
+                        buf_addr,
+                        buf_len,
+                        flags.into(),
+                        raw_arg(addr_ptr as *mut _),
+                        socklen_t(addr_len)
+                    ])
+                ))
+            }
+        })
+    }
 }
 
 #[inline]
@@ -623,56 +628,64 @@ pub(crate) fn getsockname(fd: BorrowedFd<'_>) -> io::Result<SocketAddrAny> {
 
 #[inline]
 pub(crate) fn bind(fd: BorrowedFd<'_>, addr: &impl SocketAddrArg) -> io::Result<()> {
-    addr.with_sockaddr(|addr_ptr, addr_len| {
-        #[cfg(not(target_arch = "x86"))]
-        unsafe {
-            ret(syscall_readonly!(
-                __NR_bind,
-                fd,
-                raw_arg(addr_ptr as *mut _),
-                socklen_t(addr_len)
-            ))
-        }
-        #[cfg(target_arch = "x86")]
-        unsafe {
-            ret(syscall_readonly!(
-                __NR_socketcall,
-                x86_sys(SYS_BIND),
-                slice_just_addr::<ArgReg<'_, SocketArg>, _>(&[
-                    fd.into(),
+    // SAFETY: This passes the `addr_ptr` reference to the OS which reads the
+    // buffers only within the `addr_len` bound.
+    unsafe {
+        addr.with_sockaddr(|addr_ptr, addr_len| {
+            #[cfg(not(target_arch = "x86"))]
+            {
+                ret(syscall_readonly!(
+                    __NR_bind,
+                    fd,
                     raw_arg(addr_ptr as *mut _),
                     socklen_t(addr_len)
-                ])
-            ))
-        }
-    })
+                ))
+            }
+            #[cfg(target_arch = "x86")]
+            {
+                ret(syscall_readonly!(
+                    __NR_socketcall,
+                    x86_sys(SYS_BIND),
+                    slice_just_addr::<ArgReg<'_, SocketArg>, _>(&[
+                        fd.into(),
+                        raw_arg(addr_ptr as *mut _),
+                        socklen_t(addr_len)
+                    ])
+                ))
+            }
+        })
+    }
 }
 
 #[inline]
 pub(crate) fn connect(fd: BorrowedFd<'_>, addr: &impl SocketAddrArg) -> io::Result<()> {
-    addr.with_sockaddr(|addr_ptr, addr_len| {
-        #[cfg(not(target_arch = "x86"))]
-        unsafe {
-            ret(syscall_readonly!(
-                __NR_connect,
-                fd,
-                raw_arg(addr_ptr as *mut _),
-                socklen_t(addr_len)
-            ))
-        }
-        #[cfg(target_arch = "x86")]
-        unsafe {
-            ret(syscall_readonly!(
-                __NR_socketcall,
-                x86_sys(SYS_CONNECT),
-                slice_just_addr::<ArgReg<'_, SocketArg>, _>(&[
-                    fd.into(),
+    // SAFETY: This passes the `addr_ptr` reference to the OS which reads the
+    // buffers only within the `addr_len` bound.
+    unsafe {
+        addr.with_sockaddr(|addr_ptr, addr_len| {
+            #[cfg(not(target_arch = "x86"))]
+            {
+                ret(syscall_readonly!(
+                    __NR_connect,
+                    fd,
                     raw_arg(addr_ptr as *mut _),
                     socklen_t(addr_len)
-                ])
-            ))
-        }
-    })
+                ))
+            }
+            #[cfg(target_arch = "x86")]
+            {
+                ret(syscall_readonly!(
+                    __NR_socketcall,
+                    x86_sys(SYS_CONNECT),
+                    slice_just_addr::<ArgReg<'_, SocketArg>, _>(&[
+                        fd.into(),
+                        raw_arg(addr_ptr as *mut _),
+                        socklen_t(addr_len)
+                    ])
+                ))
+            }
+        })
+    }
 }
 
 #[inline]
