@@ -2009,7 +2009,7 @@ pub(crate) fn statx(
     }
 }
 
-#[cfg(linux_kernel)]
+#[cfg(all(linux_kernel, not(feature = "linux_4_11")))]
 #[inline]
 pub(crate) fn is_statx_available() -> bool {
     unsafe {

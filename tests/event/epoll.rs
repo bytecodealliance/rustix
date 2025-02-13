@@ -40,7 +40,7 @@ fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
 
     let mut event_list = Vec::with_capacity(4);
     loop {
-        epoll::wait(&epoll, &mut event_list, -1).unwrap();
+        epoll::wait(&epoll, &mut event_list, None).unwrap();
         for event in &event_list {
             let target = event.data;
             if target.u64() == 1 {
