@@ -1176,7 +1176,7 @@ pub mod netlink {
             &self,
             f: impl FnOnce(*const SocketAddrOpaque, SocketAddrLen) -> R,
         ) -> R {
-            let mut addr: c::sockaddr_nl = unsafe { mem::zeroed() };
+            let mut addr: c::sockaddr_nl = mem::zeroed();
             addr.nl_family = c::AF_NETLINK as _;
             addr.nl_pid = self.pid;
             addr.nl_groups = self.groups;
