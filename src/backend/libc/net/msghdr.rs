@@ -121,9 +121,7 @@ pub(crate) unsafe fn with_recv_msghdr<R>(
     if res.is_ok() {
         // SAFETY: `f` returned `Ok`, so our safety condition requires `f` to
         // have initialized `msg_controllen` bytes.
-        unsafe {
-            control.set_control_len(msghdr.msg_controllen as usize);
-        }
+        control.set_control_len(msghdr.msg_controllen as usize);
     }
 
     name.len = msghdr.msg_namelen;
