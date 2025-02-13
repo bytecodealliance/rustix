@@ -39,7 +39,7 @@ impl SocketAddrUnix {
             return Err(io::Errno::NAMETOOLONG);
         }
         for (i, b) in bytes.iter().enumerate() {
-            unix.sun_path[i] = *b as _;
+            unix.sun_path[i] = bitcast!(*b);
         }
         let len = offsetof_sun_path() + bytes.len();
         let len = len.try_into().unwrap();
@@ -81,7 +81,7 @@ impl SocketAddrUnix {
         Self {
             unix: Self::init(),
             #[cfg(not(any(bsd, target_os = "haiku")))]
-            len: offsetof_sun_path() as _,
+            len: offsetof_sun_path() as SocketAddrLen,
         }
     }
 
@@ -123,7 +123,7 @@ impl SocketAddrUnix {
 
     #[inline]
     pub(crate) fn addr_len(&self) -> SocketAddrLen {
-        self.len as _
+        bitcast!(self.len)
     }
 
     #[inline]

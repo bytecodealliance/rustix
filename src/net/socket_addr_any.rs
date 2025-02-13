@@ -138,7 +138,7 @@ impl SocketAddrAny {
 
     /// Returns the length of the encoded sockaddr.
     #[inline]
-    pub fn len(&self) -> SocketAddrLen {
+    pub fn addr_len(&self) -> SocketAddrLen {
         self.len.get()
     }
 }
@@ -206,7 +206,7 @@ impl fmt::Debug for SocketAddrAny {
 
         f.debug_struct("SocketAddrAny")
             .field("address_family", &self.address_family())
-            .field("namelen", &self.len())
+            .field("namelen", &self.addr_len())
             .finish()
     }
 }
@@ -217,7 +217,7 @@ unsafe impl SocketAddrArg for SocketAddrAny {
         &self,
         f: impl FnOnce(*const SocketAddrOpaque, SocketAddrLen) -> R,
     ) -> R {
-        f(self.as_ptr().cast(), self.len())
+        f(self.as_ptr().cast(), self.addr_len())
     }
 }
 

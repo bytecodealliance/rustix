@@ -164,7 +164,7 @@ pub(crate) unsafe fn with_msghdr<R>(
     addr.with_sockaddr(|addr_ptr, addr_len| {
         let mut h = zero_msghdr();
         h.msg_name = addr_ptr as *mut _;
-        h.msg_namelen = addr_len as _;
+        h.msg_namelen = bitcast!(addr_len);
         h.msg_iov = iov.as_ptr() as _;
         h.msg_iovlen = msg_iov_len(iov.len());
         h.msg_control = control.as_control_ptr().cast();

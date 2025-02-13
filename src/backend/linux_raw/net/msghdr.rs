@@ -59,7 +59,7 @@ pub(crate) unsafe fn with_recv_msghdr<R>(
         control.set_control_len(msghdr.msg_controllen as usize);
     }
 
-    name.len = msghdr.msg_namelen as _;
+    name.len = bitcast!(msghdr.msg_namelen);
 
     res
 }
@@ -105,7 +105,7 @@ pub(crate) unsafe fn with_msghdr<R>(
         // beyond the call to `with_sockaddr`.
         let mut msghdr = noaddr_msghdr(iov, control);
         msghdr.msg_name = addr_ptr as _;
-        msghdr.msg_namelen = addr_len as _;
+        msghdr.msg_namelen = bitcast!(addr_len);
 
         f(&msghdr)
     })

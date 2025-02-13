@@ -93,7 +93,7 @@ impl SocketAddrUnix {
         Self {
             unix: Self::init(),
             #[cfg(not(any(bsd, target_os = "haiku")))]
-            len: offsetof_sun_path() as _,
+            len: offsetof_sun_path() as SocketAddrLen,
         }
     }
 
@@ -155,11 +155,11 @@ impl SocketAddrUnix {
     pub(crate) fn addr_len(&self) -> SocketAddrLen {
         #[cfg(not(any(bsd, target_os = "haiku")))]
         {
-            self.len as _
+            bitcast!(self.len)
         }
         #[cfg(any(bsd, target_os = "haiku"))]
         {
-            c::socklen_t::from(self.unix.sun_len) as _
+            bitcast!(c::socklen_t::from(self.unix.sun_len))
         }
     }
 

@@ -89,7 +89,7 @@ pub(crate) fn sendto(
                 send_recv_len(buf.len()),
                 bitflags_bits!(flags),
                 addr_ptr.cast(),
-                addr_len as _,
+                bitcast!(addr_len),
             ))
         })
     }
@@ -135,7 +135,11 @@ pub(crate) fn socket_with(
 pub(crate) fn bind(sockfd: BorrowedFd<'_>, addr: &impl SocketAddrArg) -> io::Result<()> {
     unsafe {
         addr.with_sockaddr(|addr_ptr, addr_len| {
-            ret(c::bind(borrowed_fd(sockfd), addr_ptr.cast(), addr_len as _))
+            ret(c::bind(
+                borrowed_fd(sockfd),
+                addr_ptr.cast(),
+                bitcast!(addr_len),
+            ))
         })
     }
 }
@@ -146,7 +150,7 @@ pub(crate) fn connect(sockfd: BorrowedFd<'_>, addr: &impl SocketAddrArg) -> io::
             ret(c::connect(
                 borrowed_fd(sockfd),
                 addr_ptr.cast(),
-                addr_len as _,
+                bitcast!(addr_len),
             ))
         })
     }
