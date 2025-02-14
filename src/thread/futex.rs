@@ -525,6 +525,13 @@ impl WaitPtr {
     }
 }
 
+impl Default for WaitPtr {
+    #[inline]
+    fn default() -> Self {
+        Self::new(ptr::null_mut())
+    }
+}
+
 impl From<*mut c_void> for WaitPtr {
     #[inline]
     fn from(ptr: *mut c_void) -> Self {
