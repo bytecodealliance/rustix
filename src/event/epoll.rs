@@ -235,11 +235,11 @@ pub fn wait<EpollFd: AsFd>(
 /// function and the slice that remains uninitialized.
 #[doc(alias = "epoll_wait")]
 #[inline]
-pub fn wait_uninit<EpollFd: AsFd>(
+pub fn wait_uninit<'a, EpollFd: AsFd>(
     epoll: EpollFd,
-    event_list: &mut [MaybeUninit<Event>],
+    event_list: &'a mut [MaybeUninit<Event>],
     timeout: Option<&Timespec>,
-) -> io::Result<(&mut [Event], &mut [MaybeUninit<Event>])> {
+) -> io::Result<(&'a mut [Event], &'a mut [MaybeUninit<Event>])> {
     // SAFETY: We're calling `epoll_wait` via FFI and we know how it
     // behaves.
     unsafe {
