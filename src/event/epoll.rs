@@ -78,7 +78,6 @@ use crate::backend::event::syscalls;
 use crate::buffer::split_init;
 use crate::fd::{AsFd, OwnedFd};
 use crate::io;
-#[cfg(feature = "alloc")]
 use crate::timespec::Timespec;
 #[cfg(feature = "alloc")]
 use alloc::vec::Vec;
@@ -239,7 +238,7 @@ pub fn wait<EpollFd: AsFd>(
 pub fn wait_uninit<EpollFd: AsFd>(
     epoll: EpollFd,
     event_list: &mut [MaybeUninit<Event>],
-    timeout: crate::ffi::c_int,
+    timeout: Option<&Timespec>,
 ) -> io::Result<(&mut [Event], &mut [MaybeUninit<Event>])> {
     // SAFETY: We're calling `epoll_wait` via FFI and we know how it
     // behaves.
