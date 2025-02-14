@@ -319,7 +319,7 @@ impl<'buf, 'slice, 'fd> SendAncillaryBuffer<'buf, 'slice, 'fd> {
         // Get the pointer to the payload and copy the data.
         unsafe {
             let payload = c::CMSG_DATA(last_header);
-            ptr::copy_nonoverlapping(source.as_ptr(), payload, source_len as _);
+            ptr::copy_nonoverlapping(source.as_ptr(), payload, source_len as usize);
         }
 
         true
@@ -626,7 +626,7 @@ impl<'a> MMsgHdr<'a> {
         // give us a pointer directly, so we use that.
         let mut msghdr = noaddr_msghdr(iov, control);
         msghdr.msg_name = addr.as_ptr() as _;
-        msghdr.msg_namelen = addr.len() as _;
+        msghdr.msg_namelen = bitcast!(addr.addr_len());
 
         Self::wrap(msghdr)
     }
@@ -644,7 +644,7 @@ impl<'a> MMsgHdr<'a> {
     /// Returns the number of bytes sent. This will return 0 until after a
     /// successful call to [sendmmsg].
     pub fn bytes_sent(&self) -> usize {
-        self.raw.msg_len as _
+        self.raw.msg_len as usize
     }
 }
 

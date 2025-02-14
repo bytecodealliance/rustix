@@ -150,7 +150,7 @@ pub(crate) fn read_sockaddr_v4(addr: &SocketAddrAny) -> Result<SocketAddrV4, Err
     if addr.address_family() != AddressFamily::INET {
         return Err(Errno::AFNOSUPPORT);
     }
-    assert!(addr.len() as usize >= size_of::<c::sockaddr_in>());
+    assert!(addr.addr_len() as usize >= size_of::<c::sockaddr_in>());
     let decode = unsafe { &*addr.as_ptr().cast::<c::sockaddr_in>() };
     Ok(SocketAddrV4::new(
         Ipv4Addr::from(u32::from_be(in_addr_s_addr(decode.sin_addr))),
@@ -163,7 +163,7 @@ pub(crate) fn read_sockaddr_v6(addr: &SocketAddrAny) -> Result<SocketAddrV6, Err
     if addr.address_family() != AddressFamily::INET6 {
         return Err(Errno::AFNOSUPPORT);
     }
-    assert!(addr.len() as usize >= size_of::<c::sockaddr_in6>());
+    assert!(addr.addr_len() as usize >= size_of::<c::sockaddr_in6>());
     let decode = unsafe { &*addr.as_ptr().cast::<c::sockaddr_in6>() };
     Ok(SocketAddrV6::new(
         Ipv6Addr::from(in6_addr_s6_addr(decode.sin6_addr)),
@@ -181,7 +181,7 @@ pub(crate) fn read_sockaddr_unix(addr: &SocketAddrAny) -> Result<SocketAddrUnix,
     }
 
     let offsetof_sun_path = super::addr::offsetof_sun_path();
-    let len = addr.len() as usize;
+    let len = addr.addr_len() as usize;
 
     assert!(len >= offsetof_sun_path);
 
@@ -237,7 +237,7 @@ pub(crate) fn read_sockaddr_xdp(addr: &SocketAddrAny) -> Result<SocketAddrXdp, E
     if addr.address_family() != AddressFamily::XDP {
         return Err(Errno::AFNOSUPPORT);
     }
-    assert!(addr.len() as usize >= size_of::<c::sockaddr_xdp>());
+    assert!(addr.addr_len() as usize >= size_of::<c::sockaddr_xdp>());
     let decode = unsafe { &*addr.as_ptr().cast::<c::sockaddr_xdp>() };
     Ok(SocketAddrXdp::new(
         SockaddrXdpFlags::from_bits_retain(decode.sxdp_flags),
@@ -253,7 +253,7 @@ pub(crate) fn read_sockaddr_netlink(addr: &SocketAddrAny) -> Result<SocketAddrNe
     if addr.address_family() != AddressFamily::NETLINK {
         return Err(Errno::AFNOSUPPORT);
     }
-    assert!(addr.len() as usize >= size_of::<c::sockaddr_nl>());
+    assert!(addr.addr_len() as usize >= size_of::<c::sockaddr_nl>());
     let decode = unsafe { &*addr.as_ptr().cast::<c::sockaddr_nl>() };
     Ok(SocketAddrNetlink::new(decode.nl_pid, decode.nl_groups))
 }
