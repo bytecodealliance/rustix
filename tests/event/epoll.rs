@@ -67,13 +67,10 @@ fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
 
 fn server_uninit(ready: Arc<(Mutex<u16>, Condvar)>) {
     let listen_sock = socket(AddressFamily::INET, SocketType::STREAM, None).unwrap();
-    bind_v4(&listen_sock, &SocketAddrV4::new(Ipv4Addr::LOCALHOST, 0)).unwrap();
+    bind(&listen_sock, &SocketAddrV4::new(Ipv4Addr::LOCALHOST, 0)).unwrap();
     listen(&listen_sock, 1).unwrap();
 
-    let who = match getsockname(&listen_sock).unwrap() {
-        SocketAddrAny::V4(addr) => addr,
-        _ => panic!(),
-    };
+    let who = SocketAddrV4::try_from(getsockname(&listen_sock).unwrap()).unwrap();
 
     {
         let (lock, cvar) = &*ready;
