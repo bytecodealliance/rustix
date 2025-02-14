@@ -83,6 +83,8 @@ fn test_waitv_wake() {
         Err(Errno::AGAIN) => {
             assert_eq!(lock.load(Ordering::SeqCst), 0, "the lock should still be 0")
         }
+        // Skip this test if the kernel doesn't support futex_waitv.
+        Err(Errno::NOSYS) => return,
         Err(err) => panic!("{err}"),
     }
 
@@ -202,6 +204,10 @@ fn test_waitv_timeout() {
         futex::ClockId::Monotonic,
     )
     .unwrap_err();
+    if err == Errno::NOSYS {
+        // Skip this test if the kernel doesn't support futex_waitv.
+        return;
+    }
     assert_eq!(err, Errno::TIMEDOUT);
 
     let err = futex::waitv(
