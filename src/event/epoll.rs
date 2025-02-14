@@ -38,7 +38,7 @@
 //! // Process events.
 //! let mut event_list = Vec::with_capacity(4);
 //! loop {
-//!     epoll::wait(&epoll, &mut event_list, -1)?;
+//!     epoll::wait(&epoll, &mut event_list, None)?;
 //!     for event in &event_list {
 //!         let target = event.data;
 //!         if target.u64() == 1 {
@@ -77,6 +77,8 @@ pub use crate::backend::event::epoll::*;
 use crate::backend::event::syscalls;
 use crate::fd::{AsFd, OwnedFd};
 use crate::io;
+#[cfg(feature = "alloc")]
+use crate::timespec::Timespec;
 #[cfg(feature = "alloc")]
 use alloc::vec::Vec;
 use core::ffi::c_void;
@@ -190,6 +192,12 @@ pub fn delete<EpollFd: AsFd, SourceFd: AsFd>(epoll: EpollFd, source: SourceFd) -
 /// For each event of interest, an element is written to `events`. On
 /// success, this returns the number of written elements.
 ///
+/// Linux versions older than 5.11 (those that don't support `epoll_pwait2`)
+/// don't support timeouts greater than `c_int::MAX` milliseconds; if an
+/// unsupported timeout is passed, this function fails with
+/// [`io::Errno::INVAL`]. Enable the "linux_5_11" feature to enable the full
+/// range of timeouts.
+///
 /// # References
 ///  - [Linux]
 ///  - [illumos]
@@ -202,7 +210,7 @@ pub fn delete<EpollFd: AsFd, SourceFd: AsFd>(epoll: EpollFd, source: SourceFd) -
 pub fn wait<EpollFd: AsFd>(
     epoll: EpollFd,
     event_list: &mut Vec<Event>,
-    timeout: crate::ffi::c_int,
+    timeout: Option<&Timespec>,
 ) -> io::Result<()> {
     // SAFETY: We're calling `epoll_wait` via FFI and we know how it
     // behaves.

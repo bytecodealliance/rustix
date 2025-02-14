@@ -5,8 +5,6 @@
 //! See the `rustix::backend` module documentation for details.
 #![allow(unsafe_code, clippy::undocumented_unsafe_blocks)]
 
-#[cfg(feature = "alloc")]
-use crate::backend::c;
 use crate::backend::conv::{
     by_ref, c_int, c_uint, opt_ref, ret, ret_c_int, ret_error, ret_owned_fd, ret_usize, size_of,
     slice_mut, zero,
@@ -14,7 +12,9 @@ use crate::backend::conv::{
 use crate::event::{epoll, EventfdFlags, FdSetElement, PollFd, Timespec};
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io;
-use crate::utils::{as_mut_ptr, option_as_ptr};
+use crate::utils::as_mut_ptr;
+#[cfg(feature = "linux_5_11")]
+use crate::utils::option_as_ptr;
 #[cfg(feature = "alloc")]
 use core::mem::MaybeUninit;
 use core::ptr::null_mut;
@@ -24,14 +24,12 @@ use linux_raw_sys::general::{kernel_sigset_t, EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOL
 pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: Option<&Timespec>) -> io::Result<usize> {
     let (fds_addr_mut, fds_len) = slice_mut(fds);
 
-    let timeout = option_as_ptr(timeout);
-
     unsafe {
         ret_usize(syscall!(
             __NR_ppoll,
             fds_addr_mut,
             fds_len,
-            opt_ref(timeout.as_ref()),
+            opt_ref(timeout),
             zero(),
             size_of::<kernel_sigset_t, _>()
         ))
@@ -181,33 +179,53 @@ pub(crate) fn epoll_del(epfd: BorrowedFd<'_>, fd: BorrowedFd<'_>) -> io::Result<
 pub(crate) fn epoll_wait(
     epfd: BorrowedFd<'_>,
     events: &mut [MaybeUninit<crate::event::epoll::Event>],
-    timeout: c::c_int,
+    timeout: Option<&Timespec>,
 ) -> io::Result<usize> {
     let (buf_addr_mut, buf_len) = slice_mut(events);
-    // SAFETY: `__NR_epoll_wait` doesn't access any user memory outside of
-    // the `events` array.
-    #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]
-    unsafe {
-        ret_usize(syscall!(
-            __NR_epoll_wait,
-            epfd,
-            buf_addr_mut,
-            buf_len,
-            c_int(timeout)
-        ))
+
+    // If we have Linux 5.11, use `epoll_pwait2`, which takes a `timespec`.
+    #[cfg(feature = "linux_5_11")]
+    {
+        let timeout = option_as_ptr(timeout);
+
+        // SAFETY: `__NR_epoll_pwait2` doesn't access any user memory outside of
+        // the `events` array, as we don't pass it a `sigmask`.
+        unsafe {
+            ret_usize(syscall!(
+                __NR_epoll_pwait2,
+                epfd,
+                buf_addr_mut,
+                buf_len,
+                timeout,
+                zero()
+            ))
+        }
     }
-    // SAFETY: `__NR_epoll_pwait` doesn't access any user memory outside of
-    // the `events` array, as we don't pass it a `sigmask`.
-    #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
-    unsafe {
-        ret_usize(syscall!(
-            __NR_epoll_pwait,
-            epfd,
-            buf_addr_mut,
-            buf_len,
-            c_int(timeout),
-            zero()
-        ))
+
+    // If we don't have Linux 5.11, use `epoll_pwait`, which takes a `c_int`.
+    //
+    // We do this unconditionally, rather than trying `epoll_pwait2` and
+    // falling back on `Errno::NOSYS`, because seccomp configurations will
+    // sometimes abort the process on syscalls they don't recognize.
+    #[cfg(not(feature = "linux_5_11"))]
+    {
+        let timeout = match timeout {
+            None => -1,
+            Some(timeout) => timeout.as_c_int_millis().ok_or(io::Errno::INVAL)?,
+        };
+
+        // SAFETY: `__NR_epoll_pwait` doesn't access any user memory outside of
+        // the `events` array, as we don't pass it a `sigmask`.
+        unsafe {
+            ret_usize(syscall!(
+                __NR_epoll_pwait,
+                epfd,
+                buf_addr_mut,
+                buf_len,
+                c_int(timeout),
+                zero()
+            ))
+        }
     }
 }
 

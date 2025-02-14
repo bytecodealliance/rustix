@@ -7,7 +7,6 @@ use core::num::TryFromIntError;
 use core::ops::{Add, AddAssign, Neg, Sub, SubAssign};
 use core::time::Duration;
 
-#[cfg(not(fix_y2038))]
 use crate::backend::c;
 #[allow(unused)]
 use crate::ffi;
@@ -127,6 +126,21 @@ impl Timespec {
         } else {
             None
         }
+    }
+
+    /// Convert from `Timespec` to `c::c_int` milliseconds, rounded up.
+    pub(crate) fn as_c_int_millis(&self) -> Option<c::c_int> {
+        let secs = self.tv_sec;
+        if secs < 0 {
+            return None;
+        }
+        secs.checked_mul(1000)
+            .and_then(|millis| {
+                // Add the nanoseconds, converted to millis, rounding
+                // up. With Rust 1.73.0 this can use `div_ceil`.
+                millis.checked_add((i64::from(self.tv_nsec) + 999_999) / 1_000_000)
+            })
+            .and_then(|millis| c::c_int::try_from(millis).ok())
     }
 }
 
