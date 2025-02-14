@@ -36,6 +36,7 @@ impl SocketAddrBuf {
     /// Convert the buffer into [`SocketAddrAny`].
     ///
     /// # Safety
+    ///
     /// A valid address must have been written into `self.storage`
     /// and its length written into `self.len`.
     #[inline]
@@ -49,6 +50,7 @@ impl SocketAddrBuf {
     /// conditions define the address as empty.
     ///
     /// # Safety
+    ///
     /// Either valid address must have been written into `self.storage`
     /// and its length written into `self.len`, or `self.len` must
     /// have been set to 0.
@@ -113,6 +115,8 @@ impl SocketAddrAny {
     /// Gets the address family of this socket address.
     #[inline]
     pub fn address_family(&self) -> AddressFamily {
+        // SAFETY: Our invariants maintain that the `sa_family` field is
+        // initialized.
         unsafe {
             AddressFamily::from_raw(crate::backend::net::read_sockaddr::read_sa_family(
                 self.storage.as_ptr().cast(),
@@ -207,8 +211,12 @@ impl fmt::Debug for SocketAddrAny {
     }
 }
 
+// SAFETY: `with_sockaddr` calls `f` with a pointer to its own storage.
 unsafe impl SocketAddrArg for SocketAddrAny {
-    fn with_sockaddr<R>(&self, f: impl FnOnce(*const SocketAddrOpaque, SocketAddrLen) -> R) -> R {
+    unsafe fn with_sockaddr<R>(
+        &self,
+        f: impl FnOnce(*const SocketAddrOpaque, SocketAddrLen) -> R,
+    ) -> R {
         f(self.as_ptr().cast(), self.len())
     }
 }

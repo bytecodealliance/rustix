@@ -3,7 +3,7 @@
 #![allow(unsafe_code)]
 
 #[cfg(target_os = "linux")]
-use crate::backend::net::msghdr::{with_msghdr, with_noaddr_msghdr};
+use crate::backend::net::msghdr::noaddr_msghdr;
 use crate::backend::{self, c};
 use crate::fd::{AsFd, BorrowedFd, OwnedFd};
 use crate::io::{self, IoSlice, IoSliceMut};
@@ -606,23 +606,29 @@ pub struct MMsgHdr<'a> {
 impl<'a> MMsgHdr<'a> {
     /// Constructs a new message with no destination address.
     pub fn new(iov: &'a [IoSlice<'_>], control: &'a mut SendAncillaryBuffer<'_, '_, '_>) -> Self {
-        with_noaddr_msghdr(iov, control, Self::wrap)
+        Self::wrap(noaddr_msghdr(iov, control))
     }
 
     /// Constructs a new message to a specific address.
     ///
-    /// The lifetime of `addr` (and the underlying
-    /// [SocketAddrStorage](crate::net::addr::SocketAddrStorage)) must be valid
-    /// until the call to [sendmmsg], so types implementing
-    /// [SocketAddrArg](crate::net::addr::SocketAddrArg) can't be used here
-    /// without first being converted using
-    /// [SocketAddrArg::as_any](crate::net::addr::SocketAddrArg::as_any).
+    /// This requires a `SocketAddrAny` instead of using `impl SocketAddrArg`;
+    /// to obtain a `SocketAddrAny`, use [SocketAddrArg::as_any].
+    ///
+    /// [SocketAddrArg::as_any]: crate::net::addr::SocketAddrArg::as_any
     pub fn new_with_addr(
         addr: &'a SocketAddrAny,
         iov: &'a [IoSlice<'_>],
         control: &'a mut SendAncillaryBuffer<'_, '_, '_>,
     ) -> MMsgHdr<'a> {
-        with_msghdr(addr, iov, control, Self::wrap)
+        // The reason we use `SocketAddrAny` instead of `SocketAddrArg` here,
+        // and avoid `use_msghdr`, is that we need a pointer that will remain
+        // valid for the duration of the `'a` lifetime. `SocketAddrAny` can
+        // give us a pointer directly, so we use that.
+        let mut msghdr = noaddr_msghdr(iov, control);
+        msghdr.msg_name = addr.as_ptr() as _;
+        msghdr.msg_namelen = addr.len() as _;
+
+        Self::wrap(msghdr)
     }
 
     fn wrap(msg_hdr: c::msghdr) -> Self {
@@ -898,12 +904,9 @@ mod messages {
     impl<'buf> Messages<'buf> {
         /// Create a new iterator over messages from a byte buffer.
         pub(super) fn new(buf: &'buf mut [u8]) -> Self {
-            let msghdr = {
-                let mut h = msghdr::zero_msghdr();
-                h.msg_control = buf.as_mut_ptr().cast();
-                h.msg_controllen = buf.len().try_into().unwrap();
-                h
-            };
+            let mut msghdr = msghdr::zero_msghdr();
+            msghdr.msg_control = buf.as_mut_ptr().cast();
+            msghdr.msg_controllen = buf.len().try_into().unwrap();
 
             // Get the first header.
             let header = NonNull::new(unsafe { c::CMSG_FIRSTHDR(&msghdr) });

@@ -1169,12 +1169,14 @@ pub mod netlink {
 
     #[cfg(linux_kernel)]
     #[allow(unsafe_code)]
+    // SAFETY: `with_sockaddr` calls `f` using `call_with_sockaddr`, which
+    // handles calling `f` with the needed preconditions.
     unsafe impl SocketAddrArg for SocketAddrNetlink {
-        fn with_sockaddr<R>(
+        unsafe fn with_sockaddr<R>(
             &self,
             f: impl FnOnce(*const SocketAddrOpaque, SocketAddrLen) -> R,
         ) -> R {
-            let mut addr: c::sockaddr_nl = unsafe { mem::zeroed() };
+            let mut addr: c::sockaddr_nl = mem::zeroed();
             addr.nl_family = c::AF_NETLINK as _;
             addr.nl_pid = self.pid;
             addr.nl_groups = self.groups;
@@ -1771,8 +1773,10 @@ pub mod xdp {
     }
 
     #[allow(unsafe_code)]
+    // SAFETY: `with_sockaddr` calls `f` using `call_with_sockaddr`, which
+    // handles calling `f` with the needed preconditions.
     unsafe impl SocketAddrArg for SocketAddrXdp {
-        fn with_sockaddr<R>(
+        unsafe fn with_sockaddr<R>(
             &self,
             f: impl FnOnce(*const SocketAddrOpaque, SocketAddrLen) -> R,
         ) -> R {

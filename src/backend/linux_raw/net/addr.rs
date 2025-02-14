@@ -215,6 +215,7 @@ impl SocketAddrStorage {
 
     /// Return the `sa_family` of this socket address.
     pub fn family(&self) -> AddressFamily {
+        // SAFETY: `self.0` is a `sockaddr_storage` so it has enough space.
         unsafe {
             AddressFamily::from_raw(crate::backend::net::read_sockaddr::read_sa_family(
                 crate::utils::as_ptr(&self.0).cast::<c::sockaddr>(),
@@ -225,6 +226,7 @@ impl SocketAddrStorage {
     /// Clear the `sa_family` of this socket address to
     /// `AddressFamily::UNSPEC`.
     pub fn clear_family(&mut self) {
+        // SAFETY: `self.0` is a `sockaddr_storage` so it has enough space.
         unsafe {
             crate::backend::net::read_sockaddr::initialize_family_to_unspec(
                 crate::utils::as_mut_ptr(&mut self.0).cast::<c::sockaddr>(),

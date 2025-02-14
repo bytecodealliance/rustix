@@ -112,7 +112,7 @@ unsafe fn read_sun_path0(storage: *const c::sockaddr) -> u8 {
 ///
 /// # Safety
 ///
-/// `storage` must point to a valid socket address returned from the OS.
+/// `storage` must point to a least an initialized `sockaddr_header`.
 #[inline]
 pub(crate) unsafe fn sockaddr_nonempty(storage: *const c::sockaddr, len: SocketAddrLen) -> bool {
     if len == 0 {
@@ -137,6 +137,10 @@ pub(crate) unsafe fn sockaddr_nonempty(storage: *const c::sockaddr, len: SocketA
 
 /// Set the `sa_family` field of a socket address to `AF_UNSPEC`, so that we
 /// can test for `AF_UNSPEC` to test whether it was stored to.
+///
+/// # Safety
+///
+/// `storage` must point to a least an initialized `sockaddr_header`.
 pub(crate) unsafe fn initialize_family_to_unspec(storage: *mut c::sockaddr) {
     (*storage.cast::<sockaddr_header>()).sa_family = c::AF_UNSPEC as _;
 }
