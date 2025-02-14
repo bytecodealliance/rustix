@@ -146,10 +146,8 @@ impl PartialEq<SocketAddrAny> for SocketAddrAny {
 
 impl Eq for SocketAddrAny {}
 
-#[allow(
-    clippy::non_canonical_partial_ord_impl,
-    reason = "this just forwards to another `partial_cmp`"
-)]
+// This just forwards to another `partial_cmp`.
+#[allow(clippy::non_canonical_partial_ord_impl)]
 impl PartialOrd<SocketAddrAny> for SocketAddrAny {
     fn partial_cmp(&self, other: &SocketAddrAny) -> Option<core::cmp::Ordering> {
         self.bytes().partial_cmp(other.bytes())
