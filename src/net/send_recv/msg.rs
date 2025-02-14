@@ -161,7 +161,8 @@ pub enum RecvAncillaryMessage<'a> {
     ScmCredentials(UCred),
 }
 
-/// Buffer for sending ancillary messages with [`sendmsg`] and [`sendmsg_addr`].
+/// Buffer for sending ancillary messages with [`sendmsg`] and
+/// [`sendmsg_addr`].
 ///
 /// Use the [`push`] function to add messages to send.
 ///

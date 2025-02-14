@@ -86,8 +86,9 @@ pub fn getpid() -> Pid {
 
 /// `getppid()`—Returns the parent process' ID.
 ///
-/// This will return `None` if the current process has no parent (or no parent accessible in the
-/// current PID namespace), such as if the current process is an init process (PID 1).
+/// This will return `None` if the current process has no parent (or no parent
+/// accessible in the current PID namespace), such as if the current process is
+/// an init process (PID 1).
 ///
 /// # References
 ///  - [POSIX]

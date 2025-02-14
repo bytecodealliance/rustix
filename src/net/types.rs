@@ -520,13 +520,26 @@ impl AddressFamily {
     #[cfg(any(bsd, solarish, target_os = "aix", target_os = "nto"))]
     pub const DATAKIT: Self = Self(c::AF_DATAKIT as _);
     /// `AF_DLI`
-    #[cfg(any(bsd, solarish, target_os = "aix", target_os = "haiku", target_os = "nto"))]
+    #[cfg(any(
+        bsd,
+        solarish,
+        target_os = "aix",
+        target_os = "haiku",
+        target_os = "nto"
+    ))]
     pub const DLI: Self = Self(c::AF_DLI as _);
     /// `AF_E164`
     #[cfg(any(bsd, target_os = "nto"))]
     pub const E164: Self = Self(c::AF_E164 as _);
     /// `AF_ECMA`
-    #[cfg(any(apple, freebsdlike, solarish, target_os = "aix", target_os = "nto", target_os = "openbsd"))]
+    #[cfg(any(
+        apple,
+        freebsdlike,
+        solarish,
+        target_os = "aix",
+        target_os = "nto",
+        target_os = "openbsd"
+    ))]
     pub const ECMA: Self = Self(c::AF_ECMA as _);
     /// `AF_ENCAP`
     #[cfg(target_os = "openbsd")]
@@ -568,10 +581,21 @@ impl AddressFamily {
     #[cfg(any(bsd, solarish, target_os = "aix", target_os = "nto"))]
     pub const LAT: Self = Self(c::AF_LAT as _);
     /// `AF_LINK`
-    #[cfg(any(bsd, solarish, target_os = "aix", target_os = "haiku", target_os = "nto"))]
+    #[cfg(any(
+        bsd,
+        solarish,
+        target_os = "aix",
+        target_os = "haiku",
+        target_os = "nto"
+    ))]
     pub const LINK: Self = Self(c::AF_LINK as _);
     /// `AF_MPLS`
-    #[cfg(any(netbsdlike, target_os = "dragonfly", target_os = "emscripten", target_os = "fuchsia"))]
+    #[cfg(any(
+        netbsdlike,
+        target_os = "dragonfly",
+        target_os = "emscripten",
+        target_os = "fuchsia"
+    ))]
     pub const MPLS: Self = Self(c::AF_MPLS as _);
     /// `AF_NATM`
     #[cfg(any(bsd, target_os = "nto"))]
@@ -628,7 +652,15 @@ impl AddressFamily {
     #[cfg(target_os = "aix")]
     pub const RIF: Self = Self(c::AF_RIF as _);
     /// `AF_ROUTE`
-    #[cfg(any(bsd, solarish, target_os = "android", target_os = "emscripten", target_os = "fuchsia", target_os = "haiku", target_os = "nto"))]
+    #[cfg(any(
+        bsd,
+        solarish,
+        target_os = "android",
+        target_os = "emscripten",
+        target_os = "fuchsia",
+        target_os = "haiku",
+        target_os = "nto"
+    ))]
     pub const ROUTE: Self = Self(c::AF_ROUTE as _);
     /// `AF_SCLUSTER`
     #[cfg(target_os = "freebsd")]
@@ -1628,10 +1660,8 @@ bitflags! {
 #[cfg(target_os = "linux")]
 pub mod xdp {
     use crate::backend::net::read_sockaddr::read_sockaddr_xdp;
-    use crate::net::{
-        addr::{call_with_sockaddr, SocketAddrArg, SocketAddrLen, SocketAddrOpaque},
-        SocketAddrAny,
-    };
+    use crate::net::addr::{call_with_sockaddr, SocketAddrArg, SocketAddrLen, SocketAddrOpaque};
+    use crate::net::SocketAddrAny;
 
     use super::{bitflags, c};
 

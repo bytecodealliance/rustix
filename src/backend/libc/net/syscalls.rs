@@ -8,11 +8,11 @@ use crate::backend::conv::ret_u32;
 use crate::backend::conv::{borrowed_fd, ret, ret_owned_fd, ret_send_recv, send_recv_len};
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io;
+use crate::net::addr::SocketAddrArg;
 #[cfg(target_os = "linux")]
 use crate::net::MMsgHdr;
-use crate::net::SocketAddrBuf;
 use crate::net::{
-    addr::SocketAddrArg, AddressFamily, Protocol, Shutdown, SocketAddrAny, SocketFlags, SocketType,
+    AddressFamily, Protocol, Shutdown, SocketAddrAny, SocketAddrBuf, SocketFlags, SocketType,
 };
 use crate::utils::as_ptr;
 use core::mem::{size_of, MaybeUninit};
@@ -225,7 +225,7 @@ pub(crate) fn sendmsg(
     }
 }
 
-#[cfg(not(any(windows, target_os = "espidf", target_os = "redox", target_os = "vita",)))]
+#[cfg(not(any(windows, target_os = "espidf", target_os = "redox", target_os = "vita")))]
 pub(crate) fn sendmsg_addr(
     sockfd: BorrowedFd<'_>,
     addr: &impl SocketAddrArg,

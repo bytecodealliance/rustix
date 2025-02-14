@@ -1,21 +1,16 @@
 #![allow(unsafe_code)]
 
+use crate::backend::c;
+use crate::backend::net::read_sockaddr;
+use crate::io::Errno;
+use crate::net::addr::{SocketAddrArg, SocketAddrLen, SocketAddrOpaque, SocketAddrStorage};
 #[cfg(unix)]
 use crate::net::SocketAddrUnix;
-use crate::{
-    backend::{c, net::read_sockaddr},
-    io::Errno,
-    net::{
-        addr::{SocketAddrArg, SocketAddrLen, SocketAddrOpaque, SocketAddrStorage},
-        AddressFamily, SocketAddr, SocketAddrV4, SocketAddrV6,
-    },
-};
+use crate::net::{AddressFamily, SocketAddr, SocketAddrV4, SocketAddrV6};
 #[cfg(feature = "std")]
 use core::fmt;
-use core::{
-    mem::{size_of, MaybeUninit},
-    num::NonZeroU32,
-};
+use core::mem::{size_of, MaybeUninit};
+use core::num::NonZeroU32;
 
 /// Temporary buffer for creating a `SocketAddrAny` from a
 /// syscall that writes to a `sockaddr_t` and `socklen_t`
@@ -233,7 +228,8 @@ impl TryFrom<SocketAddrAny> for SocketAddr {
 
     /// Convert if the address is an IPv4 or IPv6 address.
     ///
-    /// Returns `Err(Errno::AFNOSUPPORT)` if the address family is not IPv4 or IPv6.
+    /// Returns `Err(Errno::AFNOSUPPORT)` if the address family is not IPv4 or
+    /// IPv6.
     #[inline]
     fn try_from(value: SocketAddrAny) -> Result<Self, Self::Error> {
         match value.address_family() {

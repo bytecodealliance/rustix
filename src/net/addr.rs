@@ -1,13 +1,12 @@
 //! Types for implementers of socket address types or code that is generic over
 //! address types.
 //!
-//! The concrete address types and [`SocketAddrAny`] are in [the parent module][`super`].
+//! The concrete address types and [`SocketAddrAny`] are in
+//! [the parent module][`super`].
 
 #![allow(unsafe_code)]
-use core::{
-    mem::{size_of, MaybeUninit},
-    ptr,
-};
+use core::mem::{size_of, MaybeUninit};
+use core::ptr;
 
 use crate::backend::net::write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6};
 use crate::utils::as_ptr;
@@ -51,8 +50,8 @@ pub unsafe trait SocketAddrArg {
     ///
     /// The API uses a closure so that:
     ///   * The libc types are not exposed in the rustix API.
-    ///   * Types like `SocketAddrUnix` that contain their corresponding
-    ///     C type can pass it directly without a copy.
+    ///   * Types like `SocketAddrUnix` that contain their corresponding C type
+    ///     can pass it directly without a copy.
     ///   * Other socket types can construct their C-compatible struct on the
     ///     stack and call the closure with a pointer to it.
     ///

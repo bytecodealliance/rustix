@@ -13,7 +13,8 @@ pub struct Flock {
     pub start: u64,
     /// Number of bytes to lock
     pub length: u64,
-    /// PID of process blocking our lock. If set to `None`, it refers to the current process
+    /// PID of process blocking our lock. If set to `None`, it refers to the
+    /// current process
     pub pid: Option<Pid>,
     /// Type of lock
     pub typ: FlockType,

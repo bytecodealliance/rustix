@@ -30,8 +30,7 @@
 use crate::backend::c;
 use crate::backend::event::syscalls;
 use crate::fd::{AsFd, AsRawFd, OwnedFd};
-use crate::ffi;
-use crate::io;
+use crate::{ffi, io};
 
 use core::time::Duration;
 

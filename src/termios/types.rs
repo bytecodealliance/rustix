@@ -1,4 +1,5 @@
-use crate::backend::{c, termios::types};
+use crate::backend::c;
+use crate::backend::termios::types;
 #[cfg(target_os = "nto")]
 use crate::ffi;
 use crate::{backend, io};
@@ -1190,7 +1191,13 @@ impl SpecialCodeIndex {
     pub const VSWTCH: Self = Self(c::VSWTCH as usize);
 
     /// `VDSUSP`
-    #[cfg(any(bsd, solarish, target_os = "aix", target_os = "hurd", target_os = "nto"))]
+    #[cfg(any(
+        bsd,
+        solarish,
+        target_os = "aix",
+        target_os = "hurd",
+        target_os = "nto"
+    ))]
     pub const VDSUSP: Self = Self(c::VDSUSP as usize);
 
     /// `VSTATUS`

@@ -38,7 +38,8 @@ pub use crate::timespec::{Nsecs, Secs, Timespec};
 
 pub use backend::thread::futex::{Flags, OWNER_DIED, WAITERS};
 
-/// Equivalent to `syscall(SYS_futex, uaddr, FUTEX_WAIT, val, timeout, NULL, 0)`
+/// Equivalent to `syscall(SYS_futex, uaddr, FUTEX_WAIT, val, timeout, NULL,
+/// 0)`
 ///
 /// This is a very low-level feature for implementing synchronization
 /// primitives. See the references links.
@@ -116,7 +117,8 @@ pub fn fd(uaddr: &AtomicU32, flags: Flags, val: u32) -> io::Result<OwnedFd> {
     }
 }
 
-/// Equivalent to `syscall(SYS_futex, uaddr, FUTEX_REQUEUE, val, val2, uaddr2, 0)`
+/// Equivalent to `syscall(SYS_futex, uaddr, FUTEX_REQUEUE, val, val2, uaddr2,
+/// 0)`
 ///
 /// This is a very low-level feature for implementing synchronization
 /// primitives. See the references links.
@@ -139,7 +141,8 @@ pub fn requeue(
     unsafe { futex_val2(uaddr, Operation::Requeue, flags, val, val2, uaddr2, 0) }
 }
 
-/// Equivalent to `syscall(SYS_futex, uaddr, FUTEX_CMP_REQUEUE, val, val2, uaddr2, val3)`
+/// Equivalent to `syscall(SYS_futex, uaddr, FUTEX_CMP_REQUEUE, val, val2,
+/// uaddr2, val3)`
 ///
 /// This is a very low-level feature for implementing synchronization
 /// primitives. See the references links.
@@ -208,7 +211,8 @@ pub enum WakeOpCmp {
     Ge = 5,
 }
 
-/// Equivalent to `syscall(SYS_futex, uaddr, FUTEX_WAKE_OP, val, val2, uaddr2, val3)`
+/// Equivalent to `syscall(SYS_futex, uaddr, FUTEX_WAKE_OP, val, val2, uaddr2,
+/// val3)`
 ///
 /// This is a very low-level feature for implementing synchronization
 /// primitives. See the references links.
@@ -243,7 +247,8 @@ pub fn wake_op(
     unsafe { futex_val2(uaddr, Operation::WakeOp, flags, val, val2, uaddr2, val3) }
 }
 
-/// Equivalent to `syscall(SYS_futex, uaddr, FUTEX_LOCK_PI, 0, timeout, NULL, 0)`
+/// Equivalent to `syscall(SYS_futex, uaddr, FUTEX_LOCK_PI, 0, timeout, NULL,
+/// 0)`
 ///
 /// This is a very low-level feature for implementing synchronization
 /// primitives. See the references links.
@@ -276,7 +281,8 @@ pub fn lock_pi(uaddr: &AtomicU32, flags: Flags, timeout: Option<Timespec>) -> io
     }
 }
 
-/// Equivalent to `syscall(SYS_futex, uaddr, FUTEX_UNLOCK_PI, 0, NULL, NULL, 0)`
+/// Equivalent to `syscall(SYS_futex, uaddr, FUTEX_UNLOCK_PI, 0, NULL, NULL,
+/// 0)`
 ///
 /// This is a very low-level feature for implementing synchronization
 /// primitives. See the references links.
@@ -300,7 +306,8 @@ pub fn unlock_pi(uaddr: &AtomicU32, flags: Flags) -> io::Result<()> {
     }
 }
 
-/// Equivalent to `syscall(SYS_futex, uaddr, FUTEX_TRYLOCK_PI, 0, NULL, NULL, 0)`
+/// Equivalent to `syscall(SYS_futex, uaddr, FUTEX_TRYLOCK_PI, 0, NULL, NULL,
+/// 0)`
 ///
 /// This is a very low-level feature for implementing synchronization
 /// primitives. See the references links.
@@ -319,7 +326,8 @@ pub fn trylock_pi(uaddr: &AtomicU32, flags: Flags) -> io::Result<bool> {
     }
 }
 
-/// Equivalent to `syscall(SYS_futex, uaddr, FUTEX_WAIT_BITSET, val, timeout, NULL, val3)`
+/// Equivalent to `syscall(SYS_futex, uaddr, FUTEX_WAIT_BITSET, val, timeout,
+/// NULL, val3)`
 ///
 /// This is a very low-level feature for implementing synchronization
 /// primitives. See the references links.
@@ -358,7 +366,8 @@ pub fn wait_bitset(
     }
 }
 
-/// Equivalent to `syscall(SYS_futex, uaddr, FUTEX_WAKE_BITSET, val, NULL, NULL, val3)`
+/// Equivalent to `syscall(SYS_futex, uaddr, FUTEX_WAKE_BITSET, val, NULL,
+/// NULL, val3)`
 ///
 /// This is a very low-level feature for implementing synchronization
 /// primitives. See the references links.
@@ -390,7 +399,8 @@ pub fn wake_bitset(
     }
 }
 
-/// Equivalent to `syscall(SYS_futex, uaddr, FUTEX_WAIT_REQUEUE_PI, val, timeout, uaddr2, 0)`
+/// Equivalent to `syscall(SYS_futex, uaddr, FUTEX_WAIT_REQUEUE_PI, val,
+/// timeout, uaddr2, 0)`
 ///
 /// This is a very low-level feature for implementing synchronization
 /// primitives. See the references links.
@@ -429,7 +439,8 @@ pub fn wait_requeue_pi(
     }
 }
 
-/// Equivalent to `syscall(SYS_futex, uaddr, FUTEX_CMP_REQUEUE_PI, 1, val2, uaddr2, val3)`
+/// Equivalent to `syscall(SYS_futex, uaddr, FUTEX_CMP_REQUEUE_PI, 1, val2,
+/// uaddr2, val3)`
 ///
 /// This is a very low-level feature for implementing synchronization
 /// primitives. See the references links.
@@ -452,7 +463,8 @@ pub fn cmp_requeue_pi(
     unsafe { futex_val2(uaddr, Operation::CmpRequeuePi, flags, 1, val2, uaddr2, val3) }
 }
 
-/// Equivalent to `syscall(SYS_futex, uaddr, FUTEX_LOCK_PI2, 0, timeout, NULL, 0)`
+/// Equivalent to `syscall(SYS_futex, uaddr, FUTEX_LOCK_PI2, 0, timeout, NULL,
+/// 0)`
 ///
 /// This is a very low-level feature for implementing synchronization
 /// primitives. See the references links.

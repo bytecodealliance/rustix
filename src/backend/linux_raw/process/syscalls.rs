@@ -404,10 +404,16 @@ fn _waitid_pidfd(fd: BorrowedFd<'_>, options: WaitIdOptions) -> io::Result<Optio
 /// The caller must ensure that `status` is initialized and that `waitid`
 /// returned successfully.
 #[inline]
-#[rustfmt::skip]
 unsafe fn cvt_waitid_status(status: MaybeUninit<c::siginfo_t>) -> Option<WaitIdStatus> {
     let status = status.assume_init();
-    if status.__bindgen_anon_1.__bindgen_anon_1._sifields._sigchld._pid == 0 {
+    if status
+        .__bindgen_anon_1
+        .__bindgen_anon_1
+        ._sifields
+        ._sigchld
+        ._pid
+        == 0
+    {
         None
     } else {
         Some(WaitIdStatus(status))

@@ -18,12 +18,12 @@ use crate::backend::conv::{
 use crate::backend::reg::raw_arg;
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io::{self, IoSlice, IoSliceMut};
+use crate::net::addr::SocketAddrArg;
 #[cfg(target_os = "linux")]
 use crate::net::MMsgHdr;
-use crate::net::SocketAddrBuf;
 use crate::net::{
-    addr::SocketAddrArg, AddressFamily, Protocol, RecvAncillaryBuffer, RecvMsg,
-    SendAncillaryBuffer, Shutdown, SocketAddrAny, SocketFlags, SocketType,
+    AddressFamily, Protocol, RecvAncillaryBuffer, RecvMsg, SendAncillaryBuffer, Shutdown,
+    SocketAddrAny, SocketAddrBuf, SocketFlags, SocketType,
 };
 use core::mem::MaybeUninit;
 #[cfg(target_arch = "x86")]

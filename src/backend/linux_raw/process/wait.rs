@@ -77,8 +77,11 @@ impl SiginfoExt for siginfo_t {
     /// `si_signo` must equal `SIGCHLD` (as it is guaranteed to do after a
     /// `waitid` call).
     #[inline]
-    #[rustfmt::skip]
     unsafe fn si_status(&self) -> c_int {
-        self.__bindgen_anon_1.__bindgen_anon_1._sifields._sigchld._status
+        self.__bindgen_anon_1
+            .__bindgen_anon_1
+            ._sifields
+            ._sigchld
+            ._status
     }
 }

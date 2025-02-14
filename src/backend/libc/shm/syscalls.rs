@@ -4,8 +4,7 @@ use crate::backend::c;
 use crate::backend::conv::{c_str, ret, ret_owned_fd};
 use crate::fd::OwnedFd;
 use crate::fs::Mode;
-use crate::io;
-use crate::shm;
+use crate::{io, shm};
 
 pub(crate) fn shm_open(name: &CStr, oflags: shm::OFlags, mode: Mode) -> io::Result<OwnedFd> {
     // On this platforms, `mode_t` is `u16` and can't be passed directly to a
