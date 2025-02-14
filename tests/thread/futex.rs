@@ -70,7 +70,10 @@ fn test_waitv_wake() {
     let lock = std::sync::Arc::new(AtomicU32::new(0));
 
     let mut wait = futex::Wait::new();
-    wait.uaddr = (*lock).as_ptr().cast::<c_void>().into();
+    // In Rust 1.70, use `AtomicU32::as_ptr`.
+    wait.uaddr = (&*lock as *const AtomicU32 as *mut u32)
+        .cast::<c_void>()
+        .into();
     wait.flags = futex::WaitFlags::SIZE_U32;
     wait.val = 1;
     match futex::waitv(
@@ -97,7 +100,10 @@ fn test_waitv_wake() {
 
             std::thread::sleep(std::time::Duration::from_millis(50));
             let mut wait = futex::Wait::new();
-            wait.uaddr = (*lock).as_ptr().cast::<c_void>().into();
+            // In Rust 1.70, use `AtomicU32::as_ptr`.
+            wait.uaddr = (&*lock as *const AtomicU32 as *mut u32)
+                .cast::<c_void>()
+                .into();
             wait.flags = futex::WaitFlags::SIZE_U32;
             wait.val = 1;
             match futex::waitv(
@@ -116,7 +122,10 @@ fn test_waitv_wake() {
     });
 
     let mut wait = futex::Wait::new();
-    wait.uaddr = (*lock).as_ptr().cast::<c_void>().into();
+    // In Rust 1.70, use `AtomicU32::as_ptr`.
+    wait.uaddr = (&*lock as *const AtomicU32 as *mut u32)
+        .cast::<c_void>()
+        .into();
     wait.flags = futex::WaitFlags::SIZE_U32;
     wait.val = 0;
     match futex::waitv(
@@ -190,7 +199,10 @@ fn test_waitv_timeout() {
     let lock = AtomicU32::new(0);
 
     let mut wait = futex::Wait::new();
-    wait.uaddr = lock.as_ptr().cast::<c_void>().into();
+    // In Rust 1.70, use `AtomicU32::as_ptr`.
+    wait.uaddr = (&lock as *const AtomicU32 as *mut u32)
+        .cast::<c_void>()
+        .into();
     wait.flags = futex::WaitFlags::SIZE_U32;
     wait.val = 0;
 
