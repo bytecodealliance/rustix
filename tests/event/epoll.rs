@@ -97,7 +97,7 @@ fn server_uninit(ready: Arc<(Mutex<u16>, Condvar)>) {
 
     let mut event_list = [MaybeUninit::uninit(); 4];
     loop {
-        let (init, _) = epoll::wait_uninit(&epoll, &mut event_list, -1).unwrap();
+        let (init, _) = epoll::wait_uninit(&epoll, &mut event_list, None).unwrap();
         for event in init {
             let target = event.data;
             if target.u64() == 1 {
