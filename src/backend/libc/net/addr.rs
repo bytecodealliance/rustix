@@ -93,7 +93,7 @@ impl SocketAddrUnix {
         Self {
             unix: Self::init(),
             #[cfg(not(any(bsd, target_os = "haiku")))]
-            len: offsetof_sun_path() as SocketAddrLen,
+            len: offsetof_sun_path() as c::socklen_t,
         }
     }
 
