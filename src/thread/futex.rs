@@ -567,9 +567,7 @@ impl Wait {
     pub const fn new() -> Self {
         Self {
             val: 0,
-            uaddr: WaitPtr {
-                ptr: ptr::null_mut(),
-            },
+            uaddr: WaitPtr::new(ptr::null_mut()),
             flags: WaitFlags::empty(),
             __reserved: 0,
         }
