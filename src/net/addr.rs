@@ -90,13 +90,11 @@ pub unsafe trait SocketAddrArg {
     /// `storage` must be valid to write up to `size_of<SocketAddrStorage>()`
     /// bytes to.
     unsafe fn write_sockaddr(&self, storage: *mut SocketAddrStorage) -> SocketAddrLen {
-        // SAFETY: The closure dereferences exactly `len` bytes at `ptr`.
-        unsafe {
-            self.with_sockaddr(|ptr, len| {
-                ptr::copy_nonoverlapping(ptr.cast::<u8>(), storage.cast::<u8>(), len as usize);
-                len
-            })
-        }
+        // The closure dereferences exactly `len` bytes at `ptr`.
+        self.with_sockaddr(|ptr, len| {
+            ptr::copy_nonoverlapping(ptr.cast::<u8>(), storage.cast::<u8>(), len as usize);
+            len
+        })
     }
 }
 
