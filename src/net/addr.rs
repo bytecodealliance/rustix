@@ -68,16 +68,33 @@ pub unsafe trait SocketAddrArg {
 
     /// Convert to `SocketAddrAny`.
     fn as_any(&self) -> SocketAddrAny {
+        let mut storage = MaybeUninit::<SocketAddrStorage>::uninit();
+        // SAFETY: We've allocated `storage` here, we're writing to it, and
+        // we're using the number of bytes written.
+        unsafe {
+            let len = self.write_sockaddr(storage.as_mut_ptr());
+            SocketAddrAny::new(storage, len)
+        }
+    }
+
+    /// Encode an address into a `SocketAddrStorage`.
+    ///
+    /// Returns the number of bytes that were written.
+    ///
+    /// For a safe interface to this functionality, use [`as_any`].
+    ///
+    /// [`as_any`]: Self::as_any
+    ///
+    /// # Safety
+    ///
+    /// `storage` must be valid to write up to `size_of<SocketAddrStorage>()`
+    /// bytes to.
+    unsafe fn write_sockaddr(&self, storage: *mut SocketAddrStorage) -> SocketAddrLen {
         // SAFETY: The closure dereferences exactly `len` bytes at `ptr`.
         unsafe {
             self.with_sockaddr(|ptr, len| {
-                let mut storage = MaybeUninit::<SocketAddrStorage>::uninit();
-                ptr::copy_nonoverlapping(
-                    ptr.cast::<u8>(),
-                    storage.as_mut_ptr().cast::<u8>(),
-                    len as usize,
-                );
-                SocketAddrAny::new(storage, len)
+                ptr::copy_nonoverlapping(ptr.cast::<u8>(), storage.cast::<u8>(), len as usize);
+                len
             })
         }
     }

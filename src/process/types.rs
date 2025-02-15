@@ -1,4 +1,6 @@
 //! Types for use with [`rustix::process`] functions.
+//!
+//! [`rustix::process`]: crate::process
 
 #![allow(unsafe_code)]
 

@@ -16,6 +16,9 @@ use core::num::NonZeroU32;
 
 /// Temporary buffer for creating a `SocketAddrAny` from a
 /// syscall that writes to a `sockaddr_t` and `socklen_t`
+///
+/// Unlike `SocketAddrAny`, this does not maintain the invariant that `len`
+/// bytes are initialized.
 pub(crate) struct SocketAddrBuf {
     pub(crate) len: c::socklen_t,
     pub(crate) storage: MaybeUninit<SocketAddrStorage>,
@@ -38,7 +41,7 @@ impl SocketAddrBuf {
     /// and its length written into `self.len`.
     #[inline]
     pub(crate) unsafe fn into_any(self) -> SocketAddrAny {
-        SocketAddrAny::new(self.storage, self.len.try_into().unwrap())
+        SocketAddrAny::new(self.storage, bitcast!(self.len))
     }
 
     /// Convert the buffer into [`Option<SocketAddrAny>`].
@@ -53,7 +56,7 @@ impl SocketAddrBuf {
     /// have been set to 0.
     #[inline]
     pub(crate) unsafe fn into_any_option(self) -> Option<SocketAddrAny> {
-        let len = self.len.try_into().unwrap();
+        let len = bitcast!(self.len);
         if read_sockaddr::sockaddr_nonempty(self.storage.as_ptr().cast(), len) {
             Some(SocketAddrAny::new(self.storage, len))
         } else {
