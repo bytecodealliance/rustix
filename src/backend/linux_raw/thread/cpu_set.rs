@@ -3,7 +3,7 @@
 #![allow(non_snake_case)]
 
 use super::types::RawCpuSet;
-use core::mem::size_of_val;
+use core::mem::{size_of, size_of_val};
 
 #[inline]
 pub(crate) fn CPU_SET(cpu: usize, cpuset: &mut RawCpuSet) {
