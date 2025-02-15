@@ -12,6 +12,8 @@ pub type RawPid = i32;
 /// This is a pid, and not a pidfd. It is not a file descriptor, and the
 /// process it refers to could disappear at any time and be replaced by
 /// another, unrelated, process.
+///
+/// On Linux, `Pid` values are also used to identify threads.
 #[repr(transparent)]
 #[derive(Copy, Clone, Eq, PartialEq, Debug, Hash)]
 pub struct Pid(NonZeroI32);

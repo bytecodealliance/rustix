@@ -110,7 +110,7 @@ targets = [
 default = ["std", "use-libc-auxv"]
 
 # This enables use of std. Disabling this enables `#![no_std]`, and requires
-# Rust 1.64 or newer.
+# Rust 1.77 or newer.
 std = ["bitflags/std", "alloc", "libc?/std", "libc_errno?/std"]
 
 # Enable this to request the libc backend.
@@ -172,6 +172,9 @@ system = ["linux-raw-sys/system"]
 runtime = ["linux-raw-sys/prctl"]
 
 # Enable all API features.
+#
+# This is primarily intended for rustix developers. Users are encouraged to
+# enable only those features they need.
 all-apis = [
     "event",
     "fs",

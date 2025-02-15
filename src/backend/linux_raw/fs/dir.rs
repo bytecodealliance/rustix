@@ -87,7 +87,7 @@ impl Dir {
     ///
     /// [`libc::seekdir`]: https://docs.rs/libc/latest/arm-unknown-linux-gnueabihf/libc/fn.seekdir.html
     // In the linux_raw backend here, we don't use `libc::seekdir` and don't
-    // have this limitattion, but it's a goal of rustix to support the same API
+    // have this limitation, but it's a goal of rustix to support the same API
     // on both the linux_raw and libc backends.
     #[cfg(target_pointer_width = "64")]
     #[cfg_attr(docsrs, doc(cfg(target_pointer_width = "64")))]
@@ -315,9 +315,9 @@ impl DirEntry {
         &self.name
     }
 
-    /// Returns the "offset" of this directory entry. Note that this is not
-    /// a true numerical offset but an opaque cookie that identifies a
-    /// position in the given stream.
+    /// Returns the “offset” of this directory entry. This is not a true
+    /// numerical offset but an opaque cookie that identifies a position in the
+    /// given stream.
     #[inline]
     pub fn offset(&self) -> i64 {
         self.d_off

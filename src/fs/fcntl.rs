@@ -51,7 +51,7 @@ pub fn fcntl_setfl<Fd: AsFd>(fd: Fd, flags: OFlags) -> io::Result<()> {
     backend::fs::syscalls::fcntl_setfl(fd.as_fd(), flags)
 }
 
-/// `fcntl(fd, F_GET_SEALS)`
+/// `fcntl(fd, F_GET_SEALS)`—Return the seals for `fd`'s inode.
 ///
 /// # References
 ///  - [Linux]
@@ -67,7 +67,7 @@ pub fn fcntl_get_seals<Fd: AsFd>(fd: Fd) -> io::Result<SealFlags> {
 #[cfg(any(linux_kernel, target_os = "freebsd", target_os = "fuchsia"))]
 use backend::fs::types::SealFlags;
 
-/// `fcntl(fd, F_ADD_SEALS)`
+/// `fcntl(fd, F_ADD_SEALS)`—Add seals to `fd`'s inode.
 ///
 /// # References
 ///  - [Linux]

@@ -54,11 +54,16 @@ pub unsafe fn close(raw_fd: RawFd) {
     backend::io::syscalls::close(raw_fd)
 }
 
-/// `close(raw_fd)`—Closes a `RawFd` directly, and report any errors
-/// returned by the OS.
+/// `close(raw_fd)`—Closes a `RawFd` directly, and report any errors returned
+/// by the OS.
 ///
 /// The rustix developers do not intend the existence of this feature to imply
 /// that anyone should use it.
+///
+/// # Safety
+///
+/// This function takes a `RawFd`, which must be valid before the call, and is
+/// not valid after the call, even if it fails.
 #[cfg(feature = "try_close")]
 pub unsafe fn try_close(raw_fd: RawFd) -> crate::io::Result<()> {
     backend::io::syscalls::try_close(raw_fd)

@@ -7,8 +7,8 @@
 //! MIPS-family platforms have a special calling convention for `__NR_pipe`,
 //! however we use `__NR_pipe2` instead to avoid having to implement it.
 //!
-//! Note that MIPS R6 inline assembly currently doesn't differ from MIPS,
-//! because no explicit call of R6-only or R2-only instructions exist here.
+//! MIPS R6 inline assembly currently doesn't differ from MIPS, because no
+//! explicit call of R6-only or R2-only instructions exist here.
 
 use crate::backend::reg::{
     ArgReg, FromAsm, RetReg, SyscallNumber, ToAsm, A0, A1, A2, A3, A4, A5, R0,

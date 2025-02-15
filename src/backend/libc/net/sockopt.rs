@@ -1086,8 +1086,8 @@ pub(crate) fn xdp_mmap_offsets(fd: BorrowedFd<'_>) -> io::Result<XdpMmapOffsets>
     getsockopt_raw(fd, c::SOL_XDP, c::XDP_MMAP_OFFSETS, &mut value, &mut optlen)?;
 
     if optlen as usize == size_of::<c::xdp_mmap_offsets_v1>() {
-        // Safety: All members of xdp_mmap_offsets are u64 and thus are correctly
-        // initialized by `MaybeUninit::<xdp_statistics>::zeroed()`
+        // SAFETY: All members of xdp_mmap_offsets are `u64` and thus are
+        // correctly initialized by `MaybeUninit::<xdp_statistics>::zeroed()`.
         let xpd_mmap_offsets = unsafe { value.assume_init() };
         Ok(XdpMmapOffsets {
             rx: XdpRingOffset {
@@ -1121,8 +1121,8 @@ pub(crate) fn xdp_mmap_offsets(fd: BorrowedFd<'_>) -> io::Result<XdpMmapOffsets>
             size_of::<xdp_mmap_offsets>(),
             "unexpected getsockopt size"
         );
-        // Safety: All members of xdp_mmap_offsets are u64 and thus are correctly
-        // initialized by `MaybeUninit::<xdp_statistics>::zeroed()`
+        // SAFETY: All members of xdp_mmap_offsets are `u64` and thus are
+        // correctly initialized by `MaybeUninit::<xdp_statistics>::zeroed()`
         let xpd_mmap_offsets = unsafe { value.assume_init() };
         Ok(XdpMmapOffsets {
             rx: XdpRingOffset {
@@ -1165,8 +1165,8 @@ pub(crate) fn xdp_statistics(fd: BorrowedFd<'_>) -> io::Result<XdpStatistics> {
     getsockopt_raw(fd, c::SOL_XDP, c::XDP_STATISTICS, &mut value, &mut optlen)?;
 
     if optlen as usize == size_of::<xdp_statistics_v1>() {
-        // Safety: All members of xdp_statistics are u64 and thus are correctly
-        // initialized by `MaybeUninit::<xdp_statistics>::zeroed()`
+        // SAFETY: All members of xdp_statistics are `u64` and thus are
+        // correctly initialized by `MaybeUninit::<xdp_statistics>::zeroed()`.
         let xdp_statistics = unsafe { value.assume_init() };
         Ok(XdpStatistics {
             rx_dropped: xdp_statistics.rx_dropped,
@@ -1182,8 +1182,8 @@ pub(crate) fn xdp_statistics(fd: BorrowedFd<'_>) -> io::Result<XdpStatistics> {
             size_of::<xdp_statistics>(),
             "unexpected getsockopt size"
         );
-        // Safety: All members of xdp_statistics are u64 and thus are correctly
-        // initialized by `MaybeUninit::<xdp_statistics>::zeroed()`
+        // SAFETY: All members of xdp_statistics are `u64` and thus are
+        // correctly initialized by `MaybeUninit::<xdp_statistics>::zeroed()`.
         let xdp_statistics = unsafe { value.assume_init() };
         Ok(XdpStatistics {
             rx_dropped: xdp_statistics.rx_dropped,

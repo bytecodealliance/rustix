@@ -1239,7 +1239,7 @@ impl core::fmt::Debug for SpecialCodeIndex {
             Self::VMIN => write!(f, "VMIN"),
 
             // On Solarish platforms, Linux on SPARC, AIX, and Haiku, `VMIN`
-            // and `VTIME`have the same value as `VEOF` and `VEOL`.
+            // and `VTIME` have the same value as `VEOF` and `VEOL`.
             #[cfg(any(
                 solarish,
                 all(linux_kernel, any(target_arch = "sparc", target_arch = "sparc64")),
@@ -1373,8 +1373,11 @@ pub enum Action {
 #[derive(Debug, Copy, Clone, Eq, Hash, PartialEq)]
 #[allow(missing_docs)]
 pub struct Winsize {
+    /// The number of rows the terminal has.
     pub ws_row: u16,
+    /// The number of columns the terminal has.
     pub ws_col: u16,
+
     pub ws_xpixel: u16,
     pub ws_ypixel: u16,
 }

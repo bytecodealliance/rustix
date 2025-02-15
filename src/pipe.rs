@@ -52,6 +52,8 @@ pub const PIPE_BUF: usize = c::PIPE_BUF;
 /// This function creates a pipe and returns two file descriptors, for the
 /// reading and writing ends of the pipe, respectively.
 ///
+/// See [`pipe_with`] to pass additional flags.
+///
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
@@ -78,6 +80,8 @@ pub fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
 }
 
 /// `pipe2(flags)`—Creates a pipe, with flags.
+///
+/// `pipe_with` is the same as [`pipe`] but adds an additional flags operand.
 ///
 /// This function creates a pipe and returns two file descriptors, for the
 /// reading and writing ends of the pipe, respectively.

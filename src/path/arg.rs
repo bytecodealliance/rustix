@@ -1023,7 +1023,7 @@ where
     }
 
     // SAFETY: We just wrote the bytes above and they will remain valid for the
-    // duration of `f` b/c buf doesn't get dropped until the end of the
+    // duration of `f` because `buf` doesn't get dropped until the end of the
     // function.
     match CStr::from_bytes_with_nul(unsafe { slice::from_raw_parts(buf_ptr, bytes.len() + 1) }) {
         Ok(s) => f(s),
@@ -1071,8 +1071,8 @@ where
         }
 
         // SAFETY: We just wrote the bytes above and they will remain valid for
-        // the duration of `f` b/c buf doesn't get dropped until the end of the
-        // function.
+        // the duration of `f` because `buf` doesn't get dropped until the end
+        // of the function.
         match CStr::from_bytes_with_nul(unsafe { slice::from_raw_parts(buf_ptr, bytes.len() + 1) })
         {
             Ok(s) => f(s),

@@ -101,7 +101,7 @@ pub(crate) unsafe fn read_sa_family(storage: *const c::sockaddr) -> u16 {
 #[cfg(apple)]
 #[inline]
 unsafe fn read_sun_path0(storage: *const c::sockaddr) -> u8 {
-    // In `read_ss_family` we assert that we know the layout of `sockaddr`.
+    // In `read_sa_family` we assert that we know the layout of `sockaddr`.
     storage
         .cast::<u8>()
         .add(super::addr::offsetof_sun_path())

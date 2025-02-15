@@ -2267,7 +2267,7 @@ fn times_to_attrlist(times: &Timestamps) -> io::Result<(c::size_t, [c::timespec;
 #[cfg(apple)]
 type Attrgroup = u32;
 
-/// Attribute list for use with `setattrlist`.
+/// Attribute list for use with [`setattrlist`].
 #[cfg(apple)]
 #[repr(C)]
 struct Attrlist {

@@ -122,6 +122,7 @@ impl<'buf, Fd: AsFd> Reader<'buf, Fd> {
 }
 
 /// An inotify event.
+#[doc(alias = "inotify_event")]
 #[derive(Debug)]
 pub struct Event<'a> {
     wd: i32,

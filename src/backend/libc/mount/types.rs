@@ -147,7 +147,7 @@ pub(crate) enum FsConfigCmd {
     /// `FSCONFIG_CMD_RECONFIGURE`
     Reconfigure = 7,
 
-    /// `FSCONFIG_CMD_CREATE_EXCL`
+    /// `FSCONFIG_CMD_CREATE_EXCL` (since Linux 6.6)
     CreateExclusive = 8,
 }
 

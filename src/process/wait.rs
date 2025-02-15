@@ -145,13 +145,13 @@ impl WaitStatus {
 #[cfg(not(any(target_os = "openbsd", target_os = "redox", target_os = "wasi")))]
 pub struct WaitIdStatus(pub(crate) backend::c::siginfo_t);
 
-// SAFTEY: `siginfo_t` does contain some raw pointers, such as the `si_ptr`
-// and the `si_addr` fields, however it's up to users to use those correctly.
 #[cfg(linux_raw)]
+// SAFETY: `siginfo_t` does contain some raw pointers, such as the `si_ptr`
+// and the `si_addr` fields, however it's up to users to use those correctly.
 unsafe impl Send for WaitIdStatus {}
 
-// SAFETY: Same as with `Send`.
 #[cfg(linux_raw)]
+// SAFETY: Same as with `Send`.
 unsafe impl Sync for WaitIdStatus {}
 
 #[cfg(not(any(target_os = "openbsd", target_os = "redox", target_os = "wasi")))]
@@ -345,6 +345,7 @@ pub enum WaitId<'a> {
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/wait.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/waitpid.2.html
+#[doc(alias = "wait4")]
 #[cfg(not(target_os = "wasi"))]
 #[inline]
 pub fn waitpid(pid: Option<Pid>, waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {

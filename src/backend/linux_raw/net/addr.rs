@@ -67,9 +67,8 @@ impl SocketAddrUnix {
     /// Construct a new unnamed address.
     ///
     /// The kernel will assign an abstract Unix-domain address to the socket
-    /// when you call [`bind_unix()`][crate::net::bind_unix]. You can
-    /// inspect the assigned name with
-    /// [`getsockname`][crate::net::getsockname].
+    /// when you call [`bind`][crate::net::bind]. You can inspect the assigned
+    /// name with [`getsockname`][crate::net::getsockname].
     ///
     /// # References
     ///  - [Linux]
@@ -189,6 +188,9 @@ impl fmt::Debug for SocketAddrUnix {
 }
 
 /// `struct sockaddr_storage`.
+///
+/// This type is guaranteed to be large enough to hold any encoded socket
+/// address.
 #[repr(transparent)]
 #[derive(Copy, Clone)]
 pub struct SocketAddrStorage(c::sockaddr_storage);

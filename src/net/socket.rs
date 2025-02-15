@@ -237,6 +237,8 @@ pub fn listen<Fd: AsFd>(sockfd: Fd, backlog: i32) -> io::Result<()> {
 /// however it is not safe in general to rely on this, as file descriptors may
 /// be unexpectedly allocated on other threads or in libraries.
 ///
+/// See [`accept_with`] to pass additional flags.
+///
 /// # References
 ///  - [Beej's Guide to Network Programming]
 ///  - [POSIX]
@@ -302,6 +304,8 @@ pub fn accept_with<Fd: AsFd>(sockfd: Fd, flags: SocketFlags) -> io::Result<Owned
 /// peer address.
 ///
 /// Use [`accept`] if the peer address isn't needed.
+///
+/// See [`acceptfrom_with`] to pass additional flags.
 ///
 /// # References
 ///  - [Beej's Guide to Network Programming]

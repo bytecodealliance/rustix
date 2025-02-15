@@ -1,14 +1,3 @@
-// wasip2 conditionally gates stdlib APIs such as `OsStrExt`.
-// https://github.com/rust-lang/rust/issues/130323
-#![cfg_attr(
-    all(
-        target_os = "wasi",
-        target_env = "p2",
-        any(feature = "fs", feature = "mount", feature = "net"),
-        wasip2,
-    ),
-    feature(wasip2)
-)]
 //! `rustix` provides efficient memory-safe and [I/O-safe] wrappers to
 //! POSIX-like, Unix-like, Linux, and Winsock syscall-like APIs, with
 //! configurable backends.
@@ -140,6 +129,17 @@
 #![cfg_attr(
     any(target_os = "redox", target_os = "wasi", not(feature = "all-apis")),
     allow(unused_imports)
+)]
+// wasip2 conditionally gates stdlib APIs such as `OsStrExt`.
+// <https://github.com/rust-lang/rust/issues/130323>
+#![cfg_attr(
+    all(
+        target_os = "wasi",
+        target_env = "p2",
+        any(feature = "fs", feature = "mount", feature = "net"),
+        wasip2,
+    ),
+    feature(wasip2)
 )]
 
 #[cfg(all(feature = "alloc", feature = "rustc-dep-of-std"))]
