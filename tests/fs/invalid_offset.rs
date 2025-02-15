@@ -67,6 +67,7 @@ fn invalid_offset_fallocate() {
 )))]
 #[test]
 fn invalid_offset_fadvise() {
+    use core::num::NonZeroU64;
     use rustix::fs::{fadvise, openat, Advice, Mode, OFlags, CWD};
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
@@ -79,21 +80,63 @@ fn invalid_offset_fadvise() {
     .unwrap();
 
     // `fadvise` never fails on invalid offsets.
-    fadvise(&file, i64::MAX as u64, i64::MAX as u64, Advice::Normal).unwrap();
-    fadvise(&file, u64::MAX, 0, Advice::Normal).unwrap();
-    fadvise(&file, i64::MAX as u64, 1, Advice::Normal).unwrap();
-    fadvise(&file, 1, i64::MAX as u64, Advice::Normal).unwrap();
-    fadvise(&file, i64::MAX as u64 + 1, 0, Advice::Normal).unwrap();
-    fadvise(&file, u64::MAX, i64::MAX as u64, Advice::Normal).unwrap();
+    fadvise(
+        &file,
+        i64::MAX as u64,
+        NonZeroU64::new(i64::MAX as u64),
+        Advice::Normal,
+    )
+    .unwrap();
+    fadvise(&file, u64::MAX, None, Advice::Normal).unwrap();
+    fadvise(&file, i64::MAX as u64, NonZeroU64::new(1), Advice::Normal).unwrap();
+    fadvise(&file, 1, NonZeroU64::new(i64::MAX as u64), Advice::Normal).unwrap();
+    fadvise(&file, i64::MAX as u64 + 1, None, Advice::Normal).unwrap();
+    fadvise(
+        &file,
+        u64::MAX,
+        NonZeroU64::new(i64::MAX as u64),
+        Advice::Normal,
+    )
+    .unwrap();
 
     // `fadvise` fails on invalid lengths.
-    fadvise(&file, u64::MAX, u64::MAX, Advice::Normal).unwrap_err();
-    fadvise(&file, i64::MAX as u64, u64::MAX, Advice::Normal).unwrap_err();
-    fadvise(&file, 0, u64::MAX, Advice::Normal).unwrap_err();
-    fadvise(&file, u64::MAX, i64::MAX as u64 + 1, Advice::Normal).unwrap_err();
-    fadvise(&file, i64::MAX as u64 + 1, u64::MAX, Advice::Normal).unwrap_err();
-    fadvise(&file, i64::MAX as u64, i64::MAX as u64 + 1, Advice::Normal).unwrap_err();
-    fadvise(&file, 0, i64::MAX as u64 + 1, Advice::Normal).unwrap_err();
+    fadvise(&file, u64::MAX, NonZeroU64::new(u64::MAX), Advice::Normal).unwrap_err();
+    fadvise(
+        &file,
+        i64::MAX as u64,
+        NonZeroU64::new(u64::MAX),
+        Advice::Normal,
+    )
+    .unwrap_err();
+    fadvise(&file, 0, NonZeroU64::new(u64::MAX), Advice::Normal).unwrap_err();
+    fadvise(
+        &file,
+        u64::MAX,
+        NonZeroU64::new(i64::MAX as u64 + 1),
+        Advice::Normal,
+    )
+    .unwrap_err();
+    fadvise(
+        &file,
+        i64::MAX as u64 + 1,
+        NonZeroU64::new(u64::MAX),
+        Advice::Normal,
+    )
+    .unwrap_err();
+    fadvise(
+        &file,
+        i64::MAX as u64,
+        NonZeroU64::new(i64::MAX as u64 + 1),
+        Advice::Normal,
+    )
+    .unwrap_err();
+    fadvise(
+        &file,
+        0,
+        NonZeroU64::new(i64::MAX as u64 + 1),
+        Advice::Normal,
+    )
+    .unwrap_err();
 }
 
 #[test]

@@ -155,7 +155,7 @@ mod tests {
     fn test_layouts() {
         assert_eq_size!(SocketAddrLen, c::socklen_t);
 
-        #[cfg(not(windows))]
+        #[cfg(not(any(windows, target_os = "redox")))]
         assert_eq!(
             memoffset::span_of!(c::msghdr, msg_namelen).len(),
             size_of::<SocketAddrLen>()

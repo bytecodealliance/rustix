@@ -1,3 +1,4 @@
+#[cfg(not(target_os = "redox"))]
 #[test]
 fn negative_file_timetamp() {
     use rustix::fs::{

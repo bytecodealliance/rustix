@@ -41,6 +41,7 @@ use crate::fs::{
 };
 use crate::io;
 use core::mem::MaybeUninit;
+use core::num::NonZeroU64;
 #[cfg(any(target_arch = "mips64", target_arch = "mips64r6"))]
 use linux_raw_sys::general::stat as linux_stat64;
 use linux_raw_sys::general::{
@@ -364,7 +365,17 @@ pub(crate) fn fallocate(
 }
 
 #[inline]
-pub(crate) fn fadvise(fd: BorrowedFd<'_>, pos: u64, len: u64, advice: Advice) -> io::Result<()> {
+pub(crate) fn fadvise(
+    fd: BorrowedFd<'_>,
+    pos: u64,
+    len: Option<NonZeroU64>,
+    advice: Advice,
+) -> io::Result<()> {
+    let len = match len {
+        None => 0,
+        Some(len) => len.get(),
+    };
+
     // On ARM, the arguments are reordered so that the `len` and `pos` argument
     // pairs are aligned. And ARM has a custom syscall code for this.
     #[cfg(target_arch = "arm")]

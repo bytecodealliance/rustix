@@ -10,17 +10,6 @@ use crate::ffi::CString;
 use crate::ffi::{self, CStr};
 #[cfg(not(any(target_os = "espidf", target_os = "vita")))]
 use crate::fs::Access;
-#[cfg(not(any(
-    apple,
-    netbsdlike,
-    target_os = "solaris",
-    target_os = "dragonfly",
-    target_os = "espidf",
-    target_os = "haiku",
-    target_os = "redox",
-    target_os = "vita",
-)))]
-use crate::fs::Advice;
 #[cfg(not(any(target_os = "espidf", target_os = "redox")))]
 use crate::fs::AtFlags;
 #[cfg(not(any(
@@ -75,6 +64,17 @@ use {
     crate::backend::conv::nonnegative_ret,
     crate::fs::{copyfile_state_t, CloneFlags, CopyfileFlags},
 };
+#[cfg(not(any(
+    apple,
+    netbsdlike,
+    target_os = "solaris",
+    target_os = "dragonfly",
+    target_os = "espidf",
+    target_os = "haiku",
+    target_os = "redox",
+    target_os = "vita",
+)))]
+use {crate::fs::Advice, core::num::NonZeroU64};
 #[cfg(any(apple, linux_kernel, target_os = "hurd"))]
 use {crate::fs::XattrFlags, core::mem::size_of, core::ptr::null_mut};
 #[cfg(linux_kernel)]
@@ -1213,9 +1213,17 @@ pub(crate) fn copy_file_range(
     target_os = "redox",
     target_os = "vita",
 )))]
-pub(crate) fn fadvise(fd: BorrowedFd<'_>, offset: u64, len: u64, advice: Advice) -> io::Result<()> {
+pub(crate) fn fadvise(
+    fd: BorrowedFd<'_>,
+    offset: u64,
+    len: Option<NonZeroU64>,
+    advice: Advice,
+) -> io::Result<()> {
     let offset = offset as i64;
-    let len = len as i64;
+    let len = match len {
+        None => 0,
+        Some(len) => len.get() as i64,
+    };
 
     // Our public API uses `u64` following the [Rust convention], but the
     // underlying host APIs use a signed `off_t`. Converting these values may
