@@ -1,3 +1,14 @@
+#[cfg(not(any(
+    apple,
+    netbsdlike,
+    target_os = "solaris",
+    target_os = "dragonfly",
+    target_os = "espidf",
+    target_os = "haiku",
+    target_os = "redox",
+)))]
+use core::num::NonZeroU64;
+
 #[cfg(not(target_os = "redox"))]
 #[test]
 fn test_file() {
@@ -88,9 +99,8 @@ fn test_file() {
         target_os = "dragonfly",
         target_os = "espidf",
         target_os = "haiku",
-        target_os = "redox",
     )))]
-    rustix::fs::fadvise(&file, 0, 10, rustix::fs::Advice::Normal).unwrap();
+    rustix::fs::fadvise(&file, 0, NonZeroU64::new(10), rustix::fs::Advice::Normal).unwrap();
 
     rustix::fs::fsync(&file).unwrap();
 
@@ -99,7 +109,6 @@ fn test_file() {
         target_os = "dragonfly",
         target_os = "espidf",
         target_os = "haiku",
-        target_os = "redox",
     )))]
     rustix::fs::fdatasync(&file).unwrap();
 
@@ -134,7 +143,6 @@ fn test_file() {
         solarish,
         target_os = "haiku",
         target_os = "netbsd",
-        target_os = "redox",
         target_os = "wasi",
     )))]
     {
