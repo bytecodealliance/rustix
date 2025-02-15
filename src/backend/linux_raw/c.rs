@@ -12,6 +12,8 @@ pub(crate) use linux_raw_sys::errno::{EBADF, EINVAL};
 pub(crate) use linux_raw_sys::general::{__kernel_fd_set as fd_set, __FD_SETSIZE as FD_SETSIZE};
 pub(crate) use linux_raw_sys::ioctl::{FIONBIO, FIONREAD};
 // Import the kernel's `uid_t` and `gid_t` if they're 32-bit.
+#[cfg(feature = "thread")]
+pub(crate) use linux_raw_sys::general::futex_waitv;
 #[cfg(not(any(target_arch = "arm", target_arch = "sparc", target_arch = "x86")))]
 pub(crate) use linux_raw_sys::general::{__kernel_gid_t as gid_t, __kernel_uid_t as uid_t};
 pub(crate) use linux_raw_sys::general::{

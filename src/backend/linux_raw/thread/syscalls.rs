@@ -17,12 +17,12 @@ use crate::pid::Pid;
 use crate::thread::{
     futex, ClockId, Cpuid, MembarrierCommand, MembarrierQuery, NanosleepRelativeResult, Timespec,
 };
-use crate::utils::as_mut_ptr;
+use crate::utils::{as_mut_ptr, option_as_ptr};
 use core::mem::MaybeUninit;
 use core::sync::atomic::AtomicU32;
-use linux_raw_sys::general::{membarrier_cmd, membarrier_cmd_flag, TIMER_ABSTIME};
 #[cfg(target_pointer_width = "32")]
-use {crate::utils::option_as_ptr, linux_raw_sys::general::timespec as __kernel_old_timespec};
+use linux_raw_sys::general::timespec as __kernel_old_timespec;
+use linux_raw_sys::general::{membarrier_cmd, membarrier_cmd_flag, TIMER_ABSTIME};
 
 #[inline]
 pub(crate) fn clock_nanosleep_relative(id: ClockId, req: &Timespec) -> NanosleepRelativeResult {
@@ -327,6 +327,27 @@ unsafe fn futex_old_timespec(
         c_uint(val3)
     ))
 }
+
+#[inline]
+pub(crate) fn futex_waitv(
+    waiters: &[futex::Wait],
+    flags: futex::WaitvFlags,
+    timeout: Option<&Timespec>,
+    clockid: ClockId,
+) -> io::Result<usize> {
+    let (waiters_addr, waiters_len) = slice(waiters);
+    unsafe {
+        ret_usize(syscall!(
+            __NR_futex_waitv,
+            waiters_addr,
+            waiters_len,
+            c_uint(flags.bits()),
+            option_as_ptr(timeout),
+            clockid
+        ))
+    }
+}
+
 #[inline]
 pub(crate) fn setns(fd: BorrowedFd<'_>, nstype: c::c_int) -> io::Result<c::c_int> {
     unsafe { ret_c_int(syscall_readonly!(__NR_setns, fd, c_int(nstype))) }

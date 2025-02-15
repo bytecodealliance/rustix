@@ -123,7 +123,7 @@ event = []
 fs = []
 
 # Enable `rustix::io_uring::*` (on platforms that support it).
-io_uring = ["event", "fs", "net", "linux-raw-sys/io_uring"]
+io_uring = ["event", "fs", "net", "thread", "linux-raw-sys/io_uring"]
 
 # Enable `rustix::mount::*`.
 mount = []
