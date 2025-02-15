@@ -188,7 +188,7 @@ impl DecInt {
             buf[BUF_LEN - len] = MaybeUninit::new(b'-');
         }
 
-        DecInt {
+        Self {
             buf,
             len: NonZeroU8::new(len as u8).unwrap(),
         }

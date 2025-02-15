@@ -2,8 +2,6 @@
 
 use crate::backend::c;
 use crate::net::AddressFamily;
-use core::mem::size_of;
-use core::slice;
 #[cfg(unix)]
 use {
     crate::ffi::CStr,
@@ -13,6 +11,7 @@ use {
     core::cmp::Ordering,
     core::fmt,
     core::hash::{Hash, Hasher},
+    core::slice,
 };
 
 /// `struct sockaddr_un`
@@ -269,16 +268,6 @@ impl SocketAddrStorage {
         unsafe {
             crate::backend::net::read_sockaddr::initialize_family_to_unspec(
                 crate::utils::as_mut_ptr(&mut self.0).cast::<c::sockaddr>(),
-            )
-        }
-    }
-
-    /// View the storage as a byte slice.
-    pub fn as_mut_bytes(&mut self) -> &mut [u8] {
-        unsafe {
-            slice::from_raw_parts_mut(
-                crate::utils::as_mut_ptr(self).cast::<u8>(),
-                size_of::<Self>(),
             )
         }
     }

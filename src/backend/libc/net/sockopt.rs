@@ -82,9 +82,9 @@ use windows_sys::Win32::Foundation::BOOL;
 
 #[inline]
 fn getsockopt<T: Copy>(fd: BorrowedFd<'_>, level: i32, optname: i32) -> io::Result<T> {
-    let mut optlen = core::mem::size_of::<T>().try_into().unwrap();
+    let mut optlen = size_of::<T>().try_into().unwrap();
     debug_assert!(
-        optlen as usize >= core::mem::size_of::<c::c_int>(),
+        optlen as usize >= size_of::<c::c_int>(),
         "Socket APIs don't ever use `bool` directly"
     );
 
@@ -125,9 +125,9 @@ fn getsockopt_raw<T>(
 
 #[inline]
 fn setsockopt<T: Copy>(fd: BorrowedFd<'_>, level: i32, optname: i32, value: T) -> io::Result<()> {
-    let optlen = core::mem::size_of::<T>().try_into().unwrap();
+    let optlen = size_of::<T>().try_into().unwrap();
     debug_assert!(
-        optlen as usize >= core::mem::size_of::<c::c_int>(),
+        optlen as usize >= size_of::<c::c_int>(),
         "Socket APIs don't ever use `bool` directly"
     );
     setsockopt_raw(fd, level, optname, &value, optlen)
@@ -1077,15 +1077,15 @@ pub(crate) fn xdp_mmap_offsets(fd: BorrowedFd<'_>) -> io::Result<XdpMmapOffsets>
     // kernel version. This works because C will layout all struct members one
     // after the other.
 
-    let mut optlen = core::mem::size_of::<xdp_mmap_offsets>().try_into().unwrap();
+    let mut optlen = size_of::<xdp_mmap_offsets>().try_into().unwrap();
     debug_assert!(
-        optlen as usize >= core::mem::size_of::<c::c_int>(),
+        optlen as usize >= size_of::<c::c_int>(),
         "Socket APIs don't ever use `bool` directly"
     );
     let mut value = MaybeUninit::<xdp_mmap_offsets>::zeroed();
     getsockopt_raw(fd, c::SOL_XDP, c::XDP_MMAP_OFFSETS, &mut value, &mut optlen)?;
 
-    if optlen as usize == core::mem::size_of::<c::xdp_mmap_offsets_v1>() {
+    if optlen as usize == size_of::<c::xdp_mmap_offsets_v1>() {
         // Safety: All members of xdp_mmap_offsets are u64 and thus are correctly
         // initialized by `MaybeUninit::<xdp_statistics>::zeroed()`
         let xpd_mmap_offsets = unsafe { value.assume_init() };
@@ -1118,7 +1118,7 @@ pub(crate) fn xdp_mmap_offsets(fd: BorrowedFd<'_>) -> io::Result<XdpMmapOffsets>
     } else {
         assert_eq!(
             optlen as usize,
-            core::mem::size_of::<xdp_mmap_offsets>(),
+            size_of::<xdp_mmap_offsets>(),
             "unexpected getsockopt size"
         );
         // Safety: All members of xdp_mmap_offsets are u64 and thus are correctly
@@ -1156,15 +1156,15 @@ pub(crate) fn xdp_mmap_offsets(fd: BorrowedFd<'_>) -> io::Result<XdpMmapOffsets>
 #[cfg(target_os = "linux")]
 #[inline]
 pub(crate) fn xdp_statistics(fd: BorrowedFd<'_>) -> io::Result<XdpStatistics> {
-    let mut optlen = core::mem::size_of::<xdp_statistics>().try_into().unwrap();
+    let mut optlen = size_of::<xdp_statistics>().try_into().unwrap();
     debug_assert!(
-        optlen as usize >= core::mem::size_of::<c::c_int>(),
+        optlen as usize >= size_of::<c::c_int>(),
         "Socket APIs don't ever use `bool` directly"
     );
     let mut value = MaybeUninit::<xdp_statistics>::zeroed();
     getsockopt_raw(fd, c::SOL_XDP, c::XDP_STATISTICS, &mut value, &mut optlen)?;
 
-    if optlen as usize == core::mem::size_of::<xdp_statistics_v1>() {
+    if optlen as usize == size_of::<xdp_statistics_v1>() {
         // Safety: All members of xdp_statistics are u64 and thus are correctly
         // initialized by `MaybeUninit::<xdp_statistics>::zeroed()`
         let xdp_statistics = unsafe { value.assume_init() };
@@ -1179,7 +1179,7 @@ pub(crate) fn xdp_statistics(fd: BorrowedFd<'_>) -> io::Result<XdpStatistics> {
     } else {
         assert_eq!(
             optlen as usize,
-            core::mem::size_of::<xdp_statistics>(),
+            size_of::<xdp_statistics>(),
             "unexpected getsockopt size"
         );
         // Safety: All members of xdp_statistics are u64 and thus are correctly

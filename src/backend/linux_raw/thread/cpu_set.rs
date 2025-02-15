@@ -3,7 +3,7 @@
 #![allow(non_snake_case)]
 
 use super::types::RawCpuSet;
-use core::mem::size_of_val;
+use core::mem::{size_of, size_of_val};
 
 #[inline]
 pub(crate) fn CPU_SET(cpu: usize, cpuset: &mut RawCpuSet) {
@@ -42,7 +42,7 @@ pub(crate) fn CPU_COUNT_S(size_in_bytes: usize, cpuset: &RawCpuSet) -> u32 {
 
 #[inline]
 pub(crate) fn CPU_COUNT(cpuset: &RawCpuSet) -> u32 {
-    CPU_COUNT_S(core::mem::size_of::<RawCpuSet>(), cpuset)
+    CPU_COUNT_S(size_of::<RawCpuSet>(), cpuset)
 }
 
 #[inline]

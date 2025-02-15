@@ -13,7 +13,6 @@ use crate::net::AddressFamily;
 use crate::{io, path};
 use core::cmp::Ordering;
 use core::hash::{Hash, Hasher};
-use core::mem::size_of;
 use core::{fmt, slice};
 
 /// `struct sockaddr_un`
@@ -76,12 +75,10 @@ impl SocketAddrUnix {
     ///  - [Linux]
     ///
     /// [Linux]: https://www.man7.org/linux/man-pages/man7/unix.7.html
-    #[cfg(linux_kernel)]
     #[inline]
     pub fn new_unnamed() -> Self {
         Self {
             unix: Self::init(),
-            #[cfg(not(any(bsd, target_os = "haiku")))]
             len: offsetof_sun_path() as SocketAddrLen,
         }
     }
@@ -116,7 +113,6 @@ impl SocketAddrUnix {
     }
 
     /// `true` if the socket address is unnamed.
-    #[cfg(linux_kernel)]
     #[inline]
     pub fn is_unnamed(&self) -> bool {
         self.bytes() == Some(&[])
@@ -231,16 +227,6 @@ impl SocketAddrStorage {
         unsafe {
             crate::backend::net::read_sockaddr::initialize_family_to_unspec(
                 crate::utils::as_mut_ptr(&mut self.0).cast::<c::sockaddr>(),
-            )
-        }
-    }
-
-    /// View the storage as a byte slice.
-    pub fn as_mut_bytes(&mut self) -> &mut [u8] {
-        unsafe {
-            slice::from_raw_parts_mut(
-                crate::utils::as_mut_ptr(self).cast::<u8>(),
-                size_of::<Self>(),
             )
         }
     }

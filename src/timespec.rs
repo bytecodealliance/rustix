@@ -386,6 +386,9 @@ fn test_sizes() {
 #[allow(deprecated)]
 fn test_fix_y2038() {
     assert_eq_size!(libc::time_t, u32);
+
+    #[cfg(linux_kernel)]
+    assert_eq_size!(Timespec, linux_raw_sys::general::__kernel_timespec);
 }
 
 #[cfg(not(fix_y2038))]
@@ -393,6 +396,7 @@ fn test_fix_y2038() {
 fn timespec_layouts() {
     use crate::backend::c;
     check_renamed_type!(Timespec, timespec);
-    #[cfg(linux_raw)]
+
+    #[cfg(linux_kernel)]
     assert_eq_size!(Timespec, linux_raw_sys::general::__kernel_timespec);
 }

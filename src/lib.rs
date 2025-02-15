@@ -132,6 +132,8 @@
 #![allow(clippy::unnecessary_cast)]
 // It is common in Linux and libc APIs for types to vary between platforms.
 #![allow(clippy::useless_conversion)]
+// This clippy lint gets too many false positives.
+#![allow(clippy::needless_lifetimes)]
 // Redox and WASI have enough differences that it isn't worth precisely
 // conditionalizing all the `use`s for them. Similar for if we don't have
 // "all-apis".
@@ -140,7 +142,7 @@
     allow(unused_imports)
 )]
 
-#[cfg(all(feature = "rustc-dep-of-std", feature = "alloc"))]
+#[cfg(all(feature = "alloc", feature = "rustc-dep-of-std"))]
 extern crate rustc_std_workspace_alloc as alloc;
 
 #[cfg(all(feature = "alloc", not(feature = "rustc-dep-of-std")))]

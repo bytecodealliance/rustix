@@ -331,7 +331,7 @@ fn _waitid_all(options: WaitIdOptions) -> io::Result<Option<WaitIdStatus>> {
             __NR_waitid,
             c_uint(c::P_ALL),
             c_uint(0),
-            by_mut(&mut status),
+            &mut status,
             c_int(options.bits() as _),
             zero()
         ))?
@@ -350,7 +350,7 @@ fn _waitid_pid(pid: Pid, options: WaitIdOptions) -> io::Result<Option<WaitIdStat
             __NR_waitid,
             c_uint(c::P_PID),
             c_int(Pid::as_raw(Some(pid))),
-            by_mut(&mut status),
+            &mut status,
             c_int(options.bits() as _),
             zero()
         ))?
@@ -369,7 +369,7 @@ fn _waitid_pgid(pgid: Option<Pid>, options: WaitIdOptions) -> io::Result<Option<
             __NR_waitid,
             c_uint(c::P_PGID),
             c_int(Pid::as_raw(pgid)),
-            by_mut(&mut status),
+            &mut status,
             c_int(options.bits() as _),
             zero()
         ))?
@@ -388,7 +388,7 @@ fn _waitid_pidfd(fd: BorrowedFd<'_>, options: WaitIdOptions) -> io::Result<Optio
             __NR_waitid,
             c_uint(c::P_PIDFD),
             c_uint(fd.as_raw_fd() as _),
-            by_mut(&mut status),
+            &mut status,
             c_int(options.bits() as _),
             zero()
         ))?
@@ -535,7 +535,7 @@ pub(crate) fn fcntl_getlk(fd: BorrowedFd<'_>, lock: &Flock) -> io::Result<Option
             __NR_fcntl64,
             fd,
             c_uint(c::F_GETLK64),
-            by_ref(&mut curr_lock)
+            by_mut(&mut curr_lock)
         ))?
     }
     #[cfg(target_pointer_width = "64")]
@@ -544,7 +544,7 @@ pub(crate) fn fcntl_getlk(fd: BorrowedFd<'_>, lock: &Flock) -> io::Result<Option
             __NR_fcntl,
             fd,
             c_uint(c::F_GETLK),
-            by_ref(&mut curr_lock)
+            by_mut(&mut curr_lock)
         ))?
     }
 

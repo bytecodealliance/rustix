@@ -653,9 +653,9 @@ pub const SIGRTMAX: i32 = {
 /// implementing a libc).
 #[cfg(linux_raw)]
 #[doc(alias = "SIGRTMIN")]
-pub fn sigrt(n: i32) -> Option<Signal> {
+pub const fn sigrt(n: i32) -> Option<Signal> {
     let sig = SIGRTMIN.wrapping_add(n);
-    if (SIGRTMIN..=SIGRTMAX).contains(&sig) {
+    if sig >= SIGRTMIN && sig <= SIGRTMAX {
         // SAFETY: We've checked that `sig` is in the expected range. It could
         // still conflict with libc's reserved values, however users of the
         // `runtime` module here must already know that there's no other libc

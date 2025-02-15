@@ -37,7 +37,7 @@ pub enum MembarrierCommand {
 /// A CPU identifier as a raw integer.
 pub type RawCpuid = u32;
 
-#[repr(C)]
+#[repr(transparent)]
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub(crate) struct RawCpuSet {
     #[cfg(all(target_pointer_width = "32", not(target_arch = "x86_64")))]

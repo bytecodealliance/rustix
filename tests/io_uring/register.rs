@@ -80,7 +80,7 @@ fn register_iowq_max_workers<FD>(fd: FD) -> Result<()>
 where
     FD: AsFd,
 {
-    let iowq_max_workers = [0u32; 2];
+    let iowq_max_workers = [0_u32; 2];
     do_register(
         fd,
         true,
@@ -162,7 +162,7 @@ fn io_uring_buf_ring_can_be_registered() {
         ring_entries: ENTRIES as u32,
         bgid: BGID,
         flags: 0,
-        resv: [0u64; 3],
+        resv: [0_u64; 3],
     };
 
     assert_eq!(register_buf_ring(ring_fd, &reg), Ok(()));

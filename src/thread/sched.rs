@@ -13,7 +13,7 @@ use core::{fmt, hash};
 /// [Linux]: https://man7.org/linux/man-pages/man3/CPU_SET.3.html
 /// [`sched_setaffinity`]: crate::thread::sched_setaffinity
 /// [`sched_getaffinity`]: crate::thread::sched_getaffinity
-#[repr(C)]
+#[repr(transparent)]
 #[derive(Clone, Copy)]
 pub struct CpuSet {
     cpu_set: backend::thread::types::RawCpuSet,
