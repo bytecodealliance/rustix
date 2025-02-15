@@ -223,5 +223,12 @@ specific socket types using `From`/`Into`/`TryFrom`/`TryInto` conversions.
 
 [`SocketAddrAny`]: https://docs.rs/rustix/1.0.0/rustix/net/struct.SocketAddrAny.html
 
+The `len` parameter to [`rustix::fs::fadvise`] has changed from `u64` to
+`Option<NonZeroU64>`, to reflect that zero is a special case meaning the
+advice applies to the end of the file. To convert an arbitrary `u64` value to
+`Option<NonZeroU64>`, use `NonZeroU64::new`.
+
+[`rustix::fs::fadvise`]: https://docs.rs/rustix/1.0.0/rustix/fs/fn.fadvise.html
+
 All explicitly deprecated functions and types have been removed. Their
 deprecation messages will have identified alternatives.
