@@ -1110,46 +1110,6 @@ pub mod netlink {
     /// `NETLINK_INET_DIAG`
     #[cfg(linux_kernel)]
     pub const INET_DIAG: Protocol = Protocol(new_raw_protocol(c::NETLINK_INET_DIAG as _));
-    /// `NETLINK_ADD_MEMBERSHIP`
-    #[cfg(linux_kernel)]
-    pub const ADD_MEMBERSHIP: Protocol = Protocol(new_raw_protocol(c::NETLINK_ADD_MEMBERSHIP as _));
-    /// `NETLINK_DROP_MEMBERSHIP`
-    #[cfg(linux_kernel)]
-    pub const DROP_MEMBERSHIP: Protocol =
-        Protocol(new_raw_protocol(c::NETLINK_DROP_MEMBERSHIP as _));
-    /// `NETLINK_PKTINFO`
-    #[cfg(linux_kernel)]
-    pub const PKTINFO: Protocol = Protocol(new_raw_protocol(c::NETLINK_PKTINFO as _));
-    /// `NETLINK_BROADCAST_ERROR`
-    #[cfg(linux_kernel)]
-    pub const BROADCAST_ERROR: Protocol =
-        Protocol(new_raw_protocol(c::NETLINK_BROADCAST_ERROR as _));
-    /// `NETLINK_NO_ENOBUFS`
-    #[cfg(linux_kernel)]
-    pub const NO_ENOBUFS: Protocol = Protocol(new_raw_protocol(c::NETLINK_NO_ENOBUFS as _));
-    /// `NETLINK_RX_RING`
-    #[cfg(linux_kernel)]
-    pub const RX_RING: Protocol = Protocol(new_raw_protocol(c::NETLINK_RX_RING as _));
-    /// `NETLINK_TX_RING`
-    #[cfg(linux_kernel)]
-    pub const TX_RING: Protocol = Protocol(new_raw_protocol(c::NETLINK_TX_RING as _));
-    /// `NETLINK_LISTEN_ALL_NSID`
-    #[cfg(linux_kernel)]
-    pub const LISTEN_ALL_NSID: Protocol =
-        Protocol(new_raw_protocol(c::NETLINK_LISTEN_ALL_NSID as _));
-    /// `NETLINK_LIST_MEMBERSHIPS`
-    #[cfg(linux_kernel)]
-    pub const LIST_MEMBERSHIPS: Protocol =
-        Protocol(new_raw_protocol(c::NETLINK_LIST_MEMBERSHIPS as _));
-    /// `NETLINK_CAP_ACK`
-    #[cfg(linux_kernel)]
-    pub const CAP_ACK: Protocol = Protocol(new_raw_protocol(c::NETLINK_CAP_ACK as _));
-    /// `NETLINK_EXT_ACK`
-    #[cfg(linux_kernel)]
-    pub const EXT_ACK: Protocol = Protocol(new_raw_protocol(c::NETLINK_EXT_ACK as _));
-    /// `NETLINK_GET_STRICT_CHK`
-    #[cfg(linux_kernel)]
-    pub const GET_STRICT_CHK: Protocol = Protocol(new_raw_protocol(c::NETLINK_GET_STRICT_CHK as _));
 
     /// A Netlink socket address.
     ///
