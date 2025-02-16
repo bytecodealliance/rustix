@@ -14,7 +14,7 @@
 #![allow(unsafe_code)]
 
 use super::c;
-use super::fd::{AsRawFd, BorrowedFd, FromRawFd, RawFd};
+use super::fd::{AsRawFd as _, BorrowedFd, FromRawFd as _, RawFd};
 #[cfg(any(feature = "event", feature = "runtime", feature = "system"))]
 use super::io::errno::try_decode_error;
 #[cfg(target_pointer_width = "64")]

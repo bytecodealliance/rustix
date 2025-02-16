@@ -27,8 +27,8 @@ pub struct Flock {
 }
 
 impl Flock {
-    pub(crate) const unsafe fn from_raw_unchecked(raw_fl: c::flock) -> Flock {
-        Flock {
+    pub(crate) const unsafe fn from_raw_unchecked(raw_fl: c::flock) -> Self {
+        Self {
             start: raw_fl.l_start as _,
             length: raw_fl.l_len as _,
             pid: Pid::from_raw(raw_fl.l_pid),
@@ -50,7 +50,7 @@ impl Flock {
 
 impl From<FlockType> for Flock {
     fn from(value: FlockType) -> Self {
-        Flock {
+        Self {
             start: 0,
             length: 0,
             pid: None,

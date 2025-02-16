@@ -2,10 +2,10 @@ use rustix::event::{
     fd_set_bound, fd_set_insert, fd_set_num_elements, fd_set_remove, select, FdSetElement,
     FdSetIter, Timespec,
 };
-use rustix::fd::{AsRawFd, RawFd};
+use rustix::fd::{AsRawFd as _, RawFd};
 #[cfg(feature = "pipe")]
 #[cfg(not(windows))]
-use rustix::fd::{FromRawFd, OwnedFd};
+use rustix::fd::{FromRawFd as _, OwnedFd};
 use rustix::io::retry_on_intr;
 use serial_test::serial;
 use std::cmp::max;

@@ -14,7 +14,7 @@ use bitflags::bitflags;
 use crate::fd::BorrowedFd;
 
 #[cfg(linux_raw)]
-use crate::backend::process::wait::SiginfoExt;
+use crate::backend::process::wait::SiginfoExt as _;
 
 bitflags! {
     /// Options for modifying the behavior of [`wait`]/[`waitpid`].

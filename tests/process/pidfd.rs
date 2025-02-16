@@ -3,7 +3,7 @@
 use libc::{kill, SIGSTOP};
 #[cfg(feature = "event")]
 use rustix::event;
-use rustix::fd::AsFd;
+use rustix::fd::AsFd as _;
 use rustix::{io, process};
 use serial_test::serial;
 use std::process::Command;

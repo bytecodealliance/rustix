@@ -57,7 +57,7 @@ macro_rules! cstr {
 #[test]
 fn test_cstr() {
     use crate::ffi::CString;
-    use alloc::borrow::ToOwned;
+    use alloc::borrow::ToOwned as _;
     assert_eq!(cstr!(""), &*CString::new("").unwrap());
     assert_eq!(cstr!("").to_owned(), CString::new("").unwrap());
     assert_eq!(cstr!("hello"), &*CString::new("hello").unwrap());

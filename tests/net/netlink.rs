@@ -6,7 +6,7 @@ use rustix::net::{
 
 #[test]
 fn encode_decode() {
-    let orig = SocketAddrNetlink::new(0x12345678, 0x9abcdef0);
+    let orig = SocketAddrNetlink::new(0x1234_5678, 0x9abc_def0);
     let encoded = SocketAddrAny::from(orig);
     let decoded = SocketAddrNetlink::try_from(encoded).unwrap();
     assert_eq!(decoded, orig);
@@ -55,7 +55,7 @@ fn test_usersock() {
 
     sendto(client, data, SendFlags::empty(), &addr).unwrap();
 
-    let mut buffer = [0u8; 4096];
+    let mut buffer = [0_u8; 4096];
     let (len, src) = recvfrom(&server, &mut buffer, RecvFlags::empty()).unwrap();
 
     assert_eq!(&buffer[..len], data);

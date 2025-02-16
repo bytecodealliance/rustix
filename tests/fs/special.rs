@@ -5,7 +5,7 @@ fn test_special_fds() {
     use rustix::fs::{fstat, open, openat, Mode, OFlags, Stat, ABS, CWD};
     use rustix::process::getcwd;
     use std::ffi::OsStr;
-    use std::os::unix::ffi::OsStrExt;
+    use std::os::unix::ffi::OsStrExt as _;
     use std::path::PathBuf;
 
     let cwd_path = getcwd(Vec::new()).unwrap().into_bytes();

@@ -107,7 +107,7 @@ impl Timespec {
                     return None;
                 }
             }
-            Some(Timespec { tv_sec, tv_nsec })
+            Some(Self { tv_sec, tv_nsec })
         } else {
             None
         }
@@ -176,7 +176,7 @@ impl Timespec {
                     return None;
                 }
             }
-            Some(Timespec { tv_sec, tv_nsec })
+            Some(Self { tv_sec, tv_nsec })
         } else {
             None
         }
@@ -201,16 +201,16 @@ impl Timespec {
 impl TryFrom<Timespec> for Duration {
     type Error = TryFromIntError;
 
-    fn try_from(ts: Timespec) -> Result<Duration, Self::Error> {
-        Ok(Duration::new(ts.tv_sec.try_into()?, ts.tv_nsec as _))
+    fn try_from(ts: Timespec) -> Result<Self, Self::Error> {
+        Ok(Self::new(ts.tv_sec.try_into()?, ts.tv_nsec as _))
     }
 }
 
 impl TryFrom<Duration> for Timespec {
     type Error = TryFromIntError;
 
-    fn try_from(dur: Duration) -> Result<Timespec, Self::Error> {
-        Ok(Timespec {
+    fn try_from(dur: Duration) -> Result<Self, Self::Error> {
+        Ok(Self {
             tv_sec: dur.as_secs().try_into()?,
             tv_nsec: dur.subsec_nanos() as _,
         })

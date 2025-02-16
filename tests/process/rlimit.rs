@@ -18,7 +18,7 @@ fn test_setrlimit() {
         maximum: Some(4096),
     };
     assert_ne!(old, new);
-    rustix::process::setrlimit(Resource::Core, new.clone()).unwrap();
+    rustix::process::setrlimit(Resource::Core, new).unwrap();
 
     let lim = rustix::process::getrlimit(Resource::Core);
     assert_eq!(lim, new);
@@ -32,7 +32,7 @@ fn test_setrlimit() {
 
         let first = rustix::process::getrlimit(Resource::Core);
 
-        let old = match rustix::process::prlimit(None, Resource::Core, new.clone()) {
+        let old = match rustix::process::prlimit(None, Resource::Core, new) {
             Ok(rlimit) => rlimit,
             Err(rustix::io::Errno::NOSYS) => return,
             Err(err) => panic!("{:?}", err),

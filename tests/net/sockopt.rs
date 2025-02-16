@@ -71,15 +71,19 @@ fn test_sockopts_socket(s: &OwnedFd) {
     }
 
     // Set a timeout with more than a million nanoseconds.
-    sockopt::set_socket_timeout(s, sockopt::Timeout::Recv, Some(Duration::new(1, 10000000)))
-        .unwrap();
+    sockopt::set_socket_timeout(
+        s,
+        sockopt::Timeout::Recv,
+        Some(Duration::new(1, 10_000_000)),
+    )
+    .unwrap();
 
     // Check that we have a timeout of at least the time we set.
     assert!(
         sockopt::socket_timeout(s, sockopt::Timeout::Recv)
             .unwrap()
             .unwrap()
-            >= Duration::new(1, 10000000)
+            >= Duration::new(1, 10_000_000)
     );
 
     // Set the reuse address flag
@@ -427,7 +431,7 @@ fn test_sockopts_ipv6() {
         Err(io::Errno::NOPROTOOPT) => (),
         Err(io::Errno::INVAL) => (),
         Err(err) => panic!("{:?}", err),
-    };
+    }
 
     // Set the IPV4 V6OONLY value.
     let v6only = rustix::net::sockopt::ipv6_v6only(&s).unwrap();
@@ -562,7 +566,7 @@ fn test_sockopts_multicast_ifv4() {
 
     // Set a ipv4 interface
     match sockopt::set_ip_multicast_if(&s, &Ipv4Addr::LOCALHOST) {
-        Ok(_) => {
+        Ok(()) => {
             assert_eq!(sockopt::ip_multicast_if(&s).unwrap(), Ipv4Addr::LOCALHOST);
         }
         Err(e) if e.to_string().contains("Protocol not available") => {
@@ -595,7 +599,7 @@ fn test_sockopts_multicast_if_with_ifindex() {
         &Ipv4Addr::UNSPECIFIED,
         index,
     ) {
-        Ok(_) => {
+        Ok(()) => {
             assert_eq!(sockopt::ip_multicast_if(&s).unwrap(), Ipv4Addr::UNSPECIFIED);
         }
         Err(e) if e.to_string().contains("Protocol not available") => {
@@ -613,7 +617,7 @@ fn test_sockopts_multicast_ifv6() {
 
     // Set a ipv6 interface
     match sockopt::set_ipv6_multicast_if(&s, 1) {
-        Ok(_) => {
+        Ok(()) => {
             assert_eq!(sockopt::ipv6_multicast_if(&s).unwrap(), 1);
         }
         Err(e) if e.to_string().contains("Protocol not available") => {

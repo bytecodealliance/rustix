@@ -1,7 +1,7 @@
 #[cfg(feature = "pipe")]
 #[test]
 fn test_empty_buffers() {
-    use rustix::fd::AsFd;
+    use rustix::fd::AsFd as _;
     use rustix::net::{RecvAncillaryBuffer, SendAncillaryBuffer, SendAncillaryMessage};
     use rustix::pipe::pipe;
 

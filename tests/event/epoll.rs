@@ -11,7 +11,7 @@ use std::thread;
 
 const BUFFER_SIZE: usize = 20;
 
-fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
+fn server(ready: Arc<(Mutex<u16>, Condvar)>) -> ! {
     let listen_sock = socket(AddressFamily::INET, SocketType::STREAM, None).unwrap();
     bind(&listen_sock, &SocketAddrV4::new(Ipv4Addr::LOCALHOST, 0)).unwrap();
     listen(&listen_sock, 1).unwrap();

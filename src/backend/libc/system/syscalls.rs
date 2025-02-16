@@ -133,7 +133,7 @@ pub(crate) fn finit_module(
     param_values: &CStr,
     flags: c::c_int,
 ) -> io::Result<()> {
-    use crate::fd::AsRawFd;
+    use crate::fd::AsRawFd as _;
 
     syscall! {
         fn finit_module(

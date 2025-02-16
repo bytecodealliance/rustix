@@ -55,7 +55,7 @@ fn read_entries(dir: &mut Dir) -> HashMap<String, DirEntry> {
 #[cfg(linux_kernel)]
 fn test_raw_dir(buf: &mut [MaybeUninit<u8>]) {
     use std::collections::HashSet;
-    use std::io::{Seek, SeekFrom};
+    use std::io::{Seek as _, SeekFrom};
 
     use rustix::fd::AsFd;
     use rustix::fs::RawDir;

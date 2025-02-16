@@ -72,7 +72,7 @@ fn test_dir_read_from() {
 ))]
 #[test]
 fn test_dir_seek() {
-    use std::io::Write;
+    use std::io::Write as _;
 
     let tempdir = tempfile::tempdir().unwrap();
 

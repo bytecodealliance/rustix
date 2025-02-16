@@ -17,7 +17,7 @@ use crate::io;
 use {
     crate::ffi::{CStr, CString},
     crate::path::SMALL_PATH_BUFFER_SIZE,
-    alloc::borrow::ToOwned,
+    alloc::borrow::ToOwned as _,
     alloc::vec::Vec,
 };
 

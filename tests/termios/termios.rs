@@ -252,7 +252,7 @@ fn test_termios_speeds() {
     // speeds.
     #[cfg(any(bsd, linux_kernel))]
     {
-        for custom_speed in [speed::B50, 51, 31250, 74880, 115199] {
+        for custom_speed in [speed::B50, 51, 31250, 74880, 115_199] {
             tio.set_speed(custom_speed).unwrap();
             assert_eq!(tio.input_speed(), custom_speed);
             assert_eq!(tio.output_speed(), custom_speed);
@@ -265,7 +265,7 @@ fn test_termios_speeds() {
 
         // Similar, but using `set_input_speed` and `set_output_speed` instead
         // of `set_speed`.
-        for custom_speed in [speed::B50, 51, 31250, 74880, 115199] {
+        for custom_speed in [speed::B50, 51, 31250, 74880, 115_199] {
             tio.set_input_speed(custom_speed).unwrap();
             tio.set_output_speed(custom_speed).unwrap();
             assert_eq!(tio.input_speed(), custom_speed);
@@ -297,7 +297,7 @@ fn test_termios_speeds() {
     #[cfg(any(bsd, linux_kernel))]
     {
         tio.set_output_speed(speed::B134).unwrap();
-        for custom_speed in [speed::B50, 51, 31250, 74880, 115199] {
+        for custom_speed in [speed::B50, 51, 31250, 74880, 115_199] {
             tio.set_input_speed(custom_speed).unwrap();
             assert_eq!(tio.input_speed(), custom_speed);
             assert_eq!(tio.output_speed(), speed::B134);
@@ -309,7 +309,7 @@ fn test_termios_speeds() {
         }
 
         tio.set_input_speed(speed::B150).unwrap();
-        for custom_speed in [speed::B50, 51, 31250, 74880, 115199] {
+        for custom_speed in [speed::B50, 51, 31250, 74880, 115_199] {
             tio.set_output_speed(custom_speed).unwrap();
             assert_eq!(tio.input_speed(), speed::B150);
             assert_eq!(tio.output_speed(), custom_speed);

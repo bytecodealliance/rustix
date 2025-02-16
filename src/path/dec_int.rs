@@ -6,11 +6,11 @@
 //! `str::from_utf8_unchecked`on the buffer that it filled itself.
 #![allow(unsafe_code)]
 
-use crate::backend::fd::{AsFd, AsRawFd};
+use crate::backend::fd::{AsFd, AsRawFd as _};
 use crate::ffi::CStr;
 use core::hint::unreachable_unchecked;
 use core::mem::{self, MaybeUninit};
-use core::num::NonZeroU8;
+use core::num::{NonZeroU8, NonZeroUsize};
 #[cfg(all(feature = "std", unix))]
 use std::os::unix::ffi::OsStrExt;
 #[cfg(all(
@@ -157,7 +157,7 @@ const _: () = {
 impl DecInt {
     /// Construct a new path component from an integer.
     pub fn new<Int: Integer>(i: Int) -> Self {
-        use private::Sealed;
+        use private::Sealed as _;
 
         let (is_neg, mut i) = i.as_unsigned();
         let mut len = 1;
@@ -222,7 +222,7 @@ impl DecInt {
     /// Return the raw byte buffer including the NUL byte.
     #[inline]
     pub fn as_bytes_with_nul(&self) -> &[u8] {
-        let len = usize::from(self.len.get());
+        let len = NonZeroUsize::from(self.len).get();
         if len > BUF_LEN {
             // SAFETY: a stringified i64/u64 cannot be longer than `U64_MAX_STR_LEN` bytes
             unsafe { unreachable_unchecked() };

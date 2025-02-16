@@ -3,7 +3,7 @@
 #[test]
 fn test_splice_cursor() {
     use rustix::pipe::{pipe, splice, SpliceFlags};
-    use std::io::{Read, Seek, SeekFrom, Write};
+    use std::io::{Read as _, Seek as _, SeekFrom, Write as _};
 
     let mut src = tempfile::tempfile().unwrap();
     let mut dest = tempfile::tempfile().unwrap();
@@ -28,7 +28,7 @@ fn test_splice_cursor() {
 #[test]
 fn test_splice_offset() {
     use rustix::pipe::{pipe, splice, SpliceFlags};
-    use std::io::{Read, Write};
+    use std::io::{Read as _, Write as _};
 
     let mut src = tempfile::tempfile().unwrap();
     let mut dest = tempfile::tempfile().unwrap();

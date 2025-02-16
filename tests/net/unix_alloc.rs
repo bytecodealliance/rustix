@@ -12,7 +12,7 @@ use rustix::net::{
 };
 use rustix::path::DecInt;
 use std::path::Path;
-use std::str::FromStr;
+use std::str::FromStr as _;
 use std::sync::{Arc, Condvar, Mutex};
 use std::thread;
 
@@ -392,7 +392,7 @@ fn test_unix_msg_unconnected() {
 fn test_abstract_unix_msg() {
     crate::init();
 
-    use std::os::unix::ffi::OsStrExt;
+    use std::os::unix::ffi::OsStrExt as _;
 
     let tmpdir = tempfile::tempdir().unwrap();
     let path = tmpdir.path().join("scp_4804");
@@ -407,7 +407,7 @@ fn test_abstract_unix_msg() {
 fn test_abstract_unix_msg_unconnected() {
     crate::init();
 
-    use std::os::unix::ffi::OsStrExt;
+    use std::os::unix::ffi::OsStrExt as _;
 
     let tmpdir = tempfile::tempdir().unwrap();
     let path = tmpdir.path().join("scp_4804");
@@ -422,14 +422,14 @@ fn test_abstract_unix_msg_unconnected() {
 fn test_unix_msg_with_scm_rights() {
     crate::init();
 
-    use rustix::fd::AsFd;
+    use rustix::fd::AsFd as _;
     use rustix::io::{IoSlice, IoSliceMut};
     use rustix::net::{
         recvmsg, sendmsg, RecvAncillaryBuffer, RecvAncillaryMessage, RecvFlags, ReturnFlags,
         SendAncillaryBuffer, SendAncillaryMessage, SendFlags,
     };
     use rustix::pipe::pipe;
-    use std::string::ToString;
+    use std::string::ToString as _;
 
     let tmpdir = tempfile::tempdir().unwrap();
     let path = tmpdir.path().join("scp_4804");
@@ -661,14 +661,14 @@ fn test_unix_peercred() {
 fn test_unix_msg_with_combo() {
     crate::init();
 
-    use rustix::fd::AsFd;
+    use rustix::fd::AsFd as _;
     use rustix::io::{IoSlice, IoSliceMut};
     use rustix::net::{
         recvmsg, sendmsg, RecvAncillaryBuffer, RecvAncillaryMessage, RecvFlags, ReturnFlags,
         SendAncillaryBuffer, SendAncillaryMessage, SendFlags,
     };
     use rustix::pipe::pipe;
-    use std::string::ToString;
+    use std::string::ToString as _;
 
     let tmpdir = tempfile::tempdir().unwrap();
     let path = tmpdir.path().join("scp_4804");

@@ -2,7 +2,7 @@
 #[cfg(not(target_os = "redox"))]
 #[test]
 fn test_owned() {
-    use rustix::fd::{AsFd, AsRawFd, FromRawFd, IntoRawFd};
+    use rustix::fd::{AsFd as _, AsRawFd as _, FromRawFd as _, IntoRawFd as _};
 
     let file = rustix::fs::openat(
         rustix::fs::CWD,

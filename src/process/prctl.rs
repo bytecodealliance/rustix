@@ -12,7 +12,7 @@ use core::ptr::{null, null_mut, NonNull};
 use bitflags::bitflags;
 
 use crate::backend::prctl::syscalls;
-use crate::fd::{AsRawFd, BorrowedFd};
+use crate::fd::{AsRawFd as _, BorrowedFd};
 use crate::ffi::{c_int, c_uint, c_void, CStr};
 use crate::io;
 use crate::prctl::*;

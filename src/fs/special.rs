@@ -51,7 +51,7 @@ pub const ABS: BorrowedFd<'static> =
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::fd::AsRawFd;
+    use crate::fd::AsRawFd as _;
 
     #[test]
     fn test_cwd() {

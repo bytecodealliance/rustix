@@ -4,7 +4,7 @@ use crate::backend::c;
 #[cfg(not(target_os = "wasi"))]
 use crate::backend::conv::ret_discarded_fd;
 use crate::backend::conv::{borrowed_fd, ret, ret_c_int, ret_owned_fd, ret_usize};
-use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
+use crate::fd::{AsFd as _, BorrowedFd, OwnedFd, RawFd};
 #[cfg(not(any(
     target_os = "aix",
     target_os = "espidf",

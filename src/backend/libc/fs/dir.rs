@@ -35,7 +35,7 @@ use crate::io;
 #[cfg(not(any(target_os = "fuchsia", target_os = "vita", target_os = "wasi")))]
 #[cfg(feature = "process")]
 use crate::process::fchdir;
-use alloc::borrow::ToOwned;
+use alloc::borrow::ToOwned as _;
 #[cfg(not(any(linux_like, target_os = "hurd")))]
 use c::readdir as libc_readdir;
 #[cfg(any(linux_like, target_os = "hurd"))]

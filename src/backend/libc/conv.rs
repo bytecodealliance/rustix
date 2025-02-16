@@ -4,8 +4,8 @@
 
 use super::c;
 #[cfg(all(feature = "alloc", not(any(windows, target_os = "espidf"))))]
-use super::fd::IntoRawFd;
-use super::fd::{AsRawFd, BorrowedFd, FromRawFd, LibcFd, OwnedFd, RawFd};
+use super::fd::IntoRawFd as _;
+use super::fd::{AsRawFd as _, BorrowedFd, FromRawFd as _, LibcFd, OwnedFd, RawFd};
 #[cfg(not(windows))]
 use crate::ffi::CStr;
 use crate::io;

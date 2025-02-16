@@ -1,5 +1,5 @@
 use std::env::var;
-use std::io::Write;
+use std::io::Write as _;
 
 /// The directory for inline asm.
 const ASM_PATH: &str = "src/backend/linux_raw/arch";

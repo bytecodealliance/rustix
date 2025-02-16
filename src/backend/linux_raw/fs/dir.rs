@@ -7,7 +7,7 @@ use crate::io;
 #[cfg(feature = "process")]
 use crate::process::fchdir;
 use crate::utils::as_ptr;
-use alloc::borrow::ToOwned;
+use alloc::borrow::ToOwned as _;
 use alloc::vec::Vec;
 use core::fmt;
 use core::mem::size_of;

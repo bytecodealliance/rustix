@@ -1064,6 +1064,7 @@ impl PartialEq for io_uring_ptr {
 
 impl Eq for io_uring_ptr {}
 
+#[allow(clippy::non_canonical_partial_ord_impl)]
 impl PartialOrd for io_uring_ptr {
     #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
@@ -1173,6 +1174,7 @@ impl PartialEq for io_uring_user_data {
 
 impl Eq for io_uring_user_data {}
 
+#[allow(clippy::non_canonical_partial_ord_impl)]
 impl PartialOrd for io_uring_user_data {
     #[inline]
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
@@ -1712,7 +1714,7 @@ mod tests {
         // Test that pointers are stored in io_uring_ptr` in the way that
         // io_uring stores them in a `u64`.
         unsafe {
-            const MAGIC: u64 = !0x0123456789abcdef;
+            const MAGIC: u64 = !0x0123_4567_89ab_cdef;
             let ptr = io_uring_ptr::new(MAGIC as usize as *mut c_void);
             assert_eq!(ptr.ptr, MAGIC as usize as *mut c_void);
             #[cfg(target_pointer_width = "16")]
@@ -1730,7 +1732,7 @@ mod tests {
         // Test that `u64`s and pointers are properly stored in
         // io_uring_user_data`.
         unsafe {
-            const MAGIC: u64 = !0x0123456789abcdef;
+            const MAGIC: u64 = !0x0123_4567_89ab_cdef;
             let user_data = io_uring_user_data::from_u64(MAGIC);
             assert_eq!(user_data.u64_(), MAGIC);
             assert_eq!(

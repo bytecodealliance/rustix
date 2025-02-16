@@ -45,7 +45,7 @@ fn register_ring(fd: BorrowedFd<'_>) -> Result<BorrowedFd<'_>> {
         fd,
         false,
         IoringRegisterOp::RegisterRingFds,
-        (&update) as *const io_uring_rsrc_update as *const c_void,
+        (&update as *const io_uring_rsrc_update).cast::<c_void>(),
         1,
     )?;
 
@@ -67,7 +67,7 @@ where
         fd,
         true,
         IoringRegisterOp::UnregisterRingFds,
-        (&update) as *const io_uring_rsrc_update as *const c_void,
+        (&update as *const io_uring_rsrc_update).cast::<c_void>(),
         1,
     )?;
 
@@ -85,7 +85,7 @@ where
         fd,
         true,
         IoringRegisterOp::RegisterIowqMaxWorkers,
-        (&iowq_max_workers) as *const [u32; 2] as *const c_void,
+        (&iowq_max_workers as *const [u32; 2]).cast::<c_void>(),
         2,
     )?;
 
@@ -100,7 +100,7 @@ where
         fd,
         false,
         IoringRegisterOp::RegisterPbufRing,
-        reg as *const io_uring_buf_reg as *const c_void,
+        (reg as *const io_uring_buf_reg).cast::<c_void>(),
         1,
     )
 }
@@ -153,7 +153,8 @@ fn io_uring_buf_ring_can_be_registered() {
             MapFlags::PRIVATE,
         )
     }
-    .unwrap() as *mut io_uring_buf_ring;
+    .unwrap()
+    .cast::<io_uring_buf_ring>();
 
     let br = unsafe { br_ptr.as_mut() }.expect("A valid io_uring_buf_ring struct");
 

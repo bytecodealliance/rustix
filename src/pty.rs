@@ -24,7 +24,7 @@ use crate::{backend, io};
 use {crate::ffi::CString, alloc::vec::Vec};
 
 #[cfg(target_os = "linux")]
-use crate::{fd::FromRawFd, ioctl};
+use crate::{fd::FromRawFd as _, ioctl};
 
 bitflags::bitflags! {
     /// `O_*` flags for use with [`openpt`] and [`ioctl_tiocgptpeer`].

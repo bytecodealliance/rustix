@@ -4,7 +4,7 @@ fn test_seals() {
         fcntl_add_seals, fcntl_get_seals, ftruncate, memfd_create, MemfdFlags, SealFlags,
     };
     use std::fs::File;
-    use std::io::Write;
+    use std::io::Write as _;
 
     let fd = match memfd_create("test", MemfdFlags::CLOEXEC | MemfdFlags::ALLOW_SEALING) {
         Ok(fd) => fd,

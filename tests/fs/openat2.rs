@@ -1,4 +1,4 @@
-use rustix::fd::{AsFd, AsRawFd, OwnedFd};
+use rustix::fd::{AsFd, AsRawFd as _, OwnedFd};
 use rustix::fs::{mkdirat, openat, openat2, symlinkat, Mode, OFlags, ResolveFlags, CWD};
 use rustix::{io, path};
 

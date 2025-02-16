@@ -27,7 +27,7 @@ pub(crate) struct SocketAddrBuf {
 impl SocketAddrBuf {
     #[inline]
     pub(crate) fn new() -> Self {
-        SocketAddrBuf {
+        Self {
             len: size_of::<SocketAddrStorage>() as c::socklen_t,
             storage: MaybeUninit::<SocketAddrStorage>::uninit(),
         }
@@ -143,8 +143,8 @@ impl SocketAddrAny {
     }
 }
 
-impl PartialEq<SocketAddrAny> for SocketAddrAny {
-    fn eq(&self, other: &SocketAddrAny) -> bool {
+impl PartialEq<Self> for SocketAddrAny {
+    fn eq(&self, other: &Self) -> bool {
         self.bytes() == other.bytes()
     }
 }
@@ -153,14 +153,14 @@ impl Eq for SocketAddrAny {}
 
 // This just forwards to another `partial_cmp`.
 #[allow(clippy::non_canonical_partial_ord_impl)]
-impl PartialOrd<SocketAddrAny> for SocketAddrAny {
-    fn partial_cmp(&self, other: &SocketAddrAny) -> Option<core::cmp::Ordering> {
+impl PartialOrd<Self> for SocketAddrAny {
+    fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
         self.bytes().partial_cmp(other.bytes())
     }
 }
 
 impl Ord for SocketAddrAny {
-    fn cmp(&self, other: &SocketAddrAny) -> core::cmp::Ordering {
+    fn cmp(&self, other: &Self) -> core::cmp::Ordering {
         self.bytes().cmp(other.bytes())
     }
 }
