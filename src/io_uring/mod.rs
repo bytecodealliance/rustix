@@ -27,12 +27,13 @@
 mod bindgen_types;
 
 use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
+use crate::utils::option_as_ptr;
 use crate::{backend, io};
 use bindgen_types::*;
 use core::cmp::Ordering;
 use core::ffi::c_void;
 use core::hash::{Hash, Hasher};
-use core::mem::MaybeUninit;
+use core::mem::{size_of, MaybeUninit};
 use core::ptr::{null_mut, write_bytes};
 use linux_raw_sys::net;
 
@@ -47,12 +48,12 @@ pub use crate::fs::{
 };
 pub use crate::io::ReadWriteFlags;
 pub use crate::net::{RecvFlags, SendFlags, SocketFlags};
+pub use crate::sigset::SigSet;
 pub use crate::thread::futex::{
     Wait as FutexWait, WaitFlags as FutexWaitFlags, WaitPtr as FutexWaitPtr,
     WaitvFlags as FutexWaitvFlags,
 };
 pub use crate::timespec::{Nsecs, Secs, Timespec};
-pub use linux_raw_sys::general::sigset_t;
 
 pub use net::{__kernel_sockaddr_storage as sockaddr_storage, msghdr, sockaddr, socklen_t};
 
@@ -123,8 +124,8 @@ pub unsafe fn io_uring_register_with<Fd: AsFd>(
     backend::io_uring::syscalls::io_uring_register_with(fd.as_fd(), opcode, flags, arg, nr_args)
 }
 
-/// `io_uring_enter(fd, to_submit, min_complete, flags, arg, size)`—Initiate
-/// and/or complete asynchronous I/O.
+/// `io_uring_enter2(fd, to_submit, min_complete, flags, arg,
+/// size_of_val(arg))`—Initiate and/or complete asynchronous I/O.
 ///
 /// # Safety
 ///
@@ -132,26 +133,39 @@ pub unsafe fn io_uring_register_with<Fd: AsFd>(
 /// responsible for ensuring that memory and resources are only accessed in
 /// valid ways.
 ///
+/// And, `arg` must either be a [`SigSet`] or a [`io_uring_getevents_arg`], and
+/// `flags` must contain [`IoringEnterFlags::EXT_ARG`] if and only if it's a
+/// `io_uring_getevents_arg`.
+///
 /// # References
 ///  - [Linux]
 ///
 /// [Linux]: https://www.man7.org/linux/man-pages/man2/io_uring_enter.2.html
+#[doc(alias = "io_uring_enter2")]
 #[inline]
-pub unsafe fn io_uring_enter<Fd: AsFd>(
+pub unsafe fn io_uring_enter<Fd: AsFd, T>(
     fd: Fd,
     to_submit: u32,
     min_complete: u32,
     flags: IoringEnterFlags,
-    arg: *const c_void,
-    size: usize,
+    arg: Option<&T>,
 ) -> io::Result<u32> {
+    debug_assert!(
+        size_of::<T>() == size_of::<SigSet>()
+            || size_of::<T>() == size_of::<io_uring_getevents_arg>()
+    );
+    debug_assert!(
+        (size_of::<T>() == size_of::<io_uring_getevents_arg>())
+            == (flags.contains(IoringEnterFlags::EXT_ARG))
+    );
+
     backend::io_uring::syscalls::io_uring_enter(
         fd.as_fd(),
         to_submit,
         min_complete,
         flags,
-        arg,
-        size,
+        option_as_ptr(arg).cast::<c_void>(),
+        size_of::<T>(),
     )
 }
 

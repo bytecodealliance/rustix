@@ -55,47 +55,128 @@ use backend::fd::AsFd;
 use core::ffi::c_void;
 
 #[cfg(linux_raw)]
-pub use crate::signal::Signal;
+pub use crate::{kernel_sigset::KernelSigSet, signal::Signal, sigset::SigSet};
 
-/// `sigaction`
+/// `kernel_sigaction`
 ///
-/// If we want to expose this in public APIs, we should encapsulate the
-/// `linux_raw_sys` type.
+/// On some architectures, the `sa_restorer` field is omitted.
+///
+/// This type does not have the same layout as `libc::sigaction`.
 #[cfg(linux_raw)]
-pub use linux_raw_sys::general::kernel_sigaction as KernelSigaction;
+#[derive(Debug, Default, Clone)]
+#[repr(C)]
+pub struct KernelSigaction {
+    pub sa_handler_kernel: KernelSighandler,
+    pub sa_flags: KernelSigactionFlags,
+    #[cfg(not(any(
+        target_arch = "csky",
+        target_arch = "loongarch64",
+        target_arch = "mips",
+        target_arch = "mips32r6",
+        target_arch = "mips64",
+        target_arch = "mips64r6",
+        target_arch = "riscv32",
+        target_arch = "riscv64"
+    )))]
+    pub sa_restorer: KernelSigrestore,
+    pub sa_mask: KernelSigSet,
+}
+
+bitflags::bitflags! {
+    /// Flags for use with [`KernelSigaction`].
+    ///
+    /// This type does not have the same layout as `sa_flags` field in
+    /// `libc::sigaction`, however the flags have the same values as their
+    /// libc counterparts.
+    #[repr(transparent)]
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Default)]
+    pub struct KernelSigactionFlags: crate::ffi::c_ulong {
+        /// `SA_NOCLDSTOP`
+        const NOCLDSTOP = linux_raw_sys::general::SA_NOCLDSTOP as _;
+
+        /// `SA_NOCLDWAIT` (since Linux 2.6)
+        const NOCLDWAIT = linux_raw_sys::general::SA_NOCLDWAIT as _;
+
+        /// `SA_NODEFER`
+        const NODEFER = linux_raw_sys::general::SA_NODEFER as _;
+
+        /// `SA_ONSTACK`
+        const ONSTACK = linux_raw_sys::general::SA_ONSTACK as _;
+
+        /// `SA_RESETHAND`
+        const RESETHAND = linux_raw_sys::general::SA_RESETHAND as _;
+
+        /// `SA_RESTART`
+        const RESTART = linux_raw_sys::general::SA_RESTART as _;
+
+        /// `SA_RESTORER`
+        #[cfg(not(any(
+            target_arch = "csky",
+            target_arch = "loongarch64",
+            target_arch = "mips",
+            target_arch = "mips32r6",
+            target_arch = "mips64",
+            target_arch = "mips64r6",
+            target_arch = "riscv32",
+            target_arch = "riscv64"
+        )))]
+        const RESTORER = linux_raw_sys::general::SA_RESTORER as _;
+
+        /// `SA_SIGINFO` (since Linux 2.2)
+        const SIGINFO = linux_raw_sys::general::SA_SIGINFO as _;
+
+        /// `SA_UNSUPPORTED` (since Linux 5.11)
+        const UNSUPPORTED = linux_raw_sys::general::SA_UNSUPPORTED as _;
+
+        /// `SA_EXPOSE_TAGBITS` (since Linux 5.11)
+        const EXPOSE_TAGBITS = linux_raw_sys::general::SA_EXPOSE_TAGBITS as _;
+
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
+        const _ = !0;
+    }
+}
+
+/// `__sigrestore_t`
+///
+/// This type differs from `libc::sigrestore_t`, but can be transmuted to it.
+pub type KernelSigrestore = Option<unsafe extern "C" fn()>;
+
+/// `__kernel_sighandler_t`
+///
+/// This type differs from `libc::sighandler_t`, but can be transmuted to it.
+pub type KernelSighandler = Option<unsafe extern "C" fn(arg1: crate::ffi::c_int)>;
+
+/// Return a special “ignore” signal handler for ignoring signals.
+///
+/// This isn't the `SIG_IGN` value itself; it's a function that returns the
+/// `SIG_IGN` value.
+///
+/// If you're looking for `kernel_sig_dfl`; use [`KERNEL_SIG_DFL`].
+#[doc(alias = "SIG_IGN")]
+#[must_use]
+pub const fn kernel_sig_ign() -> KernelSighandler {
+    linux_raw_sys::signal_macros::sig_ign()
+}
+
+/// A special “default” signal handler representing the default behavior
+/// for handling a signal.
+///
+/// If you're looking for `KERNEL_SIG_IGN`; use [`kernel_sig_ign`].
+#[doc(alias = "SIG_DFL")]
+pub const KERNEL_SIG_DFL: KernelSighandler = linux_raw_sys::signal_macros::SIG_DFL;
 
 /// `stack_t`
+///
+/// This type is guaranteed to have the same layout as `libc::stack_t`.
 ///
 /// If we want to expose this in public APIs, we should encapsulate the
 /// `linux_raw_sys` type.
 #[cfg(linux_raw)]
 pub use linux_raw_sys::general::stack_t as Stack;
 
-/// `sigset_t`
-///
-/// Undefined behavior could happen in some functions if `SigSet` ever
-/// contains signal numbers in the range from `KERNEL_SIGRTMIN` to the libc
-/// `SIGRTMIN`. Unless you are implementing the libc. Which you may indeed be
-/// doing, if you're reading this.
-///
-/// If we want to expose this in public APIs, we should encapsulate the
-/// `linux_raw_sys` type.
-#[cfg(linux_raw)]
-pub use linux_raw_sys::general::sigset_t as SigSet;
-
-/// `kernel_sigset_t`
-///
-/// Undefined behavior could happen in some functions if `KernelSigSet` ever
-/// contains signal numbers in the range from `KERNEL_SIGRTMIN` to the libc
-/// `SIGRTMIN`. Unless you are implementing the libc. Which you may indeed be
-/// doing, if you're reading this.
-///
-/// If we want to expose this in public APIs, we should encapsulate the
-/// `linux_raw_sys` type.
-#[cfg(linux_raw)]
-pub use linux_raw_sys::general::kernel_sigset_t as KernelSigSet;
-
 /// `siginfo_t`
+///
+/// This type is guaranteed to have the same layout as `libc::siginfo_t`.
 ///
 /// If we want to expose this in public APIs, we should encapsulate the
 /// `linux_raw_sys` type.
@@ -478,6 +559,10 @@ pub unsafe fn tkill(tid: Pid, sig: Signal) -> io::Result<()> {
 
 /// `rt_sigprocmask(how, set, oldset)`—Adjust the process signal mask.
 ///
+/// This uses `KernelSigSet` instead of `SigSet` because the Linux
+/// documentation says says the size "is currently required to have a fixed
+/// architecture specific value (equal to `sizeof(kernel_sigset_t)`)".
+///
 /// # Safety
 ///
 /// You're on your own. And on top of all the troubles with signal handlers,
@@ -622,8 +707,6 @@ pub unsafe fn kernel_brk(addr: *mut c_void) -> io::Result<*mut c_void> {
 /// `SIGRTMIN` macro provided by libc. Don't use this unless you know your code
 /// won't share a process with a libc (perhaps because you yourself are
 /// implementing a libc).
-///
-/// See [`sigrt`] for a convenient way to construct `KERNEL_SIGRTMIN + n` values.
 #[cfg(linux_raw)]
 pub const KERNEL_SIGRTMIN: i32 = linux_raw_sys::general::SIGRTMIN as i32;
 
@@ -647,6 +730,19 @@ pub const KERNEL_SIGRTMAX: i32 = {
     }
 
     // On platforms that don't, derive it from `_NSIG`.
+    //
+    // In the Linux kernel headers, `_NSIG` refers to the number of signals
+    // known to the kernel. It's 64 on most architectures.
+    //
+    // In libc headers, `_NSIG` refers to the exclusive upper bound of the
+    // signals known to the kernel. It's 65 on most architectures.
+    //
+    // This discrepancy arises because a signal value of 0 is used as a
+    // sentinel, and the first `sigset_t` bit is signal 1 instead of 0. The
+    // Linux kernel headers and libc headers disagree on the interpretation of
+    // `_NSIG` as a result.
+    //
+    // Here, we use the Linux kernel header value.
     #[cfg(any(
         target_arch = "arm",
         target_arch = "s390x",
@@ -654,27 +750,139 @@ pub const KERNEL_SIGRTMAX: i32 = {
         target_arch = "x86_64",
     ))]
     {
-        linux_raw_sys::general::_NSIG as i32 - 1
+        linux_raw_sys::general::_NSIG as i32
     }
 };
 
-/// Return a [`Signal`] corresponding to `KERNEL_SIGRTMIN + n`.
-///
-/// This is similar to [`Signal::rt`], but uses the `KERNEL_SIGRTMIN` value
-/// instead of the libc `SIGRTMIN` value. Don't use this unless you know your
-/// code won't share a process with a libc (perhaps because you yourself are
-/// implementing a libc).
-#[cfg(linux_raw)]
-#[doc(alias = "SIGRTMIN")]
-pub const fn kernel_sigrt(n: i32) -> Option<Signal> {
-    let sig = KERNEL_SIGRTMIN.wrapping_add(n);
-    if sig >= KERNEL_SIGRTMIN && sig <= KERNEL_SIGRTMAX {
-        // SAFETY: We've checked that `sig` is in the expected range. It could
-        // still conflict with libc's reserved values, however users of the
-        // `runtime` module here must already know that there's no other libc
-        // to conflict with.
-        Some(unsafe { Signal::from_raw_unchecked(sig) })
-    } else {
-        None
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_assumptions() {
+        assert!(libc::SIGSYS < KERNEL_SIGRTMIN);
+        assert!(KERNEL_SIGRTMIN <= libc::SIGRTMIN());
+
+        // POSIX guarantees at least 8 RT signals.
+        assert!(libc::SIGRTMIN() + 8 <= KERNEL_SIGRTMAX);
+
+        // POSIX guarantees at least 8 RT signals, and it's not uncommon for
+        // libc implementations to reserve up to 3 for their own purposes.
+        assert!(KERNEL_SIGRTMIN + 8 + 3 <= KERNEL_SIGRTMAX);
+
+        assert!(KERNEL_SIGRTMAX <= libc::SIGRTMAX());
+        assert!(libc::SIGRTMAX() as u32 <= linux_raw_sys::general::_NSIG);
+
+        assert!(KERNEL_SIGRTMAX as usize - 1 < core::mem::size_of::<KernelSigSet>() * 8);
+        assert!(core::mem::size_of::<KernelSigSet>() <= core::mem::size_of::<SigSet>());
+    }
+
+    #[test]
+    fn test_layouts_matching_libc() {
+        use linux_raw_sys::general::siginfo__bindgen_ty_1__bindgen_ty_1;
+
+        // c-scape assumes rustix's `Siginfo` matches libc's. We don't use
+        // check_types macros because we want to test compatibility with actual
+        // libc, not the `crate::backend::c` which might be our own
+        // implementation.
+        assert_eq_size!(Siginfo, libc::siginfo_t);
+        assert_eq_align!(Siginfo, libc::siginfo_t);
+        assert_eq!(
+            memoffset::span_of!(Siginfo, ..),
+            memoffset::span_of!(Siginfo, __bindgen_anon_1)
+        );
+        assert_eq!(
+            memoffset::span_of!(siginfo__bindgen_ty_1__bindgen_ty_1, si_signo),
+            memoffset::span_of!(libc::siginfo_t, si_signo)
+        );
+        assert_eq!(
+            memoffset::span_of!(siginfo__bindgen_ty_1__bindgen_ty_1, si_errno),
+            memoffset::span_of!(libc::siginfo_t, si_errno)
+        );
+        assert_eq!(
+            memoffset::span_of!(siginfo__bindgen_ty_1__bindgen_ty_1, si_code),
+            memoffset::span_of!(libc::siginfo_t, si_code)
+        );
+
+        // c-scape assuemes rustix's `Stack` matches libc's. Similar to above.
+        assert_eq_size!(Stack, libc::stack_t);
+        assert_eq_align!(Stack, libc::stack_t);
+        assert_eq!(
+            memoffset::span_of!(Stack, ss_sp),
+            memoffset::span_of!(libc::stack_t, ss_sp)
+        );
+        assert_eq!(
+            memoffset::span_of!(Stack, ss_flags),
+            memoffset::span_of!(libc::stack_t, ss_flags)
+        );
+        assert_eq!(
+            memoffset::span_of!(Stack, ss_size),
+            memoffset::span_of!(libc::stack_t, ss_size)
+        );
+    }
+
+    #[test]
+    fn test_layouts_matching_kernel() {
+        use linux_raw_sys::general as c;
+
+        // Rustix's versions of these must match the kernel's versions.
+        // Some architectures have `sa_restorer`.
+        #[cfg(not(any(
+            target_arch = "csky",
+            target_arch = "loongarch64",
+            target_arch = "mips",
+            target_arch = "mips32r6",
+            target_arch = "mips64",
+            target_arch = "mips64r6",
+            target_arch = "riscv32",
+            target_arch = "riscv64"
+        )))]
+        check_renamed_struct!(
+            KernelSigaction,
+            kernel_sigaction,
+            sa_handler_kernel,
+            sa_flags,
+            sa_restorer,
+            sa_mask
+        );
+        // Some architectures omit `sa_restorer`.
+        #[cfg(any(
+            target_arch = "csky",
+            target_arch = "loongarch64",
+            target_arch = "mips",
+            target_arch = "mips32r6",
+            target_arch = "mips64",
+            target_arch = "mips64r6",
+            target_arch = "riscv32",
+            target_arch = "riscv64"
+        ))]
+        check_renamed_struct!(
+            KernelSigaction,
+            kernel_sigaction,
+            sa_handler_kernel,
+            sa_flags,
+            sa_mask
+        );
+        assert_eq_size!(KernelSigactionFlags, core::ffi::c_ulong);
+        assert_eq_align!(KernelSigactionFlags, core::ffi::c_ulong);
+        check_renamed_type!(KernelSigrestore, __sigrestore_t);
+        check_renamed_type!(KernelSighandler, __kernel_sighandler_t);
+
+        assert_eq!(
+            libc::SA_NOCLDSTOP,
+            KernelSigactionFlags::NOCLDSTOP.bits() as _
+        );
+        assert_eq!(
+            libc::SA_NOCLDWAIT,
+            KernelSigactionFlags::NOCLDWAIT.bits() as _
+        );
+        assert_eq!(libc::SA_NODEFER, KernelSigactionFlags::NODEFER.bits() as _);
+        assert_eq!(libc::SA_ONSTACK, KernelSigactionFlags::ONSTACK.bits() as _);
+        assert_eq!(
+            libc::SA_RESETHAND,
+            KernelSigactionFlags::RESETHAND.bits() as _
+        );
+        assert_eq!(libc::SA_RESTART, KernelSigactionFlags::RESTART.bits() as _);
+        assert_eq!(libc::SA_SIGINFO, KernelSigactionFlags::SIGINFO.bits() as _);
     }
 }

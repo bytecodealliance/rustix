@@ -12,22 +12,32 @@
 #![allow(unsafe_code)]
 
 use crate::backend::c;
+use core::fmt;
 use core::num::NonZeroI32;
 
 /// A signal number for use with [`kill_process`], [`kill_process_group`], and
 /// [`kill_current_process_group`].
 ///
+/// For additional constructors such as [`Signal::rt_min`]
+/// (aka `libc::SIGRTMIN`), [`Signal::rt_max`] (aka `libc::SIGRTMAX`),
+/// [`Signal::rt`] (aka `libc::SIGRTMIN() + n`), [`Signal::from_raw`], and
+/// [`Signal::from_raw_nonzero`], see [rustix-libc-wrappers].
+///
 /// [`kill_process`]: crate::process::kill_process
 /// [`kill_process_group`]: crate::process::kill_process_group
 /// [`kill_current_process_group`]: crate::process::kill_current_process_group
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+/// [`Signal::rt_min`]: https://docs.rs/rustix-libc-wrappers/*/rustix_libc_wrappers/trait.SignalExt.html#tymethod.rt_min
+/// [`Signal::rt_max`]: https://docs.rs/rustix-libc-wrappers/*/rustix_libc_wrappers/trait.SignalExt.html#tymethod.rt_max
+/// [`Signal::rt`]: https://docs.rs/rustix-libc-wrappers/*/rustix_libc_wrappers/trait.SignalExt.html#tymethod.rt
+/// [`Signal::from_raw`]: https://docs.rs/rustix-libc-wrappers/*/rustix_libc_wrappers/trait.SignalExt.html#tymethod.from_raw
+/// [`Signal::from_raw_nonzero`]: https://docs.rs/rustix-libc-wrappers/*/rustix_libc_wrappers/trait.SignalExt.html#tymethod.from_raw_nonzero
+/// [rustix-libc-wrappers]: https://docs.rs/rustix-libc-wrappers
+#[doc(alias = "SIGRTMIN")]
+#[doc(alias = "SIGRTMAX")]
+#[derive(Copy, Clone, Eq, PartialEq)]
 #[repr(transparent)]
 pub struct Signal(NonZeroI32);
 
-/// Signal constants.
-///
-/// To construct `SIGRTMIN + n` “real-time” signal values, use
-/// [`Signal::rt`].
 // SAFETY: The libc-defined signal values are all non-zero.
 #[rustfmt::skip]
 impl Signal {
@@ -183,100 +193,73 @@ impl Signal {
         self.0
     }
 
-    /// `SIGRTMIN + n`—Convert a “real-time” signal offset into a `Signal`.
+    /// Convert a raw signal number into a `Signal` without checks.
     ///
-    /// This function adds `n` to `rt_min()` to construct the raw signal value.
-    /// If the result is greater than `rt_max()`, it returns `None`. This
-    /// prevents it from returning `Signal` values which would be reserved by
-    /// the libc for internal use.
-    #[doc(alias = "SIGRTMIN", alias = "SIGRTMAX")]
-    #[cfg(feature = "use-libc-sigrt")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "use-libc-sigrt")))]
-    #[cfg(any(linux_like, solarish, target_os = "hurd"))]
-    pub fn rt(n: i32) -> Option<Self> {
-        let min = libc_sigrt_min();
-        let sig = min.wrapping_add(n);
-        if sig >= min && sig <= libc_sigrt_max() {
-            // SAFETY: Values at least `SIGRTMIN` will never be zero.
-            let sig = unsafe { NonZeroI32::new_unchecked(sig) };
-            Some(Self(sig))
-        } else {
-            None
-        }
+    /// For a safe checked version, see [`Signal::from_raw`] in
+    /// [rustix-libc-wrappers].
+    ///
+    /// # Safety
+    ///
+    /// `sig` must be a valid and non-zero signal number.
+    ///
+    /// And, if `sig` is a signal number reserved by the libc, such as a value
+    /// from the libc [`SIGRTMIN`] to the libc [`SIGRTMAX`], inclusive, then
+    /// the resulting `Signal` must not be used to send, consume, or block any
+    /// signals or alter any signal handlers.
+    ///
+    /// [`Signal::from_raw`]: https://docs.rs/rustix-libc-wrappers/*/rustix_libc_wrappers/trait.SignalExt.html#tymethod.from_raw
+    /// [rustix-libc-wrappers]: https://docs.rs/rustix-libc-wrappers
+    /// [`SIGRTMIN`]: https://docs.rs/libc/*/libc/fn.SIGRTMIN.html
+    /// [`SIGRTMAX`]: https://docs.rs/libc/*/libc/fn.SIGRTMAX.html
+    #[inline]
+    pub const unsafe fn from_raw_unchecked(sig: i32) -> Self {
+        Self::from_raw_nonzero_unchecked(NonZeroI32::new_unchecked(sig))
     }
 
-    /// `SIGRTMIN`—Return the minimum “real-time” signal value.
+    /// Convert a raw non-zero signal number into a `Signal` without checks.
     ///
-    /// This returns the libc `SIGRTMIN` value, which may be different from the
-    /// OS kernel `SIGRTMIN` value to allow libc to reserve some signals for
-    /// internal use.
+    /// For a safe checked version, see [`Signal::from_raw_nonzero`] in
+    /// [rustix-libc-wrappers].
     ///
-    /// Use [`Signal::rt`] to construct `SIGRTMIN + n` values.
-    #[doc(alias = "SIGRTMIN")]
-    #[cfg(feature = "use-libc-sigrt")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "use-libc-sigrt")))]
-    #[cfg(any(linux_like, solarish, target_os = "hurd"))]
-    pub fn rt_min() -> Self {
-        // SAFETY: The libc is telling us this is the value it wants us to use.
-        unsafe { Self::from_raw_unchecked(libc_sigrt_min()) }
+    /// # Safety
+    ///
+    /// `sig` must be a valid signal number.
+    ///
+    /// And, if `sig` is a signal number reserved by the libc, such as a value
+    /// from [`SIGRTMIN`] to [`SIGRTMAX`] inclusive, then the resulting
+    /// `Signal` must not be used to send, consume, or block any signals or
+    /// alter any signal handlers.
+    ///
+    /// [`Signal::from_raw_nonzero`]: https://docs.rs/rustix-libc-wrappers/*/rustix_libc_wrappers/trait.SignalExt.html#tymethod.from_raw_nonzero
+    /// [rustix-libc-wrappers]: https://docs.rs/rustix-libc-wrappers
+    /// [`SIGRTMIN`]: https://docs.rs/libc/*/libc/fn.SIGRTMIN.html
+    /// [`SIGRTMAX`]: https://docs.rs/libc/*/libc/fn.SIGRTMAX.html
+    #[inline]
+    pub const unsafe fn from_raw_nonzero_unchecked(sig: NonZeroI32) -> Self {
+        Self(sig)
     }
+}
 
-    /// `SIGRTMAX`—Return the maximum “real-time” signal value.
-    ///
-    /// This returns the libc `SIGRTMAX` value, which may be different from the
-    /// OS kernel `SIGRTMAX` value to allow libc to reserve some signals for
-    /// internal use.
-    #[doc(alias = "SIGRTMAX")]
-    #[cfg(feature = "use-libc-sigrt")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "use-libc-sigrt")))]
-    #[cfg(any(linux_like, solarish, target_os = "hurd"))]
-    pub fn rt_max() -> Self {
-        // SAFETY: The libc is telling us this is the value it wants us to use.
-        unsafe { Self::from_raw_unchecked(libc_sigrt_max()) }
-    }
-
-    /// Convert a raw signal number into a `Signal`.
-    ///
-    /// Returns `None` if the signal value is unrecognized, out of range, or
-    /// reserved for libc.
-    #[cfg(feature = "use-libc-sigrt")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "use-libc-sigrt")))]
-    #[cfg(any(linux_like, solarish, target_os = "hurd"))]
-    pub fn from_raw(sig: i32) -> Option<Self> {
-        if let Some(non_zero) = NonZeroI32::new(sig) {
-            Self::from_raw_nonzero(non_zero)
-        } else {
-            None
-        }
-    }
-
-    /// Convert a raw non-zero signal number into a `Signal`.
-    ///
-    /// Returns `None` if the signal value is unrecognized, out of range, or
-    /// reserved for libc.
-    #[cfg(feature = "use-libc-sigrt")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "use-libc-sigrt")))]
-    #[cfg(any(linux_like, solarish, target_os = "hurd"))]
-    pub fn from_raw_nonzero(non_zero: NonZeroI32) -> Option<Self> {
-        let sig = non_zero.get();
-        match sig {
-            c::SIGHUP => Some(Self::HUP),
-            c::SIGINT => Some(Self::INT),
-            c::SIGQUIT => Some(Self::QUIT),
-            c::SIGILL => Some(Self::ILL),
-            c::SIGTRAP => Some(Self::TRAP),
-            c::SIGABRT => Some(Self::ABORT),
-            c::SIGBUS => Some(Self::BUS),
-            c::SIGFPE => Some(Self::FPE),
-            c::SIGKILL => Some(Self::KILL),
+impl fmt::Debug for Signal {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match *self {
+            Self::HUP => "Signal::HUP".fmt(f),
+            Self::INT => "Signal::INT".fmt(f),
+            Self::QUIT => "Signal::QUIT".fmt(f),
+            Self::ILL => "Signal::ILL".fmt(f),
+            Self::TRAP => "Signal::TRAP".fmt(f),
+            Self::ABORT => "Signal::ABORT".fmt(f),
+            Self::BUS => "Signal::BUS".fmt(f),
+            Self::FPE => "Signal::FPE".fmt(f),
+            Self::KILL => "Signal::KILL".fmt(f),
             #[cfg(not(target_os = "vita"))]
-            c::SIGUSR1 => Some(Self::USR1),
-            c::SIGSEGV => Some(Self::SEGV),
+            Self::USR1 => "Signal::USR1".fmt(f),
+            Self::SEGV => "Signal::SEGV".fmt(f),
             #[cfg(not(target_os = "vita"))]
-            c::SIGUSR2 => Some(Self::USR2),
-            c::SIGPIPE => Some(Self::PIPE),
-            c::SIGALRM => Some(Self::ALARM),
-            c::SIGTERM => Some(Self::TERM),
+            Self::USR2 => "Signal::USR2".fmt(f),
+            Self::PIPE => "Signal::PIPE".fmt(f),
+            Self::ALARM => "Signal::ALARM".fmt(f),
+            Self::TERM => "Signal::TERM".fmt(f),
             #[cfg(not(any(
                 bsd,
                 solarish,
@@ -297,36 +280,36 @@ impl Signal {
                     ),
                 )
             )))]
-            c::SIGSTKFLT => Some(Self::STKFLT),
+            Self::STKFLT => "Signal::STKFLT".fmt(f),
             #[cfg(not(target_os = "vita"))]
-            c::SIGCHLD => Some(Self::CHILD),
+            Self::CHILD => "Signal::CHILD".fmt(f),
             #[cfg(not(target_os = "vita"))]
-            c::SIGCONT => Some(Self::CONT),
+            Self::CONT => "Signal::CONT".fmt(f),
             #[cfg(not(target_os = "vita"))]
-            c::SIGSTOP => Some(Self::STOP),
+            Self::STOP => "Signal::STOP".fmt(f),
             #[cfg(not(target_os = "vita"))]
-            c::SIGTSTP => Some(Self::TSTP),
+            Self::TSTP => "Signal::TSTP".fmt(f),
             #[cfg(not(target_os = "vita"))]
-            c::SIGTTIN => Some(Self::TTIN),
+            Self::TTIN => "Signal::TTIN".fmt(f),
             #[cfg(not(target_os = "vita"))]
-            c::SIGTTOU => Some(Self::TTOU),
+            Self::TTOU => "Signal::TTOU".fmt(f),
             #[cfg(not(target_os = "vita"))]
-            c::SIGURG => Some(Self::URG),
+            Self::URG => "Signal::URG".fmt(f),
             #[cfg(not(target_os = "vita"))]
-            c::SIGXCPU => Some(Self::XCPU),
+            Self::XCPU => "Signal::XCPU".fmt(f),
             #[cfg(not(target_os = "vita"))]
-            c::SIGXFSZ => Some(Self::XFSZ),
+            Self::XFSZ => "Signal::XFSZ".fmt(f),
             #[cfg(not(target_os = "vita"))]
-            c::SIGVTALRM => Some(Self::VTALARM),
+            Self::VTALARM => "Signal::VTALARM".fmt(f),
             #[cfg(not(target_os = "vita"))]
-            c::SIGPROF => Some(Self::PROF),
+            Self::PROF => "Signal::PROF".fmt(f),
             #[cfg(not(target_os = "vita"))]
-            c::SIGWINCH => Some(Self::WINCH),
+            Self::WINCH => "Signal::WINCH".fmt(f),
             #[cfg(not(any(target_os = "haiku", target_os = "vita")))]
-            c::SIGIO => Some(Self::IO),
+            Self::IO => "Signal::IO".fmt(f),
             #[cfg(not(any(bsd, target_os = "haiku", target_os = "hurd", target_os = "vita")))]
-            c::SIGPWR => Some(Self::POWER),
-            c::SIGSYS => Some(Self::SYS),
+            Self::POWER => "Signal::POWER".fmt(f),
+            Self::SYS => "Signal::SYS".fmt(f),
             #[cfg(any(
                 bsd,
                 solarish,
@@ -344,100 +327,20 @@ impl Signal {
                     )
                 )
             ))]
-            c::SIGEMT => Some(Self::EMT),
+            Self::EMT => "Signal::EMT".fmt(f),
             #[cfg(bsd)]
-            c::SIGINFO => Some(Self::INFO),
+            Self::INFO => "Signal::INFO".fmt(f),
             #[cfg(target_os = "freebsd")]
-            c::SIGTHR => Some(Self::THR),
+            Self::THR => "Signal::THR".fmt(f),
             #[cfg(target_os = "freebsd")]
-            c::SIGLIBRT => Some(Self::LIBRT),
-            _ => {
-                if sig >= libc_sigrt_min() && sig <= libc_sigrt_max() {
-                    Some(Self(non_zero))
-                } else {
-                    None
-                }
+            Self::LIBRT => "Signal::LIBRT".fmt(f),
+
+            n => {
+                "Signal::from_raw(".fmt(f)?;
+                n.as_raw().fmt(f)?;
+                ")".fmt(f)
             }
         }
-    }
-
-    /// Convert a raw signal number into a `Signal` without checks.
-    ///
-    /// See [`Signal::from_raw`] to do this with checks.
-    ///
-    /// See [`Signal::from_raw_nonzero_unchecked`] if you already have a
-    /// `NonZeroI32`.
-    ///
-    /// # Safety
-    ///
-    /// `sig` must be a valid and non-zero signal number.
-    ///
-    /// And, if `sig` is a signal number reserved by the libc, such as a value
-    /// from [`SIGRTMIN`] to [`SIGRTMAX`] inclusive, then the resulting
-    /// `Signal` must not be used to send any signals.
-    ///
-    /// [`SIGRTMIN`]: https://docs.rs/libc/*/libc/fn.SIGRTMIN.html
-    /// [`SIGRTMAX`]: https://docs.rs/libc/*/libc/fn.SIGRTMAX.html
-    #[inline]
-    pub const unsafe fn from_raw_unchecked(sig: i32) -> Self {
-        Self::from_raw_nonzero_unchecked(NonZeroI32::new_unchecked(sig))
-    }
-
-    /// Convert a raw non-zero signal number into a `Signal` without checks.
-    ///
-    /// See [`Signal::from_raw`] to do this with checks.
-    ///
-    /// # Safety
-    ///
-    /// `sig` must be a valid signal number.
-    ///
-    /// And, if `sig` is a signal number reserved by the libc, such as a value
-    /// from [`SIGRTMIN`] to [`SIGRTMAX`] inclusive, then the resulting
-    /// `Signal` must not be used to send any signals.
-    ///
-    /// [`SIGRTMIN`]: https://docs.rs/libc/*/libc/fn.SIGRTMIN.html
-    /// [`SIGRTMAX`]: https://docs.rs/libc/*/libc/fn.SIGRTMAX.html
-    #[inline]
-    pub const unsafe fn from_raw_nonzero_unchecked(sig: NonZeroI32) -> Self {
-        Self(sig)
-    }
-}
-
-/// Return the libc `SIGRTMIN` value.
-#[cfg(any(linux_like, solarish, target_os = "hurd"))]
-#[cfg(feature = "use-libc-sigrt")]
-fn libc_sigrt_min() -> i32 {
-    // SAFETY: These are the ABI-compatible ways to obtain the `SIGRTMIN`
-    // value.
-    #[cfg(any(linux_like, target_os = "hurd"))]
-    unsafe {
-        extern "C" {
-            fn __libc_current_sigrtmin() -> crate::ffi::c_int;
-        }
-        __libc_current_sigrtmin()
-    }
-    #[cfg(solarish)]
-    unsafe {
-        libc::SIGRTMIN()
-    }
-}
-
-/// Return the libc `SIGRTMAX` value.
-#[cfg(any(linux_like, solarish, target_os = "hurd"))]
-#[cfg(feature = "use-libc-sigrt")]
-fn libc_sigrt_max() -> i32 {
-    // SAFETY: These are the ABI-compatible ways to obtain the `SIGRTMAX`
-    // value.
-    #[cfg(any(linux_like, target_os = "hurd"))]
-    unsafe {
-        extern "C" {
-            fn __libc_current_sigrtmax() -> crate::ffi::c_int;
-        }
-        __libc_current_sigrtmax()
-    }
-    #[cfg(solarish)]
-    unsafe {
-        libc::SIGRTMAX()
     }
 }
 
@@ -455,30 +358,5 @@ mod tests {
                 Signal::HUP
             );
         }
-    }
-
-    #[cfg(any(linux_like, solarish, target_os = "hurd"))]
-    #[cfg(feature = "use-libc-sigrt")]
-    #[test]
-    fn test_sigrt() {
-        assert_eq!(libc::SIGRTMIN(), Signal::rt_min().as_raw());
-        assert_eq!(libc::SIGRTMIN(), Signal::rt_min().as_raw_nonzero().get());
-        assert_eq!(libc::SIGRTMAX(), Signal::rt_max().as_raw());
-        assert_eq!(libc::SIGRTMAX(), Signal::rt_max().as_raw_nonzero().get());
-        assert_eq!(Signal::rt(0).unwrap(), Signal::rt_min());
-        // POSIX guarantees at least 8 values.
-        assert_ne!(Signal::rt(7).unwrap(), Signal::rt_min());
-        assert_ne!(Signal::rt(7).unwrap(), Signal::rt_max());
-        assert_eq!(Signal::rt(7).unwrap().as_raw(), libc::SIGRTMIN() + 7);
-        assert_eq!(
-            Signal::rt(7).unwrap().as_raw_nonzero().get(),
-            libc::SIGRTMIN() + 7
-        );
-        assert!(Signal::from_raw(0).is_none());
-        for raw in libc::SIGRTMIN()..=libc::SIGRTMAX() {
-            assert!(Signal::from_raw(raw).is_some());
-        }
-        assert!(Signal::from_raw(libc::SIGRTMIN() - 1).is_none());
-        assert!(Signal::from_raw(libc::SIGRTMAX() + 1).is_none());
     }
 }
