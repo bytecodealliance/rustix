@@ -1639,7 +1639,7 @@ pub mod xdp {
 
     // Constant needs to be cast because bindgen does generate a u32 but the struct
     // expects a u16.
-    // <https://github.com/torvalds/linux/blob/v6.6/include/uapi/linux/if_xdp.h#L15-L44>
+    // <https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/uapi/linux/if_xdp.h?h=v6.13#n15>
     bitflags! {
         /// `XDP_*` constants for use in [`SocketAddrXdp`].
         #[repr(transparent)]
@@ -1684,7 +1684,7 @@ pub mod xdp {
     /// Used to bind to XDP socket.
     ///
     /// Not ABI compatible with `struct sockaddr_xdp`
-    // <https://github.com/torvalds/linux/blob/v6.6/include/uapi/linux/if_xdp.h#L38-L44>
+    // <https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/uapi/linux/if_xdp.h?h=v6.13#n48>
     #[derive(Clone, PartialEq, PartialOrd, Eq, Ord, Hash, Debug)]
     pub struct SocketAddrXdp {
         /// Flags.
@@ -1803,7 +1803,7 @@ pub mod xdp {
     /// Used to mmap rings from kernel.
     ///
     /// Not ABI compatible with `struct xdp_ring_offset`.
-    // <https://github.com/torvalds/linux/blob/v6.6/include/uapi/linux/if_xdp.h#L49-L54>
+    // <https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/uapi/linux/if_xdp.h?h=v6.13#n59>
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct XdpRingOffset {
         /// Producer offset.
@@ -1821,7 +1821,7 @@ pub mod xdp {
     /// XDP mmap offsets.
     ///
     /// Not ABI compatible with `struct xdp_mmap_offsets`
-    // <https://github.com/torvalds/linux/blob/v6.6/include/uapi/linux/if_xdp.h#L56-L61>
+    // <https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/uapi/linux/if_xdp.h?h=v6.13#n66>
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct XdpMmapOffsets {
         /// Rx ring offsets.
@@ -1837,7 +1837,7 @@ pub mod xdp {
     /// XDP umem registration.
     ///
     /// `struct xdp_umem_reg`
-    // <https://github.com/torvalds/linux/blob/v6.8/include/uapi/linux/if_xdp.h#L79-L86>
+    // <https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/uapi/linux/if_xdp.h?h=v6.13#n79>
     #[repr(C)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct XdpUmemReg {
@@ -1862,7 +1862,7 @@ pub mod xdp {
     /// XDP statistics.
     ///
     /// Not ABI compatible with `struct xdp_statistics`
-    // <https://github.com/torvalds/linux/blob/v6.6/include/uapi/linux/if_xdp.h#L81-L88>
+    // <https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/uapi/linux/if_xdp.h?h=v6.13#n92>
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct XdpStatistics {
         /// Rx dropped.
@@ -1889,7 +1889,7 @@ pub mod xdp {
     ///
     /// Requires kernel version 5.3.
     /// `struct xdp_options`
-    // <https://github.com/torvalds/linux/blob/v6.6/include/uapi/linux/if_xdp.h#L90-L92>
+    // <https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/uapi/linux/if_xdp.h?h=v6.13#n101>
     #[repr(C)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct XdpOptions {
@@ -1900,7 +1900,7 @@ pub mod xdp {
     /// XDP rx/tx frame descriptor.
     ///
     /// `struct xdp_desc`
-    // <https://github.com/torvalds/linux/blob/v6.6/include/uapi/linux/if_xdp.h#L109-L113>
+    // <https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/uapi/linux/if_xdp.h?h=v6.13#n154>
     #[repr(C)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct XdpDesc {

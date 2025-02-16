@@ -180,8 +180,7 @@ pub fn fd_set_remove(fds: &mut [FdSetElement], fd: RawFd) {
     }
 }
 
-/// Compute the minimum `nfds` value needed for the set pointed to by
-/// `fds`.
+/// Compute the minimum `nfds` value needed for the set pointed to by `fds`.
 #[inline]
 pub fn fd_set_bound(fds: &[FdSetElement]) -> RawFd {
     #[cfg(not(any(windows, target_os = "wasi")))]

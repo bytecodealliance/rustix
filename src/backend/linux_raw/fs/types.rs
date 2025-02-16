@@ -197,13 +197,13 @@ bitflags! {
         /// `O_DIRECTORY`
         const DIRECTORY = linux_raw_sys::general::O_DIRECTORY;
 
-        /// `O_DSYNC`.
+        /// `O_DSYNC`
         const DSYNC = linux_raw_sys::general::O_SYNC;
 
         /// `O_EXCL`
         const EXCL = linux_raw_sys::general::O_EXCL;
 
-        /// `O_FSYNC`.
+        /// `O_FSYNC`
         const FSYNC = linux_raw_sys::general::O_SYNC;
 
         /// `O_NOFOLLOW`
@@ -226,7 +226,7 @@ bitflags! {
         /// `O_NOCTTY`
         const NOCTTY = linux_raw_sys::general::O_NOCTTY;
 
-        /// `O_RSYNC`.
+        /// `O_RSYNC`
         const RSYNC = linux_raw_sys::general::O_SYNC;
 
         /// `O_SYNC`
@@ -252,7 +252,7 @@ bitflags! {
 
         /// `O_LARGEFILE`
         ///
-        /// Tustix and/or libc will automatically set this flag when
+        /// Rustix and/or libc will automatically set this flag when
         /// appropriate in the [`rustix::fs::open`] family of functions, so
         /// typical users do not need to care about it. It may be reported in
         /// the return of `fcntl_getfl`, though.
@@ -486,13 +486,13 @@ bitflags! {
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct SealFlags: u32 {
-        /// `F_SEAL_SEAL`.
+        /// `F_SEAL_SEAL`
         const SEAL = linux_raw_sys::general::F_SEAL_SEAL;
-        /// `F_SEAL_SHRINK`.
+        /// `F_SEAL_SHRINK`
         const SHRINK = linux_raw_sys::general::F_SEAL_SHRINK;
-        /// `F_SEAL_GROW`.
+        /// `F_SEAL_GROW`
         const GROW = linux_raw_sys::general::F_SEAL_GROW;
-        /// `F_SEAL_WRITE`.
+        /// `F_SEAL_WRITE`
         const WRITE = linux_raw_sys::general::F_SEAL_WRITE;
         /// `F_SEAL_FUTURE_WRITE` (since Linux 5.1)
         const FUTURE_WRITE = linux_raw_sys::general::F_SEAL_FUTURE_WRITE;

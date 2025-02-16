@@ -18,9 +18,9 @@
 //!  - [Linux]
 //!  - [io_uring header]
 //!
-//! [Linux]: https://man.archlinux.org/man/io_uring.7.en
+//! [Linux]: https://www.man7.org/linux/man-pages/man7/io_uring.7.html
 //! [io_uring]: https://en.wikipedia.org/wiki/Io_uring
-//! [io_uring header]: https://github.com/torvalds/linux/blob/master/include/uapi/linux/io_uring.h
+//! [io_uring header]: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/uapi/linux/io_uring.h?h=v6.13
 //! [rustix-uring]: https://crates.io/crates/rustix-uring
 #![allow(unsafe_code)]
 
@@ -68,7 +68,7 @@ mod sys {
 /// # References
 ///  - [Linux]
 ///
-/// [Linux]: https://man.archlinux.org/man/io_uring_setup.2.en
+/// [Linux]: https://www.man7.org/linux/man-pages/man2/io_uring_setup.2.html
 #[inline]
 pub fn io_uring_setup(entries: u32, params: &mut io_uring_params) -> io::Result<OwnedFd> {
     backend::io_uring::syscalls::io_uring_setup(entries, params)
@@ -88,7 +88,7 @@ pub fn io_uring_setup(entries: u32, params: &mut io_uring_params) -> io::Result<
 /// # References
 ///  - [Linux]
 ///
-/// [Linux]: https://man.archlinux.org/man/io_uring_register.2.en
+/// [Linux]: https://www.man7.org/linux/man-pages/man2/io_uring_register.2.html
 #[inline]
 pub unsafe fn io_uring_register<Fd: AsFd>(
     fd: Fd,
@@ -111,7 +111,7 @@ pub unsafe fn io_uring_register<Fd: AsFd>(
 /// # References
 ///  - [Linux]
 ///
-/// [Linux]: https://man.archlinux.org/man/io_uring_register.2.en
+/// [Linux]: https://www.man7.org/linux/man-pages/man2/io_uring_register.2.html
 #[inline]
 pub unsafe fn io_uring_register_with<Fd: AsFd>(
     fd: Fd,
@@ -135,7 +135,7 @@ pub unsafe fn io_uring_register_with<Fd: AsFd>(
 /// # References
 ///  - [Linux]
 ///
-/// [Linux]: https://man.archlinux.org/man/io_uring_enter.2.en
+/// [Linux]: https://www.man7.org/linux/man-pages/man2/io_uring_enter.2.html
 #[inline]
 pub unsafe fn io_uring_enter<Fd: AsFd>(
     fd: Fd,

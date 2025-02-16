@@ -133,7 +133,7 @@ const PROC_TRACE_CTL_ENABLE: i32 = 1;
 const PROC_TRACE_CTL_DISABLE: i32 = 2;
 const PROC_TRACE_CTL_DISABLE_EXEC: i32 = 3;
 
-/// `PROC_TRACE_CTL_*`.
+/// `PROC_TRACE_CTL_*`
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[repr(i32)]
 pub enum DumpableBehavior {
@@ -235,7 +235,7 @@ pub fn set_reaper_status(reaper: bool) -> io::Result<()> {
 const PROC_REAP_STATUS: c_int = 4;
 
 bitflags! {
-    /// `REAPER_STATUS_*`.
+    /// `REAPER_STATUS_*`
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct ReaperStatusFlags: c_uint {
@@ -302,7 +302,7 @@ pub fn get_reaper_status(process: ProcSelector) -> io::Result<ReaperStatus> {
 const PROC_REAP_GETPIDS: c_int = 5;
 
 bitflags! {
-    /// `REAPER_PIDINFO_*`.
+    /// `REAPER_PIDINFO_*`
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct PidInfoFlags: c_uint {
@@ -387,7 +387,7 @@ pub fn get_reaper_pids(process: ProcSelector) -> io::Result<Vec<PidInfo>> {
 const PROC_REAP_KILL: c_int = 6;
 
 bitflags! {
-    /// `REAPER_KILL_*`.
+    /// `REAPER_KILL_*`
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     struct KillFlags: c_uint {
@@ -454,7 +454,7 @@ const PROC_TRAPCAP_CTL: c_int = 9;
 const PROC_TRAPCAP_CTL_ENABLE: i32 = 1;
 const PROC_TRAPCAP_CTL_DISABLE: i32 = 2;
 
-/// `PROC_TRAPCAP_CTL_*`.
+/// `PROC_TRAPCAP_CTL_*`
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[repr(i32)]
 pub enum TrapCapBehavior {

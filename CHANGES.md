@@ -46,7 +46,7 @@ constant.
 `rustix::process::WaitidOptions` and `rustix::process::WaitidStatus` are
 renamed to
 [`rustix::process::WaitIdOptions`] and [`rustix::process::WaitIdStatus`] (note
-the capitalization), for consistency with [`crate::process::WaitId`].
+the capitalization), for consistency with [`rustix::process::WaitId`].
 
 [`rustix::process::WaitIdOptions`]: https://docs.rs/rustix/1.0.0/rustix/process/struct.WaitIdOptions.html
 [`rustix::process::WaitIdStatus`]: https://docs.rs/rustix/1.0.0/rustix/process/struct.WaitIdStatus.html
@@ -198,7 +198,7 @@ be used in place of `mount2`, and `mount2` is now removed.
 The [`rustix::net`] functions ending with `_v4`, `_v6`, `_unix` and `_xdp` have
 been merged into a single function that accepts any address type.
 
-Specically, the following functions are removed:
+Specifically, the following functions are removed:
 
   * `bind_any`, `bind_unix`, `bind_v4`, `bind_v6`, `bind_xdp` in favor of
     [`bind`],

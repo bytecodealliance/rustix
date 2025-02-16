@@ -38,7 +38,7 @@ pub(crate) unsafe fn pread(
     len: usize,
     pos: u64,
 ) -> io::Result<usize> {
-    // <https://github.com/torvalds/linux/blob/fcadab740480e0e0e9fa9bd272acd409884d431a/arch/arm64/kernel/sys32.c#L75>
+    // <https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/arch/arm64/kernel/sys32.c?h=v6.13#n70>
     #[cfg(all(
         target_pointer_width = "32",
         any(target_arch = "arm", target_arch = "mips", target_arch = "mips32r6"),
@@ -142,7 +142,7 @@ pub(crate) fn write(fd: BorrowedFd<'_>, buf: &[u8]) -> io::Result<usize> {
 pub(crate) fn pwrite(fd: BorrowedFd<'_>, buf: &[u8], pos: u64) -> io::Result<usize> {
     let (buf_addr, buf_len) = slice(buf);
 
-    // <https://github.com/torvalds/linux/blob/fcadab740480e0e0e9fa9bd272acd409884d431a/arch/arm64/kernel/sys32.c#L81-L83>
+    // <https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/arch/arm64/kernel/sys32.c?h=v6.13#n76>
     #[cfg(all(
         target_pointer_width = "32",
         any(target_arch = "arm", target_arch = "mips", target_arch = "mips32r6"),

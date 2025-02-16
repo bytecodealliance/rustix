@@ -137,11 +137,11 @@ impl Dir {
 
     /// `seekdir(self, offset)`
     ///
-    /// This function iso only available on 64-bit platforms because it's
+    /// This function is only available on 64-bit platforms because it's
     /// implemented using [`libc::seekdir`] which only supports offsets that
     /// fit in a `c_long`.
     ///
-    /// [`libc::seekdir`]: https://docs.rs/libc/latest/arm-unknown-linux-gnueabihf/libc/fn.seekdir.html
+    /// [`libc::seekdir`]: https://docs.rs/libc/*/arm-unknown-linux-gnueabihf/libc/fn.seekdir.html
     #[cfg(target_pointer_width = "64")]
     #[cfg_attr(docsrs, doc(cfg(target_pointer_width = "64")))]
     #[doc(alias = "seekdir")]

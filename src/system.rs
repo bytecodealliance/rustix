@@ -1,9 +1,5 @@
 //! Uname and other system-level functions.
-//!
-//! # Safety
-//!
-//! This function converts from `struct utsname` fields provided from the
-//! kernel into `&str` references, which assumes that they're NUL-terminated.
+
 #![allow(unsafe_code)]
 
 use crate::backend;

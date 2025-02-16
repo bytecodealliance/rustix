@@ -402,4 +402,5 @@ mod timespec;
 mod ugid;
 
 #[cfg(doc)]
+#[cfg_attr(docsrs, doc(cfg(doc)))]
 pub mod not_implemented;

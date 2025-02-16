@@ -21,8 +21,8 @@ use super::SocketAddrUnix;
 /// Opaque type equivalent to `sockaddr` in C.
 ///
 /// This is always used behind a raw pointer that is cast from a pointer to a
-/// `sockaddr`-compatible C type, and then cast back to a `sockaddr` pointer
-/// to be passed to a system call.
+/// `sockaddr`-compatible C type, and then cast back to a `sockaddr` pointer to
+/// be passed to a system call.
 #[repr(C)]
 pub struct SocketAddrOpaque {
     _data: [u8; 0],
@@ -32,21 +32,22 @@ pub struct SocketAddrOpaque {
 ///
 /// This type will always be big enough to hold any socket address, but never
 /// bigger than `usize`.
+#[doc(alias = "socklen_t")]
 pub type SocketAddrLen = u32;
 
 /// A trait abstracting over the types that can be passed as a `sockaddr`.
 ///
 /// # Safety
 ///
-/// Implementers of this trait must ensure that `with_sockaddr` calls
-/// `f` with a pointer that is readable for the passed length, and points
-/// to data that is a valid socket address for the system calls that accept
-/// `sockaddr` as a const pointer.
+/// Implementers of this trait must ensure that `with_sockaddr` calls `f` with
+/// a pointer that is readable for the passed length, and points to data that
+/// is a valid socket address for the system calls that accept `sockaddr` as a
+/// const pointer.
 pub unsafe trait SocketAddrArg {
     /// Call a closure with the pointer and length to the corresponding C type.
     ///
-    /// The memory pointed to by the pointer of size length is guaranteed to
-    /// be valid only for the duration of the call.
+    /// The memory pointed to by the pointer of size length is guaranteed to be
+    /// valid only for the duration of the call.
     ///
     /// The API uses a closure so that:
     ///   * The libc types are not exposed in the rustix API.
@@ -103,8 +104,8 @@ pub unsafe trait SocketAddrArg {
 /// # Safety
 ///
 /// This calls `f` with a pointer to an object it has a reference to, with the
-/// and the length of that object, so they'll be valid for the duration of
-/// the call.
+/// and the length of that object, so they'll be valid for the duration of the
+/// call.
 pub(crate) unsafe fn call_with_sockaddr<A, R>(
     addr: &A,
     f: impl FnOnce(*const SocketAddrOpaque, SocketAddrLen) -> R,

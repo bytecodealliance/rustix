@@ -575,7 +575,7 @@ pub(crate) fn epoll_wait(
         .map(|i| i as usize)
     }
 
-    // Othewise just use `epoll_wait`.
+    // Otherwise just use `epoll_wait`.
     #[cfg(not(all(linux_kernel, feature = "linux_5_11")))]
     unsafe {
         let timeout = match timeout {
