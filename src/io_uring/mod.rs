@@ -1395,10 +1395,10 @@ pub struct io_uring_rsrc_update2 {
 #[repr(C)]
 #[derive(Debug, Copy, Clone, Default)]
 pub struct io_uring_getevents_arg {
-    pub sigmask: u64,
+    pub sigmask: io_uring_ptr,
     pub sigmask_sz: u32,
     pub min_wait_usec: u32,
-    pub ts: u64,
+    pub ts: io_uring_ptr,
 }
 
 #[allow(missing_docs)]

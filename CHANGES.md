@@ -230,5 +230,14 @@ advice applies to the end of the file. To convert an arbitrary `u64` value to
 
 [`rustix::fs::fadvise`]: https://docs.rs/rustix/1.0.0/rustix/fs/fn.fadvise.html
 
+The [`sigmask`] and [`ts`] fields of [`rustix::io_uring::getevents_arg`]
+changed from `u64` to [`rustix::io_uring::io_uring_ptr`], to better preserve
+pointer provenance.
+
+[`sigmask`]: https://docs.rs/rustix/1.0.0/rustix/io_uring/struct.io_uring_getevents_arg.html#structfield.sigmask
+[`ts`]: https://docs.rs/rustix/1.0.0/rustix/io_uring/struct.io_uring_getevents_arg.html#structfield.ts
+[`rustix::io_uring::getevents_arg`]: https://docs.rs/rustix/1.0.0/rustix/io_uring/struct.io_uring_getevents_arg.html
+[`rustix::io_uring::io_uring_ptr`]: https://docs.rs/rustix/1.0.0-prerelease.0/rustix/io_uring/struct.io_uring_ptr.html
+
 All explicitly deprecated functions and types have been removed. Their
 deprecation messages will have identified alternatives.
