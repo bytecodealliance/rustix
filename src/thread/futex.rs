@@ -621,9 +621,6 @@ mod tests {
     fn test_layouts() {
         use crate::backend::c;
 
-        check_renamed_type!(Wait, futex_waitv);
-        check_renamed_struct_field!(Wait, futex_waitv, val);
-        check_renamed_struct_field!(Wait, futex_waitv, uaddr);
-        check_renamed_struct_field!(Wait, futex_waitv, flags);
+        check_renamed_struct!(Wait, futex_waitv, val, uaddr, flags, __reserved);
     }
 }

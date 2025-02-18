@@ -47,6 +47,7 @@ pub use crate::fs::{
     Advice, AtFlags, Mode, OFlags, RenameFlags, ResolveFlags, Statx, StatxFlags, XattrFlags,
 };
 pub use crate::io::ReadWriteFlags;
+pub use crate::net::addr::{SocketAddrLen, SocketAddrOpaque, SocketAddrStorage};
 pub use crate::net::{RecvFlags, SendFlags, SocketFlags};
 pub use crate::sigset::SigSet;
 pub use crate::thread::futex::{
@@ -55,12 +56,25 @@ pub use crate::thread::futex::{
 };
 pub use crate::timespec::{Nsecs, Secs, Timespec};
 
-pub use net::{__kernel_sockaddr_storage as sockaddr_storage, msghdr, sockaddr, socklen_t};
-
 mod sys {
     pub(super) use linux_raw_sys::io_uring::*;
     #[cfg(test)]
-    pub(super) use {crate::backend::c::iovec, linux_raw_sys::general::open_how};
+    pub(super) use {
+        crate::backend::c::iovec, linux_raw_sys::general::open_how, linux_raw_sys::net::msghdr,
+    };
+}
+
+/// `msghdr`
+#[allow(missing_docs)]
+#[repr(C)]
+pub struct MsgHdr {
+    pub msg_name: *mut c_void,
+    pub msg_namelen: SocketAddrLen,
+    pub msg_iov: *mut iovec,
+    pub msg_iovlen: usize,
+    pub msg_control: *mut c_void,
+    pub msg_controllen: usize,
+    pub msg_flags: RecvFlags,
 }
 
 /// `io_uring_setup(entries, params)`—Setup a context for performing
@@ -1567,7 +1581,7 @@ pub struct io_uring_getevents_arg {
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
 pub struct io_uring_recvmsg_out {
-    pub namelen: u32,
+    pub namelen: SocketAddrLen,
     pub controllen: u32,
     pub payloadlen: u32,
     pub flags: RecvmsgOutFlags,
@@ -1885,5 +1899,17 @@ mod tests {
             io_uring_buf_ring__bindgen_ty_1__bindgen_ty_2
         );
         check_struct_renamed_field!(io_uring_buf_ring, tail_or_bufs, __bindgen_anon_1);
+
+        check_renamed_struct!(
+            MsgHdr,
+            msghdr,
+            msg_name,
+            msg_namelen,
+            msg_iov,
+            msg_iovlen,
+            msg_control,
+            msg_controllen,
+            msg_flags
+        );
     }
 }
