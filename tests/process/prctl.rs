@@ -37,18 +37,21 @@ fn test_time_stamp_counter_readability() {
 
 #[cfg(target_arch = "powerpc")]
 #[test]
+#[ignore = "Doesn't work on qemu-ppc"]
 fn test_unaligned_access_control() {
     dbg!(unaligned_access_control().unwrap());
 }
 
 #[cfg(target_arch = "powerpc")]
 #[test]
+#[ignore = "Doesn't work on qemu-ppc"]
 fn test_floating_point_exception_mode() {
     dbg!(floating_point_exception_mode().unwrap());
 }
 
 #[cfg(target_arch = "powerpc")]
 #[test]
+#[ignore = "Doesn't work on qemu-ppc"]
 fn test_endian_mode() {
     dbg!(endian_mode().unwrap());
 }

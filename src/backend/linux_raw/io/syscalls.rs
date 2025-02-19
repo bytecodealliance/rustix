@@ -10,7 +10,12 @@
 use crate::backend::conv::loff_t_from_u64;
 #[cfg(all(
     target_pointer_width = "32",
-    any(target_arch = "arm", target_arch = "mips", target_arch = "mips32r6"),
+    any(
+        target_arch = "arm",
+        target_arch = "mips",
+        target_arch = "mips32r6",
+        target_arch = "powerpc"
+    ),
 ))]
 use crate::backend::conv::zero;
 use crate::backend::conv::{
@@ -41,7 +46,12 @@ pub(crate) unsafe fn pread(
     // <https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/arch/arm64/kernel/sys32.c?h=v6.13#n70>
     #[cfg(all(
         target_pointer_width = "32",
-        any(target_arch = "arm", target_arch = "mips", target_arch = "mips32r6"),
+        any(
+            target_arch = "arm",
+            target_arch = "mips",
+            target_arch = "mips32r6",
+            target_arch = "powerpc"
+        ),
     ))]
     {
         ret_usize(syscall!(
@@ -56,7 +66,12 @@ pub(crate) unsafe fn pread(
     }
     #[cfg(all(
         target_pointer_width = "32",
-        not(any(target_arch = "arm", target_arch = "mips", target_arch = "mips32r6")),
+        not(any(
+            target_arch = "arm",
+            target_arch = "mips",
+            target_arch = "mips32r6",
+            target_arch = "powerpc"
+        )),
     ))]
     {
         ret_usize(syscall!(
@@ -145,7 +160,12 @@ pub(crate) fn pwrite(fd: BorrowedFd<'_>, buf: &[u8], pos: u64) -> io::Result<usi
     // <https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/arch/arm64/kernel/sys32.c?h=v6.13#n76>
     #[cfg(all(
         target_pointer_width = "32",
-        any(target_arch = "arm", target_arch = "mips", target_arch = "mips32r6"),
+        any(
+            target_arch = "arm",
+            target_arch = "mips",
+            target_arch = "mips32r6",
+            target_arch = "powerpc"
+        ),
     ))]
     unsafe {
         ret_usize(syscall_readonly!(
@@ -160,7 +180,12 @@ pub(crate) fn pwrite(fd: BorrowedFd<'_>, buf: &[u8], pos: u64) -> io::Result<usi
     }
     #[cfg(all(
         target_pointer_width = "32",
-        not(any(target_arch = "arm", target_arch = "mips", target_arch = "mips32r6")),
+        not(any(
+            target_arch = "arm",
+            target_arch = "mips",
+            target_arch = "mips32r6",
+            target_arch = "powerpc"
+        )),
     ))]
     unsafe {
         ret_usize(syscall_readonly!(

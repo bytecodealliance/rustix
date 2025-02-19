@@ -72,6 +72,7 @@ jobs:
         riscv64gc-unknown-linux-gnu
         aarch64-unknown-linux-gnu
         aarch64-unknown-linux-musl
+        powerpc-unknown-linux-gnu
         powerpc64le-unknown-linux-gnu
         armv5te-unknown-linux-gnueabi
         s390x-unknown-linux-gnu
@@ -121,6 +122,7 @@ jobs:
     - run: cargo check --workspace --release -vv --target=aarch64-unknown-linux-gnu --features=linux_latest,all-apis --all-targets
     - run: cargo check --workspace --release -vv --target=aarch64-unknown-linux-musl --features=all-apis --all-targets
     - run: cargo check --workspace --release -vv --target=aarch64-unknown-linux-musl --features=use-libc,all-apis --all-targets
+    - run: cargo check --workspace --release -vv --target=powerpc-unknown-linux-gnu --features=all-apis --all-targets
     - run: cargo check --workspace --release -vv --target=powerpc64le-unknown-linux-gnu --features=all-apis --all-targets
     - run: cargo check --workspace --release -vv --target=armv5te-unknown-linux-gnueabi --features=all-apis --all-targets
     - run: cargo check --workspace --release -vv --target=s390x-unknown-linux-gnu --features=all-apis --all-targets
@@ -227,6 +229,7 @@ jobs:
     - run: cargo check -Z build-std --target=powerpc64-ibm-aix --features=all-apis
     - run: cargo check -Z build-std --target=mipsel-unknown-linux-gnu --features=all-apis
     - run: cargo check -Z build-std --target=mips64el-unknown-linux-gnuabi64 --features=all-apis
+    - run: cargo check -Z build-std --target=powerpc-unknown-linux-musl --features=all-apis
     - run: cargo check -Z build-std --target=powerpc64le-unknown-linux-musl --features=all-apis
 
 
@@ -239,7 +242,7 @@ jobs:
       RUSTFLAGS: --cfg rustix_use_experimental_features
     strategy:
       matrix:
-        build: [ubuntu, ubuntu-20.04, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, s390x-linux, arm-linux, ubuntu-stable, i686-linux-stable, aarch64-linux-stable, riscv64-linux-stable, s390x-linux-stable, powerpc64le-linux-stable, arm-linux-stable, ubuntu-1.63, i686-linux-1.63, aarch64-linux-1.63, riscv64-linux-1.63, s390x-linux-1.63, powerpc64le-linux-1.63, arm-linux-1.63, macos-latest, macos-13, windows, windows-2019, musl]
+        build: [ubuntu, ubuntu-20.04, i686-linux, aarch64-linux, powerpc-linux, powerpc64le-linux, riscv64-linux, s390x-linux, arm-linux, ubuntu-stable, i686-linux-stable, aarch64-linux-stable, riscv64-linux-stable, s390x-linux-stable, powerpc-linux-stable, powerpc64le-linux-stable, arm-linux-stable, ubuntu-1.63, i686-linux-1.63, aarch64-linux-1.63, riscv64-linux-1.63, s390x-linux-1.63, powerpc64le-linux, powerpc64le-linux-1.63, arm-linux-1.63, macos-latest, macos-13, windows, windows-2019, musl]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -263,6 +266,15 @@ jobs:
             qemu: qemu-aarch64
             qemu_args: -L /usr/aarch64-linux-gnu
             qemu_target: aarch64-linux-user
+          - build: powerpc-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: powerpc-unknown-linux-gnu
+            gcc_package: gcc-powerpc-linux-gnu
+            gcc: powerpc-linux-gnu-gcc
+            qemu: qemu-ppc
+            qemu_args: -L /usr/powerpc-linux-gnu
+            qemu_target: ppc-linux-user
           - build: powerpc64le-linux
             os: ubuntu-latest
             rust: nightly
@@ -336,6 +348,15 @@ jobs:
             qemu: qemu-s390x
             qemu_args: -L /usr/s390x-linux-gnu
             qemu_target: s390x-linux-user
+          - build: powerpc-linux-stable
+            os: ubuntu-latest
+            rust: stable
+            target: powerpc-unknown-linux-gnu
+            gcc_package: gcc-powerpc-linux-gnu
+            gcc: powerpc-linux-gnu-gcc
+            qemu: qemu-ppc
+            qemu_args: -L /usr/powerpc-linux-gnu
+            qemu_target: ppc-linux-user
           - build: powerpc64le-linux-stable
             os: ubuntu-latest
             rust: stable
@@ -391,6 +412,15 @@ jobs:
             qemu: qemu-s390x
             qemu_args: -L /usr/s390x-linux-gnu
             qemu_target: s390x-linux-user
+          - build: powerpc-linux-1.63
+            os: ubuntu-latest
+            rust: 1.63
+            target: powerpc-unknown-linux-gnu
+            gcc_package: gcc-powerpc-linux-gnu
+            gcc: powerpc-linux-gnu-gcc
+            qemu: qemu-ppc
+            qemu_args: -L /usr/powerpc-linux-gnu
+            qemu_target: ppc-linux-user
           - build: powerpc64le-linux-1.63
             os: ubuntu-latest
             rust: 1.63
@@ -513,7 +543,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [ubuntu, i686-linux, aarch64-linux, powerpc64le-linux, riscv64-linux, s390x-linux, arm-linux]
+        build: [ubuntu, i686-linux, aarch64-linux, powerpc-linux, powerpc64le-linux, riscv64-linux, s390x-linux, arm-linux]
         include:
           - build: ubuntu
             os: ubuntu-latest
@@ -534,7 +564,16 @@ jobs:
             qemu: qemu-aarch64
             qemu_args: -L /usr/aarch64-linux-gnu
             qemu_target: aarch64-linux-user
-          - build: powerpc64le-linux
+          - build: powerpc-linux
+            os: ubuntu-latest
+            rust: stable
+            target: powerpc-unknown-linux-gnu
+            gcc_package: gcc-powerpc-linux-gnu
+            gcc: powerpc-linux-gnu-gcc
+            qemu: qemu-ppc
+            qemu_args: -L /usr/powerpc-linux-gnu
+            qemu_target: ppc-linux-user
+          - build: powerpc-linux
             os: ubuntu-latest
             rust: stable
             target: powerpc64le-unknown-linux-gnu
@@ -652,8 +691,17 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [powerpc64le-linux, s390x-linux]
+        build: [powerpc-linux, powerpc64le-linux, s390x-linux]
         include:
+          - build: powerpc-linux
+            os: ubuntu-latest
+            rust: nightly
+            target: powerpc-unknown-linux-gnu
+            gcc_package: gcc-powerpc-linux-gnu
+            gcc: powerpc-linux-gnu-gcc
+            qemu: qemu-ppc
+            qemu_args: -L /usr/powerpc-linux-gnu
+            qemu_target: ppc-linux-user
           - build: powerpc64le-linux
             os: ubuntu-latest
             rust: nightly
@@ -676,6 +724,7 @@ jobs:
       # -D warnings is commented out in our install-rust action; re-add it here.
       RUSTFLAGS: --cfg rustix_use_experimental_asm -D warnings -D elided-lifetimes-in-paths
       RUSTDOCFLAGS: --cfg rustix_use_experimental_asm
+      CARGO_TARGET_POWERPC_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rustix_use_experimental_asm
       CARGO_TARGET_POWERPC64LE_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rustix_use_experimental_asm
       CARGO_TARGET_S390X_UNKNOWN_LINUX_GNU_RUSTFLAGS: --cfg rustix_use_experimental_asm
       QEMU_BUILD_VERSION: 9.2.0

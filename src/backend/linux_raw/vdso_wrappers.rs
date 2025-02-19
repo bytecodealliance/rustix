@@ -20,6 +20,7 @@ use core::arch::global_asm;
     target_arch = "x86_64",
     target_arch = "x86",
     target_arch = "riscv64",
+    target_arch = "powerpc",
     target_arch = "powerpc64",
     target_arch = "s390x",
 ))]
@@ -38,6 +39,7 @@ use linux_raw_sys::general::timespec as __kernel_old_timespec;
             target_arch = "x86_64",
             target_arch = "x86",
             target_arch = "riscv64",
+            target_arch = "powerpc",
             target_arch = "powerpc64",
             target_arch = "s390x"
         )
@@ -119,6 +121,7 @@ pub(crate) fn clock_gettime_dynamic(which_clock: DynamicClockId<'_>) -> io::Resu
     target_arch = "x86_64",
     target_arch = "x86",
     target_arch = "riscv64",
+    target_arch = "powerpc",
     target_arch = "powerpc64",
     target_arch = "s390x",
 ))]
@@ -271,6 +274,7 @@ type ClockGettimeType = unsafe extern "C" fn(c::c_int, *mut Timespec) -> c::c_in
     target_arch = "x86_64",
     target_arch = "x86",
     target_arch = "riscv64",
+    target_arch = "powerpc",
     target_arch = "powerpc64",
     target_arch = "s390x",
 ))]
@@ -298,6 +302,7 @@ fn init_clock_gettime() -> ClockGettimeType {
     target_arch = "x86_64",
     target_arch = "x86",
     target_arch = "riscv64",
+    target_arch = "powerpc",
     target_arch = "powerpc64",
     target_arch = "s390x",
 ))]
@@ -329,6 +334,7 @@ static CLOCK_GETTIME: AtomicPtr<Function> = AtomicPtr::new(null_mut());
     target_arch = "x86_64",
     target_arch = "x86",
     target_arch = "riscv64",
+    target_arch = "powerpc",
     target_arch = "powerpc64",
     target_arch = "s390x",
 ))]
@@ -387,6 +393,7 @@ unsafe fn _clock_gettime_via_syscall(clockid: c::c_int, res: *mut Timespec) -> i
     target_arch = "x86_64",
     target_arch = "x86",
     target_arch = "riscv64",
+    target_arch = "powerpc",
     target_arch = "powerpc64",
     target_arch = "s390x",
 ))]
@@ -451,6 +458,7 @@ fn minimal_init() {
         target_arch = "x86_64",
         target_arch = "x86",
         target_arch = "riscv64",
+        target_arch = "powerpc",
         target_arch = "powerpc64",
         target_arch = "s390x",
     ))]
@@ -499,7 +507,7 @@ fn init() {
             let ptr = vdso.sym(cstr!("LINUX_2.6"), cstr!("__vdso_clock_gettime64"));
             #[cfg(target_arch = "riscv64")]
             let ptr = vdso.sym(cstr!("LINUX_4.15"), cstr!("__vdso_clock_gettime"));
-            #[cfg(target_arch = "powerpc64")]
+            #[cfg(any(target_arch = "powerpc", target_arch = "powerpc64"))]
             let ptr = vdso.sym(cstr!("LINUX_2.6.15"), cstr!("__kernel_clock_gettime"));
             #[cfg(target_arch = "s390x")]
             let ptr = vdso.sym(cstr!("LINUX_2.6.29"), cstr!("__kernel_clock_gettime"));
@@ -519,6 +527,7 @@ fn init() {
                 target_arch = "arm",
                 target_arch = "mips",
                 target_arch = "mips32r6",
+                target_arch = "powerpc",
                 target_arch = "x86"
             ))]
             let ok = !ptr.is_null();
@@ -538,6 +547,7 @@ fn init() {
             target_arch = "x86_64",
             target_arch = "x86",
             target_arch = "riscv64",
+            target_arch = "powerpc",
             target_arch = "powerpc64",
             target_arch = "s390x",
         ))]
@@ -552,7 +562,7 @@ fn init() {
             let ptr = vdso.sym(cstr!("LINUX_2.6"), cstr!("__vdso_getcpu"));
             #[cfg(target_arch = "riscv64")]
             let ptr = vdso.sym(cstr!("LINUX_4.15"), cstr!("__vdso_getcpu"));
-            #[cfg(target_arch = "powerpc64")]
+            #[cfg(any(target_arch = "powerpc", target_arch = "powerpc64"))]
             let ptr = vdso.sym(cstr!("LINUX_2.6.15"), cstr!("__kernel_getcpu"));
             #[cfg(target_arch = "s390x")]
             let ptr = vdso.sym(cstr!("LINUX_2.6.29"), cstr!("__kernel_getcpu"));
@@ -560,6 +570,7 @@ fn init() {
             #[cfg(any(
                 target_arch = "x86_64",
                 target_arch = "riscv64",
+                target_arch = "powerpc",
                 target_arch = "powerpc64",
                 target_arch = "s390x"
             ))]

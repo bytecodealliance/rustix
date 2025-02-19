@@ -91,7 +91,9 @@ mod consts {
 )))]
 #[test]
 fn check_known_opcodes() {
-    use crate::backend::c::{c_long, c_uint};
+    #[cfg(not(target_arch = "powerpc"))]
+    use crate::backend::c::c_long;
+    use crate::backend::c::c_uint;
     use core::mem::size_of;
 
     // _IOR('U', 15, unsigned int)
@@ -106,6 +108,9 @@ fn check_known_opcodes() {
     );
 
     // _IOW('v', 2, long)
+    // This constant is currently incorrectly defined on PowerPC,
+    // see https://github.com/sunfishcode/linux-raw-sys/issues/148
+    #[cfg(not(target_arch = "powerpc"))]
     assert_eq!(
         compose_opcode(
             Direction::Write,
