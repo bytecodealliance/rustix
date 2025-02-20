@@ -430,6 +430,18 @@ pub fn set_socket_send_buffer_size<Fd: AsFd>(fd: Fd, value: usize) -> io::Result
     backend::net::sockopt::set_socket_send_buffer_size(fd.as_fd(), value)
 }
 
+/// `setsockopt(fd, SOL_SOCKET, SO_SNDBUFFORCE, value)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_socket_-and-set_socket_-functions
+#[cfg(any(linux_kernel, target_os = "fuchsia", target_os = "redox"))]
+#[inline]
+#[doc(alias = "SO_SNDBUFFORCE")]
+pub fn set_socket_send_buffer_size_force<Fd: AsFd>(fd: Fd, value: usize) -> io::Result<()> {
+    backend::net::sockopt::set_socket_send_buffer_size_force(fd.as_fd(), value)
+}
+
 /// `getsockopt(fd, SOL_SOCKET, SO_SNDBUF)`
 ///
 /// See the [module-level documentation] for more.

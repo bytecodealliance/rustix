@@ -368,6 +368,12 @@ pub(crate) fn set_socket_send_buffer_size(fd: BorrowedFd<'_>, size: usize) -> io
 }
 
 #[inline]
+pub(crate) fn set_socket_send_buffer_size_force(fd: BorrowedFd<'_>, size: usize) -> io::Result<()> {
+    let size: c::c_int = size.try_into().map_err(|_| io::Errno::INVAL)?;
+    setsockopt(fd, c::SOL_SOCKET, c::SO_SNDBUFFORCE, size)
+}
+
+#[inline]
 pub(crate) fn socket_send_buffer_size(fd: BorrowedFd<'_>) -> io::Result<usize> {
     getsockopt(fd, c::SOL_SOCKET, c::SO_SNDBUF).map(|size: u32| size as usize)
 }
