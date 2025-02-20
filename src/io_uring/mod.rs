@@ -958,7 +958,7 @@ pub const IORING_NOTIF_USAGE_ZC_COPIED: i32 = sys::IORING_NOTIF_USAGE_ZC_COPIED 
 /// `io_uring`'s native API represents pointers as `u64` values. In order to
 /// preserve strict-provenance, use a `*mut c_void`. On platforms where
 /// pointers are narrower than 64 bits, this requires additional padding.
-#[repr(C)]
+#[repr(C, align(8))]
 #[derive(Copy, Clone)]
 #[non_exhaustive]
 pub struct io_uring_ptr {
@@ -1560,6 +1560,7 @@ mod tests {
         use sys as c;
 
         assert_eq_size!(io_uring_ptr, u64);
+        assert_eq_align!(io_uring_ptr, u64);
 
         check_renamed_type!(off_or_addr2_union, io_uring_sqe__bindgen_ty_1);
         check_renamed_type!(addr_or_splice_off_in_union, io_uring_sqe__bindgen_ty_2);
