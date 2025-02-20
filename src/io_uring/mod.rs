@@ -958,7 +958,8 @@ pub const IORING_NOTIF_USAGE_ZC_COPIED: i32 = sys::IORING_NOTIF_USAGE_ZC_COPIED 
 /// `io_uring`'s native API represents pointers as `u64` values. In order to
 /// preserve strict-provenance, use a `*mut c_void`. On platforms where
 /// pointers are narrower than 64 bits, this requires additional padding.
-#[repr(C, align(8))]
+#[repr(C)]
+#[cfg_attr(target_arch = "arm", repr(align(8)))]
 #[derive(Copy, Clone)]
 #[non_exhaustive]
 pub struct io_uring_ptr {
