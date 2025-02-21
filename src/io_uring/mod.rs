@@ -959,6 +959,7 @@ pub const IORING_NOTIF_USAGE_ZC_COPIED: i32 = sys::IORING_NOTIF_USAGE_ZC_COPIED 
 /// preserve strict-provenance, use a `*mut c_void`. On platforms where
 /// pointers are narrower than 64 bits, this requires additional padding.
 #[repr(C)]
+#[cfg_attr(target_arch = "arm", repr(align(8)))]
 #[derive(Copy, Clone)]
 #[non_exhaustive]
 pub struct io_uring_ptr {
@@ -1395,10 +1396,10 @@ pub struct io_uring_rsrc_update2 {
 #[repr(C)]
 #[derive(Debug, Copy, Clone, Default)]
 pub struct io_uring_getevents_arg {
-    pub sigmask: u64,
+    pub sigmask: io_uring_ptr,
     pub sigmask_sz: u32,
     pub min_wait_usec: u32,
-    pub ts: u64,
+    pub ts: io_uring_ptr,
 }
 
 #[allow(missing_docs)]
@@ -1559,7 +1560,23 @@ mod tests {
     fn io_uring_layouts() {
         use sys as c;
 
+        // `io_uring_ptr` is a replacement for `u64`.
         assert_eq_size!(io_uring_ptr, u64);
+        assert_eq_align!(io_uring_ptr, u64);
+
+        // Test that pointers are stored in io_uring_ptr` in the way that
+        // io_uring stores them in a `u64`.
+        unsafe {
+            const MAGIC: u64 = !0x0123456789abcdef;
+            let ptr = io_uring_ptr::from(MAGIC as usize as *mut c_void);
+            assert_eq!(ptr.ptr, MAGIC as usize as *mut c_void);
+            #[cfg(target_pointer_width = "16")]
+            assert_eq!(ptr.__pad16, 0);
+            #[cfg(any(target_pointer_width = "16", target_pointer_width = "32"))]
+            assert_eq!(ptr.__pad32, 0);
+            let int = core::mem::transmute::<io_uring_ptr, u64>(ptr);
+            assert_eq!(int, MAGIC as usize as u64);
+        }
 
         check_renamed_type!(off_or_addr2_union, io_uring_sqe__bindgen_ty_1);
         check_renamed_type!(addr_or_splice_off_in_union, io_uring_sqe__bindgen_ty_2);
