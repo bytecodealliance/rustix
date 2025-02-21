@@ -158,7 +158,7 @@ fn io_uring_buf_ring_can_be_registered() {
     let br = unsafe { br_ptr.as_mut() }.expect("A valid io_uring_buf_ring struct");
 
     let reg = io_uring_buf_reg {
-        ring_addr: br_ptr as u64,
+        ring_addr: br_ptr.cast::<c_void>().into(),
         ring_entries: ENTRIES as u32,
         bgid: BGID,
         flags: 0,
