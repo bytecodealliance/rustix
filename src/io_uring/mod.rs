@@ -1560,8 +1560,23 @@ mod tests {
     fn io_uring_layouts() {
         use sys as c;
 
+        // `io_uring_ptr` is a replacement for `u64`.
         assert_eq_size!(io_uring_ptr, u64);
         assert_eq_align!(io_uring_ptr, u64);
+
+        // Test that pointers are stored in io_uring_ptr` in the way that
+        // io_uring stores them in a `u64`.
+        unsafe {
+            const MAGIC: u64 = !0x0123456789abcdef;
+            let ptr = io_uring_ptr::from(core::ptr::without_provenance_mut(MAGIC as usize));
+            assert_eq!(ptr.ptr, core::ptr::without_provenance_mut(MAGIC as usize));
+            #[cfg(target_pointer_width = "16")]
+            assert_eq!(ptr.__pad16, 0);
+            #[cfg(any(target_pointer_width = "16", target_pointer_width = "32"))]
+            assert_eq!(ptr.__pad32, 0);
+            let int = core::mem::transmute::<io_uring_ptr, u64>(ptr);
+            assert_eq!(int, MAGIC as usize as u64);
+        }
 
         check_renamed_type!(off_or_addr2_union, io_uring_sqe__bindgen_ty_1);
         check_renamed_type!(addr_or_splice_off_in_union, io_uring_sqe__bindgen_ty_2);
