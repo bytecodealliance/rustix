@@ -62,38 +62,49 @@ pub use crate::signal::Signal;
 /// If we want to expose this in public APIs, we should encapsulate the
 /// `linux_raw_sys` type.
 #[cfg(linux_raw)]
-pub type Sigaction = linux_raw_sys::general::kernel_sigaction;
+pub use linux_raw_sys::general::kernel_sigaction as KernelSigaction;
 
 /// `stack_t`
 ///
 /// If we want to expose this in public APIs, we should encapsulate the
 /// `linux_raw_sys` type.
 #[cfg(linux_raw)]
-pub type Stack = linux_raw_sys::general::stack_t;
+pub use linux_raw_sys::general::stack_t as Stack;
 
-/// `sigset_t`.
+/// `sigset_t`
 ///
-/// Undefined behavior could happen in some functions if `Sigset` ever
-/// contains signal numbers in the range from
-/// `linux_raw_sys::general::SIGRTMIN` to what the libc thinks `SIGRTMIN` is.
-/// Unless you are implementing the libc. Which you may indeed be doing, if
-/// you're reading this.
+/// Undefined behavior could happen in some functions if `SigSet` ever
+/// contains signal numbers in the range from `KERNEL_SIGRTMIN` to the libc
+/// `SIGRTMIN`. Unless you are implementing the libc. Which you may indeed be
+/// doing, if you're reading this.
 ///
 /// If we want to expose this in public APIs, we should encapsulate the
 /// `linux_raw_sys` type.
 #[cfg(linux_raw)]
-pub type Sigset = linux_raw_sys::general::kernel_sigset_t;
+pub use linux_raw_sys::general::sigset_t as SigSet;
+
+/// `kernel_sigset_t`.
+///
+/// Undefined behavior could happen in some functions if `KernelSigSet` ever
+/// contains signal numbers in the range from `KERNEL_SIGRTMIN` to the libc
+/// `SIGRTMIN`. Unless you are implementing the libc. Which you may indeed be
+/// doing, if you're reading this.
+///
+/// If we want to expose this in public APIs, we should encapsulate the
+/// `linux_raw_sys` type.
+#[cfg(linux_raw)]
+pub use linux_raw_sys::general::kernel_sigset_t as KernelSigSet;
 
 /// `siginfo_t`
 ///
 /// If we want to expose this in public APIs, we should encapsulate the
 /// `linux_raw_sys` type.
 #[cfg(linux_raw)]
-pub type Siginfo = linux_raw_sys::general::siginfo_t;
+pub use linux_raw_sys::general::siginfo_t as Siginfo;
 
 pub use crate::timespec::{Nsecs, Secs, Timespec};
 
-/// `SIG_*` constants for use with [`sigprocmask`].
+/// `SIG_*` constants for use with [`kernel_sigprocmask`].
 #[cfg(linux_raw)]
 #[repr(u32)]
 pub enum How {
@@ -341,8 +352,8 @@ pub use backend::runtime::tls::StartupTlsInfo;
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/fork.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/fork.2.html
 /// [async-signal-safe]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/V2_chap02.html#tag_15_04_03
-pub unsafe fn fork() -> io::Result<Fork> {
-    backend::runtime::syscalls::fork()
+pub unsafe fn kernel_fork() -> io::Result<Fork> {
+    backend::runtime::syscalls::kernel_fork()
 }
 
 /// Regular Unix `fork` doesn't tell the child its own PID because it assumes
@@ -423,8 +434,11 @@ pub unsafe fn execve(path: &CStr, argv: *const *const u8, envp: *const *const u8
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/sigaction.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/sigaction.2.html
 #[inline]
-pub unsafe fn sigaction(signal: Signal, new: Option<Sigaction>) -> io::Result<Sigaction> {
-    backend::runtime::syscalls::sigaction(signal, new)
+pub unsafe fn kernel_sigaction(
+    signal: Signal,
+    new: Option<KernelSigaction>,
+) -> io::Result<KernelSigaction> {
+    backend::runtime::syscalls::kernel_sigaction(signal, new)
 }
 
 /// `sigaltstack(new, old)`—Modify or query a signal stack.
@@ -479,8 +493,8 @@ pub unsafe fn tkill(tid: Pid, sig: Signal) -> io::Result<()> {
 #[inline]
 #[doc(alias = "pthread_sigmask")]
 #[doc(alias = "rt_sigprocmask")]
-pub unsafe fn sigprocmask(how: How, set: Option<&Sigset>) -> io::Result<Sigset> {
-    backend::runtime::syscalls::sigprocmask(how, set)
+pub unsafe fn kernel_sigprocmask(how: How, set: Option<&KernelSigSet>) -> io::Result<KernelSigSet> {
+    backend::runtime::syscalls::kernel_sigprocmask(how, set)
 }
 
 /// `sigpending()`—Query the pending signals.
@@ -493,7 +507,7 @@ pub unsafe fn sigprocmask(how: How, set: Option<&Sigset>) -> io::Result<Sigset> 
 ///
 /// [Linux `sigpending`]: https://man7.org/linux/man-pages/man2/sigpending.2.html
 #[inline]
-pub fn sigpending() -> Sigset {
+pub fn sigpending() -> SigSet {
     backend::runtime::syscalls::sigpending()
 }
 
@@ -507,7 +521,7 @@ pub fn sigpending() -> Sigset {
 ///
 /// [Linux `sigsuspend`]: https://man7.org/linux/man-pages/man2/sigsuspend.2.html
 #[inline]
-pub fn sigsuspend(set: &Sigset) -> io::Result<()> {
+pub fn sigsuspend(set: &SigSet) -> io::Result<()> {
     backend::runtime::syscalls::sigsuspend(set)
 }
 
@@ -524,7 +538,7 @@ pub fn sigsuspend(set: &Sigset) -> io::Result<()> {
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man3/sigwait.3.html
 #[inline]
-pub unsafe fn sigwait(set: &Sigset) -> io::Result<Signal> {
+pub unsafe fn sigwait(set: &SigSet) -> io::Result<Signal> {
     backend::runtime::syscalls::sigwait(set)
 }
 
@@ -541,7 +555,7 @@ pub unsafe fn sigwait(set: &Sigset) -> io::Result<Signal> {
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/sigwaitinfo.2.html
 #[inline]
-pub unsafe fn sigwaitinfo(set: &Sigset) -> io::Result<Siginfo> {
+pub unsafe fn sigwaitinfo(set: &SigSet) -> io::Result<Siginfo> {
     backend::runtime::syscalls::sigwaitinfo(set)
 }
 
@@ -558,7 +572,7 @@ pub unsafe fn sigwaitinfo(set: &Sigset) -> io::Result<Siginfo> {
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/sigtimedwait.2.html
 #[inline]
-pub unsafe fn sigtimedwait(set: &Sigset, timeout: Option<Timespec>) -> io::Result<Siginfo> {
+pub unsafe fn sigtimedwait(set: &SigSet, timeout: Option<Timespec>) -> io::Result<Siginfo> {
     backend::runtime::syscalls::sigtimedwait(set, timeout)
 }
 
@@ -598,8 +612,8 @@ pub fn linux_secure() -> bool {
 /// (perhaps because you yourself are implementing a libc).
 #[cfg(linux_raw)]
 #[inline]
-pub unsafe fn brk(addr: *mut c_void) -> io::Result<*mut c_void> {
-    backend::runtime::syscalls::brk(addr)
+pub unsafe fn kernel_brk(addr: *mut c_void) -> io::Result<*mut c_void> {
+    backend::runtime::syscalls::kernel_brk(addr)
 }
 
 /// `SIGRTMIN`—The start of the raw OS “real-time” signal range.
@@ -609,9 +623,9 @@ pub unsafe fn brk(addr: *mut c_void) -> io::Result<*mut c_void> {
 /// won't share a process with a libc (perhaps because you yourself are
 /// implementing a libc).
 ///
-/// See [`sigrt`] for a convenient way to construct `SIGRTMIN + n` values.
+/// See [`sigrt`] for a convenient way to construct `KERNEL_SIGRTMIN + n` values.
 #[cfg(linux_raw)]
-pub const SIGRTMIN: i32 = linux_raw_sys::general::SIGRTMIN as i32;
+pub const KERNEL_SIGRTMIN: i32 = linux_raw_sys::general::SIGRTMIN as i32;
 
 /// `SIGRTMAX`—The last of the raw OS “real-time” signal range.
 ///
@@ -620,7 +634,7 @@ pub const SIGRTMIN: i32 = linux_raw_sys::general::SIGRTMIN as i32;
 /// won't share a process with a libc (perhaps because you yourself are
 /// implementing a libc).
 #[cfg(linux_raw)]
-pub const SIGRTMAX: i32 = {
+pub const KERNEL_SIGRTMAX: i32 = {
     // Use the actual `SIGRTMAX` value on platforms which define it.
     #[cfg(not(any(
         target_arch = "arm",
@@ -644,17 +658,17 @@ pub const SIGRTMAX: i32 = {
     }
 };
 
-/// Return a [`Signal`] corresponding to `SIGRTMIN + n`.
+/// Return a [`Signal`] corresponding to `KERNEL_SIGRTMIN + n`.
 ///
-/// This is similar to [`Signal::rt`], but uses the raw OS `SIGRTMIN` value
+/// This is similar to [`Signal::rt`], but uses the `KERNEL_SIGRTMIN` value
 /// instead of the libc `SIGRTMIN` value. Don't use this unless you know your
 /// code won't share a process with a libc (perhaps because you yourself are
 /// implementing a libc).
 #[cfg(linux_raw)]
 #[doc(alias = "SIGRTMIN")]
-pub const fn sigrt(n: i32) -> Option<Signal> {
-    let sig = SIGRTMIN.wrapping_add(n);
-    if sig >= SIGRTMIN && sig <= SIGRTMAX {
+pub const fn kernel_sigrt(n: i32) -> Option<Signal> {
+    let sig = KERNEL_SIGRTMIN.wrapping_add(n);
+    if sig >= KERNEL_SIGRTMIN && sig <= KERNEL_SIGRTMAX {
         // SAFETY: We've checked that `sig` is in the expected range. It could
         // still conflict with libc's reserved values, however users of the
         // `runtime` module here must already know that there's no other libc
