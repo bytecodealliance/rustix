@@ -104,6 +104,31 @@ impl SocketAddrAny {
         Self { storage, len }
     }
 
+    /// Creates a socket address from reading from `ptr`, which points at `len`
+    /// initialized bytes.
+    ///
+    /// # Panics
+    ///
+    /// if `len` is smaller than the sockaddr header or larger than
+    /// `SocketAddrStorage`.
+    ///
+    /// # Safety
+    ///
+    /// * `ptr` must be a pointer to memory containing a valid socket address.
+    /// * `len` bytes must be initialized.
+    pub unsafe fn read(ptr: *const SocketAddrStorage, len: SocketAddrLen) -> Self {
+        assert!(len as usize >= size_of::<read_sockaddr::sockaddr_header>());
+        assert!(len as usize <= size_of::<SocketAddrStorage>());
+        let mut storage = MaybeUninit::<SocketAddrStorage>::uninit();
+        core::ptr::copy_nonoverlapping(
+            ptr.cast::<u8>(),
+            storage.as_mut_ptr().cast::<u8>(),
+            len as usize,
+        );
+        let len = NonZeroU32::new_unchecked(len);
+        Self { storage, len }
+    }
+
     /// Gets the initialized part of the storage as bytes.
     #[inline]
     fn bytes(&self) -> &[u8] {
@@ -302,5 +327,20 @@ impl TryFrom<SocketAddrAny> for SocketAddrUnix {
     #[inline]
     fn try_from(value: SocketAddrAny) -> Result<Self, Self::Error> {
         read_sockaddr::read_sockaddr_unix(&value)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn any_read() {
+        let localhost = std::net::Ipv6Addr::LOCALHOST;
+        let addr = SocketAddrAny::from(SocketAddrV6::new(localhost, 7, 8, 9));
+        unsafe {
+            let same = SocketAddrAny::read(addr.as_ptr(), addr.addr_len());
+            assert_eq!(addr, same);
+        }
     }
 }
