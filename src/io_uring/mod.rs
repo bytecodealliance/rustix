@@ -1568,8 +1568,8 @@ mod tests {
         // io_uring stores them in a `u64`.
         unsafe {
             const MAGIC: u64 = !0x0123456789abcdef;
-            let ptr = io_uring_ptr::from(core::ptr::without_provenance_mut(MAGIC as usize));
-            assert_eq!(ptr.ptr, core::ptr::without_provenance_mut(MAGIC as usize));
+            let ptr = io_uring_ptr::from(MAGIC as usize as *mut c_void);
+            assert_eq!(ptr.ptr, MAGIC as usize as *mut c_void);
             #[cfg(target_pointer_width = "16")]
             assert_eq!(ptr.__pad16, 0);
             #[cfg(any(target_pointer_width = "16", target_pointer_width = "32"))]
