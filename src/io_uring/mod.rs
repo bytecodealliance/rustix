@@ -29,7 +29,9 @@ mod bindgen_types;
 use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
 use crate::{backend, io};
 use bindgen_types::*;
+use core::cmp::Ordering;
 use core::ffi::c_void;
+use core::hash::{Hash, Hasher};
 use core::mem::MaybeUninit;
 use core::ptr::{null_mut, write_bytes};
 use linux_raw_sys::net;
@@ -428,6 +430,12 @@ pub enum IoringOp {
     /// `IORING_OP_SENDMSG_ZC`
     SendmsgZc = sys::io_uring_op::IORING_OP_SENDMSG_ZC as _,
 
+    /// `IORING_OP_READ_MULTISHOT`
+    ReadMultishot = sys::io_uring_op::IORING_OP_READ_MULTISHOT as _,
+
+    /// `IORING_OP_WAITID`
+    Waitid = sys::io_uring_op::IORING_OP_WAITID as _,
+
     /// `IORING_OP_FUTEX_WAIT`
     FutexWait = sys::io_uring_op::IORING_OP_FUTEX_WAIT as _,
 
@@ -436,6 +444,18 @@ pub enum IoringOp {
 
     /// `IORING_OP_FUTEX_WAITV`
     FutexWaitv = sys::io_uring_op::IORING_OP_FUTEX_WAITV as _,
+
+    /// `IORING_OP_FIXED_FD_INSTALL`
+    FixedFdInstall = sys::io_uring_op::IORING_OP_FIXED_FD_INSTALL as _,
+
+    /// `IORING_OP_FTRUNCATE`
+    Ftruncate = sys::io_uring_op::IORING_OP_FTRUNCATE as _,
+
+    /// `IORING_OP_BIND`
+    Bind = sys::io_uring_op::IORING_OP_BIND as _,
+
+    /// `IORING_OP_LISTEN`
+    Listen = sys::io_uring_op::IORING_OP_LISTEN as _,
 }
 
 impl Default for IoringOp {
@@ -715,6 +735,19 @@ bitflags::bitflags! {
 }
 
 bitflags::bitflags! {
+    /// `IORING_FIXED_FD_*` flags for use with [`io_uring_sqe`].
+    #[repr(transparent)]
+    #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct IoringFixedFdFlags: u32 {
+        /// `IORING_FIXED_FD_NO_CLOEXEC`
+        const NO_CLOEXEC = sys::IORING_FIXED_FD_NO_CLOEXEC;
+
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
+        const _ = !0;
+    }
+}
+
+bitflags::bitflags! {
     /// `IORING_FEAT_*` flags for use with [`io_uring_params`].
     #[repr(transparent)]
     #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -760,6 +793,9 @@ bitflags::bitflags! {
 
         /// `IORING_FEAT_REG_REG_RING`
         const REG_REG_RING = sys::IORING_FEAT_REG_REG_RING;
+
+        /// `IORING_FEAT_RECVSEND_BUNDLE`
+        const RECVSEND_BUNDLE = sys::IORING_FEAT_RECVSEND_BUNDLE;
 
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
@@ -864,6 +900,11 @@ bitflags::bitflags! {
         /// `IORING_SEND_ZC_REPORT_USAGE` (since Linux 6.2)
         const ZC_REPORT_USAGE = sys::IORING_SEND_ZC_REPORT_USAGE as _;
 
+        /// `IORING_RECVSEND_BUNDLE`
+        ///
+        /// See also [`IoringRecvFlags::BUNDLE`].
+        const BUNDLE = sys::IORING_RECVSEND_BUNDLE as _;
+
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
@@ -886,6 +927,11 @@ bitflags::bitflags! {
         ///
         /// See also [`IoringSendFlags::FIXED_BUF`].
         const FIXED_BUF = sys::IORING_RECVSEND_FIXED_BUF as _;
+
+        /// `IORING_RECVSEND_BUNDLE`
+        ///
+        /// See also [`IoringSendFlags::BUNDLE`].
+        const BUNDLE = sys::IORING_RECVSEND_BUNDLE as _;
 
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
@@ -981,24 +1027,74 @@ pub struct io_uring_ptr {
     pub __pad32: u32,
 }
 
-impl From<*mut c_void> for io_uring_ptr {
+impl io_uring_ptr {
+    /// Construct a null `io_uring_ptr`.
     #[inline]
-    fn from(ptr: *mut c_void) -> Self {
+    pub const fn null() -> Self {
+        Self::new(null_mut())
+    }
+
+    /// Construct a new `io_uring_ptr`.
+    #[inline]
+    pub const fn new(ptr: *mut c_void) -> Self {
         Self {
             ptr,
 
             #[cfg(target_pointer_width = "16")]
-            __pad16: Default::default(),
+            __pad16: 0,
             #[cfg(any(target_pointer_width = "16", target_pointer_width = "32"))]
-            __pad32: Default::default(),
+            __pad32: 0,
         }
+    }
+}
+
+impl From<*mut c_void> for io_uring_ptr {
+    #[inline]
+    fn from(ptr: *mut c_void) -> Self {
+        Self::new(ptr)
+    }
+}
+
+impl PartialEq for io_uring_ptr {
+    #[inline]
+    fn eq(&self, other: &Self) -> bool {
+        self.ptr.eq(&other.ptr)
+    }
+}
+
+impl Eq for io_uring_ptr {}
+
+impl PartialOrd for io_uring_ptr {
+    #[inline]
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.ptr.partial_cmp(&other.ptr)
+    }
+}
+
+impl Ord for io_uring_ptr {
+    #[inline]
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.ptr.cmp(&other.ptr)
+    }
+}
+
+impl Hash for io_uring_ptr {
+    #[inline]
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.ptr.hash(state)
     }
 }
 
 impl Default for io_uring_ptr {
     #[inline]
     fn default() -> Self {
-        Self::from(null_mut())
+        Self::null()
+    }
+}
+
+impl core::fmt::Pointer for io_uring_ptr {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        self.ptr.fmt(f)
     }
 }
 
@@ -1026,30 +1122,78 @@ pub union io_uring_user_data {
 impl io_uring_user_data {
     /// Return the `u64` value.
     #[inline]
-    pub fn u64_(self) -> u64 {
+    pub const fn u64_(self) -> u64 {
         // SAFETY: All the fields have the same underlying representation.
         unsafe { self.u64_ }
     }
 
     /// Create a `Self` from a `u64` value.
     #[inline]
-    pub fn from_u64(u64_: u64) -> Self {
+    pub const fn from_u64(u64_: u64) -> Self {
         Self { u64_ }
     }
 
     /// Return the `ptr` pointer value.
     #[inline]
-    pub fn ptr(self) -> *mut c_void {
+    pub const fn ptr(self) -> *mut c_void {
         // SAFETY: All the fields have the same underlying representation.
         unsafe { self.ptr }.ptr
     }
 
     /// Create a `Self` from a pointer value.
     #[inline]
-    pub fn from_ptr(ptr: *mut c_void) -> Self {
+    pub const fn from_ptr(ptr: *mut c_void) -> Self {
         Self {
-            ptr: io_uring_ptr::from(ptr),
+            ptr: io_uring_ptr::new(ptr),
         }
+    }
+}
+
+impl From<u64> for io_uring_user_data {
+    #[inline]
+    fn from(u64_: u64) -> Self {
+        Self::from_u64(u64_)
+    }
+}
+
+impl From<*mut c_void> for io_uring_user_data {
+    #[inline]
+    fn from(ptr: *mut c_void) -> Self {
+        Self::from_ptr(ptr)
+    }
+}
+
+impl PartialEq for io_uring_user_data {
+    #[inline]
+    fn eq(&self, other: &Self) -> bool {
+        // SAFETY: `io_uring_ptr` and `u64` have the same layout.
+        unsafe { self.u64_.eq(&other.u64_) }
+    }
+}
+
+impl Eq for io_uring_user_data {}
+
+impl PartialOrd for io_uring_user_data {
+    #[inline]
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        // SAFETY: `io_uring_ptr` and `u64` have the same layout.
+        unsafe { self.u64_.partial_cmp(&other.u64_) }
+    }
+}
+
+impl Ord for io_uring_user_data {
+    #[inline]
+    fn cmp(&self, other: &Self) -> Ordering {
+        // SAFETY: `io_uring_ptr` and `u64` have the same layout.
+        unsafe { self.u64_.cmp(&other.u64_) }
+    }
+}
+
+impl Hash for io_uring_user_data {
+    #[inline]
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        // SAFETY: `io_uring_ptr` and `u64` have the same layout.
+        unsafe { self.u64_.hash(state) }
     }
 }
 
@@ -1188,6 +1332,7 @@ pub union op_flags_union {
     pub msg_ring_flags: IoringMsgringFlags,
     pub uring_cmd_flags: IoringUringCmdFlags,
     pub futex_flags: FutexWaitvFlags,
+    pub install_fd_flags: IoringFixedFdFlags,
 }
 
 #[allow(missing_docs)]
@@ -1222,7 +1367,7 @@ pub struct addr_len_struct {
 #[derive(Copy, Clone)]
 #[non_exhaustive]
 pub struct io_uring_sync_cancel_reg {
-    pub addr: u64,
+    pub addr: io_uring_user_data,
     pub fd: i32,
     pub flags: IoringAsyncCancelFlags,
     pub timeout: Timespec,
@@ -1312,7 +1457,7 @@ pub struct io_sqring_offsets {
     pub dropped: u32,
     pub array: u32,
     pub resv1: u32,
-    pub user_addr: u64,
+    pub user_addr: io_uring_ptr,
 }
 
 #[allow(missing_docs)]
@@ -1327,7 +1472,7 @@ pub struct io_cqring_offsets {
     pub cqes: u32,
     pub flags: u32,
     pub resv1: u32,
-    pub user_addr: u64,
+    pub user_addr: io_uring_ptr,
 }
 
 #[allow(missing_docs)]
@@ -1437,7 +1582,7 @@ pub struct open_how {
 #[repr(C)]
 #[derive(Debug, Copy, Clone, Default)]
 pub struct io_uring_buf_reg {
-    pub ring_addr: u64,
+    pub ring_addr: io_uring_ptr,
     pub ring_entries: u32,
     pub bgid: u16,
     pub flags: u16,
@@ -1448,7 +1593,7 @@ pub struct io_uring_buf_reg {
 #[repr(C)]
 #[derive(Debug, Copy, Clone, Default)]
 pub struct io_uring_buf {
-    pub addr: u64,
+    pub addr: io_uring_ptr,
     pub len: u32,
     pub bid: u16,
     pub resv: u16,
@@ -1568,7 +1713,7 @@ mod tests {
         // io_uring stores them in a `u64`.
         unsafe {
             const MAGIC: u64 = !0x0123456789abcdef;
-            let ptr = io_uring_ptr::from(MAGIC as usize as *mut c_void);
+            let ptr = io_uring_ptr::new(MAGIC as usize as *mut c_void);
             assert_eq!(ptr.ptr, MAGIC as usize as *mut c_void);
             #[cfg(target_pointer_width = "16")]
             assert_eq!(ptr.__pad16, 0);
@@ -1576,6 +1721,28 @@ mod tests {
             assert_eq!(ptr.__pad32, 0);
             let int = core::mem::transmute::<io_uring_ptr, u64>(ptr);
             assert_eq!(int, MAGIC as usize as u64);
+        }
+
+        // `io_uring_user_data` is a replacement for `u64`.
+        assert_eq_size!(io_uring_user_data, u64);
+        assert_eq_align!(io_uring_user_data, u64);
+
+        // Test that `u64`s and pointers are properly stored in
+        // io_uring_user_data`.
+        unsafe {
+            const MAGIC: u64 = !0x0123456789abcdef;
+            let user_data = io_uring_user_data::from_u64(MAGIC);
+            assert_eq!(user_data.u64_(), MAGIC);
+            assert_eq!(
+                core::mem::transmute::<io_uring_user_data, u64>(user_data),
+                MAGIC
+            );
+            let user_data = io_uring_user_data::from_ptr(MAGIC as usize as *mut c_void);
+            assert_eq!(user_data.ptr(), MAGIC as usize as *mut c_void);
+            assert_eq!(
+                core::mem::transmute::<io_uring_user_data, u64>(user_data),
+                MAGIC as usize as u64
+            );
         }
 
         check_renamed_type!(off_or_addr2_union, io_uring_sqe__bindgen_ty_1);
