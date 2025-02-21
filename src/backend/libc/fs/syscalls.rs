@@ -25,6 +25,8 @@ use crate::fs::FallocateFlags;
 use crate::fs::FlockOperation;
 #[cfg(any(linux_kernel, target_os = "freebsd"))]
 use crate::fs::MemfdFlags;
+#[cfg(any(linux_kernel, apple))]
+use crate::fs::RenameFlags;
 #[cfg(any(linux_kernel, target_os = "freebsd", target_os = "fuchsia"))]
 use crate::fs::SealFlags;
 #[cfg(not(any(
@@ -79,7 +81,7 @@ use {crate::fs::Advice, core::num::NonZeroU64};
 use {crate::fs::XattrFlags, core::mem::size_of, core::ptr::null_mut};
 #[cfg(linux_kernel)]
 use {
-    crate::fs::{RenameFlags, ResolveFlags, Statx, StatxFlags, CWD},
+    crate::fs::{ResolveFlags, Statx, StatxFlags, CWD},
     core::ptr::null,
 };
 
@@ -560,6 +562,47 @@ pub(crate) fn renameat2(
                 flags.bits(),
             ))
         }
+    }
+}
+
+#[cfg(apple)]
+pub(crate) fn renameat2(
+    old_dirfd: BorrowedFd<'_>,
+    old_path: &CStr,
+    new_dirfd: BorrowedFd<'_>,
+    new_path: &CStr,
+    flags: RenameFlags,
+) -> io::Result<()> {
+    unsafe {
+        // macOS < 10.12 lacks `renameatx_np`.
+        weak! {
+            fn renameatx_np(
+                c::c_int,
+                *const ffi::c_char,
+                c::c_int,
+                *const ffi::c_char,
+                c::c_uint
+            ) -> c::c_int
+        }
+        // If we have `renameatx_np`, use it.
+        if let Some(libc_renameatx_np) = renameatx_np.get() {
+            return ret(libc_renameatx_np(
+                borrowed_fd(old_dirfd),
+                c_str(old_path),
+                borrowed_fd(new_dirfd),
+                c_str(new_path),
+                flags.bits(),
+            ));
+        }
+        // Otherwise, see if we can use rename. There's no point in trying `renamex_np`
+        // because it was added in the same macOS release as `renameatx_np`.
+        if !flags.is_empty()
+            || borrowed_fd(old_dirfd) != c::AT_FDCWD
+            || borrowed_fd(new_dirfd) != c::AT_FDCWD
+        {
+            return Err(io::Errno::NOSYS);
+        }
+        ret(c::rename(c_str(old_path), c_str(new_path)))
     }
 }
 
