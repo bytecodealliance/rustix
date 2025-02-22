@@ -16,12 +16,12 @@
 use crate::backend;
 use crate::fd::OwnedFd;
 use backend::c;
-use backend::fd::{BorrowedFd, FromRawFd, RawFd};
+use backend::fd::{BorrowedFd, FromRawFd as _, RawFd};
 
 #[cfg(not(any(windows, target_os = "wasi")))]
 use {
     crate::io,
-    backend::fd::{AsFd, AsRawFd},
+    backend::fd::{AsFd, AsRawFd as _},
     core::mem::ManuallyDrop,
 };
 

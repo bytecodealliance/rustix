@@ -165,7 +165,7 @@ pub(crate) fn clock_gettime_dynamic(id: DynamicClockId<'_>) -> io::Result<Timesp
 
         #[cfg(linux_kernel)]
         DynamicClockId::Dynamic(fd) => {
-            use crate::fd::AsRawFd;
+            use crate::fd::AsRawFd as _;
             const CLOCKFD: i32 = 3;
             (!fd.as_raw_fd() << 3) | CLOCKFD
         }

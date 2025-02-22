@@ -3,7 +3,7 @@
 #[test]
 fn test_seek_holes() {
     use rustix::fs::{fstat, openat, seek, Mode, OFlags, SeekFrom, CWD};
-    use std::io::Write;
+    use std::io::Write as _;
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();

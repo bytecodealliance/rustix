@@ -1,7 +1,7 @@
 use std::fs::File;
 
 use rustix::fs::{open, openat, Mode, OFlags, CWD};
-use std::io::Write;
+use std::io::Write as _;
 
 #[test]
 fn test_open_tmpfile() {

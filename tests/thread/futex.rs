@@ -34,7 +34,7 @@ fn test_wait_wake() {
     }
 
     let other = std::thread::spawn({
-        let lock = lock.clone();
+        let lock = std::sync::Arc::clone(&lock);
         move || {
             std::thread::sleep(std::time::Duration::from_millis(1));
             lock.store(1, Ordering::SeqCst);
@@ -92,7 +92,7 @@ fn test_waitv_wake() {
     }
 
     let other = std::thread::spawn({
-        let lock = lock.clone();
+        let lock = std::sync::Arc::clone(&lock);
         move || {
             std::thread::sleep(std::time::Duration::from_millis(1));
             lock.store(1, Ordering::SeqCst);

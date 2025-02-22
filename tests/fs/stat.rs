@@ -1,12 +1,12 @@
 #[test]
 fn test_stat() {
     use rustix::fs::{fstat, lstat, stat, symlink};
-    use std::io::Write;
+    use std::io::Write as _;
 
     let tmp = tempfile::tempdir().unwrap();
 
     let mut w = std::fs::File::create(tmp.path().join("file")).unwrap();
-    write!(&mut w, "Hello, File!\n").unwrap();
+    writeln!(&mut w, "Hello, File!").unwrap();
 
     assert_eq!(fstat(&w).unwrap().st_size, 13);
     assert_eq!(stat(tmp.path().join("file")).unwrap().st_size, 13);

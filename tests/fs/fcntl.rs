@@ -1,8 +1,8 @@
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 #[test]
 fn test_fcntl_dupfd_cloexec() {
-    use rustix::fd::AsFd;
-    use std::os::unix::io::AsRawFd;
+    use rustix::fd::AsFd as _;
+    use std::os::unix::io::AsRawFd as _;
 
     let file = rustix::fs::openat(
         rustix::fs::CWD,

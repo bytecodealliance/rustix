@@ -60,7 +60,7 @@ use crate::utils::as_mut_ptr;
     target_os = "fuchsia",
     target_os = "illumos"
 ))]
-use alloc::borrow::ToOwned;
+use alloc::borrow::ToOwned as _;
 #[cfg(feature = "alloc")]
 #[cfg(any(
     linux_like,

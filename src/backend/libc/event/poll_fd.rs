@@ -1,6 +1,6 @@
 use crate::backend::c;
 use crate::backend::conv::borrowed_fd;
-use crate::backend::fd::{AsFd, AsRawFd, BorrowedFd, LibcFd};
+use crate::backend::fd::{AsFd, AsRawFd as _, BorrowedFd, LibcFd};
 #[cfg(windows)]
 use crate::backend::fd::{AsSocket, RawFd};
 use crate::ffi;

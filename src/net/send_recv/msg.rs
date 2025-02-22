@@ -620,7 +620,7 @@ impl<'a> MMsgHdr<'a> {
         addr: &'a SocketAddrAny,
         iov: &'a [IoSlice<'_>],
         control: &'a mut SendAncillaryBuffer<'_, '_, '_>,
-    ) -> MMsgHdr<'a> {
+    ) -> Self {
         // The reason we use `SocketAddrAny` instead of `SocketAddrArg` here,
         // and avoid `use_msghdr`, is that we need a pointer that will remain
         // valid for the duration of the `'a` lifetime. `SocketAddrAny` can
@@ -704,8 +704,8 @@ pub fn sendmsg<Fd: AsFd>(
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=sendmsg&section=2
 /// [illumos]: https://illumos.org/man/3SOCKET/sendmsg
 #[inline]
-pub fn sendmsg_addr(
-    socket: impl AsFd,
+pub fn sendmsg_addr<Fd: AsFd>(
+    socket: Fd,
     addr: &impl SocketAddrArg,
     iov: &[IoSlice<'_>],
     control: &mut SendAncillaryBuffer<'_, '_, '_>,
@@ -722,8 +722,8 @@ pub fn sendmsg_addr(
 /// [Linux]: https://man7.org/linux/man-pages/man2/sendmmsg.2.html
 #[inline]
 #[cfg(target_os = "linux")]
-pub fn sendmmsg(
-    socket: impl AsFd,
+pub fn sendmmsg<Fd: AsFd>(
+    socket: Fd,
     msgs: &mut [MMsgHdr<'_>],
     flags: SendFlags,
 ) -> io::Result<usize> {

@@ -10,7 +10,7 @@ use crate::ffi::CStr;
 use crate::io;
 use crate::path::{DecInt, SMALL_PATH_BUFFER_SIZE};
 #[cfg(feature = "alloc")]
-use alloc::borrow::ToOwned;
+use alloc::borrow::ToOwned as _;
 use core::mem::MaybeUninit;
 use core::{ptr, slice, str};
 #[cfg(feature = "std")]
@@ -18,7 +18,7 @@ use std::ffi::{OsStr, OsString};
 #[cfg(all(feature = "std", target_os = "hermit"))]
 use std::os::hermit::ext::ffi::{OsStrExt, OsStringExt};
 #[cfg(all(feature = "std", unix))]
-use std::os::unix::ffi::{OsStrExt, OsStringExt};
+use std::os::unix::ffi::{OsStrExt as _, OsStringExt as _};
 #[cfg(all(feature = "std", target_os = "vxworks"))]
 use std::os::vxworks::ext::ffi::{OsStrExt, OsStringExt};
 #[cfg(all(

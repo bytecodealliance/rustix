@@ -1,6 +1,6 @@
 #[cfg(feature = "system")]
 use {
-    std::io::{BufRead, Read},
+    std::io::{BufRead as _, Read as _},
     std::{fs, io},
 };
 

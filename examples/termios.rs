@@ -4,7 +4,7 @@
 #[cfg(all(not(windows), feature = "termios"))]
 fn main() -> std::io::Result<()> {
     use rustix::termios::{tcgetattr, tcsetattr, OptionalActions};
-    use std::io::{Read, Write};
+    use std::io::{Read as _, Write as _};
 
     let tty = std::io::stdin();
     let termios = tcgetattr(&tty)?;

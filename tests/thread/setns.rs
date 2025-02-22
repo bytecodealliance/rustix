@@ -1,8 +1,8 @@
 use std::fs::File;
 
-use rustix::fd::AsFd;
+use rustix::fd::AsFd as _;
 #[cfg(not(target_os = "android"))]
-use rustix::fd::{FromRawFd, OwnedFd, RawFd};
+use rustix::fd::{FromRawFd as _, OwnedFd, RawFd};
 #[cfg(not(target_os = "android"))]
 use rustix::thread::*;
 

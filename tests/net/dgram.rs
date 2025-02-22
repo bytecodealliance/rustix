@@ -364,8 +364,6 @@ fn net_dgram_v4_connect_sendto() {
     let peer_addr = from.expect("peer address should be available");
     let peer_addr = SocketAddrV4::try_from(peer_addr).unwrap();
 
-    let local_addr = SocketAddrV4::try_from(local_addr).unwrap();
-
     assert_eq!(peer_addr.ip(), local_addr.ip());
 }
 
@@ -400,8 +398,6 @@ fn net_dgram_v4_sendto() {
 
     let peer_addr = from.expect("peer address should be available");
     let peer_addr = SocketAddrV4::try_from(peer_addr).unwrap();
-
-    let local_addr = SocketAddrV4::try_from(local_addr).unwrap();
 
     assert_eq!(peer_addr.ip(), local_addr.ip());
 }
@@ -440,7 +436,6 @@ fn net_dgram_v6_connect_sendto() {
     let peer_addr = from.expect("peer address should be available");
     let peer_addr = SocketAddrV6::try_from(peer_addr).unwrap();
 
-    let local_addr = SocketAddrV6::try_from(local_addr).unwrap();
     assert_eq!(peer_addr.ip(), local_addr.ip());
 }
 
@@ -476,7 +471,6 @@ fn net_dgram_v6_sendto() {
     let peer_addr = from.expect("peer address should be available");
     let peer_addr = SocketAddrV6::try_from(peer_addr).unwrap();
 
-    let local_addr = SocketAddrV6::try_from(local_addr).unwrap();
     assert_eq!(peer_addr.ip(), local_addr.ip());
 }
 

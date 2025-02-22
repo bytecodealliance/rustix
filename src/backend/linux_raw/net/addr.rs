@@ -104,7 +104,7 @@ impl SocketAddrUnix {
     /// For an abstract address, return the identifier.
     #[inline]
     pub fn abstract_name(&self) -> Option<&[u8]> {
-        if let [0, ref bytes @ ..] = self.bytes()? {
+        if let [0, bytes @ ..] = self.bytes()? {
             Some(bytes)
         } else {
             None

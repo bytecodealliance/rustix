@@ -1,4 +1,4 @@
-use rustix::fs::FileTypeExt;
+use rustix::fs::FileTypeExt as _;
 use rustix::io;
 use rustix::termios::{isatty, ttyname};
 use std::fs::File;

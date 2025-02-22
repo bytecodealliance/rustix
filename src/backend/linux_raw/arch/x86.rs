@@ -13,7 +13,7 @@
 #![allow(dead_code)]
 
 use crate::backend::reg::{
-    ArgReg, FromAsm, RetReg, SyscallNumber, ToAsm, A0, A1, A2, A3, A4, A5, R0,
+    ArgReg, FromAsm, RetReg, SyscallNumber, ToAsm as _, A0, A1, A2, A3, A4, A5, R0,
 };
 use crate::backend::vdso_wrappers::SyscallType;
 use core::arch::asm;

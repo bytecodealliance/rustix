@@ -20,7 +20,7 @@ use crate::backend::conv::{
 #[cfg(target_pointer_width = "32")]
 use crate::backend::conv::{hi, lo};
 use crate::backend::{c, MAX_IOV};
-use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
+use crate::fd::{AsFd as _, BorrowedFd, OwnedFd, RawFd};
 use crate::io::{self, DupFlags, FdFlags, IoSlice, IoSliceMut, ReadWriteFlags};
 use crate::ioctl::{IoctlOutput, RawOpcode};
 use core::cmp;

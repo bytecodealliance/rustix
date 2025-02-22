@@ -1,4 +1,4 @@
-use rustix::fd::AsFd;
+use rustix::fd::AsFd as _;
 use rustix::time::{clock_gettime_dynamic, ClockId, DynamicClockId};
 
 #[test]

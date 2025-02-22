@@ -23,7 +23,7 @@ use crate::backend::conv::{ret, ret_c_int};
 #[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
 use crate::fd::BorrowedFd;
 #[cfg(target_os = "linux")]
-use crate::fd::{AsRawFd, OwnedFd, RawFd};
+use crate::fd::{AsRawFd as _, OwnedFd, RawFd};
 #[cfg(any(target_os = "linux", feature = "fs"))]
 use crate::ffi::CStr;
 #[cfg(feature = "fs")]

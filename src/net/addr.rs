@@ -116,14 +116,14 @@ pub(crate) unsafe fn call_with_sockaddr<A, R>(
 }
 
 // SAFETY: This just forwards to the inner `SocketAddrArg` implementations.
-unsafe impl SocketAddrArg for super::SocketAddr {
+unsafe impl SocketAddrArg for SocketAddr {
     unsafe fn with_sockaddr<R>(
         &self,
         f: impl FnOnce(*const SocketAddrOpaque, SocketAddrLen) -> R,
     ) -> R {
         match self {
-            SocketAddr::V4(v4) => v4.with_sockaddr(f),
-            SocketAddr::V6(v6) => v6.with_sockaddr(f),
+            Self::V4(v4) => v4.with_sockaddr(f),
+            Self::V6(v6) => v6.with_sockaddr(f),
         }
     }
 }

@@ -5,7 +5,7 @@
 use rustix::fs::{openat, Mode, OFlags, CWD};
 use rustix::pty::*;
 use std::fs::File;
-use std::io::{Read, Write};
+use std::io::{Read as _, Write as _};
 
 #[test]
 fn openpty_basic() {

@@ -16,7 +16,7 @@ fn test_int_setter() {
     use rustix::fs::{open, Mode, OFlags};
     use rustix::ioctl::{ioctl, BadOpcode, IntegerSetter, RawOpcode};
 
-    const TUNSETOFFLOAD: RawOpcode = 0x400454D0;
+    const TUNSETOFFLOAD: RawOpcode = 0x4004_54D0;
 
     let tun = open("/dev/net/tun", OFlags::RDWR, Mode::empty()).unwrap();
 

@@ -31,7 +31,7 @@ use core::sync::atomic::AtomicU32;
 
 use crate::backend::thread::futex::Operation;
 use crate::backend::thread::syscalls::{futex_timeout, futex_val2};
-use crate::fd::{FromRawFd, OwnedFd, RawFd};
+use crate::fd::{FromRawFd as _, OwnedFd, RawFd};
 use crate::utils::option_as_ptr;
 use crate::{backend, io};
 

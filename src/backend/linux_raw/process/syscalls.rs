@@ -12,7 +12,7 @@ use crate::backend::conv::{
     by_mut, by_ref, c_int, c_uint, negative_pid, pass_usize, raw_fd, ret, ret_c_int,
     ret_c_int_infallible, ret_infallible, ret_owned_fd, zero,
 };
-use crate::fd::{AsRawFd, BorrowedFd, OwnedFd, RawFd};
+use crate::fd::{AsRawFd as _, BorrowedFd, OwnedFd, RawFd};
 #[cfg(feature = "fs")]
 use crate::ffi::CStr;
 use crate::io;

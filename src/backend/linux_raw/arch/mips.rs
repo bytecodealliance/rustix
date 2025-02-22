@@ -7,7 +7,7 @@
 //! however we use `__NR_pipe2` instead to avoid having to implement it.
 
 use crate::backend::reg::{
-    ArgReg, FromAsm, RetReg, SyscallNumber, ToAsm, A0, A1, A2, A3, A4, A5, A6, R0,
+    ArgReg, FromAsm, RetReg, SyscallNumber, ToAsm as _, A0, A1, A2, A3, A4, A5, A6, R0,
 };
 use core::arch::asm;
 

@@ -19,7 +19,7 @@ use crate::net::{
     SocketAddrV6, SocketType, UCred,
 };
 #[cfg(feature = "alloc")]
-use alloc::borrow::ToOwned;
+use alloc::borrow::ToOwned as _;
 #[cfg(feature = "alloc")]
 use alloc::string::String;
 use core::mem::{size_of, MaybeUninit};

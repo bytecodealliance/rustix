@@ -1,4 +1,4 @@
-use rustix::fd::AsRawFd;
+use rustix::fd::AsRawFd as _;
 use rustix::termios::{isatty, tcgetwinsize};
 use tempfile::{tempdir, TempDir};
 
@@ -48,11 +48,6 @@ fn stdout_stderr_terminals() {
 #[test]
 #[cfg(feature = "stdio")]
 fn stdio_descriptors() {
-    #[cfg(unix)]
-    use std::os::unix::io::AsRawFd;
-    #[cfg(target_os = "wasi")]
-    use std::os::wasi::io::AsRawFd;
-
     assert_eq!(
         rustix::stdio::stdin().as_raw_fd(),
         std::io::stdin().as_raw_fd()

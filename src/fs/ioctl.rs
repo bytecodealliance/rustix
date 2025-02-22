@@ -12,7 +12,7 @@ use {
 use bitflags::bitflags;
 
 #[cfg(all(linux_kernel, not(any(target_arch = "sparc", target_arch = "sparc64"))))]
-use crate::fd::{AsRawFd, BorrowedFd};
+use crate::fd::{AsRawFd as _, BorrowedFd};
 
 /// `ioctl(fd, BLKSSZGET)`—Returns the logical block size of a block device.
 ///

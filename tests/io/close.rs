@@ -1,4 +1,4 @@
-use rustix::fd::IntoRawFd;
+use rustix::fd::IntoRawFd as _;
 
 #[cfg(any(unix, target_os = "wasi"))]
 #[test]
