@@ -106,3 +106,26 @@ macro_rules! check_struct {
         $(check_struct_field!($name, $field));*
     };
 }
+
+/// For the case of renaming, check all fields of a struct.
+macro_rules! check_renamed_struct {
+    ($to_struct:ident, $from_struct:ident, $($field:ident),*) => {
+        // Check the size and alignment.
+        check_renamed_type!($to_struct, $from_struct);
+
+        // Check that we have all the fields.
+        if false {
+            #[allow(unreachable_code)]
+            let _test = $to_struct {
+                $($field: panic!()),*
+            };
+            #[allow(unreachable_code)]
+            let _test = c::$from_struct {
+                $($field: panic!()),*
+            };
+        }
+
+        // Check that the fields have the right sizes and offsets.
+        $(check_renamed_struct_field!($to_struct, $from_struct, $field));*
+    };
+}
