@@ -20,7 +20,7 @@ fn test_int_setter() {
 
     let tun = open("/dev/net/tun", OFlags::RDWR, Mode::empty()).unwrap();
 
-    // SAFETY: TUNSETOFFLOAD is defined for TUN.
+    // SAFETY: `TUNSETOFFLOAD` is defined for TUN.
     unsafe {
         let code = IntegerSetter::<BadOpcode<{ TUNSETOFFLOAD }>>::new_usize(0);
         assert!(ioctl(&tun, code).is_err());

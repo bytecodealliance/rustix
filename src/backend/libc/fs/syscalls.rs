@@ -590,8 +590,9 @@ pub(crate) fn renameat2(
                 flags.bits(),
             ));
         }
-        // Otherwise, see if we can use rename. There's no point in trying `renamex_np`
-        // because it was added in the same macOS release as `renameatx_np`.
+        // Otherwise, see if we can use `rename`. There's no point in trying
+        // `renamex_np` because it was added in the same macOS release as
+        // `renameatx_np`.
         if !flags.is_empty()
             || borrowed_fd(old_dirfd) != c::AT_FDCWD
             || borrowed_fd(new_dirfd) != c::AT_FDCWD

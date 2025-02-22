@@ -1,15 +1,12 @@
-use rustix::fs::Stat;
+use rustix::fs::{OFlags, Stat};
 
 fn same(a: &Stat, b: &Stat) -> bool {
     a.st_ino == b.st_ino && a.st_dev == b.st_dev
 }
 
-#[cfg(test)]
-use rustix::fs::OFlags;
-
-#[cfg(all(test, linux_kernel))]
+#[cfg(linux_kernel)]
 const DIR_OPEN_FLAGS: OFlags = OFlags::RDONLY.union(OFlags::PATH);
-#[cfg(all(test, apple))]
+#[cfg(apple)]
 const DIR_OPEN_FLAGS: OFlags = OFlags::RDONLY;
 
 #[test]

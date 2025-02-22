@@ -12,7 +12,7 @@ fn test_fcntl_dupfd_cloexec() {
     )
     .unwrap();
 
-    let new = rustix::fs::fcntl_dupfd_cloexec(&file, 700).unwrap();
+    let new = rustix::io::fcntl_dupfd_cloexec(&file, 700).unwrap();
     assert_eq!(new.as_fd().as_raw_fd(), 700);
 }
 

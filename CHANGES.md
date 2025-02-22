@@ -243,7 +243,15 @@ pointer provenance.
 [`sigmask`]: https://docs.rs/rustix/1.0.0/rustix/io_uring/struct.io_uring_getevents_arg.html#structfield.sigmask
 [`ts`]: https://docs.rs/rustix/1.0.0/rustix/io_uring/struct.io_uring_getevents_arg.html#structfield.ts
 [`rustix::io_uring::getevents_arg`]: https://docs.rs/rustix/1.0.0/rustix/io_uring/struct.io_uring_getevents_arg.html
-[`rustix::io_uring::io_uring_ptr`]: https://docs.rs/rustix/1.0.0-prerelease.0/rustix/io_uring/struct.io_uring_ptr.html
+[`rustix::io_uring::io_uring_ptr`]: https://docs.rs/rustix/1.0.0/rustix/io_uring/struct.io_uring_ptr.html
+
+The aliases for [`fcntl_dupfd_cloexec`], [`fcntl_getfd`], and [`fcntl_setfd`]
+in `rustix::fs` are removed; these functions are just available in
+`rustix::io` now.
+
+[`fcntl_dupfd_cloexec`]: https://docs.rs/rustix/1.0.0/rustix/io/fn.fcntl_dupfd_cloexec.html
+[`fcntl_getfd`]: https://docs.rs/rustix/1.0.0/rustix/io/fn.fcntl_getfd.html
+[`fcntl_setfd`]: https://docs.rs/rustix/1.0.0/rustix/io/fn.fcntl_setfd.html
 
 [`SocketAddrXdp`] no longer has a shared umem field. A new
 [`SocketAddrXdpWithSharedUmem`] is added for the purpose of calling `bind` and

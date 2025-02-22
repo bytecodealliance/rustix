@@ -99,7 +99,7 @@ pub unsafe trait SocketAddrArg {
     }
 }
 
-/// Helper for implementing SocketAddrArg::with_sockaddr
+/// Helper for implementing `SocketAddrArg::with_sockaddr`.
 ///
 /// # Safety
 ///

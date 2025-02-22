@@ -85,3 +85,37 @@ impl SiginfoExt for siginfo_t {
             ._status
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_libc_correspondence() {
+        for status in [
+            0,
+            1,
+            63,
+            64,
+            65,
+            127,
+            128,
+            129,
+            255,
+            256,
+            257,
+            4095,
+            4096,
+            4097,
+            u32::MAX,
+        ] {
+            assert_eq!(WIFSTOPPED(status), libc::WIFSTOPPED(status as i32));
+            assert_eq!(WSTOPSIG(status), libc::WSTOPSIG(status as i32) as u32);
+            assert_eq!(WIFCONTINUED(status), libc::WIFCONTINUED(status as i32));
+            assert_eq!(WIFSIGNALED(status), libc::WIFSIGNALED(status as i32));
+            assert_eq!(WTERMSIG(status), libc::WTERMSIG(status as i32) as u32);
+            assert_eq!(WIFEXITED(status), libc::WIFEXITED(status as i32));
+            assert_eq!(WEXITSTATUS(status), libc::WEXITSTATUS(status as i32) as u32);
+        }
+    }
+}
