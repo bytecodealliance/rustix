@@ -863,8 +863,8 @@ mod tests {
             sa_flags,
             sa_mask
         );
-        assert_eq_size!(KernelSigactionFlags, core::ffi::c_ulong);
-        assert_eq_align!(KernelSigactionFlags, core::ffi::c_ulong);
+        assert_eq_size!(KernelSigactionFlags, crate::ffi::c_ulong);
+        assert_eq_align!(KernelSigactionFlags, crate::ffi::c_ulong);
         check_renamed_type!(KernelSigrestore, __sigrestore_t);
         check_renamed_type!(KernelSighandler, __kernel_sighandler_t);
 
