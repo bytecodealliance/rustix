@@ -100,6 +100,10 @@ macro_rules! check_struct {
             let _test = $name {
                 $($field: panic!()),*
             };
+            #[allow(unreachable_code)]
+            let _test = c::$name {
+                $($field: panic!()),*
+            };
         }
 
         // Check that the fields have the right sizes and offsets.

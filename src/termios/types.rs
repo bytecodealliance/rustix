@@ -1391,11 +1391,7 @@ fn termios_layouts() {
     assert_eq_size!(u8, libc::cc_t);
     assert_eq_size!(types::tcflag_t, libc::tcflag_t);
 
-    check_renamed_type!(Winsize, winsize);
-    check_renamed_struct_field!(Winsize, winsize, ws_row);
-    check_renamed_struct_field!(Winsize, winsize, ws_col);
-    check_renamed_struct_field!(Winsize, winsize, ws_xpixel);
-    check_renamed_struct_field!(Winsize, winsize, ws_ypixel);
+    check_renamed_struct!(Winsize, winsize, ws_row, ws_col, ws_xpixel, ws_ypixel);
 
     // On platforms with a termios/termios2 split, check `termios`.
     #[cfg(linux_raw)]
