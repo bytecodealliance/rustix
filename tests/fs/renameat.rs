@@ -4,9 +4,17 @@ fn same(a: &Stat, b: &Stat) -> bool {
     a.st_ino == b.st_ino && a.st_dev == b.st_dev
 }
 
+#[cfg(test)]
+use rustix::fs::OFlags;
+
+#[cfg(all(test, linux_kernel))]
+const DIR_OPEN_FLAGS: OFlags = OFlags::RDONLY.union(OFlags::PATH);
+#[cfg(all(test, apple))]
+const DIR_OPEN_FLAGS: OFlags = OFlags::RDONLY;
+
 #[test]
 fn test_rename() {
-    use rustix::fs::{access, open, rename, stat, Access, Mode, OFlags};
+    use rustix::fs::{access, open, rename, stat, Access, Mode};
 
     let tmp = tempfile::tempdir().unwrap();
 
@@ -29,19 +37,13 @@ fn test_rename() {
     access(tmp.path().join("bar"), Access::EXISTS).unwrap();
 }
 
-#[cfg(linux_kernel)]
+#[cfg(any(linux_kernel, apple))]
 #[test]
 fn test_renameat() {
-    use rustix::fs::{accessat, openat, renameat, statat, Access, AtFlags, Mode, OFlags, CWD};
+    use rustix::fs::{accessat, openat, renameat, statat, Access, AtFlags, Mode, CWD};
 
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(
-        CWD,
-        tmp.path(),
-        OFlags::RDONLY | OFlags::PATH,
-        Mode::empty(),
-    )
-    .unwrap();
+    let dir = openat(CWD, tmp.path(), DIR_OPEN_FLAGS, Mode::empty()).unwrap();
 
     let _ = openat(&dir, "file", OFlags::CREATE | OFlags::WRONLY, Mode::empty()).unwrap();
     let before = statat(&dir, "file", AtFlags::empty()).unwrap();
@@ -59,19 +61,13 @@ fn test_renameat() {
 
 /// Like `test_renameat` but the file already exists, so `renameat`
 /// overwrites it.
-#[cfg(linux_kernel)]
+#[cfg(any(linux_kernel, apple))]
 #[test]
 fn test_renameat_overwrite() {
-    use rustix::fs::{openat, renameat, statat, AtFlags, Mode, OFlags, CWD};
+    use rustix::fs::{openat, renameat, statat, AtFlags, Mode, CWD};
 
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(
-        CWD,
-        tmp.path(),
-        OFlags::RDONLY | OFlags::PATH,
-        Mode::empty(),
-    )
-    .unwrap();
+    let dir = openat(CWD, tmp.path(), DIR_OPEN_FLAGS, Mode::empty()).unwrap();
 
     let _ = openat(&dir, "file", OFlags::CREATE | OFlags::WRONLY, Mode::empty()).unwrap();
     let _ = openat(&dir, "bar", OFlags::CREATE | OFlags::WRONLY, Mode::empty()).unwrap();
@@ -81,19 +77,13 @@ fn test_renameat_overwrite() {
     assert!(same(&before, &renamed));
 }
 
-#[cfg(linux_kernel)]
+#[cfg(any(linux_kernel, apple))]
 #[test]
 fn test_renameat_with() {
-    use rustix::fs::{openat, renameat_with, statat, AtFlags, Mode, OFlags, RenameFlags, CWD};
+    use rustix::fs::{openat, renameat_with, statat, AtFlags, Mode, RenameFlags, CWD};
 
     let tmp = tempfile::tempdir().unwrap();
-    let dir = openat(
-        CWD,
-        tmp.path(),
-        OFlags::RDONLY | OFlags::PATH,
-        Mode::empty(),
-    )
-    .unwrap();
+    let dir = openat(CWD, tmp.path(), DIR_OPEN_FLAGS, Mode::empty()).unwrap();
 
     let _ = openat(&dir, "file", OFlags::CREATE | OFlags::WRONLY, Mode::empty()).unwrap();
     let before = statat(&dir, "file", AtFlags::empty()).unwrap();
@@ -115,7 +105,7 @@ fn test_renameat_with() {
     )
     .unwrap();
 
-    #[cfg(all(target_os = "linux", target_env = "gnu"))]
+    #[cfg(any(apple, all(target_os = "linux", target_env = "gnu")))]
     {
         let green = statat(&dir, "green", AtFlags::empty()).unwrap();
 

@@ -14,7 +14,7 @@ use crate::fs::Access;
 use crate::fs::AtFlags;
 #[cfg(apple)]
 use crate::fs::CloneFlags;
-#[cfg(linux_kernel)]
+#[cfg(any(linux_kernel, apple))]
 use crate::fs::RenameFlags;
 #[cfg(not(target_os = "espidf"))]
 use crate::fs::Stat;
@@ -277,9 +277,10 @@ pub fn renameat<P: path::Arg, Q: path::Arg, PFd: AsFd, QFd: AsFd>(
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/renameat2.2.html
-#[cfg(linux_kernel)]
+#[cfg(any(apple, linux_kernel))]
 #[inline]
 #[doc(alias = "renameat2")]
+#[doc(alias = "renameatx_np")]
 pub fn renameat_with<P: path::Arg, Q: path::Arg, PFd: AsFd, QFd: AsFd>(
     old_dirfd: PFd,
     old_path: P,
