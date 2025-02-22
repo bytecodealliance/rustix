@@ -14,8 +14,8 @@ use core::fmt;
 use core::mem::{size_of, MaybeUninit};
 use core::num::NonZeroU32;
 
-/// Temporary buffer for creating a `SocketAddrAny` from a
-/// syscall that writes to a `sockaddr_t` and `socklen_t`
+/// Temporary buffer for creating a `SocketAddrAny` from a syscall that writes
+/// to a `sockaddr_t` and `socklen_t`
 ///
 /// Unlike `SocketAddrAny`, this does not maintain the invariant that `len`
 /// bytes are initialized.
@@ -37,8 +37,8 @@ impl SocketAddrBuf {
     ///
     /// # Safety
     ///
-    /// A valid address must have been written into `self.storage`
-    /// and its length written into `self.len`.
+    /// A valid address must have been written into `self.storage` and its
+    /// length written into `self.len`.
     #[inline]
     pub(crate) unsafe fn into_any(self) -> SocketAddrAny {
         SocketAddrAny::new(self.storage, bitcast!(self.len))
@@ -51,9 +51,8 @@ impl SocketAddrBuf {
     ///
     /// # Safety
     ///
-    /// Either valid address must have been written into `self.storage`
-    /// and its length written into `self.len`, or `self.len` must
-    /// have been set to 0.
+    /// Either valid address must have been written into `self.storage` and its
+    /// length written into `self.len`, or `self.len` must have been set to 0.
     #[inline]
     pub(crate) unsafe fn into_any_option(self) -> Option<SocketAddrAny> {
         let len = bitcast!(self.len);
@@ -85,8 +84,8 @@ pub struct SocketAddrAny {
 }
 
 impl SocketAddrAny {
-    /// Creates a socket address from `storage`, which is initialized for
-    /// `len` bytes.
+    /// Creates a socket address from `storage`, which is initialized for `len`
+    /// bytes.
     ///
     /// # Panics
     ///

@@ -236,17 +236,18 @@ impl fmt::Debug for SocketAddrUnix {
     }
 }
 
-/// `struct sockaddr_storage`.
+/// `struct sockaddr_storage`
 ///
 /// This type is guaranteed to be large enough to hold any encoded socket
 /// address.
 #[repr(transparent)]
 #[derive(Copy, Clone)]
+#[doc(alias = "sockaddr_storage")]
 pub struct SocketAddrStorage(c::sockaddr_storage);
 
 impl SocketAddrStorage {
     /// Return a socket addr storage initialized to all zero bytes. The
-    /// `sa_family` is set to `AddressFamily::UNSPEC`.
+    /// `sa_family` is set to [`AddressFamily::UNSPEC`].
     pub fn zeroed() -> Self {
         assert_eq!(c::AF_UNSPEC, 0);
         // SAFETY: `sockaddr_storage` is meant to be zero-initializable.
@@ -264,7 +265,7 @@ impl SocketAddrStorage {
     }
 
     /// Clear the `sa_family` of this socket address to
-    /// `AddressFamily::UNSPEC`.
+    /// [`AddressFamily::UNSPEC`].
     pub fn clear_family(&mut self) {
         // SAFETY: `self.0` is a `sockaddr_storage` so it has enough space.
         unsafe {

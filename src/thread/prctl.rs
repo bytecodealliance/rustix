@@ -106,7 +106,7 @@ const SECCOMP_MODE_DISABLED: i32 = 0;
 const SECCOMP_MODE_STRICT: i32 = 1;
 const SECCOMP_MODE_FILTER: i32 = 2;
 
-/// `SECCOMP_MODE_*`.
+/// `SECCOMP_MODE_*`
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[repr(i32)]
 pub enum SecureComputingMode {
@@ -416,7 +416,7 @@ pub fn remove_capability_from_bounding_set(capability: Capability) -> io::Result
 const PR_GET_SECUREBITS: c_int = 27;
 
 bitflags! {
-    /// `SECBIT_*`.
+    /// `SECBIT_*`
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct CapabilitiesSecureBits: u32 {
@@ -899,7 +899,7 @@ const PR_SCHED_CORE_SCOPE_THREAD: u32 = 0;
 const PR_SCHED_CORE_SCOPE_THREAD_GROUP: u32 = 1;
 const PR_SCHED_CORE_SCOPE_PROCESS_GROUP: u32 = 2;
 
-/// `PR_SCHED_CORE_SCOPE_*`.
+/// `PR_SCHED_CORE_SCOPE_*`
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[repr(u32)]
 pub enum CoreSchedulingScope {
@@ -930,7 +930,7 @@ impl TryFrom<u32> for CoreSchedulingScope {
 /// # References
 ///  - [`prctl(PR_SCHED_CORE,PR_SCHED_CORE_GET,…)`]
 ///
-/// [`prctl(PR_SCHED_CORE,PR_SCHED_CORE_GET,…)`]: https://www.kernel.org/doc/html/v6.10/admin-guide/hw-vuln/core-scheduling.html
+/// [`prctl(PR_SCHED_CORE,PR_SCHED_CORE_GET,…)`]: https://www.kernel.org/doc/html/v6.13/admin-guide/hw-vuln/core-scheduling.html
 #[inline]
 pub fn core_scheduling_cookie(pid: Pid, scope: CoreSchedulingScope) -> io::Result<u64> {
     let mut value: MaybeUninit<u64> = MaybeUninit::uninit();
@@ -953,7 +953,7 @@ const PR_SCHED_CORE_CREATE: usize = 1;
 /// # References
 ///  - [`prctl(PR_SCHED_CORE,PR_SCHED_CORE_CREATE,…)`]
 ///
-/// [`prctl(PR_SCHED_CORE,PR_SCHED_CORE_CREATE,…)`]: https://www.kernel.org/doc/html/v6.10/admin-guide/hw-vuln/core-scheduling.html
+/// [`prctl(PR_SCHED_CORE,PR_SCHED_CORE_CREATE,…)`]: https://www.kernel.org/doc/html/v6.13/admin-guide/hw-vuln/core-scheduling.html
 #[inline]
 pub fn create_core_scheduling_cookie(pid: Pid, scope: CoreSchedulingScope) -> io::Result<()> {
     unsafe {
@@ -975,7 +975,7 @@ const PR_SCHED_CORE_SHARE_TO: usize = 2;
 /// # References
 ///  - [`prctl(PR_SCHED_CORE,PR_SCHED_CORE_SHARE_TO,…)`]
 ///
-/// [`prctl(PR_SCHED_CORE,PR_SCHED_CORE_SHARE_TO,…)`]: https://www.kernel.org/doc/html/v6.10/admin-guide/hw-vuln/core-scheduling.html
+/// [`prctl(PR_SCHED_CORE,PR_SCHED_CORE_SHARE_TO,…)`]: https://www.kernel.org/doc/html/v6.13/admin-guide/hw-vuln/core-scheduling.html
 #[inline]
 pub fn push_core_scheduling_cookie(pid: Pid, scope: CoreSchedulingScope) -> io::Result<()> {
     unsafe {
@@ -997,7 +997,7 @@ const PR_SCHED_CORE_SHARE_FROM: usize = 3;
 /// # References
 ///  - [`prctl(PR_SCHED_CORE,PR_SCHED_CORE_SHARE_FROM,…)`]
 ///
-/// [`prctl(PR_SCHED_CORE,PR_SCHED_CORE_SHARE_FROM,…)`]: https://www.kernel.org/doc/html/v6.10/admin-guide/hw-vuln/core-scheduling.html
+/// [`prctl(PR_SCHED_CORE,PR_SCHED_CORE_SHARE_FROM,…)`]: https://www.kernel.org/doc/html/v6.13/admin-guide/hw-vuln/core-scheduling.html
 #[inline]
 pub fn pull_core_scheduling_cookie(pid: Pid, scope: CoreSchedulingScope) -> io::Result<()> {
     unsafe {

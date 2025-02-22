@@ -3,9 +3,12 @@
 //! # Safety
 //!
 //! Some signal numbers are reserved by the libc.
-//! [`Signal::from_raw_unchecked`] allows constructing `Signal` values with
-//! arbitrary values. Users must avoid using these values to send or
-//! consume signals in any way.
+//! [`Signal::from_raw_unchecked`] and [`Signal::from_raw_nonzero_unchecked`]
+//! allow constructing `Signal` values with arbitrary values. Users must avoid
+//! using reserved values to send, consume, or block any signals or alter any
+//! signal handlers.
+//!
+//! See the individual functions' safety comments for more details.
 #![allow(unsafe_code)]
 
 use crate::backend::c;
@@ -39,8 +42,8 @@ impl Signal {
     /// `SIGTRAP`
     pub const TRAP: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGTRAP) });
     /// `SIGABRT`, aka `SIGIOT`
-    #[doc(alias = "Iot")]
-    #[doc(alias = "Abrt")]
+    #[doc(alias = "IOT")]
+    #[doc(alias = "ABRT")]
     pub const ABORT: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGABRT) });
     /// `SIGBUS`
     pub const BUS: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGBUS) });
@@ -59,7 +62,7 @@ impl Signal {
     /// `SIGPIPE`
     pub const PIPE: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGPIPE) });
     /// `SIGALRM`
-    #[doc(alias = "Alrm")]
+    #[doc(alias = "ALRM")]
     pub const ALARM: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGALRM) });
     /// `SIGTERM`
     pub const TERM: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGTERM) });
@@ -87,7 +90,7 @@ impl Signal {
     pub const STKFLT: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGSTKFLT) });
     /// `SIGCHLD`
     #[cfg(not(target_os = "vita"))]
-    #[doc(alias = "Chld")]
+    #[doc(alias = "CHLD")]
     pub const CHILD: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGCHLD) });
     /// `SIGCONT`
     #[cfg(not(target_os = "vita"))]
@@ -115,7 +118,7 @@ impl Signal {
     pub const XFSZ: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGXFSZ) });
     /// `SIGVTALRM`
     #[cfg(not(target_os = "vita"))]
-    #[doc(alias = "Vtalrm")]
+    #[doc(alias = "VTALRM")]
     pub const VTALARM: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGVTALRM) });
     /// `SIGPROF`
     #[cfg(not(target_os = "vita"))]
@@ -124,15 +127,15 @@ impl Signal {
     #[cfg(not(target_os = "vita"))]
     pub const WINCH: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGWINCH) });
     /// `SIGIO`, aka `SIGPOLL`
-    #[doc(alias = "Poll")]
+    #[doc(alias = "POLL")]
     #[cfg(not(any(target_os = "haiku", target_os = "vita")))]
     pub const IO: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGIO) });
     /// `SIGPWR`
     #[cfg(not(any(bsd, target_os = "haiku", target_os = "hurd", target_os = "vita")))]
-    #[doc(alias = "Pwr")]
+    #[doc(alias = "PWR")]
     pub const POWER: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGPWR) });
     /// `SIGSYS`, aka `SIGUNUSED`
-    #[doc(alias = "Unused")]
+    #[doc(alias = "UNUSED")]
     pub const SYS: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGSYS) });
     /// `SIGEMT`
     #[cfg(any(
@@ -158,7 +161,7 @@ impl Signal {
     pub const INFO: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGINFO) });
     /// `SIGTHR`
     #[cfg(target_os = "freebsd")]
-    #[doc(alias = "Lwp")]
+    #[doc(alias = "LWP")]
     pub const THR: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGTHR) });
     /// `SIGLIBRT`
     #[cfg(target_os = "freebsd")]
@@ -182,9 +185,10 @@ impl Signal {
 
     /// `SIGRTMIN + n`—Convert a “real-time” signal offset into a `Signal`.
     ///
-    /// This function adds `n` to the libc `SIGRTMIN` value to construct the
-    /// raw signal value. If the result is greater than the platform `SIGRTMAX`
-    /// value, it returns `None`.
+    /// This function adds `n` to `rt_min()` to construct the raw signal value.
+    /// If the result is greater than `rt_max()`, it returns `None`. This
+    /// prevents it from returning `Signal` values which would be reserved by
+    /// the libc for internal use.
     #[doc(alias = "SIGRTMIN", alias = "SIGRTMAX")]
     #[cfg(feature = "use-libc-sigrt")]
     #[cfg_attr(docsrs, doc(cfg(feature = "use-libc-sigrt")))]
@@ -203,6 +207,10 @@ impl Signal {
 
     /// `SIGRTMIN`—Return the minimum “real-time” signal value.
     ///
+    /// This returns the libc `SIGRTMIN` value, which may be different from the
+    /// OS kernel `SIGRTMIN` value to allow libc to reserve some signals for
+    /// internal use.
+    ///
     /// Use [`Signal::rt`] to construct `SIGRTMIN + n` values.
     #[doc(alias = "SIGRTMIN")]
     #[cfg(feature = "use-libc-sigrt")]
@@ -214,6 +222,10 @@ impl Signal {
     }
 
     /// `SIGRTMAX`—Return the maximum “real-time” signal value.
+    ///
+    /// This returns the libc `SIGRTMAX` value, which may be different from the
+    /// OS kernel `SIGRTMAX` value to allow libc to reserve some signals for
+    /// internal use.
     #[doc(alias = "SIGRTMAX")]
     #[cfg(feature = "use-libc-sigrt")]
     #[cfg_attr(docsrs, doc(cfg(feature = "use-libc-sigrt")))]
@@ -224,6 +236,9 @@ impl Signal {
     }
 
     /// Convert a raw signal number into a `Signal`.
+    ///
+    /// Returns `None` if the signal value is unrecognized, out of range, or
+    /// reserved for libc.
     #[cfg(feature = "use-libc-sigrt")]
     #[cfg_attr(docsrs, doc(cfg(feature = "use-libc-sigrt")))]
     #[cfg(any(linux_like, solarish, target_os = "hurd"))]
@@ -236,6 +251,9 @@ impl Signal {
     }
 
     /// Convert a raw non-zero signal number into a `Signal`.
+    ///
+    /// Returns `None` if the signal value is unrecognized, out of range, or
+    /// reserved for libc.
     #[cfg(feature = "use-libc-sigrt")]
     #[cfg_attr(docsrs, doc(cfg(feature = "use-libc-sigrt")))]
     #[cfg(any(linux_like, solarish, target_os = "hurd"))]
@@ -358,8 +376,8 @@ impl Signal {
     /// from [`SIGRTMIN`] to [`SIGRTMAX`] inclusive, then the resulting
     /// `Signal` must not be used to send any signals.
     ///
-    /// [`SIGRTMIN`]: https://docs.rs/libc/latest/libc/fn.SIGRTMIN.html
-    /// [`SIGRTMAX`]: https://docs.rs/libc/latest/libc/fn.SIGRTMAX.html
+    /// [`SIGRTMIN`]: https://docs.rs/libc/*/libc/fn.SIGRTMIN.html
+    /// [`SIGRTMAX`]: https://docs.rs/libc/*/libc/fn.SIGRTMAX.html
     #[inline]
     pub const unsafe fn from_raw_unchecked(sig: i32) -> Self {
         Self::from_raw_nonzero_unchecked(NonZeroI32::new_unchecked(sig))
@@ -377,8 +395,8 @@ impl Signal {
     /// from [`SIGRTMIN`] to [`SIGRTMAX`] inclusive, then the resulting
     /// `Signal` must not be used to send any signals.
     ///
-    /// [`SIGRTMIN`]: https://docs.rs/libc/latest/libc/fn.SIGRTMIN.html
-    /// [`SIGRTMAX`]: https://docs.rs/libc/latest/libc/fn.SIGRTMAX.html
+    /// [`SIGRTMIN`]: https://docs.rs/libc/*/libc/fn.SIGRTMIN.html
+    /// [`SIGRTMAX`]: https://docs.rs/libc/*/libc/fn.SIGRTMAX.html
     #[inline]
     pub const unsafe fn from_raw_nonzero_unchecked(sig: NonZeroI32) -> Self {
         Self(sig)

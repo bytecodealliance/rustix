@@ -83,7 +83,7 @@ pub use linux_raw_sys::general::stack_t as Stack;
 #[cfg(linux_raw)]
 pub use linux_raw_sys::general::sigset_t as SigSet;
 
-/// `kernel_sigset_t`.
+/// `kernel_sigset_t`
 ///
 /// Undefined behavior could happen in some functions if `KernelSigSet` ever
 /// contains signal numbers in the range from `KERNEL_SIGRTMIN` to the libc

@@ -429,17 +429,17 @@ fn test_sockopts_ipv6() {
         Err(err) => panic!("{:?}", err),
     };
 
-    // Set the IPV4 V6OONLY value.
+    // Set the IPv4 V6OONLY value.
     let v6only = rustix::net::sockopt::ipv6_v6only(&s).unwrap();
     sockopt::set_ipv6_v6only(&s, !v6only).unwrap();
 
-    // Check that the IPV6 V6ONLY value is set.
+    // Check that the IPv6 V6ONLY value is set.
     assert_eq!(sockopt::ipv6_v6only(&s).unwrap(), !v6only);
 
-    // Set the IPV6 multicast loop value.
+    // Set the IPv6 multicast loop value.
     match sockopt::set_ipv6_multicast_loop(&s, false) {
         Ok(()) => {
-            // Check that the IPV6 multicast loop value is set.
+            // Check that the IPv6 multicast loop value is set.
             match sockopt::ipv6_multicast_loop(&s) {
                 Ok(multicast_loop) => assert!(!multicast_loop),
                 Err(err) => panic!("{:?}", err),
@@ -451,16 +451,16 @@ fn test_sockopts_ipv6() {
         Err(err) => panic!("{:?}", err),
     }
 
-    // Set the IPV6 unicast hops value to the default value.
+    // Set the IPv6 unicast hops value to the default value.
     sockopt::set_ipv6_unicast_hops(&s, None).unwrap();
 
-    // Check that the IPV6 unicast hops value is set.
+    // Check that the IPv6 unicast hops value is set.
     assert_ne!(sockopt::ipv6_unicast_hops(&s).unwrap(), 0);
 
-    // Set the IPV6 unicast hops value to a specific value.
+    // Set the IPv6 unicast hops value to a specific value.
     sockopt::set_ipv6_unicast_hops(&s, Some(8)).unwrap();
 
-    // Check that the IPV6 unicast hops value is set.
+    // Check that the IPv6 unicast hops value is set.
     assert_eq!(sockopt::ipv6_unicast_hops(&s).unwrap(), 8);
 
     // Check the initial value of `IPV6_RECVTCLASS`, set it, and check it.
@@ -560,7 +560,7 @@ fn test_sockopts_multicast_ifv4() {
 
     let s = rustix::net::socket(AddressFamily::INET, SocketType::DGRAM, None).unwrap();
 
-    // Set a ipv4 interface
+    // Set a IPv4 interface
     match sockopt::set_ip_multicast_if(&s, &Ipv4Addr::LOCALHOST) {
         Ok(_) => {
             assert_eq!(sockopt::ip_multicast_if(&s).unwrap(), Ipv4Addr::LOCALHOST);
@@ -588,7 +588,7 @@ fn test_sockopts_multicast_if_with_ifindex() {
     .unwrap();
     let index = rustix::net::netdevice::name_to_index(&fd, "lo").unwrap();
 
-    // Set a ipv4 interface
+    // Set a IPv4 interface
     match sockopt::set_ip_multicast_if_with_ifindex(
         &s,
         &Ipv4Addr::new(224, 254, 0, 0),
@@ -611,7 +611,7 @@ fn test_sockopts_multicast_ifv6() {
 
     let s = rustix::net::socket(AddressFamily::INET6, SocketType::DGRAM, None).unwrap();
 
-    // Set a ipv6 interface
+    // Set a IPv6 interface
     match sockopt::set_ipv6_multicast_if(&s, 1) {
         Ok(_) => {
             assert_eq!(sockopt::ipv6_multicast_if(&s).unwrap(), 1);

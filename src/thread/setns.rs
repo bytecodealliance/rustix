@@ -63,27 +63,27 @@ bitflags! {
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct UnshareFlags: u32 {
-        /// `CLONE_FILES`.
+        /// `CLONE_FILES`
         const FILES = CLONE_FILES;
-        /// `CLONE_FS`.
+        /// `CLONE_FS`
         const FS = CLONE_FS;
-        /// `CLONE_NEWCGROUP`.
+        /// `CLONE_NEWCGROUP`
         const NEWCGROUP = CLONE_NEWCGROUP;
-        /// `CLONE_NEWIPC`.
+        /// `CLONE_NEWIPC`
         const NEWIPC = CLONE_NEWIPC;
-        /// `CLONE_NEWNET`.
+        /// `CLONE_NEWNET`
         const NEWNET = CLONE_NEWNET;
-        /// `CLONE_NEWNS`.
+        /// `CLONE_NEWNS`
         const NEWNS = CLONE_NEWNS;
-        /// `CLONE_NEWPID`.
+        /// `CLONE_NEWPID`
         const NEWPID = CLONE_NEWPID;
-        /// `CLONE_NEWTIME`.
+        /// `CLONE_NEWTIME`
         const NEWTIME = CLONE_NEWTIME;
-        /// `CLONE_NEWUSER`.
+        /// `CLONE_NEWUSER`
         const NEWUSER = CLONE_NEWUSER;
         /// `CLONE_NEWUTS`
         const NEWUTS = CLONE_NEWUTS;
-        /// `CLONE_SYSVSEM`.
+        /// `CLONE_SYSVSEM`
         const SYSVSEM = CLONE_SYSVSEM;
 
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>

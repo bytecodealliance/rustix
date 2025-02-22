@@ -651,9 +651,9 @@ impl<'a> MMsgHdr<'a> {
 
 /// `sendmsg(msghdr)`—Sends a message on a socket.
 ///
-/// This function is for use on connected sockets, as it doesn't have
-/// a way to specify an address. See [`sendmsg_addr`] to send
-/// messages on unconnected sockets.
+/// This function is for use on connected sockets, as it doesn't have a way to
+/// specify an address. See [`sendmsg_addr`] to send messages on unconnected
+/// sockets.
 ///
 /// # References
 ///  - [POSIX]
@@ -764,9 +764,9 @@ pub fn recvmsg<Fd: AsFd>(
 pub struct RecvMsg {
     /// The number of bytes received.
     ///
-    /// When `RecvFlags::TRUNC` is in use, this may be greater than the
-    /// length of the buffer, as it reflects the number of bytes received
-    /// before truncation into the buffer.
+    /// When `RecvFlags::TRUNC` is in use, this may be greater than the length
+    /// of the buffer, as it reflects the number of bytes received before
+    /// truncation into the buffer.
     pub bytes: usize,
 
     /// The flags received.

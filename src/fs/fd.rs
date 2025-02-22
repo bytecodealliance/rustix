@@ -246,7 +246,7 @@ pub fn futimens<Fd: AsFd>(fd: Fd, times: &Timestamps) -> io::Result<()> {
     target_os = "nto",
     target_os = "redox",
     target_os = "vita",
-)))] // not implemented in libc for netbsd yet
+)))] // not implemented in libc for NetBSD yet
 #[inline]
 #[doc(alias = "posix_fallocate")]
 pub fn fallocate<Fd: AsFd>(fd: Fd, mode: FallocateFlags, offset: u64, len: u64) -> io::Result<()> {

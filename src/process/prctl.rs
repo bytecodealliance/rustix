@@ -1007,7 +1007,7 @@ bitflags! {
 /// # References
 ///  - [`prctl(PR_GET_SPECULATION_CTRL,…)`]
 ///
-/// [`prctl(PR_GET_SPECULATION_CTRL,…)`]: https://www.kernel.org/doc/html/v6.10/userspace-api/spec_ctrl.html
+/// [`prctl(PR_GET_SPECULATION_CTRL,…)`]: https://www.kernel.org/doc/html/v6.13/userspace-api/spec_ctrl.html
 #[inline]
 #[doc(alias = "PR_GET_SPECULATION_CTRL")]
 pub fn speculative_feature_state(
@@ -1024,7 +1024,7 @@ const PR_SET_SPECULATION_CTRL: c_int = 53;
 /// # References
 ///  - [`prctl(PR_SET_SPECULATION_CTRL,…)`]
 ///
-/// [`prctl(PR_SET_SPECULATION_CTRL,…)`]: https://www.kernel.org/doc/html/v6.10/userspace-api/spec_ctrl.html
+/// [`prctl(PR_SET_SPECULATION_CTRL,…)`]: https://www.kernel.org/doc/html/v6.13/userspace-api/spec_ctrl.html
 #[inline]
 #[doc(alias = "PR_SET_SPECULATION_CTRL")]
 pub fn control_speculative_feature(
@@ -1080,7 +1080,7 @@ const PR_PAC_GET_ENABLED_KEYS: c_int = 61;
 /// # References
 ///  - [`prctl(PR_PAC_GET_ENABLED_KEYS,…)`]
 ///
-/// [`prctl(PR_PAC_GET_ENABLED_KEYS,…)`]: https://www.kernel.org/doc/html/v6.10/arch/arm64/pointer-authentication.html
+/// [`prctl(PR_PAC_GET_ENABLED_KEYS,…)`]: https://www.kernel.org/doc/html/v6.13/arch/arm64/pointer-authentication.html
 #[inline]
 #[doc(alias = "PR_PAC_GET_ENABLED_KEYS")]
 pub fn enabled_pointer_authentication_keys() -> io::Result<PointerAuthenticationKeys> {
@@ -1100,7 +1100,7 @@ const PR_PAC_SET_ENABLED_KEYS: c_int = 60;
 /// Please ensure the conditions necessary to safely call this function, as
 /// detailed in the references above.
 ///
-/// [`prctl(PR_PAC_SET_ENABLED_KEYS,…)`]: https://www.kernel.org/doc/html/v6.10/arch/arm64/pointer-authentication.html
+/// [`prctl(PR_PAC_SET_ENABLED_KEYS,…)`]: https://www.kernel.org/doc/html/v6.13/arch/arm64/pointer-authentication.html
 #[inline]
 #[doc(alias = "PR_PAC_SET_ENABLED_KEYS")]
 pub unsafe fn configure_pointer_authentication_keys<

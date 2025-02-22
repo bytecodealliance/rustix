@@ -1251,9 +1251,9 @@ pub(crate) fn fadvise(
         }
     }
 
-    // Similarly, on FreeBSD, if `offset + len` would overflow an `off_t` in
-    // a way that users using a `u64` interface wouldn't be aware of, reduce
-    // the length so that we only operate on the range that doesn't overflow.
+    // Similarly, on FreeBSD, if `offset + len` would overflow an `off_t` in a
+    // way that users using a `u64` interface wouldn't be aware of, reduce the
+    // length so that we only operate on the range that doesn't overflow.
     #[cfg(target_os = "freebsd")]
     let len = if len > 0 && offset.checked_add(len).is_none() {
         i64::MAX - offset

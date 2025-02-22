@@ -1,4 +1,4 @@
-//! Unimplemented functions.
+//! Documentation about unimplemented functions.
 //!
 //! This module contains documentation for several functions that rustix does
 //! not implement, either because they are out of scope, or because they are
@@ -21,7 +21,7 @@ macro_rules! not_implemented {
 ///
 /// There are several allocator implementations for Rust; one of them is
 /// [dlmalloc]. For a rustix-based implementation, see [rustix-dlmalloc].
-/// Another allocator implementaion is [talc].
+/// Another allocator implementation is [talc].
 ///
 /// [dlmalloc]: https://crates.io/crates/dlmalloc
 /// [talc]: https://crates.io/crates/talc
@@ -289,11 +289,11 @@ pub mod yet {
     not_implemented!(shmctl);
 }
 
-/// These functions are not yet finished in rustix.
+/// These functions are not quite yet finished in rustix.
 ///
 /// Rustix's codebase includes experimental implementations of these functions,
 /// however they are not yet publicly exposed because their API might need more
-/// work and/or they don't yet have a libc backend implementation.
+/// work and/or they don't yet have a libc backend implementation yet.
 ///
 /// See [#1314] for more information, and please leave comments if there are
 /// specific functions you're interested in.
