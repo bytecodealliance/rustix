@@ -562,8 +562,7 @@ pub(crate) unsafe fn futex_timeout(
             val3,
         ))
         .or_else(|err| {
-            // See the comments in `rustix_clock_gettime_via_syscall` about
-            // emulation.
+            // See the comments in `clock_gettime_via_syscall` about emulation.
             if err == io::Errno::NOSYS {
                 futex_old_timespec(uaddr, op, flags, val, timeout, uaddr2, val3)
             } else {

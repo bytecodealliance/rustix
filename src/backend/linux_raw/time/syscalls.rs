@@ -32,8 +32,7 @@ pub(crate) fn clock_getres(which_clock: ClockId) -> Timespec {
     unsafe {
         let mut result = MaybeUninit::<Timespec>::uninit();
         if let Err(err) = ret(syscall!(__NR_clock_getres_time64, which_clock, &mut result)) {
-            // See the comments in `rustix_clock_gettime_via_syscall` about
-            // emulation.
+            // See the comments in `clock_gettime_via_syscall` about emulation.
             debug_assert_eq!(err, io::Errno::NOSYS);
             clock_getres_old(which_clock, &mut result);
         }
@@ -138,8 +137,7 @@ pub(crate) fn timerfd_settime(
             &mut result
         ))
         .or_else(|err| {
-            // See the comments in `rustix_clock_gettime_via_syscall` about
-            // emulation.
+            // See the comments in `clock_gettime_via_syscall` about emulation.
             if err == io::Errno::NOSYS {
                 timerfd_settime_old(fd, flags, new_value, &mut result)
             } else {
@@ -222,8 +220,7 @@ pub(crate) fn timerfd_gettime(fd: BorrowedFd<'_>) -> io::Result<Itimerspec> {
     #[cfg(target_pointer_width = "32")]
     unsafe {
         ret(syscall!(__NR_timerfd_gettime64, fd, &mut result)).or_else(|err| {
-            // See the comments in `rustix_clock_gettime_via_syscall` about
-            // emulation.
+            // See the comments in `clock_gettime_via_syscall` about emulation.
             if err == io::Errno::NOSYS {
                 timerfd_gettime_old(fd, &mut result)
             } else {

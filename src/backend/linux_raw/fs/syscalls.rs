@@ -1349,8 +1349,7 @@ unsafe fn _utimensat_old(
     times: &Timestamps,
     flags: AtFlags,
 ) -> io::Result<()> {
-    // See the comments in `rustix_clock_gettime_via_syscall` about
-    // emulation.
+    // See the comments in `clock_gettime_via_syscall` about emulation.
     let old_times = [
         __kernel_old_timespec {
             tv_sec: times

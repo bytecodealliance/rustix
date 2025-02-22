@@ -108,7 +108,7 @@ pub(crate) fn clock_gettime_dynamic(which_clock: DynamicClockId<'_>) -> io::Resu
         match callee(id, timespec.as_mut_ptr()) {
             0 => (),
             EINVAL => return Err(io::Errno::INVAL),
-            _ => _rustix_clock_gettime_via_syscall(id, timespec.as_mut_ptr())?,
+            _ => _clock_gettime_via_syscall(id, timespec.as_mut_ptr())?,
         }
         Ok(timespec.assume_init())
     }
@@ -337,11 +337,8 @@ static GETCPU: AtomicPtr<Function> = AtomicPtr::new(null_mut());
 static SYSCALL: AtomicPtr<Function> = AtomicPtr::new(null_mut());
 
 #[cfg(feature = "time")]
-unsafe extern "C" fn rustix_clock_gettime_via_syscall(
-    clockid: c::c_int,
-    res: *mut Timespec,
-) -> c::c_int {
-    match _rustix_clock_gettime_via_syscall(clockid, res) {
+unsafe extern "C" fn clock_gettime_via_syscall(clockid: c::c_int, res: *mut Timespec) -> c::c_int {
+    match _clock_gettime_via_syscall(clockid, res) {
         Ok(()) => 0,
         Err(err) => err.raw_os_error().wrapping_neg(),
     }
@@ -349,23 +346,17 @@ unsafe extern "C" fn rustix_clock_gettime_via_syscall(
 
 #[cfg(feature = "time")]
 #[cfg(target_pointer_width = "32")]
-unsafe fn _rustix_clock_gettime_via_syscall(
-    clockid: c::c_int,
-    res: *mut Timespec,
-) -> io::Result<()> {
+unsafe fn _clock_gettime_via_syscall(clockid: c::c_int, res: *mut Timespec) -> io::Result<()> {
     let r0 = syscall!(__NR_clock_gettime64, c_int(clockid), res);
     match ret(r0) {
-        Err(io::Errno::NOSYS) => _rustix_clock_gettime_via_syscall_old(clockid, res),
+        Err(io::Errno::NOSYS) => _clock_gettime_via_syscall_old(clockid, res),
         otherwise => otherwise,
     }
 }
 
 #[cfg(feature = "time")]
 #[cfg(target_pointer_width = "32")]
-unsafe fn _rustix_clock_gettime_via_syscall_old(
-    clockid: c::c_int,
-    res: *mut Timespec,
-) -> io::Result<()> {
+unsafe fn _clock_gettime_via_syscall_old(clockid: c::c_int, res: *mut Timespec) -> io::Result<()> {
     // Ordinarily `rustix` doesn't like to emulate system calls, but in the
     // case of time APIs, it's specific to Linux, specific to 32-bit
     // architectures *and* specific to old kernel versions, and it's not that
@@ -387,10 +378,7 @@ unsafe fn _rustix_clock_gettime_via_syscall_old(
 
 #[cfg(feature = "time")]
 #[cfg(target_pointer_width = "64")]
-unsafe fn _rustix_clock_gettime_via_syscall(
-    clockid: c::c_int,
-    res: *mut Timespec,
-) -> io::Result<()> {
+unsafe fn _clock_gettime_via_syscall(clockid: c::c_int, res: *mut Timespec) -> io::Result<()> {
     ret(syscall!(__NR_clock_gettime, c_int(clockid), res))
 }
 
@@ -402,7 +390,7 @@ unsafe fn _rustix_clock_gettime_via_syscall(
     target_arch = "powerpc64",
     target_arch = "s390x",
 ))]
-unsafe extern "C" fn rustix_getcpu_via_syscall(
+unsafe extern "C" fn getcpu_via_syscall(
     cpu: *mut u32,
     node: *mut u32,
     unused: *mut c_void,
@@ -451,7 +439,7 @@ fn minimal_init() {
         CLOCK_GETTIME
             .compare_exchange(
                 null_mut(),
-                rustix_clock_gettime_via_syscall as *mut Function,
+                clock_gettime_via_syscall as *mut Function,
                 Relaxed,
                 Relaxed,
             )
@@ -470,7 +458,7 @@ fn minimal_init() {
         GETCPU
             .compare_exchange(
                 null_mut(),
-                rustix_getcpu_via_syscall as *mut Function,
+                getcpu_via_syscall as *mut Function,
                 Relaxed,
                 Relaxed,
             )
