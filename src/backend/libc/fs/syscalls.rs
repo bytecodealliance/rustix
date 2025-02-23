@@ -5,9 +5,11 @@ use crate::backend::c;
 use crate::backend::conv::ret_usize;
 use crate::backend::conv::{borrowed_fd, c_str, ret, ret_c_int, ret_off_t, ret_owned_fd};
 use crate::fd::{BorrowedFd, OwnedFd};
+#[allow(unused_imports)]
+use crate::ffi;
+use crate::ffi::CStr;
 #[cfg(all(apple, feature = "alloc"))]
 use crate::ffi::CString;
-use crate::ffi::{self, CStr};
 #[cfg(not(any(target_os = "espidf", target_os = "vita")))]
 use crate::fs::Access;
 #[cfg(not(any(target_os = "espidf", target_os = "redox")))]
