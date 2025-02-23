@@ -5,9 +5,11 @@ use crate::backend::c;
 use crate::backend::conv::ret_usize;
 use crate::backend::conv::{borrowed_fd, c_str, ret, ret_c_int, ret_off_t, ret_owned_fd};
 use crate::fd::{BorrowedFd, OwnedFd};
+#[allow(unused_imports)]
+use crate::ffi;
+use crate::ffi::CStr;
 #[cfg(all(apple, feature = "alloc"))]
 use crate::ffi::CString;
-use crate::ffi::{self, CStr};
 #[cfg(not(any(target_os = "espidf", target_os = "vita")))]
 use crate::fs::Access;
 #[cfg(not(any(target_os = "espidf", target_os = "redox")))]
@@ -273,13 +275,7 @@ pub(crate) fn statvfs(filename: &CStr) -> io::Result<StatVfs> {
 #[cfg(feature = "alloc")]
 #[inline]
 pub(crate) fn readlink(path: &CStr, buf: &mut [u8]) -> io::Result<usize> {
-    unsafe {
-        ret_usize(c::readlink(
-            c_str(path),
-            buf.as_mut_ptr().cast::<ffi::c_char>(),
-            buf.len(),
-        ) as isize)
-    }
+    unsafe { ret_usize(c::readlink(c_str(path), buf.as_mut_ptr().cast(), buf.len()) as isize) }
 }
 
 #[cfg(not(target_os = "redox"))]
@@ -293,7 +289,7 @@ pub(crate) fn readlinkat(
         ret_usize(c::readlinkat(
             borrowed_fd(dirfd),
             c_str(path),
-            buf.as_mut_ptr().cast::<ffi::c_char>(),
+            buf.as_mut_ptr().cast(),
             buf.len(),
         ) as isize)
     }
