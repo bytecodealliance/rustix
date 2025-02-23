@@ -273,13 +273,7 @@ pub(crate) fn statvfs(filename: &CStr) -> io::Result<StatVfs> {
 #[cfg(feature = "alloc")]
 #[inline]
 pub(crate) fn readlink(path: &CStr, buf: &mut [u8]) -> io::Result<usize> {
-    unsafe {
-        ret_usize(c::readlink(
-            c_str(path),
-            buf.as_mut_ptr().cast::<ffi::c_char>(),
-            buf.len(),
-        ) as isize)
-    }
+    unsafe { ret_usize(c::readlink(c_str(path), buf.as_mut_ptr().cast(), buf.len()) as isize) }
 }
 
 #[cfg(not(target_os = "redox"))]
@@ -293,7 +287,7 @@ pub(crate) fn readlinkat(
         ret_usize(c::readlinkat(
             borrowed_fd(dirfd),
             c_str(path),
-            buf.as_mut_ptr().cast::<ffi::c_char>(),
+            buf.as_mut_ptr().cast(),
             buf.len(),
         ) as isize)
     }

@@ -207,7 +207,7 @@ impl Dir {
                     #[cfg(any(freebsdlike, netbsdlike))]
                     d_fileno: dirent.d_fileno,
 
-                    name: CStr::from_ptr(dirent.d_name.as_ptr()).to_owned(),
+                    name: CStr::from_ptr(dirent.d_name.as_ptr().cast()).to_owned(),
                 };
 
                 Some(Ok(result))
