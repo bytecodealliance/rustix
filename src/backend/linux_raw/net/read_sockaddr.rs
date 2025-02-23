@@ -7,7 +7,7 @@ use crate::io::Errno;
 use crate::net::addr::SocketAddrLen;
 use crate::net::netlink::SocketAddrNetlink;
 #[cfg(target_os = "linux")]
-use crate::net::xdp::{SockaddrXdpFlags, SocketAddrXdp};
+use crate::net::xdp::{SocketAddrXdp, SocketAddrXdpFlags};
 use crate::net::{
     AddressFamily, Ipv4Addr, Ipv6Addr, SocketAddrAny, SocketAddrUnix, SocketAddrV4, SocketAddrV6,
 };
@@ -133,11 +133,14 @@ pub(crate) fn read_sockaddr_xdp(addr: &SocketAddrAny) -> Result<SocketAddrXdp, E
     }
     assert!(addr.addr_len() as usize >= size_of::<c::sockaddr_xdp>());
     let decode = unsafe { &*addr.as_ptr().cast::<c::sockaddr_xdp>() };
+
+    // This ignores the `sxdp_shared_umem_fd` field, which is only expected to
+    // be significant in `bind` calls, and not returned from `acceptfrom` or
+    // `recvmsg` or similar.
     Ok(SocketAddrXdp::new(
-        SockaddrXdpFlags::from_bits_retain(decode.sxdp_flags),
+        SocketAddrXdpFlags::from_bits_retain(decode.sxdp_flags),
         u32::from_be(decode.sxdp_ifindex),
         u32::from_be(decode.sxdp_queue_id),
-        u32::from_be(decode.sxdp_shared_umem_fd),
     ))
 }
 

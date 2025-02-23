@@ -1620,6 +1620,7 @@ bitflags! {
 #[cfg(target_os = "linux")]
 pub mod xdp {
     use crate::backend::net::read_sockaddr::read_sockaddr_xdp;
+    use crate::fd::{AsRawFd, BorrowedFd};
     use crate::net::addr::{call_with_sockaddr, SocketAddrArg, SocketAddrLen, SocketAddrOpaque};
     use crate::net::SocketAddrAny;
 
@@ -1644,7 +1645,7 @@ pub mod xdp {
         /// `XDP_*` constants for use in [`SocketAddrXdp`].
         #[repr(transparent)]
         #[derive(Copy, Clone, PartialEq, PartialOrd, Eq, Ord, Hash, Debug)]
-        pub struct SockaddrXdpFlags: u16 {
+        pub struct SocketAddrXdpFlags: u16 {
             /// `XDP_SHARED_UMEM`
             const XDP_SHARED_UMEM = bitcast!(c::XDP_SHARED_UMEM as u16);
             /// `XDP_COPY`
@@ -1683,46 +1684,40 @@ pub mod xdp {
     ///
     /// Used to bind to XDP socket.
     ///
-    /// Not ABI compatible with `struct sockaddr_xdp`
+    /// Not ABI compatible with `struct sockaddr_xdp`.
+    ///
+    /// To add a shared UMEM file descriptor, use [`SocketAddrXdpWithSharedUmem`].
     // <https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/uapi/linux/if_xdp.h?h=v6.13#n48>
     #[derive(Clone, PartialEq, PartialOrd, Eq, Ord, Hash, Debug)]
     pub struct SocketAddrXdp {
         /// Flags.
-        sxdp_flags: SockaddrXdpFlags,
+        sxdp_flags: SocketAddrXdpFlags,
         /// Interface index.
         sxdp_ifindex: u32,
         /// Queue ID.
         sxdp_queue_id: u32,
-        /// Shared UMEM file descriptor.
-        sxdp_shared_umem_fd: u32,
     }
 
     impl SocketAddrXdp {
         /// Construct a new XDP address.
         #[inline]
-        pub fn new(
-            flags: SockaddrXdpFlags,
-            interface_index: u32,
-            queue_id: u32,
-            share_umem_fd: u32,
-        ) -> Self {
+        pub fn new(flags: SocketAddrXdpFlags, interface_index: u32, queue_id: u32) -> Self {
             Self {
                 sxdp_flags: flags,
                 sxdp_ifindex: interface_index,
                 sxdp_queue_id: queue_id,
-                sxdp_shared_umem_fd: share_umem_fd,
             }
         }
 
         /// Return flags.
         #[inline]
-        pub fn flags(&self) -> SockaddrXdpFlags {
+        pub fn flags(&self) -> SocketAddrXdpFlags {
             self.sxdp_flags
         }
 
         /// Set flags.
         #[inline]
-        pub fn set_flags(&mut self, flags: SockaddrXdpFlags) {
+        pub fn set_flags(&mut self, flags: SocketAddrXdpFlags) {
             self.sxdp_flags = flags;
         }
 
@@ -1749,18 +1744,6 @@ pub mod xdp {
         pub fn set_queue_id(&mut self, queue_id: u32) {
             self.sxdp_queue_id = queue_id;
         }
-
-        /// Return shared UMEM file descriptor.
-        #[inline]
-        pub fn shared_umem_fd(&self) -> u32 {
-            self.sxdp_shared_umem_fd
-        }
-
-        /// Set shared UMEM file descriptor.
-        #[inline]
-        pub fn set_shared_umem_fd(&mut self, shared_umem_fd: u32) {
-            self.sxdp_shared_umem_fd = shared_umem_fd;
-        }
     }
 
     #[allow(unsafe_code)]
@@ -1776,7 +1759,7 @@ pub mod xdp {
                 sxdp_flags: self.flags().bits(),
                 sxdp_ifindex: self.interface_index(),
                 sxdp_queue_id: self.queue_id(),
-                sxdp_shared_umem_fd: self.shared_umem_fd(),
+                sxdp_shared_umem_fd: !0,
             };
 
             call_with_sockaddr(&addr, f)
@@ -1795,6 +1778,39 @@ pub mod xdp {
 
         fn try_from(addr: SocketAddrAny) -> Result<Self, Self::Error> {
             read_sockaddr_xdp(&addr)
+        }
+    }
+
+    /// An XDP socket address with a shared UMEM file descriptor.
+    ///
+    /// This implements `SocketAddrArg` so that it can be passed to [`bind`].
+    ///
+    /// [`bind`]: crate::net::bind
+    #[derive(Debug)]
+    pub struct SocketAddrXdpWithSharedUmem<'a> {
+        /// XDP address.
+        pub addr: SocketAddrXdp,
+        /// Shared UMEM file descriptor.
+        pub shared_umem_fd: BorrowedFd<'a>,
+    }
+
+    #[allow(unsafe_code)]
+    // SAFETY: `with_sockaddr` calls `f` using `call_with_sockaddr`, which
+    // handles calling `f` with the needed preconditions.
+    unsafe impl<'a> SocketAddrArg for SocketAddrXdpWithSharedUmem<'a> {
+        unsafe fn with_sockaddr<R>(
+            &self,
+            f: impl FnOnce(*const SocketAddrOpaque, SocketAddrLen) -> R,
+        ) -> R {
+            let addr = c::sockaddr_xdp {
+                sxdp_family: c::AF_XDP as _,
+                sxdp_flags: self.addr.flags().bits(),
+                sxdp_ifindex: self.addr.interface_index(),
+                sxdp_queue_id: self.addr.queue_id(),
+                sxdp_shared_umem_fd: self.shared_umem_fd.as_raw_fd() as u32,
+            };
+
+            call_with_sockaddr(&addr, f)
         }
     }
 
