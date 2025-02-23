@@ -39,7 +39,7 @@ unsafe impl ioctl::Ioctl for Tiocsctty {
     const IS_MUTATING: bool = false;
 
     fn opcode(&self) -> ioctl::Opcode {
-        ioctl::Opcode::old(c::TIOCSCTTY as ioctl::RawOpcode)
+        c::TIOCSCTTY as ioctl::Opcode
     }
 
     fn as_ptr(&mut self) -> *mut c::c_void {

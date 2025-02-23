@@ -303,5 +303,22 @@ vector before calling `epoll::wait` or `kqueue`, or consuming it using
 [`Buffer` trait]: https://docs.rs/rustix/1.0.0/rustix/buffer/trait.Buffer.html
 [`spare_capacity`]: https://docs.rs/rustix/1.0.0/rustix/buffer/fn.spare_capacity.html
 
+The `Opcode` type has changed from a struct to a raw integer value, and the
+associated utilities are change to `const` functions. In place of `BadOpcode`,
+use the opcode value directly. In place of `ReadOpcode`, `WriteOpcode`,
+`ReadWriteOpcode`, and `NoneOpcode`, use the `read`, `write`, `read_write`, and
+`none` const functions in the [`ioctl::opcode`] module. For example, in place
+of this:
+```rust
+ioctl::Setter::<ioctl::ReadOpcode<b'U', 15, c_uint>, c_uint>::new(interface)
+```
+use this:
+```rust
++ ioctl::Setter::<{ ioctl::opcode::read::<c_uint>(b'U', 15) }, c_uint>::new(interface)
+```
+.
+
+[`ioctl::opcode`]: https://docs.rs/rustix/1.0.0/rustix/ioctl/opcode/index.html
+
 All explicitly deprecated functions and types have been removed. Their
 deprecation messages will have identified alternatives.
