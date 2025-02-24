@@ -1,12 +1,14 @@
 use rustix::fd::{AsRawFd as _, BorrowedFd};
 use rustix::fs::{fcntl_lock, FlockOperation};
 use rustix::process::{fcntl_getlk, getppid, Flock, FlockType};
+use serial_test::serial;
 use std::fs::File;
 use std::os::unix::process::CommandExt as _;
 use std::process::Command;
 
 #[cfg(feature = "fs")]
 #[test]
+#[serial]
 fn test_fcntl_getlk() {
     let f = tempfile::tempfile().unwrap();
 
