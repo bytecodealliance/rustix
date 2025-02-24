@@ -26,29 +26,29 @@ impl<T> Buffer<T> for &mut Vec<MaybeUninit<T>> {}
 impl<'a, T> Buffer<T> for Extend<'a, T> {}
 
 impl<T> private::Sealed<T> for &mut [T] {
-    type Result = usize;
+    type Output = usize;
 
     #[inline]
-    fn as_raw_parts_mut(&mut self) -> (*mut T, usize) {
+    fn parts_mut(&mut self) -> (*mut T, usize) {
         (self.as_mut_ptr(), self.len())
     }
 
     #[inline]
-    unsafe fn finish(self, len: usize) -> Self::Result {
+    unsafe fn assume_init(self, len: usize) -> Self::Output {
         len
     }
 }
 
 impl<T, const N: usize> private::Sealed<T> for &mut [T; N] {
-    type Result = usize;
+    type Output = usize;
 
     #[inline]
-    fn as_raw_parts_mut(&mut self) -> (*mut T, usize) {
+    fn parts_mut(&mut self) -> (*mut T, usize) {
         (self.as_mut_ptr(), N)
     }
 
     #[inline]
-    unsafe fn finish(self, len: usize) -> Self::Result {
+    unsafe fn assume_init(self, len: usize) -> Self::Output {
         len
     }
 }
@@ -58,29 +58,29 @@ impl<T, const N: usize> private::Sealed<T> for &mut [T; N] {
 // don't have to add an extra `*` in these situations.
 #[cfg(feature = "alloc")]
 impl<T> private::Sealed<T> for &mut Vec<T> {
-    type Result = usize;
+    type Output = usize;
 
     #[inline]
-    fn as_raw_parts_mut(&mut self) -> (*mut T, usize) {
+    fn parts_mut(&mut self) -> (*mut T, usize) {
         (self.as_mut_ptr(), self.len())
     }
 
     #[inline]
-    unsafe fn finish(self, len: usize) -> Self::Result {
+    unsafe fn assume_init(self, len: usize) -> Self::Output {
         len
     }
 }
 
 impl<'a, T> private::Sealed<T> for &'a mut [MaybeUninit<T>] {
-    type Result = (&'a mut [T], &'a mut [MaybeUninit<T>]);
+    type Output = (&'a mut [T], &'a mut [MaybeUninit<T>]);
 
     #[inline]
-    fn as_raw_parts_mut(&mut self) -> (*mut T, usize) {
+    fn parts_mut(&mut self) -> (*mut T, usize) {
         (self.as_mut_ptr().cast(), self.len())
     }
 
     #[inline]
-    unsafe fn finish(self, len: usize) -> Self::Result {
+    unsafe fn assume_init(self, len: usize) -> Self::Output {
         let (init, uninit) = self.split_at_mut(len);
 
         // SAFETY: The user asserts that the slice is now initialized.
@@ -91,15 +91,15 @@ impl<'a, T> private::Sealed<T> for &'a mut [MaybeUninit<T>] {
 }
 
 impl<'a, T, const N: usize> private::Sealed<T> for &'a mut [MaybeUninit<T>; N] {
-    type Result = (&'a mut [T], &'a mut [MaybeUninit<T>]);
+    type Output = (&'a mut [T], &'a mut [MaybeUninit<T>]);
 
     #[inline]
-    fn as_raw_parts_mut(&mut self) -> (*mut T, usize) {
+    fn parts_mut(&mut self) -> (*mut T, usize) {
         (self.as_mut_ptr().cast(), self.len())
     }
 
     #[inline]
-    unsafe fn finish(self, len: usize) -> Self::Result {
+    unsafe fn assume_init(self, len: usize) -> Self::Output {
         let (init, uninit) = self.split_at_mut(len);
 
         // SAFETY: The user asserts that the slice is now initialized.
@@ -111,15 +111,15 @@ impl<'a, T, const N: usize> private::Sealed<T> for &'a mut [MaybeUninit<T>; N] {
 
 #[cfg(feature = "alloc")]
 impl<'a, T> private::Sealed<T> for &'a mut Vec<MaybeUninit<T>> {
-    type Result = (&'a mut [T], &'a mut [MaybeUninit<T>]);
+    type Output = (&'a mut [T], &'a mut [MaybeUninit<T>]);
 
     #[inline]
-    fn as_raw_parts_mut(&mut self) -> (*mut T, usize) {
+    fn parts_mut(&mut self) -> (*mut T, usize) {
         (self.as_mut_ptr().cast(), self.len())
     }
 
     #[inline]
-    unsafe fn finish(self, len: usize) -> Self::Result {
+    unsafe fn assume_init(self, len: usize) -> Self::Output {
         let (init, uninit) = self.split_at_mut(len);
 
         // SAFETY: The user asserts that the slice is now initialized.
@@ -174,10 +174,10 @@ impl<'a, T> private::Sealed<T> for Extend<'a, T> {
     /// The mutated `Vec` reflects the number of bytes read. We also return
     /// this number, and a value of 0 indicates the end of the stream has
     /// been reached.
-    type Result = usize;
+    type Output = usize;
 
     #[inline]
-    fn as_raw_parts_mut(&mut self) -> (*mut T, usize) {
+    fn parts_mut(&mut self) -> (*mut T, usize) {
         let spare = self.0.spare_capacity_mut();
 
         debug_assert!(!spare.is_empty(), "`extend` uses spare capacity, and never allocates new memory, so the `Vec` passed to it should have some spare capacity.");
@@ -186,7 +186,7 @@ impl<'a, T> private::Sealed<T> for Extend<'a, T> {
     }
 
     #[inline]
-    unsafe fn finish(self, len: usize) -> Self::Result {
+    unsafe fn assume_init(self, len: usize) -> Self::Output {
         // We initialized `len` elements; extend the `Vec` to include them.
         self.0.set_len(self.0.len() + len);
         len
@@ -215,17 +215,17 @@ pub(super) unsafe fn split_init(
 mod private {
     pub trait Sealed<T> {
         /// The result of the process operation.
-        type Result;
+        type Output;
 
         /// Return a pointer and length for this buffer.
-        fn as_raw_parts_mut(&mut self) -> (*mut T, usize);
+        fn parts_mut(&mut self) -> (*mut T, usize);
 
         /// Convert a finished buffer pointer into its result.
         ///
         /// # Safety
         ///
         /// At least `len` bytes of the buffer must now be initialized.
-        unsafe fn finish(self, len: usize) -> Self::Result;
+        unsafe fn assume_init(self, len: usize) -> Self::Output;
     }
 }
 

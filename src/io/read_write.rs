@@ -37,11 +37,11 @@ pub use backend::io::types::ReadWriteFlags;
 /// [illumos]: https://illumos.org/man/2/read
 /// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/I_002fO-Primitives.html#index-reading-from-a-file-descriptor
 #[inline]
-pub fn read<Fd: AsFd, Buf: Buffer<u8>>(fd: Fd, mut buf: Buf) -> io::Result<Buf::Result> {
+pub fn read<Fd: AsFd, Buf: Buffer<u8>>(fd: Fd, mut buf: Buf) -> io::Result<Buf::Output> {
     // SAFETY: `read` behaves.
-    let len = unsafe { backend::io::syscalls::read(fd.as_fd(), buf.as_raw_parts_mut())? };
+    let len = unsafe { backend::io::syscalls::read(fd.as_fd(), buf.parts_mut())? };
     // SAFETY: `read` works.
-    unsafe { Ok(buf.finish(len)) }
+    unsafe { Ok(buf.assume_init(len)) }
 }
 
 /// `write(fd, buf)`—Writes to a stream.
