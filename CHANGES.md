@@ -245,5 +245,14 @@ pointer provenance.
 [`rustix::io_uring::getevents_arg`]: https://docs.rs/rustix/1.0.0/rustix/io_uring/struct.io_uring_getevents_arg.html
 [`rustix::io_uring::io_uring_ptr`]: https://docs.rs/rustix/1.0.0-prerelease.0/rustix/io_uring/struct.io_uring_ptr.html
 
+[`SocketAddrXdp`] no longer has a shared umem field. A new
+[`SocketAddrXdpWithSharedUmem`] is added for the purpose of calling `bind` and
+passing it an XDP address with a shared UMEM fd. And `SockaddrXdpFlags` is
+renamed to [`SocketAddrXdpFlags`].
+
+[`SocketAddrXdp`]: https://docs.rs/rustix/1.0.0/rustix/net/xdp/struct.SocketAddrXdp.html
+[`SocketAddrXdpWithSharedUmem`]: https://docs.rs/rustix/1.0.0/rustix/net/xdp/struct.SocketAddrXdpWithSharedUmem.html
+[`SocketAddrXdpFlags`]: https://docs.rs/rustix/1.0.0/rustix/net/xdp/struct.SocketAddrXdpFlags.html
+
 All explicitly deprecated functions and types have been removed. Their
 deprecation messages will have identified alternatives.
