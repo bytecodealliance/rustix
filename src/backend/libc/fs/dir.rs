@@ -154,7 +154,8 @@ impl Dir {
 
     /// `readdir(self)`, where `None` means the end of the directory.
     pub fn read(&mut self) -> Option<io::Result<DirEntry>> {
-        // If we've seen errors, don't continue to try to read anything further.
+        // If we've seen errors, don't continue to try to read anything
+        // further.
         if self.any_errors {
             return None;
         }

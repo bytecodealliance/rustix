@@ -106,8 +106,6 @@ fn check_known_opcodes() {
     );
 
     // _IOW('v', 2, long)
-    // This constant is currently incorrectly defined on PowerPC,
-    // see https://github.com/sunfishcode/linux-raw-sys/issues/148
     assert_eq!(
         compose_opcode(
             Direction::Write,

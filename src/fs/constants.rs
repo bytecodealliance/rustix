@@ -20,7 +20,8 @@ mod tests {
         #[cfg(linux_kernel)]
         assert_eq_size!(FsWord, linux_raw_sys::general::__fsword_t);
 
-        // Don't test against `__kernel_mode_t` on platforms where it's a `u16`.
+        // Don't test against `__kernel_mode_t` on platforms where it's a
+        // `u16`.
         #[cfg(linux_kernel)]
         #[cfg(not(any(
             target_arch = "x86",

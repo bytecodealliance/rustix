@@ -258,7 +258,8 @@ mod readwrite_pv64 {
             fun(fd, iov, iovcnt, offset)
         } else {
             // Unlike the plain "p" functions, the "pv" functions pass their
-            // offset in an endian-independent way, and always in two registers.
+            // offset in an endian-independent way, and always in two
+            // registers.
             syscall! {
                 fn preadv(
                     fd: c_int,
@@ -285,7 +286,8 @@ mod readwrite_pv64 {
             fun(fd, iov, iovcnt, offset)
         } else {
             // Unlike the plain "p" functions, the "pv" functions pass their
-            // offset in an endian-independent way, and always in two registers.
+            // offset in an endian-independent way, and always in two
+            // registers.
             syscall! {
                 fn pwritev(
                     fd: c_int,
@@ -348,7 +350,8 @@ mod readwrite_pv64v2 {
             fun(fd, iov, iovcnt, offset, flags)
         } else {
             // Unlike the plain "p" functions, the "pv" functions pass their
-            // offset in an endian-independent way, and always in two registers.
+            // offset in an endian-independent way, and always in two
+            // registers.
             syscall! {
                 fn preadv2(
                     fd: c_int,
@@ -384,7 +387,8 @@ mod readwrite_pv64v2 {
             fun(fd, iov, iovcnt, offset, flags)
         } else {
             // Unlike the plain "p" functions, the "pv" functions pass their
-            // offset in an endian-independent way, and always in two registers.
+            // offset in an endian-independent way, and always in two
+            // registers.
             syscall! {
                 fn pwritev2(
                     fd: c_int,

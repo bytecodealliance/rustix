@@ -164,13 +164,14 @@ impl DecInt {
         let mut buf = [MaybeUninit::uninit(); BUF_LEN];
         buf[BUF_LEN - 1] = MaybeUninit::new(b'\0');
 
-        // We use `loop { …; if cond { break } }` instead of `while !cond { … }` so the
-        // loop is entered at least once. This way `0` does not need a special
-        // handling.
+        // We use `loop { …; if cond { break } }` instead of
+        // `while !cond { … }` so the loop is entered at least once. This way
+        // `0` does not need a special handling.
         loop {
             len += 1;
             if len > BUF_LEN {
-                // SAFETY: a stringified i64/u64 cannot be longer than `U64_MAX_STR_LEN` bytes
+                // SAFETY: A stringified i64/u64 cannot be longer than
+                // `U64_MAX_STR_LEN` bytes.
                 unsafe { unreachable_unchecked() };
             }
             buf[BUF_LEN - len] = MaybeUninit::new(b'0' + i.div_mod_10());
@@ -182,7 +183,8 @@ impl DecInt {
         if is_neg {
             len += 1;
             if len > BUF_LEN {
-                // SAFETY: a stringified i64/u64 cannot be longer than `U64_MAX_STR_LEN` bytes
+                // SAFETY: A stringified i64/u64 cannot be longer than
+                // `U64_MAX_STR_LEN` bytes.
                 unsafe { unreachable_unchecked() };
             }
             buf[BUF_LEN - len] = MaybeUninit::new(b'-');
@@ -224,7 +226,8 @@ impl DecInt {
     pub fn as_bytes_with_nul(&self) -> &[u8] {
         let len = NonZeroUsize::from(self.len).get();
         if len > BUF_LEN {
-            // SAFETY: a stringified i64/u64 cannot be longer than `U64_MAX_STR_LEN` bytes
+            // SAFETY: A stringified i64/u64 cannot be longer than
+            // `U64_MAX_STR_LEN` bytes.
             unsafe { unreachable_unchecked() };
         }
         let init = &self.buf[(self.buf.len() - len)..];

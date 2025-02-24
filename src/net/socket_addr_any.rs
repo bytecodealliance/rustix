@@ -26,7 +26,7 @@ pub(crate) struct SocketAddrBuf {
 
 impl SocketAddrBuf {
     #[inline]
-    pub(crate) fn new() -> Self {
+    pub(crate) const fn new() -> Self {
         Self {
             len: size_of::<SocketAddrStorage>() as c::socklen_t,
             storage: MaybeUninit::<SocketAddrStorage>::uninit(),
@@ -97,7 +97,7 @@ impl SocketAddrAny {
     /// * `storage` must contain a valid socket address.
     /// * `len` bytes must be initialized.
     #[inline]
-    pub unsafe fn new(storage: MaybeUninit<SocketAddrStorage>, len: SocketAddrLen) -> Self {
+    pub const unsafe fn new(storage: MaybeUninit<SocketAddrStorage>, len: SocketAddrLen) -> Self {
         assert!(len as usize >= size_of::<read_sockaddr::sockaddr_header>());
         assert!(len as usize <= size_of::<SocketAddrStorage>());
         let len = NonZeroU32::new_unchecked(len);

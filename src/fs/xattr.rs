@@ -1,3 +1,5 @@
+//! Extended attribute functions.
+
 #![allow(unsafe_code)]
 
 use crate::buffer::Buffer;
