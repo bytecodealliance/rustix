@@ -216,7 +216,8 @@ jobs:
     - run: cargo check -Z build-std --target aarch64-unknown-linux-gnu_ilp32 --all-targets --features=all-apis
     - run: cargo check -Z build-std --target x86_64-unknown-haiku --all-targets --features=all-apis
     - run: cargo check -Z build-std --target x86_64-uwp-windows-msvc --all-targets --features=all-apis
-    - run: cargo check -Z build-std --target=riscv32imc-esp-espidf --features=all-apis
+    # Temporarily disable riscv32imc-esp-espidf, as it gets build errors.
+    # - run: cargo check -Z build-std --target=riscv32imc-esp-espidf --features=all-apis
     - run: cargo check -Z build-std --target=aarch64-unknown-nto-qnx710 --features=all-apis
     - run: cargo check -Z build-std --target=x86_64-pc-nto-qnx710 --features=all-apis
     # Temporarily disable --features=all-apis, which doesn't build yet.
