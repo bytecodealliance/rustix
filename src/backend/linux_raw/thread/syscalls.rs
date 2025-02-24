@@ -429,6 +429,7 @@ pub(crate) fn setgroups_thread(gids: &[crate::ugid::Gid]) -> io::Result<()> {
     target_arch = "x86_64",
     target_arch = "x86",
     target_arch = "riscv64",
+    target_arch = "powerpc",
     target_arch = "powerpc64",
     target_arch = "s390x"
 ))]
@@ -439,6 +440,7 @@ pub(crate) use crate::backend::vdso_wrappers::sched_getcpu;
     target_arch = "x86_64",
     target_arch = "x86",
     target_arch = "riscv64",
+    target_arch = "powerpc",
     target_arch = "powerpc64",
     target_arch = "s390x"
 )))]

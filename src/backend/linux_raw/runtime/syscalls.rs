@@ -57,6 +57,7 @@ pub(crate) unsafe fn kernel_fork() -> io::Result<Fork> {
         target_arch = "mips32r6",
         target_arch = "mips64",
         target_arch = "mips64r6",
+        target_arch = "powerpc",
         target_arch = "powerpc64",
         target_arch = "riscv64",
         target_arch = "s390x",
