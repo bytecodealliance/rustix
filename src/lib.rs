@@ -8,7 +8,7 @@
 //! # #[cfg(feature = "net")]
 //! # fn read(sock: std::net::TcpStream, buf: &mut [u8]) -> std::io::Result<()> {
 //! # use rustix::net::RecvFlags;
-//! let nread: usize = rustix::net::recv(&sock, buf, RecvFlags::PEEK)?;
+//! let (nread, _received) = rustix::net::recv(&sock, buf, RecvFlags::PEEK)?;
 //! # let _ = nread;
 //! # Ok(())
 //! # }
@@ -28,7 +28,7 @@
 //! # #[cfg(windows)]
 //! # use std::os::windows::io::AsRawSocket;
 //! # const MSG_PEEK: i32 = libc::MSG_PEEK;
-//! let nread: usize = unsafe {
+//! let nread = unsafe {
 //!     #[cfg(any(unix, target_os = "wasi"))]
 //!     let raw = sock.as_raw_fd();
 //!     #[cfg(windows)]

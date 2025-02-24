@@ -73,7 +73,7 @@ fn test_readwrite_p() {
 fn test_readwrite_p_uninit() {
     use core::mem::MaybeUninit;
     use rustix::fs::{openat, Mode, OFlags, CWD};
-    use rustix::io::{pread_uninit, pwrite};
+    use rustix::io::{pread, pwrite};
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
@@ -88,9 +88,9 @@ fn test_readwrite_p_uninit() {
     pwrite(&file, b"hello", 200).unwrap();
     pwrite(&file, b"world", 300).unwrap();
     let mut buf = [MaybeUninit::uninit(); 5];
-    let (init, _) = pread_uninit(&file, &mut buf, 200).unwrap();
+    let (init, _) = pread(&file, &mut buf, 200).unwrap();
     assert_eq!(&init, b"hello");
-    let (init, _) = pread_uninit(&file, &mut buf, 300).unwrap();
+    let (init, _) = pread(&file, &mut buf, 300).unwrap();
     assert_eq!(&init, b"world");
 }
 

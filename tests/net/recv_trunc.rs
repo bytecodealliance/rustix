@@ -5,7 +5,7 @@ use rustix::net::ReturnFlags;
 use rustix::net::{AddressFamily, RecvFlags, SendFlags, SocketAddrUnix, SocketType};
 use std::mem::MaybeUninit;
 
-/// Test `recv_uninit` with the `RecvFlags::Trunc` flag.
+/// Test `recv` with `&mut [MaybeUninit<u8>]` with the `RecvFlags::Trunc` flag.
 #[test]
 fn net_recv_uninit_trunc() {
     crate::init();
@@ -27,9 +27,8 @@ fn net_recv_uninit_trunc() {
     #[cfg(not(any(apple, solarish, target_os = "netbsd")))]
     {
         let mut response = [MaybeUninit::<u8>::zeroed(); 5];
-        let (init, uninit, length) =
-            rustix::net::recv_uninit(&receiver, &mut response, RecvFlags::TRUNC)
-                .expect("recv_uninit");
+        let ((init, uninit), length) =
+            rustix::net::recv(&receiver, &mut response, RecvFlags::TRUNC).expect("recv_uninit");
 
         // We used the `TRUNC` flag, so we should have only gotten 5 bytes.
         assert_eq!(init, b"Hello");
@@ -45,9 +44,8 @@ fn net_recv_uninit_trunc() {
 
     // This time receive it without `TRUNC`. This should fail.
     let mut response = [MaybeUninit::<u8>::zeroed(); 5];
-    let (init, uninit, length) =
-        rustix::net::recv_uninit(&receiver, &mut response, RecvFlags::empty())
-            .expect("recv_uninit");
+    let ((init, uninit), length) =
+        rustix::net::recv(&receiver, &mut response, RecvFlags::empty()).expect("recv_uninit");
 
     // We didn't use the `TRUNC` flag, so we should have received 15 bytes,
     // truncated to 5 bytes.

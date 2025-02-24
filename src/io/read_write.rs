@@ -2,10 +2,9 @@
 
 #![allow(unsafe_code)]
 
-use crate::buffer::{split_init, Buffer};
+use crate::buffer::Buffer;
 use crate::{backend, io};
 use backend::fd::AsFd;
-use core::mem::MaybeUninit;
 
 // Declare `IoSlice` and `IoSliceMut`.
 #[cfg(not(windows))]
@@ -40,7 +39,7 @@ pub use backend::io::types::ReadWriteFlags;
 pub fn read<Fd: AsFd, Buf: Buffer<u8>>(fd: Fd, mut buf: Buf) -> io::Result<Buf::Output> {
     // SAFETY: `read` behaves.
     let len = unsafe { backend::io::syscalls::read(fd.as_fd(), buf.parts_mut())? };
-    // SAFETY: `read` works.
+    // SAFETY: `read` behaves.
     unsafe { Ok(buf.assume_init(len)) }
 }
 
@@ -73,9 +72,6 @@ pub fn write<Fd: AsFd>(fd: Fd, buf: &[u8]) -> io::Result<usize> {
 
 /// `pread(fd, buf, offset)`—Reads from a file at a given position.
 ///
-/// This takes a `&mut [u8]` which Rust requires to contain initialized memory.
-/// To use an uninitialized buffer, use [`pread_uninit`].
-///
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
@@ -97,25 +93,15 @@ pub fn write<Fd: AsFd>(fd: Fd, buf: &[u8]) -> io::Result<usize> {
 /// [illumos]: https://illumos.org/man/2/pread
 /// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/I_002fO-Primitives.html#index-pread64
 #[inline]
-pub fn pread<Fd: AsFd>(fd: Fd, buf: &mut [u8], offset: u64) -> io::Result<usize> {
-    unsafe { backend::io::syscalls::pread(fd.as_fd(), buf.as_mut_ptr(), buf.len(), offset) }
-}
-
-/// `pread(fd, buf, offset)`—Reads from a file at a given position.
-///
-/// This is equivalent to [`pread`], except that it can read into uninitialized
-/// memory. It returns the slice that was initialized by this function and the
-/// slice that remains uninitialized.
-#[inline]
-pub fn pread_uninit<Fd: AsFd>(
+pub fn pread<Fd: AsFd, Buf: Buffer<u8>>(
     fd: Fd,
-    buf: &mut [MaybeUninit<u8>],
+    mut buf: Buf,
     offset: u64,
-) -> io::Result<(&mut [u8], &mut [MaybeUninit<u8>])> {
-    let length = unsafe {
-        backend::io::syscalls::pread(fd.as_fd(), buf.as_mut_ptr().cast::<u8>(), buf.len(), offset)
-    };
-    Ok(unsafe { split_init(buf, length?) })
+) -> io::Result<Buf::Output> {
+    // SAFETY: `pread` behaves.
+    let len = unsafe { backend::io::syscalls::pread(fd.as_fd(), buf.parts_mut(), offset)? };
+    // SAFETY: `pread` behaves.
+    unsafe { Ok(buf.assume_init(len)) }
 }
 
 /// `pwrite(fd, bufs)`—Writes to a file at a given position.
