@@ -12,7 +12,7 @@ use core::ptr::{null, null_mut, NonNull};
 use bitflags::bitflags;
 
 use crate::backend::prctl::syscalls;
-use crate::fd::{AsRawFd as _, BorrowedFd};
+use crate::fd::{AsRawFd as _, BorrowedFd, RawFd};
 use crate::ffi::{c_int, c_uint, c_void, CStr};
 use crate::io;
 use crate::prctl::*;
@@ -765,7 +765,7 @@ pub struct PrctlMmMap {
     pub auxv_size: u32,
     /// File descriptor of executable file that was used to create this
     /// process.
-    pub exe_fd: u32,
+    pub exe_fd: RawFd,
 }
 
 /// Provides one-shot access to all the addresses by passing in a

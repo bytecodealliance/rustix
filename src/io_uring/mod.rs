@@ -80,12 +80,17 @@ pub struct MsgHdr {
 /// `io_uring_setup(entries, params)`—Setup a context for performing
 /// asynchronous I/O.
 ///
+/// # Safety
+///
+/// If [`IoringSetupFlags::ATTACH_WQ`] is set, the `wq_fd` field of
+/// `io_uring_params` must be an open file descriptor.
+///
 /// # References
 ///  - [Linux]
 ///
 /// [Linux]: https://www.man7.org/linux/man-pages/man2/io_uring_setup.2.html
 #[inline]
-pub fn io_uring_setup(entries: u32, params: &mut io_uring_params) -> io::Result<OwnedFd> {
+pub unsafe fn io_uring_setup(entries: u32, params: &mut io_uring_params) -> io::Result<OwnedFd> {
     backend::io_uring::syscalls::io_uring_setup(entries, params)
 }
 
@@ -1469,7 +1474,7 @@ pub struct io_uring_params {
     pub sq_thread_cpu: u32,
     pub sq_thread_idle: u32,
     pub features: IoringFeatureFlags,
-    pub wq_fd: u32,
+    pub wq_fd: RawFd,
     pub resv: [u32; 3],
     pub sq_off: io_sqring_offsets,
     pub cq_off: io_cqring_offsets,

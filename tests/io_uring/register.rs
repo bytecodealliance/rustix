@@ -108,7 +108,7 @@ where
 #[test]
 fn test_io_uring_register_with() {
     let mut params = io_uring_params::default();
-    let ring_fd = io_uring_setup(4, &mut params).unwrap();
+    let ring_fd = unsafe { io_uring_setup(4, &mut params).unwrap() };
     assert_eq!(params.sq_entries, 4);
     assert_eq!(params.cq_entries, 8);
 
@@ -130,7 +130,7 @@ fn io_uring_buf_ring_can_be_registered() {
     const BGID: u16 = 42;
 
     let mut params = io_uring_params::default();
-    let ring_fd = io_uring_setup(4, &mut params).unwrap();
+    let ring_fd = unsafe { io_uring_setup(4, &mut params).unwrap() };
 
     // Test that the kernel version supports IORING_REGISTER_PBUF_RING. If it
     // doesn't, the kernel will return EINVAL. Not setting a `ring_addr` on
