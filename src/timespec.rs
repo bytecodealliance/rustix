@@ -27,7 +27,7 @@ pub struct Timespec {
 /// A type for the `tv_sec` field of [`Timespec`].
 pub type Secs = i64;
 
-/// A type for the `tv_sec` field of [`Timespec`].
+/// A type for the `tv_nsec` field of [`Timespec`].
 #[cfg(any(
     fix_y2038,
     linux_raw,
