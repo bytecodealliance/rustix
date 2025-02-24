@@ -613,9 +613,7 @@ impl<'a> MMsgHdr<'a> {
     /// Constructs a new message to a specific address.
     ///
     /// This requires a `SocketAddrAny` instead of using `impl SocketAddrArg`;
-    /// to obtain a `SocketAddrAny`, use [SocketAddrArg::as_any].
-    ///
-    /// [SocketAddrArg::as_any]: crate::net::addr::SocketAddrArg::as_any
+    /// to obtain a `SocketAddrAny`, use [`SocketAddrArg::as_any`].
     pub fn new_with_addr(
         addr: &'a SocketAddrAny,
         iov: &'a [IoSlice<'_>],

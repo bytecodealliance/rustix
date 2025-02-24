@@ -37,8 +37,7 @@ pub(crate) fn clock_nanosleep_relative(id: ClockId, req: &Timespec) -> Nanosleep
             &mut rem
         ))
         .or_else(|err| {
-            // See the comments in `rustix_clock_gettime_via_syscall` about
-            // emulation.
+            // See the comments in `clock_gettime_via_syscall` about emulation.
             if err == io::Errno::NOSYS {
                 clock_nanosleep_relative_old(id, req, &mut rem)
             } else {
@@ -105,8 +104,7 @@ pub(crate) fn clock_nanosleep_absolute(id: ClockId, req: &Timespec) -> io::Resul
             zero()
         ))
         .or_else(|err| {
-            // See the comments in `rustix_clock_gettime_via_syscall` about
-            // emulation.
+            // See the comments in `clock_gettime_via_syscall` about emulation.
             if err == io::Errno::NOSYS {
                 clock_nanosleep_absolute_old(id, req)
             } else {
@@ -154,8 +152,7 @@ pub(crate) fn nanosleep(req: &Timespec) -> NanosleepRelativeResult {
             &mut rem
         ))
         .or_else(|err| {
-            // See the comments in `rustix_clock_gettime_via_syscall` about
-            // emulation.
+            // See the comments in `clock_gettime_via_syscall` about emulation.
             if err == io::Errno::NOSYS {
                 nanosleep_old(req, &mut rem)
             } else {
@@ -272,8 +269,7 @@ pub(crate) unsafe fn futex_timeout(
             c_uint(val3)
         ))
         .or_else(|err| {
-            // See the comments in `rustix_clock_gettime_via_syscall` about
-            // emulation.
+            // See the comments in `clock_gettime_via_syscall` about emulation.
             if err == io::Errno::NOSYS {
                 futex_old_timespec(uaddr, op, flags, val, timeout, uaddr2, val3)
             } else {

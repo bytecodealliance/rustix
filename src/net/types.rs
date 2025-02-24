@@ -1638,8 +1638,8 @@ pub mod xdp {
         }
     }
 
-    // Constant needs to be cast because bindgen does generate a u32 but the struct
-    // expects a u16.
+    // Constant needs to be cast because bindgen does generate a `u32` but the
+    // struct expects a `u16`.
     // <https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/uapi/linux/if_xdp.h?h=v6.13#n15>
     bitflags! {
         /// `XDP_*` constants for use in [`SocketAddrXdp`].
@@ -1686,7 +1686,8 @@ pub mod xdp {
     ///
     /// Not ABI compatible with `struct sockaddr_xdp`.
     ///
-    /// To add a shared UMEM file descriptor, use [`SocketAddrXdpWithSharedUmem`].
+    /// To add a shared UMEM file descriptor, use
+    /// [`SocketAddrXdpWithSharedUmem`].
     // <https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/include/uapi/linux/if_xdp.h?h=v6.13#n48>
     #[derive(Clone, PartialEq, PartialOrd, Eq, Ord, Hash, Debug)]
     pub struct SocketAddrXdp {

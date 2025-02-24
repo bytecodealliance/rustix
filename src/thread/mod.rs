@@ -18,10 +18,6 @@ mod sched_yield;
 #[cfg(linux_kernel)]
 mod setns;
 
-#[cfg(linux_kernel)]
-pub use crate::thread::futex::{
-    Flags as FutexFlags, OWNER_DIED as FUTEX_OWNER_DIED, WAITERS as FUTEX_WAITERS,
-};
 #[cfg(not(target_os = "redox"))]
 pub use clock::*;
 #[cfg(linux_kernel)]

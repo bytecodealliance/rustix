@@ -71,7 +71,8 @@
 //!  - Provide y2038 compatibility, on platforms which support this.
 //!  - Correct selected platform bugs, such as behavioral differences when
 //!    running under seccomp.
-//!  - Use `timespec` for timestamps instead of `timeval`.
+//!  - Use `timespec` for timestamps and timeouts instead of `timeval` and
+//!    `c_int` milliseconds.
 //!
 //! Things they don't do include:
 //!  - Detecting whether functions are supported at runtime, except in specific
