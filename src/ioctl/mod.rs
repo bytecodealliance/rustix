@@ -209,14 +209,12 @@ pub mod opcode {
         )
     }
 
-    /// Create a new non-mutating opcode from a group, a number, and the type
-    /// of data.
+    /// Create a new opcode from a group, a number, that uses no data.
     ///
-    /// This corresponds to the C macro `_IO(group, number)` when `T` is zero
-    /// sized.
+    /// This corresponds to the C macro `_IO(group, number)`.
     #[inline]
-    pub const fn none<T>(group: u8, number: u8) -> Opcode {
-        from_components(Direction::None, group, number, mem::size_of::<T>())
+    pub const fn none(group: u8, number: u8) -> Opcode {
+        from_components(Direction::None, group, number, 0)
     }
 
     /// Create a new reading opcode from a group, a number and the type of
