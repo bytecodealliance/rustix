@@ -5,21 +5,21 @@
 use core::mem::MaybeUninit;
 use core::slice;
 
-/// Split an uninitialized byte slice into initialized and uninitialized parts.
+/// Split an uninitialized slice into initialized and uninitialized parts.
 ///
 /// # Safety
 ///
 /// `init_len` must not be greater than `buf.len()`, and at least `init_len`
-/// bytes must be initialized.
+/// elements must be initialized.
 #[inline]
-pub(super) unsafe fn split_init(
-    buf: &mut [MaybeUninit<u8>],
+pub(super) unsafe fn split_init<T>(
+    buf: &mut [MaybeUninit<T>],
     init_len: usize,
-) -> (&mut [u8], &mut [MaybeUninit<u8>]) {
+) -> (&mut [T], &mut [MaybeUninit<T>]) {
     debug_assert!(init_len <= buf.len());
     let buf_ptr = buf.as_mut_ptr();
     let uninit_len = buf.len() - init_len;
-    let init = slice::from_raw_parts_mut(buf_ptr.cast::<u8>(), init_len);
+    let init = slice::from_raw_parts_mut(buf_ptr.cast::<T>(), init_len);
     let uninit = slice::from_raw_parts_mut(buf_ptr.add(init_len), uninit_len);
     (init, uninit)
 }
@@ -66,7 +66,7 @@ mod tests {
     #[test]
     fn test_split_init_empty() {
         unsafe {
-            let (init, uninit) = split_init(&mut [], 0);
+            let (init, uninit) = split_init::<u8>(&mut [], 0);
             assert!(init.is_empty());
             assert!(uninit.is_empty());
         }

@@ -15,7 +15,6 @@ use crate::io;
 use crate::utils::as_mut_ptr;
 #[cfg(feature = "linux_5_11")]
 use crate::utils::option_as_ptr;
-#[cfg(feature = "alloc")]
 use core::mem::MaybeUninit;
 use core::ptr::null_mut;
 use linux_raw_sys::general::{kernel_sigset_t, EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD};
@@ -174,7 +173,6 @@ pub(crate) fn epoll_del(epfd: BorrowedFd<'_>, fd: BorrowedFd<'_>) -> io::Result<
     }
 }
 
-#[cfg(feature = "alloc")]
 #[inline]
 pub(crate) fn epoll_wait(
     epfd: BorrowedFd<'_>,
