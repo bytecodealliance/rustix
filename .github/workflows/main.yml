@@ -54,6 +54,7 @@ jobs:
         cargo update --package=dashmap --precise 5.4.0
         cargo update --package=regex --precise=1.9.0
         cargo update --package=half --precise=2.2.1
+        cargo update --package=flate2 --precise=1.0.35
 
     - run: >
         rustup target add
@@ -498,6 +499,7 @@ jobs:
         cargo update --package=dashmap --precise 5.4.0
         cargo update --package=regex --precise=1.9.0
         cargo update --package=half --precise=2.2.1
+        cargo update --package=flate2 --precise=1.0.35
 
     - run: |
         cargo test --verbose --features=all-apis --release --workspace -- --nocapture
