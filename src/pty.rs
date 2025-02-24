@@ -208,7 +208,7 @@ unsafe impl ioctl::Ioctl for Tiocgptpeer {
     const IS_MUTATING: bool = false;
 
     fn opcode(&self) -> ioctl::Opcode {
-        ioctl::Opcode::old(c::TIOCGPTPEER as ioctl::RawOpcode)
+        c::TIOCGPTPEER as ioctl::Opcode
     }
 
     fn as_ptr(&mut self) -> *mut c::c_void {

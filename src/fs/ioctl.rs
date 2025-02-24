@@ -25,7 +25,7 @@ use crate::fd::{AsRawFd as _, BorrowedFd};
 pub fn ioctl_blksszget<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
     // SAFETY: `BLZSSZGET` is a getter opcode that gets a u32.
     unsafe {
-        let ctl = ioctl::Getter::<ioctl::BadOpcode<{ c::BLKSSZGET }>, c::c_uint>::new();
+        let ctl = ioctl::Getter::<{ c::BLKSSZGET }, c::c_uint>::new();
         ioctl::ioctl(fd, ctl)
     }
 }
@@ -37,7 +37,7 @@ pub fn ioctl_blksszget<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
 pub fn ioctl_blkpbszget<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
     // SAFETY: `BLKPBSZGET` is a getter opcode that gets a u32.
     unsafe {
-        let ctl = ioctl::Getter::<ioctl::BadOpcode<{ c::BLKPBSZGET }>, c::c_uint>::new();
+        let ctl = ioctl::Getter::<{ c::BLKPBSZGET }, c::c_uint>::new();
         ioctl::ioctl(fd, ctl)
     }
 }
@@ -64,9 +64,7 @@ pub fn ioctl_ficlone<Fd: AsFd, SrcFd: AsFd>(fd: Fd, src_fd: SrcFd) -> io::Result
 pub fn ext4_ioc_resize_fs<Fd: AsFd>(fd: Fd, blocks: u64) -> io::Result<()> {
     // SAFETY: `EXT4_IOC_RESIZE_FS` is a pointer setter opcode.
     unsafe {
-        let ctl = ioctl::Setter::<ioctl::BadOpcode<{ backend::fs::EXT4_IOC_RESIZE_FS }>, u64>::new(
-            blocks,
-        );
+        let ctl = ioctl::Setter::<{ backend::fs::EXT4_IOC_RESIZE_FS }, u64>::new(blocks);
         ioctl::ioctl(fd, ctl)
     }
 }
@@ -81,7 +79,7 @@ unsafe impl ioctl::Ioctl for Ficlone<'_> {
     const IS_MUTATING: bool = false;
 
     fn opcode(&self) -> ioctl::Opcode {
-        ioctl::Opcode::old(c::FICLONE as ioctl::RawOpcode)
+        c::FICLONE as ioctl::Opcode
     }
 
     fn as_ptr(&mut self) -> *mut c::c_void {
@@ -144,9 +142,9 @@ bitflags! {
 pub fn ioctl_getflags<Fd: AsFd>(fd: Fd) -> io::Result<IFlags> {
     unsafe {
         #[cfg(target_pointer_width = "32")]
-        let ctl = ioctl::Getter::<ioctl::BadOpcode<{ c::FS_IOC32_GETFLAGS }>, u32>::new();
+        let ctl = ioctl::Getter::<{ c::FS_IOC32_GETFLAGS }, u32>::new();
         #[cfg(target_pointer_width = "64")]
-        let ctl = ioctl::Getter::<ioctl::BadOpcode<{ c::FS_IOC_GETFLAGS }>, u32>::new();
+        let ctl = ioctl::Getter::<{ c::FS_IOC_GETFLAGS }, u32>::new();
 
         ioctl::ioctl(fd, ctl).map(IFlags::from_bits_retain)
     }
@@ -161,11 +159,10 @@ pub fn ioctl_getflags<Fd: AsFd>(fd: Fd) -> io::Result<IFlags> {
 pub fn ioctl_setflags<Fd: AsFd>(fd: Fd, flags: IFlags) -> io::Result<()> {
     unsafe {
         #[cfg(target_pointer_width = "32")]
-        let ctl =
-            ioctl::Setter::<ioctl::BadOpcode<{ c::FS_IOC32_SETFLAGS }>, u32>::new(flags.bits());
+        let ctl = ioctl::Setter::<{ c::FS_IOC32_SETFLAGS }, u32>::new(flags.bits());
 
         #[cfg(target_pointer_width = "64")]
-        let ctl = ioctl::Setter::<ioctl::BadOpcode<{ c::FS_IOC_SETFLAGS }>, u32>::new(flags.bits());
+        let ctl = ioctl::Setter::<{ c::FS_IOC_SETFLAGS }, u32>::new(flags.bits());
 
         ioctl::ioctl(fd, ctl)
     }

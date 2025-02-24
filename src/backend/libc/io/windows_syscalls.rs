@@ -7,7 +7,7 @@ use crate::backend::conv::{borrowed_fd, ret_c_int};
 use crate::backend::fd::LibcFd;
 use crate::fd::{BorrowedFd, RawFd};
 use crate::io;
-use crate::ioctl::{IoctlOutput, RawOpcode};
+use crate::ioctl::{IoctlOutput, Opcode};
 
 pub(crate) unsafe fn close(raw_fd: RawFd) {
     let _ = c::close(raw_fd as LibcFd);
@@ -21,7 +21,7 @@ pub(crate) unsafe fn try_close(raw_fd: RawFd) -> io::Result<()> {
 #[inline]
 pub(crate) unsafe fn ioctl(
     fd: BorrowedFd<'_>,
-    request: RawOpcode,
+    request: Opcode,
     arg: *mut c::c_void,
 ) -> io::Result<IoctlOutput> {
     ret_c_int(c::ioctl(borrowed_fd(fd), request, arg.cast()))
@@ -30,7 +30,7 @@ pub(crate) unsafe fn ioctl(
 #[inline]
 pub(crate) unsafe fn ioctl_readonly(
     fd: BorrowedFd<'_>,
-    request: RawOpcode,
+    request: Opcode,
     arg: *mut c::c_void,
 ) -> io::Result<IoctlOutput> {
     ioctl(fd, request, arg)
