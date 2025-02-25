@@ -24,6 +24,7 @@ use core::slice;
 ///
 /// ```rust
 /// # use rustix::io::read;
+/// # #[cfg(not(windows))]
 /// # fn example(fd: rustix::fd::BorrowedFd) -> rustix::io::Result<()> {
 /// let mut buf = [0_u8; 64];
 /// let nread = read(fd, &mut buf)?;
@@ -36,6 +37,7 @@ use core::slice;
 /// ```rust
 /// # use rustix::io::read;
 /// # use core::mem::MaybeUninit;
+/// # #[cfg(not(windows))]
 /// # fn example(fd: rustix::fd::BorrowedFd) -> rustix::io::Result<()> {
 /// let mut buf = [MaybeUninit::<u8>::uninit(); 64];
 /// let (init, uninit) = read(fd, &mut buf)?;
@@ -50,6 +52,7 @@ use core::slice;
 /// ```rust
 /// # use rustix::io::read;
 /// # use rustix::buffer::spare_capacity;
+/// # #[cfg(not(windows))]
 /// # fn example(fd: rustix::fd::BorrowedFd) -> rustix::io::Result<()> {
 /// let mut buf = Vec::with_capacity(64);
 /// let nread = read(fd, spare_capacity(&mut buf))?;
