@@ -204,6 +204,7 @@ pub struct SpareCapacity<'a, T>(&'a mut Vec<T>);
 /// # Examples
 ///
 /// ```
+/// # #[cfg(not(windows))]
 /// # fn test(input: &std::fs::File) -> rustix::io::Result<()> {
 /// use rustix::buffer::spare_capacity;
 /// use rustix::io::{read, Errno};
