@@ -437,5 +437,5 @@ pub unsafe fn kevent<Fd: AsFd, Buf: Buffer<Event>>(
     )
     .map(|res| res as _)?;
 
-    unsafe { Ok(eventlist.assume_init(len)) }
+    Ok(eventlist.assume_init(len))
 }
