@@ -328,6 +328,7 @@ mod tests {
         //let _x = read(&input, buf).unwrap();
     }
 
+    #[cfg(not(windows))]
     #[test]
     fn test_slice() {
         use crate::io::read;
@@ -347,6 +348,7 @@ mod tests {
         assert_eq!(nread, 0);
     }
 
+    #[cfg(not(windows))]
     #[test]
     fn test_slice_uninit() {
         use crate::io::read;
@@ -374,6 +376,7 @@ mod tests {
         assert_eq!(uninit.len(), buf.len());
     }
 
+    #[cfg(not(windows))]
     #[test]
     fn test_spare_capacity() {
         use crate::io::read;
