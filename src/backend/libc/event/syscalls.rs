@@ -23,11 +23,7 @@ use crate::io;
 use crate::utils::as_mut_ptr;
 #[cfg(any(linux_kernel, target_os = "illumos", target_os = "redox"))]
 use crate::utils::as_ptr;
-#[cfg(any(
-    all(feature = "alloc", bsd),
-    solarish,
-    all(feature = "alloc", any(linux_kernel, target_os = "redox")),
-))]
+#[cfg(any(all(feature = "alloc", bsd), solarish))]
 use core::mem::MaybeUninit;
 #[cfg(any(
     bsd,
