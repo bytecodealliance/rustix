@@ -23,6 +23,7 @@ use core::slice;
 /// Passing a `&mut [u8]`:
 ///
 /// ```rust
+/// # #[cfg(not(windows))]
 /// # use rustix::io::read;
 /// # #[cfg(not(windows))]
 /// # fn example(fd: rustix::fd::BorrowedFd) -> rustix::io::Result<()> {
@@ -35,7 +36,9 @@ use core::slice;
 /// Passing a `&mut [MaybeUninit<u8>]`:
 ///
 /// ```rust
+/// # #[cfg(not(windows))]
 /// # use rustix::io::read;
+/// # #[cfg(not(windows))]
 /// # use core::mem::MaybeUninit;
 /// # #[cfg(not(windows))]
 /// # fn example(fd: rustix::fd::BorrowedFd) -> rustix::io::Result<()> {
@@ -50,7 +53,9 @@ use core::slice;
 /// Passing a [`SpareCapacity`], via the [`spare_capacity`] helper function:
 ///
 /// ```rust
+/// # #[cfg(not(windows))]
 /// # use rustix::io::read;
+/// # #[cfg(not(windows))]
 /// # use rustix::buffer::spare_capacity;
 /// # #[cfg(not(windows))]
 /// # fn example(fd: rustix::fd::BorrowedFd) -> rustix::io::Result<()> {
