@@ -1,5 +1,6 @@
 //! An API for interfacing with `kqueue`.
 
+use crate::buffer::Buffer;
 use crate::fd::{AsFd, OwnedFd, RawFd};
 use crate::pid::Pid;
 use crate::signal::Signal;
@@ -8,9 +9,7 @@ use crate::{backend, io};
 use backend::c::{self, intptr_t, kevent as kevent_t, uintptr_t};
 use backend::event::syscalls;
 
-use alloc::vec::Vec;
 use core::mem::zeroed;
-use core::ptr::slice_from_raw_parts_mut;
 use core::time::Duration;
 
 /// A `kqueue` event for use with [`kevent`].
@@ -418,32 +417,25 @@ pub fn kqueue() -> io::Result<OwnedFd> {
 /// [OpenBSD]: https://man.openbsd.org/kevent.2
 /// [NetBSD]: https://man.netbsd.org/kevent.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=kevent&section=2
-pub unsafe fn kevent<Fd: AsFd>(
+pub unsafe fn kevent<Fd: AsFd, Buf: Buffer<Event>>(
     kqueue: Fd,
     changelist: &[Event],
-    eventlist: &mut Vec<Event>,
+    mut eventlist: Buf,
     timeout: Option<Duration>,
-) -> io::Result<usize> {
+) -> io::Result<Buf::Output> {
     let timeout = timeout.map(|timeout| backend::c::timespec {
         tv_sec: timeout.as_secs() as _,
         tv_nsec: timeout.subsec_nanos() as _,
     });
 
     // Populate the event list with events.
-    eventlist.set_len(0);
-    let out_slice = slice_from_raw_parts_mut(eventlist.as_mut_ptr().cast(), eventlist.capacity());
-    let res = syscalls::kevent(
+    let len = syscalls::kevent(
         kqueue.as_fd(),
         changelist,
-        &mut *out_slice,
+        eventlist.parts_mut(),
         timeout.as_ref(),
     )
-    .map(|res| res as _);
+    .map(|res| res as _)?;
 
-    // Update the event list.
-    if let Ok(len) = res {
-        eventlist.set_len(len);
-    }
-
-    res
+    unsafe { Ok(eventlist.assume_init(len)) }
 }

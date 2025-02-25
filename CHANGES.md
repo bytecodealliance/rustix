@@ -267,18 +267,18 @@ argument optionallly containing a raw file descriptor.
 
 [`rustix::io_uring::io_uring_setup`]: https://docs.rs/rustix/1.0.0/rustix/io_uring/fn.io_uring_setup.html
 
-[`read`], [`pread`], [`recv`], [`recvfrom`], [`getrandom`], and [`epoll::wait`]
-now use the new [`Buffer` trait].
+[`read`], [`pread`], [`recv`], [`recvfrom`], [`getrandom`], [`epoll::wait`],
+and [`kqueue`] now use the new [`Buffer` trait].
 
 This replaces `read_uninit`, `pread_uninit`, `recv_uninit`, `recvfrom_uninit`,
 and `getrandom_uninit`, as the `Buffer` trait supports reading into
 uninitialized slices.
 
-`epoll::wait` previously took a `Vec` which it implicitly cleared before
-writing its results. When passing a `Vec` to `epoll::wait` using
-[`spare_capacity`], the `Vec` is not cleared first. Consider clearing the
-vector before calling `epoll::wait`, or consuming it using `.drain(..)`
-before reusing it.
+`epoll::wait` and `kqueue` previously took a `Vec` which it implicitly cleared
+before results were appended. When passing a `Vec` to `epoll::wait` or `kqueue`
+using [`spare_capacity`], the `Vec` is not cleared first. Consider clearing the
+vector before calling `epoll::wait` or `kqueue`, or consuming it using
+`.drain(..)` before reusing it.
 
 [`read`]: https://docs.rs/rustix/1.0.0/rustix/io/fn.read.html
 [`pread`]: https://docs.rs/rustix/1.0.0/rustix/io/fn.pread.html
@@ -286,6 +286,7 @@ before reusing it.
 [`recvfrom`]: https://docs.rs/rustix/1.0.0/rustix/net/fn.recvfrom.html
 [`getrandom`]: https://docs.rs/rustix/1.0.0/rustix/rand/fn.getrandom.html
 [`epoll::wait`]: https://docs.rs/rustix/1.0.0/rustix/event/epoll/fn.wait.html
+[`kqueue`]: https://docs.rs/rustix/1.0.0/x86_64-unknown-freebsd/rustix/event/kqueue/fn.kqueue.html
 [`Buffer` trait]: https://docs.rs/rustix/1.0.0/rustix/buffer/trait.Buffer.html
 [`spare_capacity`]: https://docs.rs/rustix/1.0.0/rustix/buffer/fn.spare_capacity.html
 

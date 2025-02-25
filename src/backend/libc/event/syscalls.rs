@@ -23,7 +23,7 @@ use crate::io;
 use crate::utils::as_mut_ptr;
 #[cfg(any(linux_kernel, target_os = "illumos", target_os = "redox"))]
 use crate::utils::as_ptr;
-#[cfg(any(all(feature = "alloc", bsd), solarish))]
+#[cfg(solarish)]
 use core::mem::MaybeUninit;
 #[cfg(any(
     bsd,
@@ -102,7 +102,7 @@ pub(crate) fn kqueue() -> io::Result<OwnedFd> {
 pub(crate) unsafe fn kevent(
     kq: BorrowedFd<'_>,
     changelist: &[Event],
-    eventlist: &mut [MaybeUninit<Event>],
+    eventlist: (*mut Event, usize),
     timeout: Option<&c::timespec>,
 ) -> io::Result<c::c_int> {
     ret_c_int(c::kevent(
@@ -112,11 +112,8 @@ pub(crate) unsafe fn kevent(
             .len()
             .try_into()
             .map_err(|_| io::Errno::OVERFLOW)?,
-        eventlist.as_mut_ptr().cast(),
-        eventlist
-            .len()
-            .try_into()
-            .map_err(|_| io::Errno::OVERFLOW)?,
+        eventlist.0.cast(),
+        eventlist.1.try_into().map_err(|_| io::Errno::OVERFLOW)?,
         timeout.map_or(null(), as_ptr),
     ))
 }
