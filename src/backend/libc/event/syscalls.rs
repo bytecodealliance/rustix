@@ -4,7 +4,6 @@ use crate::backend::c;
 #[cfg(any(linux_kernel, solarish, target_os = "redox"))]
 use crate::backend::conv::ret;
 use crate::backend::conv::ret_c_int;
-#[cfg(feature = "alloc")]
 #[cfg(any(linux_kernel, target_os = "illumos", target_os = "redox"))]
 use crate::backend::conv::ret_u32;
 #[cfg(solarish)]
@@ -512,11 +511,10 @@ pub(crate) fn epoll_del(epoll: BorrowedFd<'_>, source: BorrowedFd<'_>) -> io::Re
 }
 
 #[inline]
-#[cfg(feature = "alloc")]
 #[cfg(any(linux_kernel, target_os = "illumos", target_os = "redox"))]
-pub(crate) fn epoll_wait(
+pub(crate) unsafe fn epoll_wait(
     epoll: BorrowedFd<'_>,
-    events: &mut [MaybeUninit<crate::event::epoll::Event>],
+    events: (*mut crate::event::epoll::Event, usize),
     timeout: Option<&Timespec>,
 ) -> io::Result<usize> {
     // If we're on Linux >= 5.11 and a libc that has an `epoll_pwait2`
@@ -527,7 +525,7 @@ pub(crate) fn epoll_wait(
         target_env = "gnu",
         not(fix_y2038)
     ))]
-    unsafe {
+    {
         weak! {
             fn epoll_pwait2(
                 c::c_int,
@@ -541,8 +539,8 @@ pub(crate) fn epoll_wait(
         if let Some(epoll_pwait2_func) = epoll_pwait2.get() {
             return ret_u32(epoll_pwait2_func(
                 borrowed_fd(epoll),
-                events.as_mut_ptr().cast::<c::epoll_event>(),
-                events.len().try_into().unwrap_or(i32::MAX),
+                events.0.cast::<c::epoll_event>(),
+                events.1.try_into().unwrap_or(i32::MAX),
                 crate::utils::option_as_ptr(timeout).cast(),
                 null(),
             ))
@@ -552,7 +550,7 @@ pub(crate) fn epoll_wait(
 
     // If we're on Linux >= 5.11, use `epoll_pwait2` via `libc::syscall`.
     #[cfg(all(linux_kernel, feature = "linux_5_11"))]
-    unsafe {
+    {
         use linux_raw_sys::general::__kernel_timespec as timespec;
 
         syscall! {
@@ -567,8 +565,8 @@ pub(crate) fn epoll_wait(
 
         ret_u32(epoll_pwait2(
             borrowed_fd(epoll),
-            events.as_mut_ptr().cast::<c::epoll_event>(),
-            events.len().try_into().unwrap_or(i32::MAX),
+            events.0.cast::<c::epoll_event>(),
+            events.1.try_into().unwrap_or(i32::MAX),
             crate::utils::option_as_ptr(timeout).cast(),
             null(),
         ))
@@ -577,7 +575,7 @@ pub(crate) fn epoll_wait(
 
     // Otherwise just use `epoll_wait`.
     #[cfg(not(all(linux_kernel, feature = "linux_5_11")))]
-    unsafe {
+    {
         let timeout = match timeout {
             None => -1,
             Some(timeout) => timeout.as_c_int_millis().ok_or(io::Errno::INVAL)?,
@@ -585,8 +583,8 @@ pub(crate) fn epoll_wait(
 
         ret_u32(c::epoll_wait(
             borrowed_fd(epoll),
-            events.as_mut_ptr().cast::<c::epoll_event>(),
-            events.len().try_into().unwrap_or(i32::MAX),
+            events.0.cast::<c::epoll_event>(),
+            events.1.try_into().unwrap_or(i32::MAX),
             timeout,
         ))
         .map(|i| i as usize)
