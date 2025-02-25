@@ -1,3 +1,4 @@
+use rustix::buffer::spare_capacity;
 use rustix::event::{epoll, Timespec};
 use std::time::Instant;
 
@@ -9,7 +10,7 @@ fn epoll_timeout() {
     let mut events = Vec::with_capacity(1);
     epoll::wait(
         &epoll_fd,
-        &mut events,
+        spare_capacity(&mut events),
         Some(&Timespec {
             tv_sec: 0,
             tv_nsec: 1_000_000,

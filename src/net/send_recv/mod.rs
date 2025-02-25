@@ -2,13 +2,12 @@
 
 #![allow(unsafe_code)]
 
-use crate::buffer::split_init;
+use crate::buffer::Buffer;
 use crate::net::addr::SocketAddrArg;
 use crate::net::SocketAddrAny;
 use crate::{backend, io};
 use backend::fd::AsFd;
 use core::cmp::min;
-use core::mem::MaybeUninit;
 
 pub use backend::net::send_recv::{RecvFlags, ReturnFlags, SendFlags};
 
@@ -20,8 +19,9 @@ pub use msg::*;
 
 /// `recv(fd, buf, flags)`—Reads data from a socket.
 ///
-/// This takes a `&mut [u8]` which Rust requires to contain initialized memory.
-/// To use an uninitialized buffer, use [`recv_uninit`].
+/// In addition to the `Buffer::Output` return value, this also returns the
+/// number of bytes received before any truncation due to the
+/// [`RecvFlags::TRUNC`] flag.
 ///
 /// # References
 ///  - [Beej's Guide to Network Programming]
@@ -48,31 +48,20 @@ pub use msg::*;
 /// [illumos]: https://illumos.org/man/3SOCKET/recv
 /// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Receiving-Data.html
 #[inline]
-pub fn recv<Fd: AsFd>(fd: Fd, buf: &mut [u8], flags: RecvFlags) -> io::Result<usize> {
-    unsafe { backend::net::syscalls::recv(fd.as_fd(), buf.as_mut_ptr(), buf.len(), flags) }
-}
-
-/// `recv(fd, buf, flags)`—Reads data from a socket.
-///
-/// This is equivalent to [`recv`], except that it can read into uninitialized
-/// memory. It returns the slice that was initialized by this function, the
-/// slice that remains uninitialized, and the number of bytes received before
-/// any truncation due to the `RecvFlags::TRUNC` flag.
 #[allow(clippy::type_complexity)]
-#[inline]
-pub fn recv_uninit<Fd: AsFd>(
+pub fn recv<Fd: AsFd, Buf: Buffer<u8>>(
     fd: Fd,
-    buf: &mut [MaybeUninit<u8>],
+    mut buf: Buf,
     flags: RecvFlags,
-) -> io::Result<(&mut [u8], &mut [MaybeUninit<u8>], usize)> {
-    let length = unsafe {
-        backend::net::syscalls::recv(fd.as_fd(), buf.as_mut_ptr().cast::<u8>(), buf.len(), flags)?
-    };
-
+) -> io::Result<(Buf::Output, usize)> {
+    let (ptr, len) = buf.parts_mut();
+    // SAFETY: `recv` behaves.
+    let recv_len = unsafe { backend::net::syscalls::recv(fd.as_fd(), (ptr, len), flags)? };
     // If the `TRUNC` flag is set, the returned `length` may be longer than the
     // buffer length.
-    let (init, uninit) = unsafe { split_init(buf, min(length, buf.len())) };
-    Ok((init, uninit, length))
+    let min_len = min(len, recv_len);
+    // SAFETY: `recv` behaves.
+    unsafe { Ok((buf.assume_init(min_len), recv_len)) }
 }
 
 /// `send(fd, buf, flags)`—Writes data to a socket.
@@ -109,8 +98,9 @@ pub fn send<Fd: AsFd>(fd: Fd, buf: &[u8], flags: SendFlags) -> io::Result<usize>
 /// `recvfrom(fd, buf, flags, addr, len)`—Reads data from a socket and
 /// returns the sender address.
 ///
-/// This takes a `&mut [u8]` which Rust requires to contain initialized memory.
-/// To use an uninitialized buffer, use [`recvfrom_uninit`].
+/// In addition to the `Buffer::Output` return value, this also returns the
+/// number of bytes received before any truncation due to the
+/// [`RecvFlags::TRUNC`] flag.
 ///
 /// # References
 ///  - [Beej's Guide to Network Programming]
@@ -137,47 +127,20 @@ pub fn send<Fd: AsFd>(fd: Fd, buf: &[u8], flags: SendFlags) -> io::Result<usize>
 /// [illumos]: https://illumos.org/man/3SOCKET/recvfrom
 /// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Receiving-Datagrams.html
 #[inline]
-pub fn recvfrom<Fd: AsFd>(
+pub fn recvfrom<Fd: AsFd, Buf: Buffer<u8>>(
     fd: Fd,
-    buf: &mut [u8],
+    mut buf: Buf,
     flags: RecvFlags,
-) -> io::Result<(usize, Option<SocketAddrAny>)> {
-    unsafe { backend::net::syscalls::recvfrom(fd.as_fd(), buf.as_mut_ptr(), buf.len(), flags) }
-}
-
-/// `recvfrom(fd, buf, flags, addr, len)`—Reads data from a socket and
-/// returns the sender address.
-///
-/// This is equivalent to [`recvfrom`], except that it can read into
-/// uninitialized memory. It returns the slice that was initialized by this
-/// function, the slice that remains uninitialized, the number of bytes
-/// received before any truncation due to the `RecvFlags::TRUNC` flag, and
-/// the address of the sender if known.
-#[allow(clippy::type_complexity)]
-#[inline]
-pub fn recvfrom_uninit<Fd: AsFd>(
-    fd: Fd,
-    buf: &mut [MaybeUninit<u8>],
-    flags: RecvFlags,
-) -> io::Result<(
-    &mut [u8],
-    &mut [MaybeUninit<u8>],
-    usize,
-    Option<SocketAddrAny>,
-)> {
-    let (length, addr) = unsafe {
-        backend::net::syscalls::recvfrom(
-            fd.as_fd(),
-            buf.as_mut_ptr().cast::<u8>(),
-            buf.len(),
-            flags,
-        )?
-    };
-
+) -> io::Result<(Buf::Output, usize, Option<SocketAddrAny>)> {
+    let (ptr, len) = buf.parts_mut();
+    // SAFETY: `recvfrom` behaves.
+    let (recv_len, addr) =
+        unsafe { backend::net::syscalls::recvfrom(fd.as_fd(), (ptr, len), flags)? };
     // If the `TRUNC` flag is set, the returned `length` may be longer than the
     // buffer length.
-    let (init, uninit) = unsafe { split_init(buf, min(length, buf.len())) };
-    Ok((init, uninit, length, addr))
+    let min_len = min(len, recv_len);
+    // SAFETY: `recvfrom` behaves.
+    unsafe { Ok((buf.assume_init(min_len), recv_len, addr)) }
 }
 
 /// `sendto(fd, buf, flags, addr)`—Writes data to a socket to a specific IP
