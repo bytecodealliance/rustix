@@ -248,7 +248,8 @@ impl<'buf, 'slice, 'fd> SendAncillaryBuffer<'buf, 'slice, 'fd> {
     /// [`send`]: crate::net::send
     #[inline]
     pub fn new(buffer: &'buf mut [u8]) -> Self {
-        // SAFETY: T -> MaybeUninit<T> is always safe and we never uninitialize any bytes.
+        // SAFETY: T -> MaybeUninit<T> is always safe and we never uninitialize any
+        // bytes.
         Self::new_(unsafe { core::mem::transmute::<&mut [u8], &mut [MaybeUninit<u8>]>(buffer) })
     }
 
@@ -424,7 +425,8 @@ impl<'buf> RecvAncillaryBuffer<'buf> {
     /// [`recv`]: crate::net::recv
     #[inline]
     pub fn new(buffer: &'buf mut [u8]) -> Self {
-        // SAFETY: T -> MaybeUninit<T> is always safe and we never uninitialize any bytes.
+        // SAFETY: T -> MaybeUninit<T> is always safe and we never uninitialize any
+        // bytes.
         Self::new_(unsafe { core::mem::transmute::<&mut [u8], &mut [MaybeUninit<u8>]>(buffer) })
     }
 
