@@ -30,10 +30,12 @@ fn net_v4_connect_any() {
 
     let accepted = rustix::net::accept(&listener).expect("accept");
     let mut response = [0_u8; 128];
-    let n = rustix::net::recv(&accepted, &mut response, RecvFlags::empty()).expect("recv");
+    let (n, actual) =
+        rustix::net::recv(&accepted, &mut response, RecvFlags::empty()).expect("recv");
 
     // Not strictly required, but it makes the test simpler.
     assert_eq!(n, request.len());
+    assert_eq!(actual, request.len());
 
     assert_eq!(request, &response[..n]);
 }
@@ -63,10 +65,12 @@ fn net_v4_connect_any_accept_with() {
 
     let accepted = rustix::net::accept_with(&listener, SocketFlags::CLOEXEC).expect("accept_with");
     let mut response = [0_u8; 128];
-    let n = rustix::net::recv(&accepted, &mut response, RecvFlags::empty()).expect("recv");
+    let (n, actual) =
+        rustix::net::recv(&accepted, &mut response, RecvFlags::empty()).expect("recv");
 
     // Not strictly required, but it makes the test simpler.
     assert_eq!(n, request.len());
+    assert_eq!(actual, request.len());
 
     assert_eq!(request, &response[..n]);
 }
@@ -95,10 +99,12 @@ fn net_v6_connect_any() {
 
     let accepted = rustix::net::accept(&listener).expect("accept");
     let mut response = [0_u8; 128];
-    let n = rustix::net::recv(&accepted, &mut response, RecvFlags::empty()).expect("recv");
+    let (n, actual) =
+        rustix::net::recv(&accepted, &mut response, RecvFlags::empty()).expect("recv");
 
     // Not strictly required, but it makes the test simpler.
     assert_eq!(n, request.len());
+    assert_eq!(actual, request.len());
 
     assert_eq!(request, &response[..n]);
 }
@@ -128,10 +134,12 @@ fn net_v6_connect_any_accept_with() {
 
     let accepted = rustix::net::accept_with(&listener, SocketFlags::CLOEXEC).expect("accept_with");
     let mut response = [0_u8; 128];
-    let n = rustix::net::recv(&accepted, &mut response, RecvFlags::empty()).expect("recv");
+    let (n, actual) =
+        rustix::net::recv(&accepted, &mut response, RecvFlags::empty()).expect("recv");
 
     // Not strictly required, but it makes the test simpler.
     assert_eq!(n, request.len());
+    assert_eq!(actual, request.len());
 
     assert_eq!(request, &response[..n]);
 }
@@ -160,10 +168,12 @@ fn net_v4_connect() {
 
     let accepted = rustix::net::accept(&listener).expect("accept");
     let mut response = [0_u8; 128];
-    let n = rustix::net::recv(&accepted, &mut response, RecvFlags::empty()).expect("recv");
+    let (n, actual) =
+        rustix::net::recv(&accepted, &mut response, RecvFlags::empty()).expect("recv");
 
     // Not strictly required, but it makes the test simpler.
     assert_eq!(n, request.len());
+    assert_eq!(actual, request.len());
 
     assert_eq!(request, &response[..n]);
 }
@@ -195,10 +205,12 @@ fn net_v6_connect() {
 
     let accepted = rustix::net::accept(&listener).expect("accept");
     let mut response = [0_u8; 128];
-    let n = rustix::net::recv(&accepted, &mut response, RecvFlags::empty()).expect("recv");
+    let (n, actual) =
+        rustix::net::recv(&accepted, &mut response, RecvFlags::empty()).expect("recv");
 
     // Not strictly required, but it makes the test simpler.
     assert_eq!(n, request.len());
+    assert_eq!(actual, request.len());
 
     assert_eq!(request, &response[..n]);
 }
@@ -310,10 +322,12 @@ fn net_v4_bind_any() {
 
     let accepted = rustix::net::accept(&listener).expect("accept");
     let mut response = [0_u8; 128];
-    let n = rustix::net::recv(&accepted, &mut response, RecvFlags::empty()).expect("recv");
+    let (n, actual) =
+        rustix::net::recv(&accepted, &mut response, RecvFlags::empty()).expect("recv");
 
     // Not strictly required, but it makes the test simpler.
     assert_eq!(n, request.len());
+    assert_eq!(actual, request.len());
 
     assert_eq!(request, &response[..n]);
 }
@@ -341,10 +355,12 @@ fn net_v6_bind_any() {
 
     let accepted = rustix::net::accept(&listener).expect("accept");
     let mut response = [0_u8; 128];
-    let n = rustix::net::recv(&accepted, &mut response, RecvFlags::empty()).expect("recv");
+    let (n, actual) =
+        rustix::net::recv(&accepted, &mut response, RecvFlags::empty()).expect("recv");
 
     // Not strictly required, but it makes the test simpler.
     assert_eq!(n, request.len());
+    assert_eq!(actual, request.len());
 
     assert_eq!(request, &response[..n]);
 }
@@ -373,11 +389,12 @@ fn net_v4_sendto() {
 
     let accepted = rustix::net::accept(&listener).expect("accept");
     let mut response = [0_u8; 128];
-    let (n, from) =
+    let (n, actual, from) =
         rustix::net::recvfrom(&accepted, &mut response, RecvFlags::empty()).expect("recv");
 
     // Not strictly required, but it makes the test simpler.
     assert_eq!(n, request.len());
+    assert_eq!(actual, request.len());
 
     assert_eq!(request, &response[..n]);
     assert!(from.is_none());
@@ -407,11 +424,12 @@ fn net_v6_sendto() {
 
     let accepted = rustix::net::accept(&listener).expect("accept");
     let mut response = [0_u8; 128];
-    let (n, from) =
+    let (n, actual, from) =
         rustix::net::recvfrom(&accepted, &mut response, RecvFlags::empty()).expect("recv");
 
     // Not strictly required, but it makes the test simpler.
     assert_eq!(n, request.len());
+    assert_eq!(actual, request.len());
 
     assert_eq!(request, &response[..n]);
     assert!(from.is_none());
@@ -440,11 +458,12 @@ fn net_v4_sendto_any() {
 
     let accepted = rustix::net::accept(&listener).expect("accept");
     let mut response = [0_u8; 128];
-    let (n, from) =
+    let (n, actual, from) =
         rustix::net::recvfrom(&accepted, &mut response, RecvFlags::empty()).expect("recv");
 
     // Not strictly required, but it makes the test simpler.
     assert_eq!(n, request.len());
+    assert_eq!(actual, request.len());
 
     assert_eq!(request, &response[..n]);
     assert!(from.is_none());
@@ -473,11 +492,12 @@ fn net_v6_sendto_any() {
 
     let accepted = rustix::net::accept(&listener).expect("accept");
     let mut response = [0_u8; 128];
-    let (n, from) =
+    let (n, actual, from) =
         rustix::net::recvfrom(&accepted, &mut response, RecvFlags::empty()).expect("recv");
 
     // Not strictly required, but it makes the test simpler.
     assert_eq!(n, request.len());
+    assert_eq!(actual, request.len());
 
     assert_eq!(request, &response[..n]);
     assert!(from.is_none());
@@ -522,10 +542,12 @@ fn net_v4_acceptfrom() {
     assert_eq!(from.clone().port(), peer_addr.port());
 
     let mut response = [0_u8; 128];
-    let n = rustix::net::recv(&accepted, &mut response, RecvFlags::empty()).expect("recv");
+    let (n, actual) =
+        rustix::net::recv(&accepted, &mut response, RecvFlags::empty()).expect("recv");
 
     // Not strictly required, but it makes the test simpler.
     assert_eq!(n, request.len());
+    assert_eq!(actual, request.len());
 
     assert_eq!(request, &response[..n]);
 }
@@ -569,10 +591,12 @@ fn net_v6_acceptfrom() {
     assert_eq!(from.clone().port(), peer_addr.port());
 
     let mut response = [0_u8; 128];
-    let n = rustix::net::recv(&accepted, &mut response, RecvFlags::empty()).expect("recv");
+    let (n, actual) =
+        rustix::net::recv(&accepted, &mut response, RecvFlags::empty()).expect("recv");
 
     // Not strictly required, but it makes the test simpler.
     assert_eq!(n, request.len());
+    assert_eq!(actual, request.len());
 
     assert_eq!(request, &response[..n]);
 }
@@ -596,8 +620,10 @@ fn net_shutdown() {
 
     let accepted = rustix::net::accept(&listener).expect("accept");
     let mut response = [0_u8; 128];
-    let n = rustix::net::recv(&accepted, &mut response, RecvFlags::empty()).expect("recv");
+    let (n, actual) =
+        rustix::net::recv(&accepted, &mut response, RecvFlags::empty()).expect("recv");
     assert_eq!(n, 0);
+    assert_eq!(actual, 0);
 
     drop(sender);
 }

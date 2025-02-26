@@ -1,3 +1,4 @@
+use rustix::buffer::spare_capacity;
 use rustix::event::epoll;
 use rustix::io::{ioctl_fionbio, read, write};
 use rustix::net::{
@@ -40,8 +41,8 @@ fn server(ready: Arc<(Mutex<u16>, Condvar)>) -> ! {
 
     let mut event_list = Vec::with_capacity(4);
     loop {
-        epoll::wait(&epoll, &mut event_list, None).unwrap();
-        for event in &event_list {
+        epoll::wait(&epoll, spare_capacity(&mut event_list), None).unwrap();
+        for event in event_list.drain(..) {
             let target = event.data;
             if target.u64() == 1 {
                 let conn_sock = accept(&listen_sock).unwrap();

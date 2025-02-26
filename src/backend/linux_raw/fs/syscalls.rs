@@ -1534,45 +1534,48 @@ pub(crate) fn inotify_rm_watch(infd: BorrowedFd<'_>, wfd: i32) -> io::Result<()>
 }
 
 #[inline]
-pub(crate) fn getxattr(path: &CStr, name: &CStr, value: &mut [u8]) -> io::Result<usize> {
-    let (value_addr_mut, value_len) = slice_mut(value);
-    unsafe {
-        ret_usize(syscall!(
-            __NR_getxattr,
-            path,
-            name,
-            value_addr_mut,
-            value_len
-        ))
-    }
+pub(crate) unsafe fn getxattr(
+    path: &CStr,
+    name: &CStr,
+    value: (*mut u8, usize),
+) -> io::Result<usize> {
+    ret_usize(syscall!(
+        __NR_getxattr,
+        path,
+        name,
+        value.0,
+        pass_usize(value.1)
+    ))
 }
 
 #[inline]
-pub(crate) fn lgetxattr(path: &CStr, name: &CStr, value: &mut [u8]) -> io::Result<usize> {
-    let (value_addr_mut, value_len) = slice_mut(value);
-    unsafe {
-        ret_usize(syscall!(
-            __NR_lgetxattr,
-            path,
-            name,
-            value_addr_mut,
-            value_len
-        ))
-    }
+pub(crate) unsafe fn lgetxattr(
+    path: &CStr,
+    name: &CStr,
+    value: (*mut u8, usize),
+) -> io::Result<usize> {
+    ret_usize(syscall!(
+        __NR_lgetxattr,
+        path,
+        name,
+        value.0,
+        pass_usize(value.1)
+    ))
 }
 
 #[inline]
-pub(crate) fn fgetxattr(fd: BorrowedFd<'_>, name: &CStr, value: &mut [u8]) -> io::Result<usize> {
-    let (value_addr_mut, value_len) = slice_mut(value);
-    unsafe {
-        ret_usize(syscall!(
-            __NR_fgetxattr,
-            fd,
-            name,
-            value_addr_mut,
-            value_len
-        ))
-    }
+pub(crate) unsafe fn fgetxattr(
+    fd: BorrowedFd<'_>,
+    name: &CStr,
+    value: (*mut u8, usize),
+) -> io::Result<usize> {
+    ret_usize(syscall!(
+        __NR_fgetxattr,
+        fd,
+        name,
+        value.0,
+        pass_usize(value.1)
+    ))
 }
 
 #[inline]
@@ -1636,21 +1639,18 @@ pub(crate) fn fsetxattr(
 }
 
 #[inline]
-pub(crate) fn listxattr(path: &CStr, list: &mut [u8]) -> io::Result<usize> {
-    let (list_addr_mut, list_len) = slice_mut(list);
-    unsafe { ret_usize(syscall!(__NR_listxattr, path, list_addr_mut, list_len)) }
+pub(crate) unsafe fn listxattr(path: &CStr, list: (*mut u8, usize)) -> io::Result<usize> {
+    ret_usize(syscall!(__NR_listxattr, path, list.0, pass_usize(list.1)))
 }
 
 #[inline]
-pub(crate) fn llistxattr(path: &CStr, list: &mut [u8]) -> io::Result<usize> {
-    let (list_addr_mut, list_len) = slice_mut(list);
-    unsafe { ret_usize(syscall!(__NR_llistxattr, path, list_addr_mut, list_len)) }
+pub(crate) unsafe fn llistxattr(path: &CStr, list: (*mut u8, usize)) -> io::Result<usize> {
+    ret_usize(syscall!(__NR_llistxattr, path, list.0, pass_usize(list.1)))
 }
 
 #[inline]
-pub(crate) fn flistxattr(fd: BorrowedFd<'_>, list: &mut [u8]) -> io::Result<usize> {
-    let (list_addr_mut, list_len) = slice_mut(list);
-    unsafe { ret_usize(syscall!(__NR_flistxattr, fd, list_addr_mut, list_len)) }
+pub(crate) unsafe fn flistxattr(fd: BorrowedFd<'_>, list: (*mut u8, usize)) -> io::Result<usize> {
+    ret_usize(syscall!(__NR_flistxattr, fd, list.0, pass_usize(list.1)))
 }
 
 #[inline]

@@ -2,6 +2,7 @@
 
 #[cfg(all(bsd, feature = "event"))]
 fn main() -> std::io::Result<()> {
+    use rustix::buffer::spare_capacity;
     use rustix::event::kqueue::*;
     #[cfg(feature = "fs")]
     use rustix::{fd::AsRawFd, fs};
@@ -60,7 +61,7 @@ fn main() -> std::io::Result<()> {
     eprintln!("Run with --features process to enable more!");
     #[cfg(not(feature = "fs"))]
     eprintln!("Run with --features fs to enable more!");
-    unsafe { kevent(&kq, &subs, &mut out, None) }?;
+    unsafe { kevent(&kq, &subs, spare_capacity(&mut out), None) }?;
 
     loop {
         while let Some(e) = out.pop() {
@@ -80,7 +81,7 @@ fn main() -> std::io::Result<()> {
                 _ => eprintln!("Unknown event"),
             }
         }
-        unsafe { kevent(&kq, &[], &mut out, None) }?;
+        unsafe { kevent(&kq, &[], spare_capacity(&mut out), None) }?;
     }
 }
 

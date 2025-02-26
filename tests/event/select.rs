@@ -245,7 +245,7 @@ fn test_select_with_sockets() {
     let mut buf = [b'\0'];
     assert_eq!(
         retry_on_intr(|| recv(&reader, &mut buf, RecvFlags::empty())).unwrap(),
-        1
+        (1, 1)
     );
     assert_eq!(buf[0], b'a');
 
@@ -364,7 +364,7 @@ fn test_select_with_maxfd_sockets() {
     let mut buf = [b'\0'];
     assert_eq!(
         retry_on_intr(|| recv(&reader, &mut buf, RecvFlags::empty())).unwrap(),
-        1
+        (1, 1)
     );
     assert_eq!(buf[0], b'a');
 

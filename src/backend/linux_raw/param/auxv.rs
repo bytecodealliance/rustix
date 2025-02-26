@@ -569,7 +569,7 @@ impl Iterator for AuxFile {
         let mut buf = [0_u8; size_of::<Self::Item>()];
         let mut slice = &mut buf[..];
         while !slice.is_empty() {
-            match crate::io::read(&self.0, slice) {
+            match crate::io::read(&self.0, &mut *slice) {
                 Ok(0) => panic!("unexpected end of auxv file"),
                 Ok(n) => slice = &mut slice[n..],
                 Err(crate::io::Errno::INTR) => continue,

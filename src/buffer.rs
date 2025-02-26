@@ -2,73 +2,407 @@
 
 #![allow(unsafe_code)]
 
+#[cfg(feature = "alloc")]
+use alloc::vec::Vec;
 use core::mem::MaybeUninit;
 use core::slice;
 
-/// Split an uninitialized byte slice into initialized and uninitialized parts.
+/// A memory buffer that may be uninitialized.
 ///
-/// # Safety
+/// There are three types that implement the `Buffer` trait, and the type you
+/// use determines the return type of the functions that use it:
 ///
-/// `init_len` must not be greater than `buf.len()`, and at least `init_len`
-/// bytes must be initialized.
-#[inline]
-pub(super) unsafe fn split_init(
-    buf: &mut [MaybeUninit<u8>],
-    init_len: usize,
-) -> (&mut [u8], &mut [MaybeUninit<u8>]) {
-    debug_assert!(init_len <= buf.len());
-    let buf_ptr = buf.as_mut_ptr();
-    let uninit_len = buf.len() - init_len;
-    let init = slice::from_raw_parts_mut(buf_ptr.cast::<u8>(), init_len);
-    let uninit = slice::from_raw_parts_mut(buf_ptr.add(init_len), uninit_len);
-    (init, uninit)
+/// | If you pass a...         | You get back a... |
+/// | ------------------------ | ----------------- |
+/// | `&mut [u8]`              | `usize`, indicating the number of elements initialized. |
+/// | `&mut [MaybeUninit<u8>]` | `(&mut [u8], &[mut MaybeUninit<u8>])`, holding the initialized and uninitialized subslices. |
+/// | [`SpareCapacity`]        | `usize`, indicating the number of elements initialized. And the `Vec` is extended. |
+///
+/// # Examples
+///
+/// Passing a `&mut [u8]`:
+///
+/// ```rust
+/// # use rustix::io::read;
+/// # fn example(fd: rustix::fd::BorrowedFd) -> rustix::io::Result<()> {
+/// let mut buf = [0_u8; 64];
+/// let nread = read(fd, &mut buf)?;
+/// # Ok(())
+/// # }
+/// ```
+///
+/// Passing a `&mut [MaybeUninit<u8>]`:
+///
+/// ```rust
+/// # use rustix::io::read;
+/// # use core::mem::MaybeUninit;
+/// # fn example(fd: rustix::fd::BorrowedFd) -> rustix::io::Result<()> {
+/// let mut buf = [MaybeUninit::<u8>::uninit(); 64];
+/// let (init, uninit) = read(fd, &mut buf)?;
+/// // `init` is a `&mut [u8]` with the initialized bytes.
+/// // `uninit` is a `&mut [MaybeUninit<u8>]` with the remaining bytes.
+/// # Ok(())
+/// # }
+/// ```
+///
+/// Passing a [`SpareCapacity`], via the [`spare_capacity`] helper function:
+///
+/// ```rust
+/// # use rustix::io::read;
+/// # use rustix::buffer::spare_capacity;
+/// # fn example(fd: rustix::fd::BorrowedFd) -> rustix::io::Result<()> {
+/// let mut buf = Vec::with_capacity(64);
+/// let nread = read(fd, spare_capacity(&mut buf))?;
+/// // Also, `buf.len()` is now `nread` elements greater.
+/// # Ok(())
+/// # }
+/// ```
+///
+/// If you see errors like "move occurs because `x` has type `&mut [u8]`,
+/// which does not implement the `Copy` trait", replace `x` with `&mut *x`.
+pub trait Buffer<T>: private::Sealed<T> {}
+
+// Implement `Buffer` for all the types that implement `Sealed`.
+impl<T> Buffer<T> for &mut [T] {}
+impl<T, const N: usize> Buffer<T> for &mut [T; N] {}
+#[cfg(feature = "alloc")]
+impl<T> Buffer<T> for &mut Vec<T> {}
+impl<T> Buffer<T> for &mut [MaybeUninit<T>] {}
+impl<T, const N: usize> Buffer<T> for &mut [MaybeUninit<T>; N] {}
+#[cfg(feature = "alloc")]
+impl<T> Buffer<T> for &mut Vec<MaybeUninit<T>> {}
+#[cfg(feature = "alloc")]
+impl<'a, T> Buffer<T> for SpareCapacity<'a, T> {}
+
+impl<T> private::Sealed<T> for &mut [T] {
+    type Output = usize;
+
+    #[inline]
+    fn parts_mut(&mut self) -> (*mut T, usize) {
+        (self.as_mut_ptr(), self.len())
+    }
+
+    #[inline]
+    unsafe fn assume_init(self, len: usize) -> Self::Output {
+        len
+    }
+}
+
+impl<T, const N: usize> private::Sealed<T> for &mut [T; N] {
+    type Output = usize;
+
+    #[inline]
+    fn parts_mut(&mut self) -> (*mut T, usize) {
+        (self.as_mut_ptr(), N)
+    }
+
+    #[inline]
+    unsafe fn assume_init(self, len: usize) -> Self::Output {
+        len
+    }
+}
+
+// `Vec` implements `DerefMut` to `&mut [T]`, however it doesn't get
+// auto-derefed in a `impl Buffer<u8>`, so we add this `impl` so that our users
+// don't have to add an extra `*` in these situations.
+#[cfg(feature = "alloc")]
+impl<T> private::Sealed<T> for &mut Vec<T> {
+    type Output = usize;
+
+    #[inline]
+    fn parts_mut(&mut self) -> (*mut T, usize) {
+        (self.as_mut_ptr(), self.len())
+    }
+
+    #[inline]
+    unsafe fn assume_init(self, len: usize) -> Self::Output {
+        len
+    }
+}
+
+impl<'a, T> private::Sealed<T> for &'a mut [MaybeUninit<T>] {
+    type Output = (&'a mut [T], &'a mut [MaybeUninit<T>]);
+
+    #[inline]
+    fn parts_mut(&mut self) -> (*mut T, usize) {
+        (self.as_mut_ptr().cast(), self.len())
+    }
+
+    #[inline]
+    unsafe fn assume_init(self, len: usize) -> Self::Output {
+        let (init, uninit) = self.split_at_mut(len);
+
+        // SAFETY: The user asserts that the slice is now initialized.
+        let init = slice::from_raw_parts_mut(init.as_mut_ptr().cast::<T>(), init.len());
+
+        (init, uninit)
+    }
+}
+
+impl<'a, T, const N: usize> private::Sealed<T> for &'a mut [MaybeUninit<T>; N] {
+    type Output = (&'a mut [T], &'a mut [MaybeUninit<T>]);
+
+    #[inline]
+    fn parts_mut(&mut self) -> (*mut T, usize) {
+        (self.as_mut_ptr().cast(), self.len())
+    }
+
+    #[inline]
+    unsafe fn assume_init(self, len: usize) -> Self::Output {
+        let (init, uninit) = self.split_at_mut(len);
+
+        // SAFETY: The user asserts that the slice is now initialized.
+        let init = slice::from_raw_parts_mut(init.as_mut_ptr().cast::<T>(), init.len());
+
+        (init, uninit)
+    }
+}
+
+#[cfg(feature = "alloc")]
+impl<'a, T> private::Sealed<T> for &'a mut Vec<MaybeUninit<T>> {
+    type Output = (&'a mut [T], &'a mut [MaybeUninit<T>]);
+
+    #[inline]
+    fn parts_mut(&mut self) -> (*mut T, usize) {
+        (self.as_mut_ptr().cast(), self.len())
+    }
+
+    #[inline]
+    unsafe fn assume_init(self, len: usize) -> Self::Output {
+        let (init, uninit) = self.split_at_mut(len);
+
+        // SAFETY: The user asserts that the slice is now initialized.
+        let init = slice::from_raw_parts_mut(init.as_mut_ptr().cast::<T>(), init.len());
+
+        (init, uninit)
+    }
+}
+
+/// A type that implements [`Buffer`] by appending to a `Vec`, up to its
+/// capacity.
+///
+/// To use this, use the [`spare_capacity`] function.
+///
+/// Because this uses the capacity, and never reallocates, the `Vec` should
+/// have some non-empty spare capacity.
+#[cfg(feature = "alloc")]
+#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
+pub struct SpareCapacity<'a, T>(&'a mut Vec<T>);
+
+/// Construct an [`SpareCapacity`], which implements [`Buffer`].
+///
+/// This wraps a `Vec` and uses the spare capacity of the `Vec` as the buffer
+/// to receive data in, automatically setting the length of the `Vec` to
+/// include the received elements.
+///
+/// This uses the existing capacity, and never allocates, so the `Vec` should
+/// have some non-empty spare capacity!
+///
+/// # Examples
+///
+/// ```
+/// # fn test(input: rustix::fd::BorrowedFd) -> rustix::io::Result<()> {
+/// use rustix::buffer::spare_capacity;
+/// use rustix::io::{read, Errno};
+///
+/// let mut buf = Vec::with_capacity(1024);
+/// match read(input, spare_capacity(&mut buf)) {
+///     Ok(0) => { /* end of stream */ }
+///     Ok(n) => { /* `buf` is now `n` bytes longer */ }
+///     Err(Errno::INTR) => { /* `buf` is unmodified */ }
+///     Err(e) => {
+///         return Err(e);
+///     }
+/// }
+///
+/// # Ok(())
+/// # }
+/// ```
+#[cfg(feature = "alloc")]
+#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
+pub fn spare_capacity<'a, T>(v: &'a mut Vec<T>) -> SpareCapacity<'a, T> {
+    debug_assert_ne!(
+        v.capacity(),
+        0,
+        "`extend` uses spare capacity, and never allocates new memory, so the `Vec` passed to it \
+         should have some spare capacity."
+    );
+
+    SpareCapacity(v)
+}
+
+#[cfg(feature = "alloc")]
+impl<'a, T> private::Sealed<T> for SpareCapacity<'a, T> {
+    /// The mutated `Vec` reflects the number of bytes read. We also return
+    /// this number, and a value of 0 indicates the end of the stream has
+    /// been reached.
+    type Output = usize;
+
+    #[inline]
+    fn parts_mut(&mut self) -> (*mut T, usize) {
+        let spare = self.0.spare_capacity_mut();
+        (spare.as_mut_ptr().cast(), spare.len())
+    }
+
+    #[inline]
+    unsafe fn assume_init(self, len: usize) -> Self::Output {
+        // We initialized `len` elements; extend the `Vec` to include them.
+        self.0.set_len(self.0.len() + len);
+        len
+    }
+}
+
+mod private {
+    pub trait Sealed<T> {
+        /// The result of the process operation.
+        type Output;
+
+        /// Return a pointer and length for this buffer.
+        fn parts_mut(&mut self) -> (*mut T, usize);
+
+        /// Convert a finished buffer pointer into its result.
+        ///
+        /// # Safety
+        ///
+        /// At least `len` bytes of the buffer must now be initialized.
+        unsafe fn assume_init(self, len: usize) -> Self::Output;
+    }
 }
 
 #[cfg(test)]
 mod tests {
+    #[allow(unused_imports)]
     use super::*;
 
+    #[cfg(not(windows))]
     #[test]
-    fn test_split_init() {
-        let mut input_array = [
-            MaybeUninit::new(0_u8),
-            MaybeUninit::new(1_u8),
-            MaybeUninit::new(2_u8),
-            MaybeUninit::new(3_u8),
+    fn test_compilation() {
+        use crate::io::read;
+        use core::mem::MaybeUninit;
+
+        let input = std::fs::File::open("Cargo.toml").unwrap();
+
+        let mut buf = vec![0_u8; 3];
+        buf.reserve(32);
+        let _x: usize = read(&input, spare_capacity(&mut buf)).unwrap();
+        let _x: (&mut [u8], &mut [MaybeUninit<u8>]) =
+            read(&input, buf.spare_capacity_mut()).unwrap();
+        let _x: usize = read(&input, &mut buf).unwrap();
+        let _x: usize = read(&input, &mut *buf).unwrap();
+        let _x: usize = read(&input, &mut buf[..]).unwrap();
+        let _x: usize = read(&input, &mut (*buf)[..]).unwrap();
+
+        let mut buf = [0, 0, 0];
+        let _x: usize = read(&input, &mut buf).unwrap();
+        let _x: usize = read(&input, &mut buf[..]).unwrap();
+
+        let mut buf = [
+            MaybeUninit::uninit(),
+            MaybeUninit::uninit(),
+            MaybeUninit::uninit(),
         ];
-        let input_array_clone = input_array.clone();
-        let input_array_ptr = input_array.as_ptr();
-        let output_array = [0_u8, 1_u8, 2_u8, 3_u8];
+        let _x: (&mut [u8], &mut [MaybeUninit<u8>]) = read(&input, &mut buf).unwrap();
+        let _x: (&mut [u8], &mut [MaybeUninit<u8>]) = read(&input, &mut buf[..]).unwrap();
 
-        unsafe {
-            let (init, uninit) = split_init(&mut input_array, 0);
-            assert_eq!(init, &[]);
-            assert_eq!(uninit.len(), input_array_clone.len());
-            assert_eq!(uninit.as_ptr(), input_array_ptr);
+        let mut buf = vec![
+            MaybeUninit::uninit(),
+            MaybeUninit::uninit(),
+            MaybeUninit::uninit(),
+        ];
+        let _x: (&mut [u8], &mut [MaybeUninit<u8>]) = read(&input, &mut buf).unwrap();
+        let _x: (&mut [u8], &mut [MaybeUninit<u8>]) = read(&input, &mut buf[..]).unwrap();
 
-            let (init, uninit) = split_init(&mut input_array, input_array_clone.len());
-            assert_eq!(init, &output_array[..]);
-            assert_eq!(init.as_ptr(), input_array_ptr.cast());
-            assert_eq!(uninit.len(), 0);
-            assert_eq!(
-                uninit.as_ptr(),
-                input_array_ptr.add(input_array_clone.len())
-            );
+        // This is reduced from src/fs/inotify.rs line 177.
+        struct Wrapper<'a>(&'a mut [u8]);
+        impl<'a> Wrapper<'a> {
+            fn read(&mut self) {
+                let input = std::fs::File::open("Cargo.toml").unwrap();
 
-            let (init, uninit) = split_init(&mut input_array, 2);
-            assert_eq!(init, &output_array[..2]);
-            assert_eq!(init.as_ptr(), input_array_ptr.cast());
-            assert_eq!(uninit.len(), 2);
-            assert_eq!(uninit.as_ptr(), input_array_ptr.add(2));
+                // Ideally we'd write this.
+                //let _x: usize = read(&input, self.0).unwrap();
+                // But we need to write this instead.
+                let _x: usize = read(&input, &mut *self.0).unwrap();
+            }
         }
+        let mut buf = vec![0_u8; 3];
+        let mut wrapper = Wrapper(&mut buf);
+        wrapper.read();
+
+        // Why does this get two error messages?
+        //let mut buf = [0, 0, 0];
+        //let _x = read(&input, buf).unwrap();
     }
 
+    #[cfg(not(windows))]
     #[test]
-    fn test_split_init_empty() {
-        unsafe {
-            let (init, uninit) = split_init(&mut [], 0);
-            assert!(init.is_empty());
-            assert!(uninit.is_empty());
-        }
+    fn test_slice() {
+        use crate::io::read;
+        use std::io::{Seek, SeekFrom};
+
+        let mut input = std::fs::File::open("Cargo.toml").unwrap();
+
+        let mut buf = [0_u8; 64];
+        let nread = read(&input, &mut buf).unwrap();
+        assert_eq!(nread, buf.len());
+        assert_eq!(&buf[..9], b"[package]");
+        input.seek(SeekFrom::End(-1)).unwrap();
+        let nread = read(&input, &mut buf).unwrap();
+        assert_eq!(nread, 1);
+        input.seek(SeekFrom::End(0)).unwrap();
+        let nread = read(&input, &mut buf).unwrap();
+        assert_eq!(nread, 0);
+    }
+
+    #[cfg(not(windows))]
+    #[test]
+    fn test_slice_uninit() {
+        use crate::io::read;
+        use core::mem::MaybeUninit;
+        use std::io::{Seek, SeekFrom};
+
+        let mut input = std::fs::File::open("Cargo.toml").unwrap();
+
+        let mut buf = [MaybeUninit::<u8>::uninit(); 64];
+        let (init, uninit) = read(&input, &mut buf).unwrap();
+        assert_eq!(uninit.len(), 0);
+        assert_eq!(&init[..9], b"[package]");
+        assert_eq!(init.len(), buf.len());
+        assert_eq!(
+            unsafe { core::mem::transmute::<&mut [MaybeUninit<u8>], &mut [u8]>(&mut buf[..9]) },
+            b"[package]"
+        );
+        input.seek(SeekFrom::End(-1)).unwrap();
+        let (init, uninit) = read(&input, &mut buf).unwrap();
+        assert_eq!(init.len(), 1);
+        assert_eq!(uninit.len(), buf.len() - 1);
+        input.seek(SeekFrom::End(0)).unwrap();
+        let (init, uninit) = read(&input, &mut buf).unwrap();
+        assert_eq!(init.len(), 0);
+        assert_eq!(uninit.len(), buf.len());
+    }
+
+    #[cfg(not(windows))]
+    #[test]
+    fn test_spare_capacity() {
+        use crate::io::read;
+        use std::io::{Seek, SeekFrom};
+
+        let mut input = std::fs::File::open("Cargo.toml").unwrap();
+
+        let mut buf = Vec::with_capacity(64);
+        let nread = read(&input, spare_capacity(&mut buf)).unwrap();
+        assert_eq!(nread, buf.capacity());
+        assert_eq!(nread, buf.len());
+        assert_eq!(&buf[..9], b"[package]");
+        buf.clear();
+        input.seek(SeekFrom::End(-1)).unwrap();
+        let nread = read(&input, spare_capacity(&mut buf)).unwrap();
+        assert_eq!(nread, 1);
+        assert_eq!(buf.len(), 1);
+        buf.clear();
+        input.seek(SeekFrom::End(0)).unwrap();
+        let nread = read(&input, spare_capacity(&mut buf)).unwrap();
+        assert_eq!(nread, 0);
+        assert!(buf.is_empty());
     }
 }

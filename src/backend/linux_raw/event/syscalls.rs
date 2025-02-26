@@ -6,8 +6,8 @@
 #![allow(unsafe_code, clippy::undocumented_unsafe_blocks)]
 
 use crate::backend::conv::{
-    by_ref, c_int, c_uint, opt_ref, ret, ret_c_int, ret_error, ret_owned_fd, ret_usize, size_of,
-    slice_mut, zero,
+    by_ref, c_int, c_uint, opt_ref, pass_usize, ret, ret_c_int, ret_error, ret_owned_fd, ret_usize,
+    size_of, slice_mut, zero,
 };
 use crate::event::{epoll, EventfdFlags, FdSetElement, PollFd, Timespec};
 use crate::fd::{BorrowedFd, OwnedFd};
@@ -15,8 +15,6 @@ use crate::io;
 use crate::utils::as_mut_ptr;
 #[cfg(feature = "linux_5_11")]
 use crate::utils::option_as_ptr;
-#[cfg(feature = "alloc")]
-use core::mem::MaybeUninit;
 use core::ptr::null_mut;
 use linux_raw_sys::general::{kernel_sigset_t, EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD};
 
@@ -174,32 +172,25 @@ pub(crate) fn epoll_del(epfd: BorrowedFd<'_>, fd: BorrowedFd<'_>) -> io::Result<
     }
 }
 
-#[cfg(feature = "alloc")]
 #[inline]
-pub(crate) fn epoll_wait(
+pub(crate) unsafe fn epoll_wait(
     epfd: BorrowedFd<'_>,
-    events: &mut [MaybeUninit<crate::event::epoll::Event>],
+    events: (*mut crate::event::epoll::Event, usize),
     timeout: Option<&Timespec>,
 ) -> io::Result<usize> {
-    let (buf_addr_mut, buf_len) = slice_mut(events);
-
     // If we have Linux 5.11, use `epoll_pwait2`, which takes a `timespec`.
     #[cfg(feature = "linux_5_11")]
     {
         let timeout = option_as_ptr(timeout);
 
-        // SAFETY: `__NR_epoll_pwait2` doesn't access any user memory outside of
-        // the `events` array, as we don't pass it a `sigmask`.
-        unsafe {
-            ret_usize(syscall!(
-                __NR_epoll_pwait2,
-                epfd,
-                buf_addr_mut,
-                buf_len,
-                timeout,
-                zero()
-            ))
-        }
+        ret_usize(syscall!(
+            __NR_epoll_pwait2,
+            epfd,
+            events.0,
+            pass_usize(events.1),
+            timeout,
+            zero()
+        ))
     }
 
     // If we don't have Linux 5.11, use `epoll_pwait`, which takes a `c_int`.
@@ -214,18 +205,14 @@ pub(crate) fn epoll_wait(
             Some(timeout) => timeout.as_c_int_millis().ok_or(io::Errno::INVAL)?,
         };
 
-        // SAFETY: `__NR_epoll_pwait` doesn't access any user memory outside of
-        // the `events` array, as we don't pass it a `sigmask`.
-        unsafe {
-            ret_usize(syscall!(
-                __NR_epoll_pwait,
-                epfd,
-                buf_addr_mut,
-                buf_len,
-                c_int(timeout),
-                zero()
-            ))
-        }
+        ret_usize(syscall!(
+            __NR_epoll_pwait,
+            epfd,
+            events.0,
+            pass_usize(events.1),
+            c_int(timeout),
+            zero()
+        ))
     }
 }
 

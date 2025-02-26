@@ -10,14 +10,16 @@ fn xattr_basic() {
     #[cfg(apple)]
     let enodata = libc::ENOATTR;
 
+    let mut empty: [u8; 0] = [];
+
     assert_eq!(
-        rustix::fs::getxattr("/no/such/path", "user.test", &mut [])
+        rustix::fs::getxattr("/no/such/path", "user.test", &mut empty)
             .unwrap_err()
             .kind(),
         io::ErrorKind::NotFound
     );
     assert_eq!(
-        rustix::fs::lgetxattr("/no/such/path", "user.test", &mut [])
+        rustix::fs::lgetxattr("/no/such/path", "user.test", &mut empty)
             .unwrap_err()
             .kind(),
         io::ErrorKind::NotFound
@@ -35,13 +37,13 @@ fn xattr_basic() {
         io::ErrorKind::NotFound
     );
     assert_eq!(
-        rustix::fs::listxattr("/no/such/path", &mut [])
+        rustix::fs::listxattr("/no/such/path", &mut empty)
             .unwrap_err()
             .kind(),
         io::ErrorKind::NotFound
     );
     assert_eq!(
-        rustix::fs::llistxattr("/no/such/path", &mut [])
+        rustix::fs::llistxattr("/no/such/path", &mut empty)
             .unwrap_err()
             .kind(),
         io::ErrorKind::NotFound
@@ -60,13 +62,13 @@ fn xattr_basic() {
     );
 
     assert_eq!(
-        rustix::fs::getxattr("Cargo.toml", "user.test", &mut [])
+        rustix::fs::getxattr("Cargo.toml", "user.test", &mut empty)
             .unwrap_err()
             .raw_os_error(),
         enodata
     );
     assert_eq!(
-        rustix::fs::lgetxattr("Cargo.toml", "user.test", &mut [])
+        rustix::fs::lgetxattr("Cargo.toml", "user.test", &mut empty)
             .unwrap_err()
             .raw_os_error(),
         enodata
@@ -83,8 +85,8 @@ fn xattr_basic() {
             .raw_os_error(),
         enodata
     );
-    assert_eq!(rustix::fs::listxattr("Cargo.toml", &mut []).unwrap(), 0);
-    assert_eq!(rustix::fs::llistxattr("Cargo.toml", &mut []).unwrap(), 0);
+    assert_eq!(rustix::fs::listxattr("Cargo.toml", &mut empty).unwrap(), 0);
+    assert_eq!(rustix::fs::llistxattr("Cargo.toml", &mut empty).unwrap(), 0);
     assert_eq!(
         rustix::fs::removexattr("Cargo.toml", "user.test")
             .unwrap_err()
@@ -100,7 +102,7 @@ fn xattr_basic() {
 
     let file = std::fs::File::open("Cargo.toml").unwrap();
     assert_eq!(
-        rustix::fs::fgetxattr(&file, "user.test", &mut [])
+        rustix::fs::fgetxattr(&file, "user.test", &mut empty)
             .unwrap_err()
             .raw_os_error(),
         enodata
@@ -111,7 +113,7 @@ fn xattr_basic() {
             .raw_os_error(),
         enodata
     );
-    assert_eq!(rustix::fs::flistxattr(&file, &mut []).unwrap(), 0);
+    assert_eq!(rustix::fs::flistxattr(&file, &mut empty).unwrap(), 0);
     assert_eq!(
         rustix::fs::fremovexattr(&file, "user.test")
             .unwrap_err()

@@ -2329,16 +2329,18 @@ struct Attrlist {
 }
 
 #[cfg(any(apple, linux_kernel, target_os = "hurd"))]
-pub(crate) fn getxattr(path: &CStr, name: &CStr, value: &mut [u8]) -> io::Result<usize> {
-    let value_ptr = value.as_mut_ptr();
-
+pub(crate) unsafe fn getxattr(
+    path: &CStr,
+    name: &CStr,
+    value: (*mut u8, usize),
+) -> io::Result<usize> {
     #[cfg(not(apple))]
-    unsafe {
+    {
         ret_usize(c::getxattr(
             path.as_ptr(),
             name.as_ptr(),
-            value_ptr.cast::<c::c_void>(),
-            value.len(),
+            value.0.cast::<c::c_void>(),
+            value.1,
         ))
     }
 
@@ -2346,35 +2348,35 @@ pub(crate) fn getxattr(path: &CStr, name: &CStr, value: &mut [u8]) -> io::Result
     {
         // Passing an empty to slice to `getxattr` leads to `ERANGE` on macOS.
         // Pass null instead.
-        let ptr = if value.is_empty() {
+        let ptr = if value.1 == 0 {
             core::ptr::null_mut()
         } else {
-            value_ptr.cast::<c::c_void>()
+            value.0.cast::<c::c_void>()
         };
-        unsafe {
-            ret_usize(c::getxattr(
-                path.as_ptr(),
-                name.as_ptr(),
-                ptr,
-                value.len(),
-                0,
-                0,
-            ))
-        }
+        ret_usize(c::getxattr(
+            path.as_ptr(),
+            name.as_ptr(),
+            ptr,
+            value.1,
+            0,
+            0,
+        ))
     }
 }
 
 #[cfg(any(apple, linux_kernel, target_os = "hurd"))]
-pub(crate) fn lgetxattr(path: &CStr, name: &CStr, value: &mut [u8]) -> io::Result<usize> {
-    let value_ptr = value.as_mut_ptr();
-
+pub(crate) unsafe fn lgetxattr(
+    path: &CStr,
+    name: &CStr,
+    value: (*mut u8, usize),
+) -> io::Result<usize> {
     #[cfg(not(apple))]
-    unsafe {
+    {
         ret_usize(c::lgetxattr(
             path.as_ptr(),
             name.as_ptr(),
-            value_ptr.cast::<c::c_void>(),
-            value.len(),
+            value.0.cast::<c::c_void>(),
+            value.1,
         ))
     }
 
@@ -2382,36 +2384,36 @@ pub(crate) fn lgetxattr(path: &CStr, name: &CStr, value: &mut [u8]) -> io::Resul
     {
         // Passing an empty to slice to `getxattr` leads to `ERANGE` on macOS.
         // Pass null instead.
-        let ptr = if value.is_empty() {
+        let ptr = if value.1 == 0 {
             core::ptr::null_mut()
         } else {
-            value_ptr.cast::<c::c_void>()
+            value.0.cast::<c::c_void>()
         };
 
-        unsafe {
-            ret_usize(c::getxattr(
-                path.as_ptr(),
-                name.as_ptr(),
-                ptr,
-                value.len(),
-                0,
-                c::XATTR_NOFOLLOW,
-            ))
-        }
+        ret_usize(c::getxattr(
+            path.as_ptr(),
+            name.as_ptr(),
+            ptr,
+            value.1,
+            0,
+            c::XATTR_NOFOLLOW,
+        ))
     }
 }
 
 #[cfg(any(apple, linux_kernel, target_os = "hurd"))]
-pub(crate) fn fgetxattr(fd: BorrowedFd<'_>, name: &CStr, value: &mut [u8]) -> io::Result<usize> {
-    let value_ptr = value.as_mut_ptr();
-
+pub(crate) unsafe fn fgetxattr(
+    fd: BorrowedFd<'_>,
+    name: &CStr,
+    value: (*mut u8, usize),
+) -> io::Result<usize> {
     #[cfg(not(apple))]
-    unsafe {
+    {
         ret_usize(c::fgetxattr(
             borrowed_fd(fd),
             name.as_ptr(),
-            value_ptr.cast::<c::c_void>(),
-            value.len(),
+            value.0.cast::<c::c_void>(),
+            value.1,
         ))
     }
 
@@ -2419,21 +2421,19 @@ pub(crate) fn fgetxattr(fd: BorrowedFd<'_>, name: &CStr, value: &mut [u8]) -> io
     {
         // Passing an empty to slice to `getxattr` leads to `ERANGE` on macOS.
         // Pass null instead.
-        let ptr = if value.is_empty() {
+        let ptr = if value.1 == 0 {
             core::ptr::null_mut()
         } else {
-            value_ptr.cast::<c::c_void>()
+            value.0.cast::<c::c_void>()
         };
-        unsafe {
-            ret_usize(c::fgetxattr(
-                borrowed_fd(fd),
-                name.as_ptr(),
-                ptr,
-                value.len(),
-                0,
-                0,
-            ))
-        }
+        ret_usize(c::fgetxattr(
+            borrowed_fd(fd),
+            name.as_ptr(),
+            ptr,
+            value.1,
+            0,
+            0,
+        ))
     }
 }
 
@@ -2531,70 +2531,61 @@ pub(crate) fn fsetxattr(
 }
 
 #[cfg(any(apple, linux_kernel, target_os = "hurd"))]
-pub(crate) fn listxattr(path: &CStr, list: &mut [u8]) -> io::Result<usize> {
+pub(crate) unsafe fn listxattr(path: &CStr, list: (*mut u8, usize)) -> io::Result<usize> {
     #[cfg(not(apple))]
-    unsafe {
+    {
         ret_usize(c::listxattr(
             path.as_ptr(),
-            list.as_mut_ptr().cast::<ffi::c_char>(),
-            list.len(),
+            list.0.cast::<ffi::c_char>(),
+            list.1,
         ))
     }
 
     #[cfg(apple)]
-    unsafe {
+    {
         ret_usize(c::listxattr(
             path.as_ptr(),
-            list.as_mut_ptr().cast::<ffi::c_char>(),
-            list.len(),
+            list.0.cast::<ffi::c_char>(),
+            list.1,
             0,
         ))
     }
 }
 
 #[cfg(any(apple, linux_kernel, target_os = "hurd"))]
-pub(crate) fn llistxattr(path: &CStr, list: &mut [u8]) -> io::Result<usize> {
+pub(crate) unsafe fn llistxattr(path: &CStr, list: (*mut u8, usize)) -> io::Result<usize> {
     #[cfg(not(apple))]
-    unsafe {
+    {
         ret_usize(c::llistxattr(
             path.as_ptr(),
-            list.as_mut_ptr().cast::<ffi::c_char>(),
-            list.len(),
+            list.0.cast::<ffi::c_char>(),
+            list.1,
         ))
     }
 
     #[cfg(apple)]
-    unsafe {
+    {
         ret_usize(c::listxattr(
             path.as_ptr(),
-            list.as_mut_ptr().cast::<ffi::c_char>(),
-            list.len(),
+            list.0.cast::<ffi::c_char>(),
+            list.1,
             c::XATTR_NOFOLLOW,
         ))
     }
 }
 
 #[cfg(any(apple, linux_kernel, target_os = "hurd"))]
-pub(crate) fn flistxattr(fd: BorrowedFd<'_>, list: &mut [u8]) -> io::Result<usize> {
+pub(crate) unsafe fn flistxattr(fd: BorrowedFd<'_>, list: (*mut u8, usize)) -> io::Result<usize> {
     let fd = borrowed_fd(fd);
 
     #[cfg(not(apple))]
-    unsafe {
-        ret_usize(c::flistxattr(
-            fd,
-            list.as_mut_ptr().cast::<ffi::c_char>(),
-            list.len(),
-        ))
+    {
+        ret_usize(c::flistxattr(fd, list.0.cast::<ffi::c_char>(), list.1))
     }
 
     #[cfg(apple)]
-    unsafe {
-        ret_usize(c::flistxattr(
-            fd,
-            list.as_mut_ptr().cast::<ffi::c_char>(),
-            list.len(),
-            0,
-        ))
+    {
+        ret_usize(c::flistxattr(fd, list.0.cast::<ffi::c_char>(), list.1, 0))
     }
 }
 
