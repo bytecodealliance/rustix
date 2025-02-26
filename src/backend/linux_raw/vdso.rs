@@ -487,7 +487,7 @@ fn test_vdso() {
         #[cfg(target_arch = "riscv64")]
         let ptr = vdso.sym(cstr!("LINUX_4.15"), cstr!("__vdso_gettimeofday"));
         #[cfg(target_arch = "powerpc")]
-        let ptr = vdso.sym(cstr!("LINUX_5.11"), cstr!("__kernel_clock_gettime64"));
+        let _ptr = vdso.sym(cstr!("LINUX_5.11"), cstr!("__kernel_clock_gettime64"));
         #[cfg(target_arch = "powerpc64")]
         let ptr = vdso.sym(cstr!("LINUX_2.6.15"), cstr!("__kernel_clock_gettime"));
         #[cfg(target_arch = "s390x")]
