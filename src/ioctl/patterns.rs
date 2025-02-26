@@ -184,7 +184,7 @@ impl<'a, const OPCODE: Opcode, Value> Updater<'a, OPCODE, Value> {
     /// - For this opcode, `Value` must be the type that the kernel expects to
     ///   get.
     #[inline]
-    pub const unsafe fn new(value: &'a mut Value) -> Self {
+    pub unsafe fn new(value: &'a mut Value) -> Self {
         Self { value }
     }
 }
