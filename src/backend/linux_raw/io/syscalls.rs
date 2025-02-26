@@ -27,7 +27,7 @@ use crate::backend::conv::{hi, lo};
 use crate::backend::{c, MAX_IOV};
 use crate::fd::{AsFd as _, BorrowedFd, OwnedFd, RawFd};
 use crate::io::{self, DupFlags, FdFlags, IoSlice, IoSliceMut, ReadWriteFlags};
-use crate::ioctl::{IoctlOutput, RawOpcode};
+use crate::ioctl::{IoctlOutput, Opcode};
 use core::cmp;
 use linux_raw_sys::general::{F_DUPFD_CLOEXEC, F_GETFD, F_SETFD};
 
@@ -272,7 +272,7 @@ pub(crate) unsafe fn try_close(fd: RawFd) -> io::Result<()> {
 #[inline]
 pub(crate) unsafe fn ioctl(
     fd: BorrowedFd<'_>,
-    request: RawOpcode,
+    request: Opcode,
     arg: *mut c::c_void,
 ) -> io::Result<IoctlOutput> {
     ret_c_int(syscall!(__NR_ioctl, fd, c_uint(request), arg))
@@ -281,7 +281,7 @@ pub(crate) unsafe fn ioctl(
 #[inline]
 pub(crate) unsafe fn ioctl_readonly(
     fd: BorrowedFd<'_>,
-    request: RawOpcode,
+    request: Opcode,
     arg: *mut c::c_void,
 ) -> io::Result<IoctlOutput> {
     ret_c_int(syscall_readonly!(__NR_ioctl, fd, c_uint(request), arg))
