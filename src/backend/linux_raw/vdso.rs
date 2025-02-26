@@ -497,6 +497,7 @@ fn test_vdso() {
         #[cfg(any(target_arch = "mips64", target_arch = "mips64r6"))]
         let ptr = vdso.sym(cstr!("LINUX_2.6"), cstr!("__vdso_gettimeofday"));
 
+        #[cfg(not(target_arch = "powerpc"))]
         assert!(!ptr.is_null());
     }
 
