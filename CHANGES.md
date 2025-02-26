@@ -267,5 +267,11 @@ argument optionallly containing a raw file descriptor.
 
 [`rustix::io_uring::io_uring_setup`]: https://docs.rs/rustix/1.0.0/rustix/io_uring/fn.io_uring_setup.html
 
+The buffer for [`SendAncillaryBuffer`] and [`RecvAncillaryBuffer`] is now
+a `[MaybeUninit<u8>]` instead of a `[u8]`.
+
+[`SendAncillaryBuffer`]: https://docs.rs/rustix/1.0.0/rustix/net/struct.SendAncillaryBuffer.html
+[`RecvAncillaryBuffer`]: https://docs.rs/rustix/1.0.0/rustix/net/struct.RecvAncillaryBuffer.html
+
 All explicitly deprecated functions and types have been removed. Their
 deprecation messages will have identified alternatives.
