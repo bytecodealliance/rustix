@@ -55,7 +55,7 @@ unsafe impl<const OPCODE: Opcode> Ioctl for NoArg<OPCODE> {
 /// Implements the traditional “getter” pattern for `ioctl`s.
 ///
 /// Some `ioctl`s just read data into the userspace. As this is a popular
-/// pattern this structure implements it.
+/// pattern, this structure implements it.
 ///
 /// To compute a value for the `OPCODE` argument, see the functions in the
 /// [`opcode`] module.

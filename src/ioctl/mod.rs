@@ -58,11 +58,12 @@ use bsd as platform;
 ///
 /// # Safety
 ///
-/// While [`Ioctl`] takes much of the unsafety out of `ioctl` calls, it is
-/// still unsafe to call this code with arbitrary device drivers, as it is up
-/// to the device driver to implement the `ioctl` call correctly. It is on the
-/// onus of the protocol between the user and the driver to ensure that the
-/// `ioctl` call is safe to make.
+/// While [`Ioctl`] takes much of the unsafety out of `ioctl` calls, callers
+/// must still ensure that the opcode value, operand type, and data access
+/// correctly reflect what's in the device driver servicing the call. `ioctl`
+/// calls form a protocol between the userspace `ioctl` callers and the device
+/// drivers in the kernel, and safety depends on both sides agreeing and
+/// upholding the expectations of the other.
 ///
 /// # References
 ///  - [Linux]
