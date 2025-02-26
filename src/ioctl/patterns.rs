@@ -29,7 +29,7 @@ impl<const OPCODE: Opcode> NoArg<OPCODE> {
     ///
     /// - `OPCODE` must provide a valid opcode.
     #[inline]
-    pub unsafe fn new() -> Self {
+    pub const unsafe fn new() -> Self {
         Self {}
     }
 }
@@ -81,7 +81,7 @@ impl<const OPCODE: Opcode, Output> Getter<OPCODE, Output> {
     /// - For this opcode, `Output` must be the type that the kernel expects to
     ///   write into.
     #[inline]
-    pub unsafe fn new() -> Self {
+    pub const unsafe fn new() -> Self {
         Self {
             output: mem::MaybeUninit::uninit(),
         }
@@ -138,7 +138,7 @@ impl<const OPCODE: Opcode, Input> Setter<OPCODE, Input> {
     /// - For this opcode, `Input` must be the type that the kernel expects to
     ///   get.
     #[inline]
-    pub unsafe fn new(input: Input) -> Self {
+    pub const unsafe fn new(input: Input) -> Self {
         Self { input }
     }
 }
@@ -229,7 +229,7 @@ impl<const OPCODE: Opcode> IntegerSetter<OPCODE> {
     /// - For this opcode, it must expect an integer.
     /// - The integer is in the valid range for this opcode.
     #[inline]
-    pub unsafe fn new_usize(value: usize) -> Self {
+    pub const unsafe fn new_usize(value: usize) -> Self {
         Self { value: value as _ }
     }
 
@@ -241,7 +241,7 @@ impl<const OPCODE: Opcode> IntegerSetter<OPCODE> {
     /// - For this opcode, it must expect an integer.
     /// - The integer is in the valid range for this opcode.
     #[inline]
-    pub unsafe fn new_pointer(value: &mut c::c_void) -> Self {
+    pub const unsafe fn new_pointer(value: *mut c::c_void) -> Self {
         Self { value }
     }
 }

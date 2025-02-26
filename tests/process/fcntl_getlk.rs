@@ -6,7 +6,6 @@ use std::fs::File;
 use std::os::unix::process::CommandExt as _;
 use std::process::Command;
 
-#[cfg(feature = "fs")]
 #[test]
 #[serial]
 fn test_fcntl_getlk() {

@@ -218,8 +218,8 @@ fn init_from_sysinfo_ehdr() -> Option<Vdso> {
         // Parse the hash table header.
         if !vdso.gnu_hash.is_null() {
             vdso.nbucket = ElfHashEntry::from(*vdso.gnu_hash);
-            // The bucket array is located after the header (4 uint32) and the bloom
-            // filter (size_t array of gnu_hash[2] elements).
+            // The bucket array is located after the header (4 uint32) and the
+            // bloom filter (size_t array of gnu_hash[2] elements).
             vdso.bucket = vdso
                 .gnu_hash
                 .add(4)
@@ -497,6 +497,8 @@ fn test_vdso() {
         #[cfg(any(target_arch = "mips64", target_arch = "mips64r6"))]
         let ptr = vdso.sym(cstr!("LINUX_2.6"), cstr!("__vdso_gettimeofday"));
 
+        // On PowerPC, "__kernel_clock_gettime64" isn't available in
+        // Linux < 5.11.
         #[cfg(not(target_arch = "powerpc"))]
         assert!(!ptr.is_null());
     }

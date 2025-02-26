@@ -74,13 +74,14 @@ impl<F> Weak<F> {
                 NULL => None,
                 addr => {
                     let func = mem::transmute_copy::<*mut c_void, F>(&addr);
-                    // The caller is presumably going to read through this value
-                    // (by calling the function we've dlsymed). This means we'd
-                    // need to have loaded it with at least C11's consume
-                    // ordering in order to be guaranteed that the data we read
-                    // from the pointer isn't from before the pointer was
-                    // stored. Rust has no equivalent to memory_order_consume,
-                    // so we use an acquire fence (sorry, ARM).
+                    // The caller is presumably going to read through this
+                    // value (by calling the function we've dlsymed). This
+                    // means we'd need to have loaded it with at least C11's
+                    // consume ordering in order to be guaranteed that the data
+                    // we read from the pointer isn't from before the pointer
+                    // was stored. Rust has no equivalent to
+                    // memory_order_consume, so we use an acquire fence (sorry,
+                    // ARM).
                     //
                     // Now, in practice this likely isn't needed even on CPUs
                     // where relaxed and consume mean different things. The

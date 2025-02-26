@@ -73,8 +73,11 @@ impl Pid {
 
     /// Converts an `Option<Pid>` into a `RawPid`.
     #[inline]
-    pub fn as_raw(pid: Option<Self>) -> RawPid {
-        pid.map_or(0, |pid| pid.0.get())
+    pub const fn as_raw(pid: Option<Self>) -> RawPid {
+        match pid {
+            Some(pid) => pid.0.get(),
+            None => 0,
+        }
     }
 
     /// Test whether this pid represents the init process (pid 1).

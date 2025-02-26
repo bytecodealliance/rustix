@@ -94,7 +94,8 @@ impl SocketAddrUnix {
     pub fn path(&self) -> Option<&CStr> {
         let bytes = self.bytes()?;
         if !bytes.is_empty() && bytes[0] != 0 {
-            // SAFETY: `from_bytes_with_nul_unchecked` since the string is NUL-terminated.
+            // SAFETY: `from_bytes_with_nul_unchecked` since the string is
+            // NUL-terminated.
             Some(unsafe { CStr::from_bytes_with_nul_unchecked(bytes) })
         } else {
             None

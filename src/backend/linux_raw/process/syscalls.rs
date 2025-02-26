@@ -548,7 +548,8 @@ pub(crate) fn fcntl_getlk(fd: BorrowedFd<'_>, lock: &Flock) -> io::Result<Option
         ))?
     }
 
-    // If no blocking lock is found, `fcntl(GETLK, ..)` sets `l_type` to `F_UNLCK`
+    // If no blocking lock is found, `fcntl(GETLK, ..)` sets `l_type` to
+    // `F_UNLCK`.
     if curr_lock.l_type == c::F_UNLCK as _ {
         Ok(None)
     } else {

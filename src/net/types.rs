@@ -1130,13 +1130,13 @@ pub mod netlink {
     impl SocketAddrNetlink {
         /// Construct a netlink address
         #[inline]
-        pub fn new(pid: u32, groups: u32) -> Self {
+        pub const fn new(pid: u32, groups: u32) -> Self {
             Self { pid, groups }
         }
 
         /// Return port id.
         #[inline]
-        pub fn pid(&self) -> u32 {
+        pub const fn pid(&self) -> u32 {
             self.pid
         }
 
@@ -1148,7 +1148,7 @@ pub mod netlink {
 
         /// Return multicast groups mask.
         #[inline]
-        pub fn groups(&self) -> u32 {
+        pub const fn groups(&self) -> u32 {
             self.groups
         }
 
@@ -1702,7 +1702,7 @@ pub mod xdp {
     impl SocketAddrXdp {
         /// Construct a new XDP address.
         #[inline]
-        pub fn new(flags: SocketAddrXdpFlags, interface_index: u32, queue_id: u32) -> Self {
+        pub const fn new(flags: SocketAddrXdpFlags, interface_index: u32, queue_id: u32) -> Self {
             Self {
                 sxdp_flags: flags,
                 sxdp_ifindex: interface_index,
