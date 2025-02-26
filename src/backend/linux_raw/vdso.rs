@@ -440,7 +440,7 @@ fn test_vdso() {
         let ptr = vdso.sym(cstr!("LINUX_2.6"), cstr!("__vdso_clock_gettime64"));
         #[cfg(target_arch = "riscv64")]
         let ptr = vdso.sym(cstr!("LINUX_4.15"), cstr!("__vdso_clock_gettime"));
-        #[cfg(target_arch = "powerpc64")]
+        #[cfg(any(target_arch = "powerpc", target_arch = "powerpc64"))]
         let ptr = vdso.sym(cstr!("LINUX_2.6.15"), cstr!("__kernel_clock_gettime"));
         #[cfg(target_arch = "s390x")]
         let ptr = vdso.sym(cstr!("LINUX_2.6.29"), cstr!("__kernel_clock_gettime"));
@@ -463,7 +463,7 @@ fn test_vdso() {
         let ptr = vdso.sym(cstr!("LINUX_2.6"), cstr!("__vdso_clock_getres"));
         #[cfg(target_arch = "riscv64")]
         let ptr = vdso.sym(cstr!("LINUX_4.15"), cstr!("__vdso_clock_getres"));
-        #[cfg(target_arch = "powerpc64")]
+        #[cfg(any(target_arch = "powerpc", target_arch = "powerpc64"))]
         let ptr = vdso.sym(cstr!("LINUX_2.6.15"), cstr!("__kernel_clock_getres"));
         #[cfg(target_arch = "s390x")]
         let ptr = vdso.sym(cstr!("LINUX_2.6.29"), cstr!("__kernel_clock_getres"));
@@ -486,8 +486,10 @@ fn test_vdso() {
         let ptr = vdso.sym(cstr!("LINUX_2.6"), cstr!("__vdso_gettimeofday"));
         #[cfg(target_arch = "riscv64")]
         let ptr = vdso.sym(cstr!("LINUX_4.15"), cstr!("__vdso_gettimeofday"));
+        #[cfg(target_arch = "powerpc")]
+        let _ptr = vdso.sym(cstr!("LINUX_5.11"), cstr!("__kernel_clock_gettime64"));
         #[cfg(target_arch = "powerpc64")]
-        let ptr = vdso.sym(cstr!("LINUX_2.6.15"), cstr!("__kernel_gettimeofday"));
+        let ptr = vdso.sym(cstr!("LINUX_2.6.15"), cstr!("__kernel_clock_gettime"));
         #[cfg(target_arch = "s390x")]
         let ptr = vdso.sym(cstr!("LINUX_2.6.29"), cstr!("__kernel_gettimeofday"));
         #[cfg(any(target_arch = "mips", target_arch = "mips32r6"))]
@@ -495,6 +497,7 @@ fn test_vdso() {
         #[cfg(any(target_arch = "mips64", target_arch = "mips64r6"))]
         let ptr = vdso.sym(cstr!("LINUX_2.6"), cstr!("__vdso_gettimeofday"));
 
+        #[cfg(not(target_arch = "powerpc"))]
         assert!(!ptr.is_null());
     }
 

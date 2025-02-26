@@ -30,6 +30,7 @@
 #[cfg_attr(target_arch = "mips32r6", path = "mips32r6.rs")]
 #[cfg_attr(target_arch = "mips64", path = "mips64.rs")]
 #[cfg_attr(target_arch = "mips64r6", path = "mips64r6.rs")]
+#[cfg_attr(target_arch = "powerpc", path = "powerpc.rs")]
 #[cfg_attr(target_arch = "powerpc64", path = "powerpc64.rs")]
 #[cfg_attr(target_arch = "riscv64", path = "riscv64.rs")]
 #[cfg_attr(target_arch = "s390x", path = "s390x.rs")]
@@ -46,6 +47,7 @@ pub(in crate::backend) mod asm;
     target_arch = "mips32r6",
     target_arch = "mips64",
     target_arch = "mips64r6",
+    target_arch = "powerpc",
     target_arch = "powerpc64",
     target_arch = "riscv64",
     target_arch = "s390x",

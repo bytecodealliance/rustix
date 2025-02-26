@@ -1038,7 +1038,7 @@ pub const IORING_NOTIF_USAGE_ZC_COPIED: i32 = sys::IORING_NOTIF_USAGE_ZC_COPIED 
 /// preserve strict-provenance, use a `*mut c_void`. On platforms where
 /// pointers are narrower than 64 bits, this requires additional padding.
 #[repr(C)]
-#[cfg_attr(target_arch = "arm", repr(align(8)))]
+#[cfg_attr(any(target_arch = "arm", target_arch = "powerpc"), repr(align(8)))]
 #[derive(Copy, Clone)]
 #[non_exhaustive]
 pub struct io_uring_ptr {
