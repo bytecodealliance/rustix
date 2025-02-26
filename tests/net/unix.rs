@@ -456,7 +456,7 @@ fn test_unix_msg_with_scm_rights() {
                 let data_socket = accept(&connection_socket).unwrap();
                 let mut sum = 0;
                 loop {
-                    let mut cmsg_buffer = RecvAncillaryBuffer::from(cmsg_space.as_mut_slice());
+                    let mut cmsg_buffer = RecvAncillaryBuffer::new(cmsg_space.as_mut_slice());
                     let result = recvmsg(
                         &data_socket,
                         &mut [IoSliceMut::new(&mut buffer)],
@@ -562,7 +562,7 @@ fn test_unix_msg_with_scm_rights() {
         let we = [write_end.as_fd()];
         let msg = SendAncillaryMessage::ScmRights(&we);
         let mut space = [MaybeUninit::uninit(); rustix::cmsg_space!(ScmRights(1))];
-        let mut cmsg_buffer = SendAncillaryBuffer::from(space.as_mut_slice());
+        let mut cmsg_buffer = SendAncillaryBuffer::new(space.as_mut_slice());
         assert!(cmsg_buffer.push(msg));
 
         connect(&data_socket, &addr).unwrap();
@@ -622,7 +622,7 @@ fn test_unix_peercred_explicit() {
     let ucred = sockopt::socket_peercred(&send_sock).unwrap();
     let msg = SendAncillaryMessage::ScmCredentials(ucred);
     let mut space = [MaybeUninit::uninit(); rustix::cmsg_space!(ScmCredentials(1))];
-    let mut cmsg_buffer = SendAncillaryBuffer::from(space.as_mut_slice());
+    let mut cmsg_buffer = SendAncillaryBuffer::new(space.as_mut_slice());
     assert!(cmsg_buffer.push(msg));
 
     sendmsg(
@@ -634,7 +634,7 @@ fn test_unix_peercred_explicit() {
     .unwrap();
 
     let mut cmsg_space = [MaybeUninit::uninit(); rustix::cmsg_space!(ScmCredentials(1))];
-    let mut cmsg_buffer = RecvAncillaryBuffer::from(cmsg_space.as_mut_slice());
+    let mut cmsg_buffer = RecvAncillaryBuffer::new(cmsg_space.as_mut_slice());
 
     let mut buffer = [0; BUFFER_SIZE];
     let result = recvmsg(
@@ -694,7 +694,7 @@ fn test_unix_peercred_implicit() {
     .unwrap();
 
     let mut cmsg_space = [MaybeUninit::uninit(); rustix::cmsg_space!(ScmCredentials(1))];
-    let mut cmsg_buffer = RecvAncillaryBuffer::from(cmsg_space.as_mut_slice());
+    let mut cmsg_buffer = RecvAncillaryBuffer::new(cmsg_space.as_mut_slice());
 
     let mut buffer = [0; BUFFER_SIZE];
     let result = recvmsg(
@@ -755,7 +755,7 @@ fn test_unix_msg_with_combo() {
                 let data_socket = accept(&connection_socket).unwrap();
                 let mut sum = 0;
                 loop {
-                    let mut cmsg_buffer = RecvAncillaryBuffer::from(cmsg_space.as_mut_slice());
+                    let mut cmsg_buffer = RecvAncillaryBuffer::new(cmsg_space.as_mut_slice());
                     let result = recvmsg(
                         &data_socket,
                         &mut [IoSliceMut::new(&mut buffer)],
@@ -875,7 +875,7 @@ fn test_unix_msg_with_combo() {
         let data_socket = socket(AddressFamily::UNIX, SocketType::SEQPACKET, None).unwrap();
 
         let mut space = [MaybeUninit::uninit(); rustix::cmsg_space!(ScmRights(2), ScmRights(1))];
-        let mut cmsg_buffer = SendAncillaryBuffer::from(space.as_mut_slice());
+        let mut cmsg_buffer = SendAncillaryBuffer::new(space.as_mut_slice());
 
         // Format a CMSG.
         let we = [write_end.as_fd(), another_write_end.as_fd()];

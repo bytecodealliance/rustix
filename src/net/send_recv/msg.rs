@@ -184,15 +184,9 @@ pub struct SendAncillaryBuffer<'buf, 'slice, 'fd> {
     _phantom: PhantomData<&'slice [BorrowedFd<'fd>]>,
 }
 
-impl<'buf> From<&'buf mut [u8]> for SendAncillaryBuffer<'buf, '_, '_> {
-    fn from(buffer: &'buf mut [u8]) -> Self {
-        Self::new(buffer)
-    }
-}
-
 impl<'buf> From<&'buf mut [MaybeUninit<u8>]> for SendAncillaryBuffer<'buf, '_, '_> {
     fn from(buffer: &'buf mut [MaybeUninit<u8>]) -> Self {
-        Self::new_(buffer)
+        Self::new(buffer)
     }
 }
 
@@ -217,9 +211,10 @@ impl<'buf, 'slice, 'fd> SendAncillaryBuffer<'buf, 'slice, 'fd> {
     ///
     /// Allocate a buffer for a single file descriptor:
     /// ```
+    /// # use core::mem::MaybeUninit;
     /// # use rustix::cmsg_space;
     /// # use rustix::net::SendAncillaryBuffer;
-    /// let mut space = [0; rustix::cmsg_space!(ScmRights(1))];
+    /// let mut space = [MaybeUninit::uninit(); rustix::cmsg_space!(ScmRights(1))];
     /// let mut cmsg_buffer = SendAncillaryBuffer::new(&mut space);
     /// ```
     ///
@@ -227,9 +222,10 @@ impl<'buf, 'slice, 'fd> SendAncillaryBuffer<'buf, 'slice, 'fd> {
     /// ```
     /// # #[cfg(linux_kernel)]
     /// # {
+    /// # use core::mem::MaybeUninit;
     /// # use rustix::cmsg_space;
     /// # use rustix::net::SendAncillaryBuffer;
-    /// let mut space = [0; rustix::cmsg_space!(ScmCredentials(1))];
+    /// let mut space = [MaybeUninit::uninit(); rustix::cmsg_space!(ScmCredentials(1))];
     /// let mut cmsg_buffer = SendAncillaryBuffer::new(&mut space);
     /// # }
     /// ```
@@ -238,22 +234,17 @@ impl<'buf, 'slice, 'fd> SendAncillaryBuffer<'buf, 'slice, 'fd> {
     /// ```
     /// # #[cfg(linux_kernel)]
     /// # {
+    /// # use core::mem::MaybeUninit;
     /// # use rustix::cmsg_space;
     /// # use rustix::net::SendAncillaryBuffer;
-    /// let mut space = [0; rustix::cmsg_space!(ScmRights(2), ScmCredentials(1))];
+    /// let mut space = [MaybeUninit::uninit(); rustix::cmsg_space!(ScmRights(2), ScmCredentials(1))];
     /// let mut cmsg_buffer = SendAncillaryBuffer::new(&mut space);
     /// # }
     /// ```
     ///
     /// [`send`]: crate::net::send
     #[inline]
-    pub fn new(buffer: &'buf mut [u8]) -> Self {
-        // SAFETY: T -> MaybeUninit<T> is always safe and we never uninitialize any
-        // bytes.
-        Self::new_(unsafe { core::mem::transmute::<&mut [u8], &mut [MaybeUninit<u8>]>(buffer) })
-    }
-
-    fn new_(buffer: &'buf mut [MaybeUninit<u8>]) -> Self {
+    pub fn new(buffer: &'buf mut [MaybeUninit<u8>]) -> Self {
         Self {
             buffer: align_for_cmsghdr(buffer),
             length: 0,
@@ -371,15 +362,9 @@ pub struct RecvAncillaryBuffer<'buf> {
     length: usize,
 }
 
-impl<'buf> From<&'buf mut [u8]> for RecvAncillaryBuffer<'buf> {
-    fn from(buffer: &'buf mut [u8]) -> Self {
-        Self::new(buffer)
-    }
-}
-
 impl<'buf> From<&'buf mut [MaybeUninit<u8>]> for RecvAncillaryBuffer<'buf> {
     fn from(buffer: &'buf mut [MaybeUninit<u8>]) -> Self {
-        Self::new_(buffer)
+        Self::new(buffer)
     }
 }
 
@@ -394,9 +379,10 @@ impl<'buf> RecvAncillaryBuffer<'buf> {
     ///
     /// Allocate a buffer for a single file descriptor:
     /// ```
+    /// # use core::mem::MaybeUninit;
     /// # use rustix::cmsg_space;
     /// # use rustix::net::RecvAncillaryBuffer;
-    /// let mut space = [0; rustix::cmsg_space!(ScmRights(1))];
+    /// let mut space = [MaybeUninit::uninit(); rustix::cmsg_space!(ScmRights(1))];
     /// let mut cmsg_buffer = RecvAncillaryBuffer::new(&mut space);
     /// ```
     ///
@@ -404,9 +390,10 @@ impl<'buf> RecvAncillaryBuffer<'buf> {
     /// ```
     /// # #[cfg(linux_kernel)]
     /// # {
+    /// # use core::mem::MaybeUninit;
     /// # use rustix::cmsg_space;
     /// # use rustix::net::RecvAncillaryBuffer;
-    /// let mut space = [0; rustix::cmsg_space!(ScmCredentials(1))];
+    /// let mut space = [MaybeUninit::uninit(); rustix::cmsg_space!(ScmCredentials(1))];
     /// let mut cmsg_buffer = RecvAncillaryBuffer::new(&mut space);
     /// # }
     /// ```
@@ -415,22 +402,17 @@ impl<'buf> RecvAncillaryBuffer<'buf> {
     /// ```
     /// # #[cfg(linux_kernel)]
     /// # {
+    /// # use core::mem::MaybeUninit;
     /// # use rustix::cmsg_space;
     /// # use rustix::net::RecvAncillaryBuffer;
-    /// let mut space = [0; rustix::cmsg_space!(ScmRights(2), ScmCredentials(1))];
+    /// let mut space = [MaybeUninit::uninit(); rustix::cmsg_space!(ScmRights(2), ScmCredentials(1))];
     /// let mut cmsg_buffer = RecvAncillaryBuffer::new(&mut space);
     /// # }
     /// ```
     ///
     /// [`recv`]: crate::net::recv
     #[inline]
-    pub fn new(buffer: &'buf mut [u8]) -> Self {
-        // SAFETY: T -> MaybeUninit<T> is always safe and we never uninitialize any
-        // bytes.
-        Self::new_(unsafe { core::mem::transmute::<&mut [u8], &mut [MaybeUninit<u8>]>(buffer) })
-    }
-
-    fn new_(buffer: &'buf mut [MaybeUninit<u8>]) -> Self {
+    pub fn new(buffer: &'buf mut [MaybeUninit<u8>]) -> Self {
         Self {
             buffer: align_for_cmsghdr(buffer),
             read: 0,
