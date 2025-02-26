@@ -573,7 +573,7 @@ jobs:
             qemu: qemu-ppc
             qemu_args: -L /usr/powerpc-linux-gnu
             qemu_target: ppc-linux-user
-          - build: powerpc-linux
+          - build: powerpc64le-linux
             os: ubuntu-latest
             rust: stable
             target: powerpc64le-unknown-linux-gnu
