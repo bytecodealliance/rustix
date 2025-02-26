@@ -9,6 +9,11 @@ use core::ptr::addr_of_mut;
 use core::{fmt, mem};
 
 /// Implements an `ioctl` with no real arguments.
+///
+/// To compute a value for the `OPCODE` argument, see the functions in the
+/// [`opcode`] module.
+///
+/// [`opcode`]: crate::ioctl::opcode
 pub struct NoArg<const OPCODE: Opcode> {}
 
 impl<const OPCODE: Opcode> fmt::Debug for NoArg<OPCODE> {
@@ -51,6 +56,11 @@ unsafe impl<const OPCODE: Opcode> Ioctl for NoArg<OPCODE> {
 ///
 /// Some `ioctl`s just read data into the userspace. As this is a popular
 /// pattern this structure implements it.
+///
+/// To compute a value for the `OPCODE` argument, see the functions in the
+/// [`opcode`] module.
+///
+/// [`opcode`]: crate::ioctl::opcode
 pub struct Getter<const OPCODE: Opcode, Output> {
     /// The output data.
     output: mem::MaybeUninit<Output>,
@@ -100,6 +110,11 @@ unsafe impl<const OPCODE: Opcode, Output> Ioctl for Getter<OPCODE, Output> {
 /// the `ioctl`.
 ///
 /// The opcode must be read-only.
+///
+/// To compute a value for the `OPCODE` argument, see the functions in the
+/// [`opcode`] module.
+///
+/// [`opcode`]: crate::ioctl::opcode
 pub struct Setter<const OPCODE: Opcode, Input> {
     /// The input data.
     input: Input,
@@ -150,6 +165,11 @@ unsafe impl<const OPCODE: Opcode, Input> Ioctl for Setter<OPCODE, Input> {
 ///
 /// The ioctl takes a reference to a struct that it reads its input from,
 /// then writes output to the same struct.
+///
+/// To compute a value for the `OPCODE` argument, see the functions in the
+/// [`opcode`] module.
+///
+/// [`opcode`]: crate::ioctl::opcode
 pub struct Updater<'a, const OPCODE: Opcode, Value> {
     /// Reference to input/output data.
     value: &'a mut Value,
@@ -188,6 +208,11 @@ unsafe impl<'a, const OPCODE: Opcode, T> Ioctl for Updater<'a, OPCODE, T> {
 }
 
 /// Implements an `ioctl` that passes an integer into the `ioctl`.
+///
+/// To compute a value for the `OPCODE` argument, see the functions in the
+/// [`opcode`] module.
+///
+/// [`opcode`]: crate::ioctl::opcode
 pub struct IntegerSetter<const OPCODE: Opcode> {
     /// The value to pass in.
     ///

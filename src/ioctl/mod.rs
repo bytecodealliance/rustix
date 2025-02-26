@@ -185,6 +185,14 @@ pub unsafe trait Ioctl {
 }
 
 /// Const functions for computing opcode values.
+///
+/// Linux's headers define macros such as `_IO`, `_IOR`, `_IOW`, and `_IORW`
+/// for defining ioctl values in a structured way that encode whether they
+/// are reading and/or writing, and other information about the ioctl. The
+/// functions in this module correspond to those macros.
+///
+/// If you're writing a driver and defining your own ioctl numbers, it's
+/// recommended to use these functions to compute them.
 #[cfg(any(linux_kernel, bsd))]
 pub mod opcode {
     use super::*;
@@ -192,6 +200,7 @@ pub mod opcode {
     /// Create a new opcode from a direction, group, number, and size.
     ///
     /// This corresponds to the C macro `_IOC(direction, group, number, size)`
+    #[doc(alias = "_IOC")]
     #[inline]
     pub const fn from_components(
         direction: Direction,
@@ -212,6 +221,7 @@ pub mod opcode {
     /// Create a new opcode from a group, a number, that uses no data.
     ///
     /// This corresponds to the C macro `_IO(group, number)`.
+    #[doc(alias = "_IO")]
     #[inline]
     pub const fn none(group: u8, number: u8) -> Opcode {
         from_components(Direction::None, group, number, 0)
@@ -221,6 +231,7 @@ pub mod opcode {
     /// data.
     ///
     /// This corresponds to the C macro `_IOR(group, number, T)`.
+    #[doc(alias = "_IOR")]
     #[inline]
     pub const fn read<T>(group: u8, number: u8) -> Opcode {
         from_components(Direction::Read, group, number, mem::size_of::<T>())
@@ -230,6 +241,7 @@ pub mod opcode {
     /// data.
     ///
     /// This corresponds to the C macro `_IOW(group, number, T)`.
+    #[doc(alias = "_IOW")]
     #[inline]
     pub const fn write<T>(group: u8, number: u8) -> Opcode {
         from_components(Direction::Write, group, number, mem::size_of::<T>())
@@ -239,6 +251,7 @@ pub mod opcode {
     /// type of data.
     ///
     /// This corresponds to the C macro `_IOWR(group, number, T)`.
+    #[doc(alias = "_IORW")]
     #[inline]
     pub const fn read_write<T>(group: u8, number: u8) -> Opcode {
         from_components(Direction::ReadWrite, group, number, mem::size_of::<T>())
