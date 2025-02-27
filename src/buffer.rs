@@ -58,8 +58,35 @@ use core::slice;
 /// # }
 /// ```
 ///
-/// If you see errors like "move occurs because `x` has type `&mut [u8]`,
-/// which does not implement the `Copy` trait", replace `x` with `&mut *x`.
+/// # Guide to error messages
+///
+/// Sometimes code using `Buffer` can encounter non-obvious error messages.
+/// Here are some we've encountered, along with ways to fix them.
+///
+/// If you see errors like
+/// "cannot move out of `self` which is behind a mutable reference"
+/// and
+/// "move occurs because `x` has type `&mut [u8]`, which does not implement the `Copy` trait",
+/// replace `x` with `&mut *x`. See `confusing_error_buffer_wrapper` in
+/// examples/buffer_errors.rs.
+///
+/// If you see errors like
+/// "type annotations needed"
+/// and
+/// "cannot infer type of the type parameter `Buf` declared on the function `read`",
+/// you may need to change a `&mut []` to `&mut [0_u8; 0]`. See
+/// `confusing_error_empty_slice` in examples/buffer_errors.rs.
+///
+/// If you see errors like
+/// "the trait bound `[MaybeUninit<u8>; 1]: Buffer<u8>` is not satisfied",
+/// add a `&mut` to pass the array by reference instead of by value. See
+/// `confusing_error_array_by_value` in examples/buffer_errors.rs.
+///
+/// If you see errors like
+/// "cannot move out of `x`, a captured variable in an `FnMut` closure",
+/// try replacing `x` with `&mut *x`, or, if that doesn't work, try moving
+/// a `let` into the closure body. See `confusing_error_retry_closure` and
+/// `confusing_error_retry_indirect_closure` in examples/buffer_errors.rs.
 pub trait Buffer<T>: private::Sealed<T> {}
 
 // Implement `Buffer` for all the types that implement `Sealed`.
@@ -311,26 +338,6 @@ mod tests {
         ];
         let _x: (&mut [u8], &mut [MaybeUninit<u8>]) = read(&input, &mut buf).unwrap();
         let _x: (&mut [u8], &mut [MaybeUninit<u8>]) = read(&input, &mut buf[..]).unwrap();
-
-        // This is reduced from src/fs/inotify.rs line 177.
-        struct Wrapper<'a>(&'a mut [u8]);
-        impl<'a> Wrapper<'a> {
-            fn read(&mut self) {
-                let input = std::fs::File::open("Cargo.toml").unwrap();
-
-                // Ideally we'd write this.
-                //let _x: usize = read(&input, self.0).unwrap();
-                // But we need to write this instead.
-                let _x: usize = read(&input, &mut *self.0).unwrap();
-            }
-        }
-        let mut buf = vec![0_u8; 3];
-        let mut wrapper = Wrapper(&mut buf);
-        wrapper.read();
-
-        // Why does this get two error messages?
-        //let mut buf = [0, 0, 0];
-        //let _x = read(&input, buf).unwrap();
     }
 
     #[cfg(not(windows))]
