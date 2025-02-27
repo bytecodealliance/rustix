@@ -349,22 +349,22 @@ mod tests {
         // `TUNGETDEVNETNS` is defined as `_IO('T', 227)`.
         assert_eq!(
             linux_raw_sys::ioctl::TUNGETDEVNETNS,
-            opcode::none(b'T', 227)
+            opcode::none(b'T', 227) as _
         );
         // `FS_IOC_GETVERSION` is defined as `_IOR('v', 1, long)`.
         assert_eq!(
             linux_raw_sys::ioctl::FS_IOC_GETVERSION,
-            opcode::read::<c::c_long>(b'v', 1)
+            opcode::read::<c::c_long>(b'v', 1) as _
         );
         // `TUNSETNOCSUM` is defined as `_IOW('T', 200, int)`.
         assert_eq!(
             linux_raw_sys::ioctl::TUNSETNOCSUM,
-            opcode::write::<c::c_int>(b'T', 200)
+            opcode::write::<c::c_int>(b'T', 200) as _
         );
         // `FIFREEZE` is defined as `_IOWR('X', 119, int)`.
         assert_eq!(
             linux_raw_sys::ioctl::FIFREEZE,
-            opcode::read_write::<c::c_int>(b'X', 119)
+            opcode::read_write::<c::c_int>(b'X', 119) as _
         );
     }
 }
