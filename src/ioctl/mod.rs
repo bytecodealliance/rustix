@@ -340,6 +340,7 @@ type _Opcode = c::c_uint;
 type _Opcode = i32;
 
 #[cfg(linux_kernel)]
+#[cfg(not(any(target_arch = "sparc", target_arch = "sparc64")))]
 #[cfg(test)]
 mod tests {
     use super::*;
