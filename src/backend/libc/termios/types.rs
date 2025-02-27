@@ -13,5 +13,5 @@ use crate::ffi;
 pub type tcflag_t = ffi::c_ulong;
 #[cfg(target_os = "redox")]
 pub type tcflag_t = u32;
-#[cfg(not(any(target_os = "wasi", apple, target_os = "redox")))]
+#[cfg(not(any(apple, target_os = "redox", target_os = "wasi")))]
 pub type tcflag_t = ffi::c_uint;

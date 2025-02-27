@@ -38,7 +38,7 @@ pub enum Resource {
     Core = bitcast!(c::RLIMIT_CORE),
     /// `RLIMIT_RSS`
     // "nto" has `RLIMIT_RSS`, but it has the same value as `RLIMIT_AS`.
-    #[cfg(not(any(apple, solarish, target_os = "nto", target_os = "haiku")))]
+    #[cfg(not(any(apple, solarish, target_os = "haiku", target_os = "nto")))]
     Rss = bitcast!(c::RLIMIT_RSS),
     /// `RLIMIT_NPROC`
     #[cfg(not(any(solarish, target_os = "haiku")))]
