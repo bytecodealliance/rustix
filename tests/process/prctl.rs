@@ -98,6 +98,7 @@ fn test_is_io_flusher() {
 }
 
 #[cfg(feature = "thread")]
+#[cfg(feature = "system")]
 #[test]
 fn test_virtual_memory_map_config_struct_size() {
     if !thread_has_capability(Capability::SystemResource).unwrap() {
@@ -108,7 +109,6 @@ fn test_virtual_memory_map_config_struct_size() {
         return;
     }
 
-    #[cfg(feature = "system")]
     if !linux_kernel_config_item_is_enabled("CONFIG_CHECKPOINT_RESTORE").unwrap_or(false) {
         eprintln!(
             "test_virtual_memory_map_config_struct_size: Test skipped due to missing kernel \
