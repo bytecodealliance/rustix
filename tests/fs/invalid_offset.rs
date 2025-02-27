@@ -5,7 +5,7 @@
 //! take file offsets are properly diagnosed.
 //!
 //! These tests are disabled on iOS/macOS since those platforms kill the
-//! process with `SIGXFSZ` instead of returning an error.
+//! process with `Signal::XFSZ` instead of returning an error.
 
 #![cfg(not(any(target_os = "redox", target_os = "wasi")))]
 
