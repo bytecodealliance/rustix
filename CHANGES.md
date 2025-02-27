@@ -92,11 +92,14 @@ The `rustix::procfs` is removed. This functionality is now available in the
 
 [rustix-linux-procfs crate]: https://crates.io/crates/rustix-linux-procfs
 
-The `flags` field of [`rustix::net::RecvMsgReturn`] changed type from
-[`RecvFlags`] to a new [`ReturnFlags`], since it supports a different set of
-flags.
+`rustix::net::RecvMsgReturn` is renamed to [`rustix::net::RecvMsg`].
 
-[`rustix::net::RecvMsgReturn`]: https://docs.rs/rustix/1.0.0/rustix/net/struct.RecvMsgReturn.html
+[`rustix::net::RecvMsg`]: https://docs.rs/rustix/1.0.0/rustix/net/struct.RecvMsg.html
+
+The `flags` field of [`rustix::net::RecvMsg`] changed type from [`RecvFlags`]
+to a new [`ReturnFlags`], since it supports a different set of flags.
+
+[`rustix::net::RecvMsg`]: https://docs.rs/rustix/1.0.0/rustix/net/struct.RecvMsg.html
 [`RecvFlags`]: https://docs.rs/rustix/1.0.0/rustix/net/struct.RecvFlags.html
 [`ReturnFlags`]: https://docs.rs/rustix/1.0.0/rustix/net/struct.ReturnFlags.html
 
@@ -106,8 +109,8 @@ mean a timeout in milliseconds to an `Option<&Timespec>`. The [`Timespec`]'s
 fields are `tv_sec` which holds seconds and `tv_nsec` which holds nanoseconds.
 
 [`rustix::event::poll`]: https://docs.rs/rustix/1.0.0/rustix/event/fn.poll.html
-[`rustix::event::epoll`]: https://docs.rs/rustix/1.0.0/rustix/event/fn.epoll.html
-[`Timespec`]: https://docs.rs/rustix/1.0.0/rustix/time/type.Timespec.html
+[`rustix::event::epoll`]: https://docs.rs/rustix/1.0.0/rustix/event/epoll/index.html
+[`Timespec`]: https://docs.rs/rustix/1.0.0/rustix/time/struct.Timespec.html
 
 Functions in [`rustix::event::port`] are renamed to remove the redundant
 `port_*` prefix.
@@ -124,22 +127,22 @@ Functions in [`rustix::event::port`] are renamed to remove the redundant
 directly. They are now signed instead of unsigned, so that they can represent
 times before the epoch.
 
-[`rustix::fs::Stat`]: https://docs.rs/rustix/1.0.0/rustix/fs/type.Stat.html
+[`rustix::fs::Stat`]: https://docs.rs/rustix/1.0.0/rustix/fs/struct.Stat.html
 
 `rustix::io::is_read_write` is removed, as it's higher-level functionality that
 can be implemented in terms of lower-level rustix calls.
 
-[`rustix::net::recv_uninit`] and [`rustix::net::recvfrom_uninit`] now include
+[`rustix::net::recv`] and [`rustix::net::recvfrom`] now include
 the number of received bytes in their return types, as this number may differ
 from the number of bytes written to the buffer when
 [`rustix::net::RecvFlags::TRUNC`] is used.
 
-[`rustix::net::recv_uninit`]: https://docs.rs/rustix/1.0.0/rustix/net/fn.recv_uninit.html
-[`rustix::net::recvfrom_uninit`]: https://docs.rs/rustix/1.0.0/rustix/net/fn.recvfrom_uninit.html
+[`rustix::net::recv`]: https://docs.rs/rustix/1.0.0/rustix/net/fn.recv.html
+[`rustix::net::recvfrom`]: https://docs.rs/rustix/1.0.0/rustix/net/fn.recvfrom.html
 [`rustix::net::RecvFlags::TRUNC`]: https://docs.rs/rustix/1.0.0/rustix/net/struct.RecvFlags.html#associatedconstant.TRUNC
 
 [`rustix::io_uring::io_uring_register`] now has a [`IoringRegisterFlags`]
-argument, and `rustix::io_uring::io_uring_register` is removed.
+argument, and `rustix::io_uring::io_uring_register_with` is removed.
 
 [`rustix::io_uring::io_uring_register`]: https://docs.rs/rustix/1.0.0/rustix/io_uring/fn.io_uring_register.html
 [`IoringRegisterFlags`]: https://docs.rs/rustix/1.0.0/rustix/io_uring/struct.IoringRegisterFlags.html
@@ -148,19 +151,15 @@ argument, and `rustix::io_uring::io_uring_register` is removed.
 `Signal::Int` is now named [`Signal::INT`]. Also, `Signal` is no longer
 directly convertible to `i32`; use [`Signal::as_raw`] instead.
 
-[`rustix::process::Signal`]: https://docs.rs/rustix/1.0.0/rustix/process/enum.Signal.html
-[`Signal::INT`]: https://docs.rs/rustix/1.0.0/rustix/process/enum.Signal.html#variant.Int
-[`Signal::as_raw`]: https://docs.rs/rustix/1.0.0/rustix/process/enum.Signal.html#method.as_raw
+[`rustix::process::Signal`]: https://docs.rs/rustix/1.0.0/rustix/process/struct.Signal.html
+[`Signal::INT`]: https://docs.rs/rustix/1.0.0/rustix/process/struct.Signal.html#variant.Int
+[`Signal::as_raw`]: https://docs.rs/rustix/1.0.0/rustix/process/struct.Signal.html#method.as_raw
 
 The associated constant `rustix::ioctl::Ioctl::OPCODE` is now replaced with an
 associated method [`rustix::ioctl::Ioctl::opcode`], to support ioctls where the
 opcode is computed rather than a constant.
 
 [`rustix::ioctl::Ioctl::opcode`]: https://docs.rs/rustix/1.0.0/rustix/ioctl/trait.Ioctl.html#tymethod.opcode
-
-`rustix::net::RecvMsgReturn` is renamed to [`rustix::net::RecvMsg`].
-
-[`rustix::net::RecvMsg`]: https://docs.rs/rustix/1.0.0/rustix/net/struct.RecvMsgReturn.html
 
 The `ifindex` argument in
 [`rustix::net::sockopt::set_ip_add_membership_with_ifindex`] and
@@ -172,7 +171,7 @@ changed from `i32` to `u32`.
 
 The `list` argument in [`rustix::fs::listxattr`], [`rustix::fs::flistxattr`],
 and [`rustix::fs::llistxattr`] changed from `[c_char]`, which is `[i8]` on some
-architectures, to [`u8`].
+architectures, to `[u8]`.
 
 [`rustix::fs::listxattr`]: https://docs.rs/rustix/1.0.0/rustix/fs/fn.listxattr.html
 [`rustix::fs::flistxattr`]: https://docs.rs/rustix/1.0.0/rustix/fs/fn.flistxattr.html
@@ -188,7 +187,7 @@ with other platforms:
 | `st_ctimensec` | `st_ctime_nsec` |
 | `st_birthtimensec` | `st_birthtime_nsec` |
 
-[`Stat`]: https://docs.rs/rustix/1.0.0/x86_64-unknown-netbsd/rustix/fs/type.Stat.html
+[`Stat`]: https://docs.rs/rustix/1.0.0/x86_64-unknown-netbsd/rustix/fs/struct.Stat.html
 
 [`rustix::mount::mount`]'s `data` argument is now an `Option`, so it can now
 be used in place of `mount2`, and `mount2` is now removed.
@@ -247,13 +246,14 @@ pointer provenance.
 
 The aliases for [`fcntl_dupfd_cloexec`], [`fcntl_getfd`], and [`fcntl_setfd`]
 in `rustix::fs` are removed; these functions are just available in
-`rustix::io` now.
+[`rustix::io`] now.
 
 [`fcntl_dupfd_cloexec`]: https://docs.rs/rustix/1.0.0/rustix/io/fn.fcntl_dupfd_cloexec.html
 [`fcntl_getfd`]: https://docs.rs/rustix/1.0.0/rustix/io/fn.fcntl_getfd.html
 [`fcntl_setfd`]: https://docs.rs/rustix/1.0.0/rustix/io/fn.fcntl_setfd.html
+[`rustix::io`]: https://docs.rs/rustix/1.0.0/rustix/io/index.html
 
-[`SocketAddrXdp`] no longer has a shared umem field. A new
+[`SocketAddrXdp`] no longer has a shared UMEM field. A new
 [`SocketAddrXdpWithSharedUmem`] is added for the purpose of calling `bind` and
 passing it an XDP address with a shared UMEM fd. And `SockaddrXdpFlags` is
 renamed to [`SocketAddrXdpFlags`].
@@ -303,11 +303,11 @@ vector before calling `epoll::wait` or `kqueue`, or consuming it using
 [`Buffer` trait]: https://docs.rs/rustix/1.0.0/rustix/buffer/trait.Buffer.html
 [`spare_capacity`]: https://docs.rs/rustix/1.0.0/rustix/buffer/fn.spare_capacity.html
 
-The `Opcode` type has changed from a struct to a raw integer value, and the
-associated utilities are change to `const` functions. In place of `ReadOpcode`,
-`WriteOpcode`, `ReadWriteOpcode`, and `NoneOpcode`, use the `read`, `write`,
-`read_write`, and `none` const functions in the [`ioctl::opcode`] module. For
-example, in place of this:
+The [`rustix::ioctl::Opcode`] type has changed from a struct to a raw integer
+value, and the associated utilities are change to `const` functions. In place
+of `ReadOpcode`, `WriteOpcode`, `ReadWriteOpcode`, and `NoneOpcode`, use the
+`read`, `write`, `read_write`, and `none` const functions in the
+[`ioctl::opcode`] module. For example, in place of this:
 ```rust
 ioctl::Setter::<ioctl::ReadOpcode<b'U', 15, c_uint>, c_uint>::new(interface)
 ```
@@ -319,6 +319,7 @@ use this:
 
 In place of `BadOpcode`, use the opcode value directly.
 
+[`rustix::ioctl::Opcode`]: https://docs.rs/rustix/1.0.0/rustix/ioctl/type.Opcode.html
 [`ioctl::opcode`]: https://docs.rs/rustix/1.0.0/rustix/ioctl/opcode/index.html
 
 All explicitly deprecated functions and types have been removed. Their

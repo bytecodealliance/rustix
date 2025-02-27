@@ -59,11 +59,13 @@ fn test_transparent_huge_pages_are_disabled() {
     dbg!(transparent_huge_pages_are_disabled().unwrap());
 }
 
-/*
+#[cfg(feature = "system")]
+#[cfg_attr(
+    not(any(target_arch = "x86", target_arch = "x86_64")),
+    ignore = "`secure_computing_mode` doesn't work on qemu"
+)]
 #[test]
-#[ignore = "Might result in SIGKILL"]
 fn test_secure_computing_mode() {
-    #[cfg(feature = "system")]
     if !linux_kernel_config_item_is_enabled("CONFIG_SECCOMP").unwrap_or(false) {
         eprintln!(
             "test_secure_computing_mode: Test skipped due to missing kernel
@@ -72,13 +74,23 @@ fn test_secure_computing_mode() {
         return;
     }
 
-    dbg!(secure_computing_mode().unwrap());
+    // If seccomp is enabled, calling `secure_computing_mode` could evoke a
+    // `Signal::KILL`, so only call it if seccomp is disabled.
+    for line in std::io::BufReader::new(std::fs::File::open("/proc/self/status").unwrap()).lines() {
+        if let Some(seccomp) = line.unwrap().strip_prefix("Seccomp:") {
+            let seccomp = seccomp.trim();
+            let seccomp: i32 = seccomp.parse().unwrap();
+            let seccomp: rustix::thread::SecureComputingMode = seccomp.try_into().unwrap();
+            if seccomp == rustix::thread::SecureComputingMode::Disabled {
+                assert_eq!(seccomp, secure_computing_mode().unwrap());
+            }
+        }
+    }
 }
-*/
 
+#[cfg(feature = "system")]
 #[test]
 fn test_get_clear_child_tid_address() {
-    #[cfg(feature = "system")]
     if !linux_kernel_config_item_is_enabled("CONFIG_CHECKPOINT_RESTORE").unwrap_or(false) {
         eprintln!(
             "test_get_clear_child_tid_address: Test skipped due to missing kernel feature: \
@@ -98,9 +110,9 @@ fn test_get_clear_child_tid_address() {
     }
 }
 
+#[cfg(feature = "system")]
 #[test]
 fn test_core_scheduling_cookie() {
-    #[cfg(feature = "system")]
     if !linux_kernel_config_item_is_enabled("CONFIG_SCHED_CORE").unwrap_or(false) {
         eprintln!(
             "test_core_scheduling_cookie: Test skipped due to missing kernel feature: \

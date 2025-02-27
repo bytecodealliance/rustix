@@ -100,7 +100,7 @@ pub fn set_name(name: &CStr) -> io::Result<()> {
 // PR_GET_SECCOMP/PR_SET_SECCOMP
 //
 
-//const PR_GET_SECCOMP: c_int = 21;
+const PR_GET_SECCOMP: c_int = 21;
 
 const SECCOMP_MODE_DISABLED: i32 = 0;
 const SECCOMP_MODE_STRICT: i32 = 1;
@@ -131,7 +131,6 @@ impl TryFrom<i32> for SecureComputingMode {
     }
 }
 
-/*
 /// Get the secure computing mode of the calling thread.
 ///
 /// If the caller is not in secure computing mode, this returns
@@ -155,7 +154,6 @@ impl TryFrom<i32> for SecureComputingMode {
 pub fn secure_computing_mode() -> io::Result<SecureComputingMode> {
     unsafe { prctl_1arg(PR_GET_SECCOMP) }.and_then(TryInto::try_into)
 }
-*/
 
 const PR_SET_SECCOMP: c_int = 22;
 
