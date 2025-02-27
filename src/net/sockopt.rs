@@ -466,6 +466,7 @@ pub fn socket_send_buffer_size<Fd: AsFd>(fd: Fd) -> io::Result<usize> {
     target_os = "emscripten",
     target_os = "espidf",
     target_os = "haiku",
+    target_os = "horizon",
     target_os = "hurd",
     target_os = "netbsd",
     target_os = "nto",
@@ -1228,6 +1229,7 @@ pub fn ipv6_original_dst<Fd: AsFd>(fd: Fd) -> io::Result<SocketAddrV6> {
     windows,
     target_os = "espidf",
     target_os = "haiku",
+    target_os = "horizon",
     target_os = "redox",
     target_os = "vita"
 )))]
@@ -1247,6 +1249,7 @@ pub fn set_ipv6_tclass<Fd: AsFd>(fd: Fd, value: u32) -> io::Result<()> {
     windows,
     target_os = "espidf",
     target_os = "haiku",
+    target_os = "horizon",
     target_os = "redox",
     target_os = "vita"
 )))]

@@ -82,6 +82,7 @@ impl Signal {
         solarish,
         target_os = "aix",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "hurd",
         target_os = "nto",
         target_os = "vita",
@@ -141,7 +142,13 @@ impl Signal {
     #[cfg(not(any(target_os = "haiku", target_os = "vita")))]
     pub const IO: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGIO) });
     /// `SIGPWR`
-    #[cfg(not(any(bsd, target_os = "haiku", target_os = "hurd", target_os = "vita")))]
+    #[cfg(not(any(
+        bsd,
+        target_os = "haiku",
+        target_os = "horizon",
+        target_os = "hurd",
+        target_os = "vita"
+    )))]
     #[doc(alias = "PWR")]
     pub const POWER: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGPWR) });
     /// `SIGSYS`, aka `SIGUNUSED`
@@ -265,6 +272,7 @@ impl fmt::Debug for Signal {
                 solarish,
                 target_os = "aix",
                 target_os = "haiku",
+                target_os = "horizon",
                 target_os = "hurd",
                 target_os = "nto",
                 target_os = "vita",
@@ -307,7 +315,13 @@ impl fmt::Debug for Signal {
             Self::WINCH => "Signal::WINCH".fmt(f),
             #[cfg(not(any(target_os = "haiku", target_os = "vita")))]
             Self::IO => "Signal::IO".fmt(f),
-            #[cfg(not(any(bsd, target_os = "haiku", target_os = "hurd", target_os = "vita")))]
+            #[cfg(not(any(
+                bsd,
+                target_os = "haiku",
+                target_os = "horizon",
+                target_os = "hurd",
+                target_os = "vita"
+            )))]
             Self::POWER => "Signal::POWER".fmt(f),
             Self::SYS => "Signal::SYS".fmt(f),
             #[cfg(any(

@@ -36,6 +36,7 @@ pub use backend::pipe::types::{IoSliceRaw, SpliceFlags};
     windows,
     target_os = "espidf",
     target_os = "haiku",
+    target_os = "horizon",
     target_os = "hurd",
     target_os = "redox",
     target_os = "vita",
@@ -101,6 +102,7 @@ pub fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
     target_os = "aix",
     target_os = "espidf",
     target_os = "haiku",
+    target_os = "horizon",
     target_os = "nto"
 )))]
 #[inline]

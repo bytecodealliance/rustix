@@ -39,6 +39,7 @@ pub enum ClockId {
     /// `CLOCK_PROCESS_CPUTIME_ID`
     #[cfg(not(any(
         solarish,
+        target_os = "horizon",
         target_os = "netbsd",
         target_os = "redox",
         target_os = "vita"
@@ -49,6 +50,7 @@ pub enum ClockId {
     /// `CLOCK_THREAD_CPUTIME_ID`
     #[cfg(not(any(
         solarish,
+        target_os = "horizon",
         target_os = "netbsd",
         target_os = "redox",
         target_os = "vita"

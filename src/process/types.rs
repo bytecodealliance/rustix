@@ -11,6 +11,7 @@ use core::mem::transmute;
 /// File lock data structure used in [`fcntl_getlk`].
 ///
 /// [`fcntl_getlk`]: crate::process::fcntl_getlk()
+#[cfg(not(target_os = "horizon"))]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Flock {
     /// Starting offset for lock
@@ -26,6 +27,7 @@ pub struct Flock {
     pub offset_type: FlockOffsetType,
 }
 
+#[cfg(not(target_os = "horizon"))]
 impl Flock {
     pub(crate) const unsafe fn from_raw_unchecked(raw_fl: c::flock) -> Self {
         Self {
@@ -48,6 +50,7 @@ impl Flock {
     }
 }
 
+#[cfg(not(target_os = "horizon"))]
 impl From<FlockType> for Flock {
     fn from(value: FlockType) -> Self {
         Self {
@@ -63,6 +66,7 @@ impl From<FlockType> for Flock {
 /// `F_*LCK` constants for use with [`fcntl_getlk`].
 ///
 /// [`fcntl_getlk`]: crate::process::fcntl_getlk()
+#[cfg(not(target_os = "horizon"))]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(i16)]
 pub enum FlockType {
@@ -77,6 +81,7 @@ pub enum FlockType {
 /// `F_SEEK*` constants for use with [`fcntl_getlk`].
 ///
 /// [`fcntl_getlk`]: crate::process::fcntl_getlk()
+#[cfg(not(target_os = "horizon"))]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(i16)]
 pub enum FlockOffsetType {

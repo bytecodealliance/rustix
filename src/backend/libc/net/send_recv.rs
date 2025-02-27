@@ -19,6 +19,7 @@ bitflags! {
             target_os = "espidf",
             target_os = "nto",
             target_os = "haiku",
+            target_os = "horizon",
             target_os = "hurd",
             target_os = "redox",
             target_os = "vita",
@@ -30,7 +31,7 @@ bitflags! {
         #[cfg(not(windows))]
         const DONTWAIT = bitcast!(c::MSG_DONTWAIT);
         /// `MSG_EOR`
-        #[cfg(not(windows))]
+        #[cfg(not(any(windows, target_os = "horizon")))]
         const EOR = bitcast!(c::MSG_EOR);
         /// `MSG_MORE`
         #[cfg(not(any(
@@ -73,6 +74,7 @@ bitflags! {
             target_os = "aix",
             target_os = "espidf",
             target_os = "haiku",
+            target_os = "horizon",
             target_os = "nto",
             target_os = "redox",
             target_os = "vita",
@@ -89,6 +91,7 @@ bitflags! {
             target_os = "aix",
             target_os = "espidf",
             target_os = "haiku",
+            target_os = "horizon",
             target_os = "hurd",
             target_os = "nto",
             target_os = "redox",
@@ -103,7 +106,7 @@ bitflags! {
         // Apple, illumos, and NetBSD have `MSG_TRUNC` but it's not documented
         // for use with `recv` and friends, and in practice appears to be
         // ignored.
-        #[cfg(not(any(apple, solarish, target_os = "netbsd")))]
+        #[cfg(not(any(apple, solarish, target_os = "horizon", target_os = "netbsd")))]
         const TRUNC = bitcast!(c::MSG_TRUNC);
         /// `MSG_WAITALL`
         const WAITALL = bitcast!(c::MSG_WAITALL);
@@ -125,11 +128,13 @@ bitflags! {
         /// `MSG_OOB`
         const OOB = bitcast!(c::MSG_OOB);
         /// `MSG_EOR`
-        #[cfg(not(windows))]
+        #[cfg(not(any(windows, target_os = "horizon")))]
         const EOR = bitcast!(c::MSG_EOR);
         /// `MSG_TRUNC`
+        #[cfg(not(target_os = "horizon"))]
         const TRUNC = bitcast!(c::MSG_TRUNC);
         /// `MSG_CTRUNC`
+        #[cfg(not(target_os = "horizon"))]
         const CTRUNC = bitcast!(c::MSG_CTRUNC);
 
         /// `MSG_CMSG_CLOEXEC`

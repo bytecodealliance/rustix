@@ -15,6 +15,7 @@ mod dir;
     target_os = "dragonfly",
     target_os = "espidf",
     target_os = "haiku",
+    target_os = "horizon",
     target_os = "redox",
     target_os = "vita",
 )))]
@@ -36,6 +37,7 @@ mod ioctl;
 #[cfg(not(any(
     target_os = "espidf",
     target_os = "haiku",
+    target_os = "horizon",
     target_os = "redox",
     target_os = "vita",
     target_os = "wasi"
@@ -56,6 +58,7 @@ mod special;
 mod statx;
 #[cfg(not(any(
     target_os = "espidf",
+    target_os = "horizon",
     target_os = "redox",
     target_os = "vita",
     target_os = "wasi"
@@ -79,6 +82,7 @@ pub use dir::{Dir, DirEntry};
     target_os = "dragonfly",
     target_os = "espidf",
     target_os = "haiku",
+    target_os = "horizon",
     target_os = "redox",
     target_os = "vita",
 )))]
@@ -98,6 +102,7 @@ pub use ioctl::*;
 #[cfg(not(any(
     target_os = "espidf",
     target_os = "haiku",
+    target_os = "horizon",
     target_os = "redox",
     target_os = "vita",
     target_os = "wasi"
@@ -118,6 +123,7 @@ pub use special::*;
 pub use statx::*;
 #[cfg(not(any(
     target_os = "espidf",
+    target_os = "horizon",
     target_os = "redox",
     target_os = "vita",
     target_os = "wasi"

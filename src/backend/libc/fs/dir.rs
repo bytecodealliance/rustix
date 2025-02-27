@@ -16,6 +16,7 @@ use crate::fs::{fstat, Stat};
 #[cfg(not(any(
     solarish,
     target_os = "haiku",
+    target_os = "horizon",
     target_os = "netbsd",
     target_os = "nto",
     target_os = "redox",
@@ -217,7 +218,7 @@ impl Dir {
     }
 
     /// `fstat(self)`
-    #[cfg(not(target_os = "vita"))]
+    #[cfg(not(any(target_os = "horizon", target_os = "vita")))]
     #[inline]
     pub fn stat(&self) -> io::Result<Stat> {
         fstat(unsafe { BorrowedFd::borrow_raw(c::dirfd(self.libc_dir.as_ptr())) })
@@ -227,6 +228,7 @@ impl Dir {
     #[cfg(not(any(
         solarish,
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "netbsd",
         target_os = "nto",
         target_os = "redox",
@@ -242,6 +244,7 @@ impl Dir {
     #[cfg(not(any(
         solarish,
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "redox",
         target_os = "vita",
         target_os = "wasi"
@@ -253,7 +256,12 @@ impl Dir {
 
     /// `fchdir(self)`
     #[cfg(feature = "process")]
-    #[cfg(not(any(target_os = "fuchsia", target_os = "vita", target_os = "wasi")))]
+    #[cfg(not(any(
+        target_os = "fuchsia",
+        target_os = "horizon",
+        target_os = "vita",
+        target_os = "wasi"
+    )))]
     #[cfg_attr(docsrs, doc(cfg(feature = "process")))]
     #[inline]
     pub fn chdir(&self) -> io::Result<()> {
@@ -287,7 +295,7 @@ impl Iterator for Dir {
 impl fmt::Debug for Dir {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut s = f.debug_struct("Dir");
-        #[cfg(not(target_os = "vita"))]
+        #[cfg(not(any(target_os = "horizon", target_os = "vita")))]
         s.field("fd", unsafe { &c::dirfd(self.libc_dir.as_ptr()) });
         s.finish()
     }

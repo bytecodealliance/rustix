@@ -17,7 +17,13 @@ use crate::net::{
 use crate::utils::as_ptr;
 use core::mem::{size_of, MaybeUninit};
 use core::ptr::null_mut;
-#[cfg(not(any(windows, target_os = "espidf", target_os = "redox", target_os = "vita")))]
+#[cfg(not(any(
+    windows,
+    target_os = "espidf",
+    target_os = "horizon",
+    target_os = "redox",
+    target_os = "vita"
+)))]
 use {
     super::msghdr::{noaddr_msghdr, with_msghdr, with_recv_msghdr},
     super::send_recv::ReturnFlags,
@@ -177,7 +183,13 @@ pub(crate) fn accept(sockfd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
     }
 }
 
-#[cfg(not(any(windows, target_os = "espidf", target_os = "redox", target_os = "vita")))]
+#[cfg(not(any(
+    windows,
+    target_os = "espidf",
+    target_os = "horizon",
+    target_os = "redox",
+    target_os = "vita"
+)))]
 pub(crate) fn recvmsg(
     sockfd: BorrowedFd<'_>,
     iov: &mut [IoSliceMut<'_>],
@@ -206,7 +218,13 @@ pub(crate) fn recvmsg(
     })
 }
 
-#[cfg(not(any(windows, target_os = "espidf", target_os = "redox", target_os = "vita")))]
+#[cfg(not(any(
+    windows,
+    target_os = "espidf",
+    target_os = "horizon",
+    target_os = "redox",
+    target_os = "vita"
+)))]
 pub(crate) fn sendmsg(
     sockfd: BorrowedFd<'_>,
     iov: &[IoSlice<'_>],
@@ -223,7 +241,13 @@ pub(crate) fn sendmsg(
     }
 }
 
-#[cfg(not(any(windows, target_os = "espidf", target_os = "redox", target_os = "vita")))]
+#[cfg(not(any(
+    windows,
+    target_os = "espidf",
+    target_os = "horizon",
+    target_os = "redox",
+    target_os = "vita"
+)))]
 pub(crate) fn sendmsg_addr(
     sockfd: BorrowedFd<'_>,
     addr: &impl SocketAddrArg,
@@ -267,6 +291,7 @@ pub(crate) fn sendmmsg(
     target_os = "aix",
     target_os = "espidf",
     target_os = "haiku",
+    target_os = "horizon",
     target_os = "nto",
     target_os = "redox",
     target_os = "vita",
@@ -301,6 +326,7 @@ pub(crate) fn acceptfrom(sockfd: BorrowedFd<'_>) -> io::Result<(OwnedFd, Option<
     target_os = "aix",
     target_os = "espidf",
     target_os = "haiku",
+    target_os = "horizon",
     target_os = "nto",
     target_os = "redox",
     target_os = "vita",
@@ -329,6 +355,7 @@ pub(crate) fn acceptfrom_with(
     target_os = "aix",
     target_os = "espidf",
     target_os = "haiku",
+    target_os = "horizon",
     target_os = "nto",
     target_os = "redox",
     target_os = "vita",
@@ -345,6 +372,7 @@ pub(crate) fn accept_with(sockfd: BorrowedFd<'_>, _flags: SocketFlags) -> io::Re
     target_os = "aix",
     target_os = "espidf",
     target_os = "haiku",
+    target_os = "horizon",
     target_os = "nto",
     target_os = "redox",
     target_os = "vita",

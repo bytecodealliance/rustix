@@ -33,6 +33,7 @@ use crate::io;
     target_os = "emscripten",
     target_os = "espidf",
     target_os = "fuchsia",
+    target_os = "horizon",
     target_os = "redox",
     target_os = "vita",
     target_os = "wasi"
@@ -56,6 +57,7 @@ use crate::process::{RawPid, WaitOptions, WaitStatus};
 #[cfg(not(any(
     target_os = "espidf",
     target_os = "fuchsia",
+    target_os = "horizon",
     target_os = "redox",
     target_os = "vita",
     target_os = "wasi"
@@ -63,8 +65,9 @@ use crate::process::{RawPid, WaitOptions, WaitStatus};
 use crate::process::{Resource, Rlimit};
 #[cfg(not(any(
     target_os = "espidf",
-    target_os = "redox",
+    target_os = "horizon",
     target_os = "openbsd",
+    target_os = "redox",
     target_os = "vita",
     target_os = "wasi"
 )))]
@@ -155,6 +158,7 @@ pub(crate) fn nice(inc: i32) -> io::Result<i32> {
 #[cfg(not(any(
     target_os = "espidf",
     target_os = "fuchsia",
+    target_os = "horizon",
     target_os = "vita",
     target_os = "wasi"
 )))]
@@ -172,6 +176,7 @@ pub(crate) fn getpriority_user(uid: Uid) -> io::Result<i32> {
 #[cfg(not(any(
     target_os = "espidf",
     target_os = "fuchsia",
+    target_os = "horizon",
     target_os = "vita",
     target_os = "wasi"
 )))]
@@ -189,6 +194,7 @@ pub(crate) fn getpriority_pgrp(pgid: Option<Pid>) -> io::Result<i32> {
 #[cfg(not(any(
     target_os = "espidf",
     target_os = "fuchsia",
+    target_os = "horizon",
     target_os = "vita",
     target_os = "wasi"
 )))]
@@ -206,6 +212,7 @@ pub(crate) fn getpriority_process(pid: Option<Pid>) -> io::Result<i32> {
 #[cfg(not(any(
     target_os = "espidf",
     target_os = "fuchsia",
+    target_os = "horizon",
     target_os = "vita",
     target_os = "wasi"
 )))]
@@ -217,6 +224,7 @@ pub(crate) fn setpriority_user(uid: Uid, priority: i32) -> io::Result<()> {
 #[cfg(not(any(
     target_os = "espidf",
     target_os = "fuchsia",
+    target_os = "horizon",
     target_os = "vita",
     target_os = "wasi"
 )))]
@@ -234,6 +242,7 @@ pub(crate) fn setpriority_pgrp(pgid: Option<Pid>, priority: i32) -> io::Result<(
 #[cfg(not(any(
     target_os = "espidf",
     target_os = "fuchsia",
+    target_os = "horizon",
     target_os = "vita",
     target_os = "wasi"
 )))]
@@ -251,6 +260,7 @@ pub(crate) fn setpriority_process(pid: Option<Pid>, priority: i32) -> io::Result
 #[cfg(not(any(
     target_os = "espidf",
     target_os = "fuchsia",
+    target_os = "horizon",
     target_os = "redox",
     target_os = "vita",
     target_os = "wasi"
@@ -267,6 +277,7 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
 #[cfg(not(any(
     target_os = "espidf",
     target_os = "fuchsia",
+    target_os = "horizon",
     target_os = "redox",
     target_os = "vita",
     target_os = "wasi"
@@ -297,6 +308,7 @@ pub(crate) fn prlimit(pid: Option<Pid>, limit: Resource, new: Rlimit) -> io::Res
 #[cfg(not(any(
     target_os = "espidf",
     target_os = "fuchsia",
+    target_os = "horizon",
     target_os = "redox",
     target_os = "vita",
     target_os = "wasi"
@@ -319,6 +331,7 @@ fn rlimit_from_libc(lim: c::rlimit) -> Rlimit {
 #[cfg(not(any(
     target_os = "espidf",
     target_os = "fuchsia",
+    target_os = "horizon",
     target_os = "redox",
     target_os = "vita",
     target_os = "wasi"
@@ -372,8 +385,9 @@ pub(crate) fn _waitpid(
 
 #[cfg(not(any(
     target_os = "espidf",
-    target_os = "redox",
+    target_os = "horizon",
     target_os = "openbsd",
+    target_os = "redox",
     target_os = "vita",
     target_os = "wasi"
 )))]
@@ -393,8 +407,9 @@ pub(crate) fn waitid(id: WaitId<'_>, options: WaitIdOptions) -> io::Result<Optio
 
 #[cfg(not(any(
     target_os = "espidf",
-    target_os = "redox",
+    target_os = "horizon",
     target_os = "openbsd",
+    target_os = "redox",
     target_os = "vita",
     target_os = "wasi"
 )))]
@@ -417,8 +432,9 @@ fn _waitid_all(options: WaitIdOptions) -> io::Result<Option<WaitIdStatus>> {
 
 #[cfg(not(any(
     target_os = "espidf",
-    target_os = "redox",
+    target_os = "horizon",
     target_os = "openbsd",
+    target_os = "redox",
     target_os = "vita",
     target_os = "wasi"
 )))]
@@ -441,8 +457,9 @@ fn _waitid_pid(pid: Pid, options: WaitIdOptions) -> io::Result<Option<WaitIdStat
 
 #[cfg(not(any(
     target_os = "espidf",
-    target_os = "redox",
+    target_os = "horizon",
     target_os = "openbsd",
+    target_os = "redox",
     target_os = "vita",
     target_os = "wasi"
 )))]
@@ -489,6 +506,7 @@ fn _waitid_pidfd(fd: BorrowedFd<'_>, options: WaitIdOptions) -> io::Result<Optio
 /// returned successfully.
 #[cfg(not(any(
     target_os = "espidf",
+    target_os = "horizon",
     target_os = "openbsd",
     target_os = "redox",
     target_os = "vita",
@@ -660,6 +678,7 @@ pub(crate) fn getgroups(buf: &mut [Gid]) -> io::Result<usize> {
     target_os = "emscripten",
     target_os = "espidf",
     target_os = "fuchsia",
+    target_os = "horizon",
     target_os = "redox",
     target_os = "vita",
     target_os = "wasi"

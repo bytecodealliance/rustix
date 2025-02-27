@@ -20,6 +20,7 @@ bitflags! {
             solarish,
             target_os = "espidf",
             target_os = "haiku",
+            target_os = "horizon",
             target_os = "hurd",
             target_os = "nto",
             target_os = "openbsd",

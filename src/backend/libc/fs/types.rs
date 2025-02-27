@@ -2,7 +2,7 @@ use crate::backend::c;
 use crate::ffi;
 use bitflags::bitflags;
 
-#[cfg(not(any(target_os = "espidf", target_os = "vita")))]
+#[cfg(not(any(target_os = "espidf", target_os = "horizon", target_os = "vita")))]
 bitflags! {
     /// `*_OK` constants for use with [`accessat`].
     ///
@@ -27,7 +27,7 @@ bitflags! {
     }
 }
 
-#[cfg(not(any(target_os = "espidf", target_os = "redox")))]
+#[cfg(not(any(target_os = "espidf", target_os = "horizon", target_os = "redox")))]
 bitflags! {
     /// `AT_*` constants for use with [`openat`], [`statat`], and other `*at`
     /// functions.
@@ -83,6 +83,22 @@ bitflags! {
     }
 }
 
+#[cfg(target_os = "horizon")]
+bitflags! {
+    /// `AT_*` constants for use with [`openat`], [`statat`], and other `*at`
+    /// functions.
+    ///
+    /// [`openat`]: crate::fs::openat
+    /// [`statat`]: crate::fs::statat
+    #[repr(transparent)]
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct AtFlags: u32 {
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
+        const _ = !0;
+    }
+}
+
+#[cfg(not(target_os = "horizon"))]
 bitflags! {
     /// `S_I*` constants for use with [`openat`], [`chmodat`], and [`fchmod`].
     ///
@@ -152,6 +168,21 @@ bitflags! {
         #[cfg(not(any(target_os = "espidf", target_os = "vita")))]
         const SVTX = c::S_ISVTX as RawMode;
 
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
+        const _ = !0;
+    }
+}
+
+#[cfg(target_os = "horizon")]
+bitflags! {
+    /// `S_I*` constants for use with [`openat`], [`chmodat`], and [`fchmod`].
+    ///
+    /// [`openat`]: crate::fs::openat
+    /// [`chmodat`]: crate::fs::chmodat
+    /// [`fchmod`]: crate::fs::fchmod
+    #[repr(transparent)]
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct Mode: RawMode {
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
@@ -228,11 +259,11 @@ bitflags! {
         const CREATE = bitcast!(c::O_CREAT);
 
         /// `O_DIRECTORY`
-        #[cfg(not(target_os = "espidf"))]
+        #[cfg(not(any(target_os = "espidf", target_os = "horizon")))]
         const DIRECTORY = bitcast!(c::O_DIRECTORY);
 
         /// `O_DSYNC`
-        #[cfg(not(any(target_os = "dragonfly", target_os = "espidf", target_os = "l4re", target_os = "redox", target_os = "vita")))]
+        #[cfg(not(any(target_os = "dragonfly", target_os = "espidf", target_os = "horizon", target_os = "l4re", target_os = "redox", target_os = "vita")))]
         const DSYNC = bitcast!(c::O_DSYNC);
 
         /// `O_EXCL`
@@ -246,7 +277,7 @@ bitflags! {
         const FSYNC = bitcast!(c::O_FSYNC);
 
         /// `O_NOFOLLOW`
-        #[cfg(not(target_os = "espidf"))]
+        #[cfg(not(any(target_os = "espidf", target_os = "horizon")))]
         const NOFOLLOW = bitcast!(c::O_NOFOLLOW);
 
         /// `O_NONBLOCK`
@@ -264,7 +295,7 @@ bitflags! {
         const RDWR = bitcast!(c::O_RDWR);
 
         /// `O_NOCTTY`
-        #[cfg(not(any(target_os = "espidf", target_os = "l4re", target_os = "redox", target_os = "vita")))]
+        #[cfg(not(any(target_os = "espidf", target_os = "horizon", target_os = "l4re", target_os = "redox", target_os = "vita")))]
         const NOCTTY = bitcast!(c::O_NOCTTY);
 
         /// `O_RSYNC`
@@ -347,6 +378,7 @@ bitflags! {
             target_os = "aix",
             target_os = "espidf",
             target_os = "haiku",
+            target_os = "horizon",
             target_os = "wasi",
             target_os = "vita",
             solarish
@@ -601,6 +633,7 @@ impl FileType {
     target_os = "solaris",
     target_os = "dragonfly",
     target_os = "espidf",
+    target_os = "horizon",
     target_os = "haiku",
     target_os = "redox",
     target_os = "vita",
@@ -711,6 +744,7 @@ bitflags! {
 #[cfg(not(any(
     netbsdlike,
     target_os = "espidf",
+    target_os = "horizon",
     target_os = "nto",
     target_os = "redox",
     target_os = "vita"
@@ -838,11 +872,11 @@ bitflags! {
         const NOEXEC = c::ST_NOEXEC as u64;
 
         /// `ST_NOSUID`
-        #[cfg(not(any(target_os = "espidf", target_os = "vita")))]
+        #[cfg(not(any(target_os = "espidf", target_os = "horizon", target_os = "vita")))]
         const NOSUID = c::ST_NOSUID as u64;
 
         /// `ST_RDONLY`
-        #[cfg(not(any(target_os = "espidf", target_os = "vita")))]
+        #[cfg(not(any(target_os = "espidf", target_os = "horizon", target_os = "vita")))]
         const RDONLY = c::ST_RDONLY as u64;
 
         /// `ST_RELATIME`
@@ -865,7 +899,12 @@ bitflags! {
 // Solaris doesn't support `flock` and doesn't define `LOCK_SH` etc., but we
 // reuse this `FlockOperation` enum for `fcntl_lock`, so on Solaris we use
 // our own made-up integer values.
-#[cfg(not(any(target_os = "espidf", target_os = "vita", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "espidf",
+    target_os = "horizon",
+    target_os = "vita",
+    target_os = "wasi"
+)))]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(u32)]
 pub enum FlockOperation {
@@ -998,6 +1037,7 @@ pub struct Stat {
     solarish,
     target_os = "espidf",
     target_os = "haiku",
+    target_os = "horizon",
     target_os = "netbsd",
     target_os = "nto",
     target_os = "redox",
@@ -1019,6 +1059,7 @@ pub type StatFs = c::statfs64;
     solarish,
     target_os = "espidf",
     target_os = "haiku",
+    target_os = "horizon",
     target_os = "nto",
     target_os = "redox",
     target_os = "vita",

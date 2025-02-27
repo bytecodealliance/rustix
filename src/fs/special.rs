@@ -27,6 +27,7 @@ use backend::fd::{BorrowedFd, RawFd};
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/fcntl.h.html
 // SAFETY: `AT_FDCWD` is a reserved value that is never dynamically
 // allocated, so it'll remain valid for the duration of `'static`.
+#[cfg(not(target_os = "horizon"))]
 #[doc(alias = "AT_FDCWD")]
 pub const CWD: BorrowedFd<'static> =
     unsafe { BorrowedFd::<'static>::borrow_raw(c::AT_FDCWD as RawFd) };

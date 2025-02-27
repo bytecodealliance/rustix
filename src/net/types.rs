@@ -23,15 +23,20 @@ impl SocketType {
     pub const DGRAM: Self = Self(c::SOCK_DGRAM as _);
 
     /// `SOCK_SEQPACKET`
-    #[cfg(not(target_os = "espidf"))]
+    #[cfg(not(any(target_os = "espidf", target_os = "horizon")))]
     pub const SEQPACKET: Self = Self(c::SOCK_SEQPACKET as _);
 
     /// `SOCK_RAW`
-    #[cfg(not(target_os = "espidf"))]
+    #[cfg(not(any(target_os = "espidf", target_os = "horizon")))]
     pub const RAW: Self = Self(c::SOCK_RAW as _);
 
     /// `SOCK_RDM`
-    #[cfg(not(any(target_os = "espidf", target_os = "haiku", target_os = "redox")))]
+    #[cfg(not(any(
+        target_os = "espidf",
+        target_os = "haiku",
+        target_os = "horizon",
+        target_os = "redox"
+    )))]
     pub const RDM: Self = Self(c::SOCK_RDM as _);
 
     /// Constructs a `SocketType` from a raw integer.
@@ -92,6 +97,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "hurd",
         target_os = "nto",
         target_os = "redox",
@@ -109,6 +115,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "hurd",
         target_os = "nto",
         target_os = "redox",
@@ -119,12 +126,18 @@ impl AddressFamily {
     #[cfg(not(any(
         target_os = "aix",
         target_os = "espidf",
+        target_os = "horizon",
         target_os = "redox",
         target_os = "vita",
     )))]
     pub const IPX: Self = Self(c::AF_IPX as _);
     /// `AF_APPLETALK`
-    #[cfg(not(any(target_os = "espidf", target_os = "redox", target_os = "vita")))]
+    #[cfg(not(any(
+        target_os = "espidf",
+        target_os = "horizon",
+        target_os = "redox",
+        target_os = "vita"
+    )))]
     pub const APPLETALK: Self = Self(c::AF_APPLETALK as _);
     /// `AF_NETROM`
     #[cfg(not(any(
@@ -134,6 +147,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "hurd",
         target_os = "nto",
         target_os = "redox",
@@ -148,6 +162,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "hurd",
         target_os = "nto",
         target_os = "redox",
@@ -162,6 +177,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "hurd",
         target_os = "nto",
         target_os = "redox",
@@ -175,6 +191,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "hurd",
         target_os = "nto",
         target_os = "redox",
@@ -189,6 +206,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "hurd",
         target_os = "nto",
         target_os = "redox",
@@ -199,6 +217,7 @@ impl AddressFamily {
     #[cfg(not(any(
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "redox",
         target_os = "vita"
     )))]
@@ -211,6 +230,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "hurd",
         target_os = "nto",
         target_os = "redox",
@@ -225,6 +245,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "hurd",
         target_os = "nto",
         target_os = "redox",
@@ -238,6 +259,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "hurd",
         target_os = "nto",
         target_os = "redox",
@@ -256,6 +278,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "hurd",
         target_os = "nto",
         target_os = "redox",
@@ -270,6 +293,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "hurd",
         target_os = "nto",
         target_os = "redox",
@@ -284,6 +308,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "hurd",
         target_os = "nto",
         target_os = "redox",
@@ -298,6 +323,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "hurd",
         target_os = "nto",
         target_os = "redox",
@@ -312,6 +338,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "hurd",
         target_os = "nto",
         target_os = "redox",
@@ -322,6 +349,7 @@ impl AddressFamily {
     #[cfg(not(any(
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "redox",
         target_os = "vita"
     )))]
@@ -333,6 +361,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "hurd",
         target_os = "nto",
         target_os = "redox",
@@ -347,6 +376,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "hurd",
         target_os = "nto",
         target_os = "redox",
@@ -361,6 +391,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "hurd",
         target_os = "nto",
         target_os = "redox",
@@ -375,6 +406,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "hurd",
         target_os = "nto",
         target_os = "redox",
@@ -389,6 +421,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "hurd",
         target_os = "nto",
         target_os = "redox",
@@ -403,6 +436,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "hurd",
         target_os = "nto",
         target_os = "redox",
@@ -416,6 +450,7 @@ impl AddressFamily {
         windows,
         target_os = "aix",
         target_os = "espidf",
+        target_os = "horizon",
         target_os = "hurd",
         target_os = "redox",
         target_os = "vita",
@@ -429,6 +464,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "hurd",
         target_os = "nto",
         target_os = "redox",
@@ -443,6 +479,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "hurd",
         target_os = "nto",
         target_os = "redox",
@@ -456,6 +493,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "hurd",
         target_os = "redox",
         target_os = "vita",
@@ -469,6 +507,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "hurd",
         target_os = "nto",
         target_os = "redox",
@@ -483,6 +522,7 @@ impl AddressFamily {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "hurd",
         target_os = "nto",
         target_os = "redox",
@@ -745,6 +785,7 @@ pub mod ipproto {
         solarish,
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "vita"
     )))]
     pub const IGMP: Protocol = Protocol(new_raw_protocol(c::IPPROTO_IGMP as _));
@@ -754,6 +795,7 @@ pub mod ipproto {
         windows,
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "redox",
         target_os = "vita"
     )))]
@@ -765,6 +807,7 @@ pub mod ipproto {
         solarish,
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "redox",
         target_os = "vita"
     )))]
@@ -774,6 +817,7 @@ pub mod ipproto {
         solarish,
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "vita"
     )))]
     pub const PUP: Protocol = Protocol(new_raw_protocol(c::IPPROTO_PUP as _));
@@ -784,6 +828,7 @@ pub mod ipproto {
         solarish,
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "vita"
     )))]
     pub const IDP: Protocol = Protocol(new_raw_protocol(c::IPPROTO_IDP as _));
@@ -793,6 +838,7 @@ pub mod ipproto {
         windows,
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "redox",
         target_os = "vita"
     )))]
@@ -806,6 +852,7 @@ pub mod ipproto {
         target_os = "dragonfly",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "nto",
         target_os = "openbsd",
         target_os = "redox",
@@ -820,6 +867,7 @@ pub mod ipproto {
         windows,
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "redox",
         target_os = "vita"
     )))]
@@ -830,6 +878,7 @@ pub mod ipproto {
         windows,
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "redox",
         target_os = "vita"
     )))]
@@ -839,6 +888,7 @@ pub mod ipproto {
         solarish,
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "redox",
         target_os = "vita"
     )))]
@@ -848,6 +898,7 @@ pub mod ipproto {
         solarish,
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "redox",
         target_os = "vita"
     )))]
@@ -860,6 +911,7 @@ pub mod ipproto {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "nto",
         target_os = "redox",
         target_os = "vita",
@@ -873,6 +925,7 @@ pub mod ipproto {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "nto",
         target_os = "redox",
         target_os = "vita",
@@ -885,6 +938,7 @@ pub mod ipproto {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "redox",
         target_os = "vita",
     )))]
@@ -895,6 +949,7 @@ pub mod ipproto {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "redox",
         target_os = "vita"
     )))]
@@ -907,6 +962,7 @@ pub mod ipproto {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "nto",
         target_os = "redox",
         target_os = "vita",
@@ -918,6 +974,7 @@ pub mod ipproto {
         target_os = "dragonfly",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "openbsd",
         target_os = "redox",
         target_os = "vita",
@@ -933,6 +990,7 @@ pub mod ipproto {
         target_os = "dragonfly",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "nto",
         target_os = "redox",
         target_os = "vita",
@@ -947,6 +1005,7 @@ pub mod ipproto {
         target_os = "dragonfly",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "netbsd",
         target_os = "nto",
         target_os = "redox",
@@ -957,7 +1016,7 @@ pub mod ipproto {
     #[cfg(linux_kernel)]
     pub const ETHERNET: Protocol = Protocol(new_raw_protocol(c::IPPROTO_ETHERNET as _));
     /// `IPPROTO_RAW`
-    #[cfg(not(any(target_os = "espidf", target_os = "vita")))]
+    #[cfg(not(any(target_os = "espidf", target_os = "horizon", target_os = "vita")))]
     pub const RAW: Protocol = Protocol(new_raw_protocol(c::IPPROTO_RAW as _));
     /// `IPPROTO_MPTCP`
     #[cfg(not(any(
@@ -969,6 +1028,7 @@ pub mod ipproto {
         target_os = "espidf",
         target_os = "fuchsia",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "nto",
         target_os = "redox",
         target_os = "vita",
@@ -979,6 +1039,7 @@ pub mod ipproto {
         solarish,
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "redox",
         target_os = "vita"
     )))]
@@ -994,6 +1055,7 @@ pub mod ipproto {
         target_os = "dragonfly",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "nto",
         target_os = "redox",
         target_os = "vita",
@@ -1004,6 +1066,7 @@ pub mod ipproto {
         solarish,
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "redox",
         target_os = "vita"
     )))]
@@ -1601,6 +1664,7 @@ bitflags! {
             target_os = "aix",
             target_os = "espidf",
             target_os = "haiku",
+            target_os = "horizon",
             target_os = "nto",
             target_os = "vita",
         )))]

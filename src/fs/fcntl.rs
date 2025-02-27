@@ -7,6 +7,7 @@
     target_os = "emscripten",
     target_os = "espidf",
     target_os = "fuchsia",
+    target_os = "horizon",
     target_os = "redox",
     target_os = "vita",
     target_os = "wasi"
@@ -93,6 +94,7 @@ pub fn fcntl_add_seals<Fd: AsFd>(fd: Fd, seals: SealFlags) -> io::Result<()> {
     target_os = "emscripten",
     target_os = "espidf",
     target_os = "fuchsia",
+    target_os = "horizon",
     target_os = "redox",
     target_os = "vita",
     target_os = "wasi"
