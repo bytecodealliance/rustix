@@ -83,7 +83,6 @@ bitflags! {
     }
 }
 
-#[cfg(feature = "mount")]
 bitflags! {
     /// `FSOPEN_*` constants for use with [`fsopen`].
     ///
@@ -99,7 +98,6 @@ bitflags! {
     }
 }
 
-#[cfg(feature = "mount")]
 bitflags! {
     /// `FSMOUNT_*` constants for use with [`fsmount`].
     ///
@@ -116,7 +114,6 @@ bitflags! {
 }
 
 /// `FSCONFIG_*` constants for use with the `fsconfig` syscall.
-#[cfg(feature = "mount")]
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 #[repr(u32)]
 pub(crate) enum FsConfigCmd {
@@ -148,7 +145,6 @@ pub(crate) enum FsConfigCmd {
     CreateExclusive = linux_raw_sys::general::fsconfig_command::FSCONFIG_CMD_CREATE_EXCL as u32,
 }
 
-#[cfg(feature = "mount")]
 bitflags! {
     /// `MOUNT_ATTR_*` constants for use with [`fsmount`].
     ///
@@ -197,7 +193,6 @@ bitflags! {
     }
 }
 
-#[cfg(feature = "mount")]
 bitflags! {
     /// `MOVE_MOUNT_*` constants for use with [`move_mount`].
     ///
@@ -237,7 +232,6 @@ bitflags! {
     }
 }
 
-#[cfg(feature = "mount")]
 bitflags! {
     /// `OPENTREE_*` constants for use with [`open_tree`].
     ///
@@ -268,7 +262,6 @@ bitflags! {
     }
 }
 
-#[cfg(feature = "mount")]
 bitflags! {
     /// `FSPICK_*` constants for use with [`fspick`].
     ///

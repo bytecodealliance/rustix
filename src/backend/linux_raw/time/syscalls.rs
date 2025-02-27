@@ -5,25 +5,19 @@
 //! See the `rustix::backend` module documentation for details.
 #![allow(unsafe_code, clippy::undocumented_unsafe_blocks)]
 
-use crate::backend::conv::{ret, ret_infallible};
+use crate::backend::conv::{by_ref, ret, ret_infallible, ret_owned_fd};
 use crate::clockid::ClockId;
+use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io;
+use crate::time::{Itimerspec, TimerfdClockId, TimerfdFlags, TimerfdTimerFlags};
 use crate::timespec::Timespec;
 use core::mem::MaybeUninit;
-#[cfg(all(feature = "time", target_pointer_width = "32"))]
+#[cfg(target_pointer_width = "32")]
 use linux_raw_sys::general::itimerspec as __kernel_old_itimerspec;
 #[cfg(target_pointer_width = "32")]
 use linux_raw_sys::general::timespec as __kernel_old_timespec;
-#[cfg(feature = "time")]
-use {
-    crate::backend::conv::{by_ref, ret_owned_fd},
-    crate::fd::BorrowedFd,
-    crate::fd::OwnedFd,
-    crate::time::{Itimerspec, TimerfdClockId, TimerfdFlags, TimerfdTimerFlags},
-};
 
 // `clock_gettime` has special optimizations via the vDSO.
-#[cfg(feature = "time")]
 pub(crate) use crate::backend::vdso_wrappers::{clock_gettime, clock_gettime_dynamic};
 
 #[inline]
@@ -57,7 +51,6 @@ unsafe fn clock_getres_old(which_clock: ClockId, result: &mut MaybeUninit<Timesp
     });
 }
 
-#[cfg(feature = "time")]
 #[inline]
 pub(crate) fn clock_settime(which_clock: ClockId, timespec: Timespec) -> io::Result<()> {
     // `clock_settime64` was introduced in Linux 5.1. The old `clock_settime`
@@ -83,7 +76,6 @@ pub(crate) fn clock_settime(which_clock: ClockId, timespec: Timespec) -> io::Res
     }
 }
 
-#[cfg(feature = "time")]
 #[cfg(target_pointer_width = "32")]
 unsafe fn clock_settime_old(which_clock: ClockId, timespec: Timespec) -> io::Result<()> {
     let old_timespec = __kernel_old_timespec {
@@ -100,13 +92,11 @@ unsafe fn clock_settime_old(which_clock: ClockId, timespec: Timespec) -> io::Res
     ))
 }
 
-#[cfg(feature = "time")]
 #[inline]
 pub(crate) fn timerfd_create(clockid: TimerfdClockId, flags: TimerfdFlags) -> io::Result<OwnedFd> {
     unsafe { ret_owned_fd(syscall_readonly!(__NR_timerfd_create, clockid, flags)) }
 }
 
-#[cfg(feature = "time")]
 #[inline]
 pub(crate) fn timerfd_settime(
     fd: BorrowedFd<'_>,
@@ -148,7 +138,6 @@ pub(crate) fn timerfd_settime(
     }
 }
 
-#[cfg(feature = "time")]
 #[cfg(target_pointer_width = "32")]
 unsafe fn timerfd_settime_old(
     fd: BorrowedFd<'_>,
@@ -206,7 +195,6 @@ unsafe fn timerfd_settime_old(
     Ok(())
 }
 
-#[cfg(feature = "time")]
 #[inline]
 pub(crate) fn timerfd_gettime(fd: BorrowedFd<'_>) -> io::Result<Itimerspec> {
     let mut result = MaybeUninit::<Itimerspec>::uninit();
@@ -231,7 +219,6 @@ pub(crate) fn timerfd_gettime(fd: BorrowedFd<'_>) -> io::Result<Itimerspec> {
     }
 }
 
-#[cfg(feature = "time")]
 #[cfg(target_pointer_width = "32")]
 unsafe fn timerfd_gettime_old(
     fd: BorrowedFd<'_>,

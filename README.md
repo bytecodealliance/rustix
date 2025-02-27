@@ -52,8 +52,9 @@ building.
 
 ## Cargo features
 
-The modules [`rustix::io`], [`rustix::fd`], and [`rustix::ffi`] are enabled by
-default. The rest of the API is conditional with cargo feature flags:
+The modules [`rustix::io`], [`rustix::fd`], [`rustix::ffi`], and
+[`rustix::ioctl`] are enabled by default. The rest of the API is conditional
+with cargo feature flags:
 
 | Name       | Description                                                    |
 | ---------- | -------------------------------------------------------------- |
@@ -97,6 +98,7 @@ default. The rest of the API is conditional with cargo feature flags:
 [`rustix::io`]: https://docs.rs/rustix/*/rustix/io/index.html
 [`rustix::fd`]: https://docs.rs/rustix/*/rustix/fd/index.html
 [`rustix::ffi`]: https://docs.rs/rustix/*/rustix/ffi/index.html
+[`rustix::ioctl`]: https://docs.rs/rustix/*/rustix/ffi/ioctl.html
 
 ## 64-bit Large File Support (LFS) and Year 2038 (y2038) support
 

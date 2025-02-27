@@ -187,7 +187,7 @@ pub unsafe trait Ioctl {
 
 /// Const functions for computing opcode values.
 ///
-/// Linux's headers define macros such as `_IO`, `_IOR`, `_IOW`, and `_IORW`
+/// Linux's headers define macros such as `_IO`, `_IOR`, `_IOW`, and `_IOWR`
 /// for defining ioctl values in a structured way that encode whether they
 /// are reading and/or writing, and other information about the ioctl. The
 /// functions in this module correspond to those macros.
@@ -252,7 +252,7 @@ pub mod opcode {
     /// type of data.
     ///
     /// This corresponds to the C macro `_IOWR(group, number, T)`.
-    #[doc(alias = "_IORW")]
+    #[doc(alias = "_IOWR")]
     #[inline]
     pub const fn read_write<T>(group: u8, number: u8) -> Opcode {
         from_components(Direction::ReadWrite, group, number, mem::size_of::<T>())
@@ -338,3 +338,34 @@ type _Opcode = c::c_uint;
 // Windows has `ioctlsocket`, which uses `i32`.
 #[cfg(windows)]
 type _Opcode = i32;
+
+#[cfg(linux_kernel)]
+#[cfg(not(any(target_arch = "sparc", target_arch = "sparc64")))]
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_opcode_funcs() {
+        // `TUNGETDEVNETNS` is defined as `_IO('T', 227)`.
+        assert_eq!(
+            linux_raw_sys::ioctl::TUNGETDEVNETNS as Opcode,
+            opcode::none(b'T', 227)
+        );
+        // `FS_IOC_GETVERSION` is defined as `_IOR('v', 1, long)`.
+        assert_eq!(
+            linux_raw_sys::ioctl::FS_IOC_GETVERSION as Opcode,
+            opcode::read::<c::c_long>(b'v', 1)
+        );
+        // `TUNSETNOCSUM` is defined as `_IOW('T', 200, int)`.
+        assert_eq!(
+            linux_raw_sys::ioctl::TUNSETNOCSUM as Opcode,
+            opcode::write::<c::c_int>(b'T', 200)
+        );
+        // `FIFREEZE` is defined as `_IOWR('X', 119, int)`.
+        assert_eq!(
+            linux_raw_sys::ioctl::FIFREEZE as Opcode,
+            opcode::read_write::<c::c_int>(b'X', 119)
+        );
+    }
+}

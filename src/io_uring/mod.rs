@@ -49,6 +49,7 @@ pub use crate::fs::{
 pub use crate::io::ReadWriteFlags;
 pub use crate::net::addr::{SocketAddrLen, SocketAddrOpaque, SocketAddrStorage};
 pub use crate::net::{RecvFlags, SendFlags, SocketFlags};
+pub use crate::signal::Signal;
 pub use crate::sigset::SigSet;
 pub use crate::thread::futex::{
     Wait as FutexWait, WaitFlags as FutexWaitFlags, WaitPtr as FutexWaitPtr,
