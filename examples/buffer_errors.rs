@@ -12,22 +12,22 @@ fn main() {
 }
 
 fn error_buffer_wrapper() {
-    use rustix::io::read;
+    use rustix::buffer::Buffer;
+
+    fn read<B: Buffer<u8>>(_: B) {}
 
     // This is reduced from src/fs/inotify.rs line 177.
     struct Wrapper<'a>(&'a mut [u8]);
     impl<'a> Wrapper<'a> {
         fn read(&mut self) {
-            let input = std::fs::File::open("Cargo.toml").unwrap();
-
             // Ideally we'd write this, but it gets:
             // "cannot move out of `self` which is behind a mutable reference".
             /*
-            let _x: usize = read(&input, self.0).unwrap();
+            read(self.0);
             */
 
             // The fix: add `&mut *`.
-            let _x: usize = read(&input, &mut *self.0).unwrap();
+            read(&mut *self.0);
         }
     }
     let mut buf = vec![0_u8; 3];
@@ -40,7 +40,7 @@ fn error_retry_closure() {
     use rustix::io;
     use rustix::io::retry_on_intr;
 
-    fn b<B: Buffer<u8>>(_: B) -> Result<(), io::Errno> {
+    fn b<B: Buffer<u8>>(_: B) -> io::Result<()> {
         Ok(())
     }
 
@@ -95,8 +95,6 @@ fn error_retry_indirect_closure() {
                     vec.shrink_to_fit();
                     return Ok(vec);
                 }
-
-                Err(io::Errno::RANGE) => continue,
                 Err(err) => return Err(err),
             }
         }
@@ -110,23 +108,27 @@ fn error_retry_indirect_closure() {
 }
 
 fn error_empty_slice() {
-    use rustix::io::read;
-    let input = std::fs::File::open("Cargo.toml").unwrap();
+    use rustix::buffer::Buffer;
+
+    fn read<B: Buffer<u8>>(_: B) {}
 
     // Functions that take `&mut [u8]` can be passed `&mut []`, but with
     // `Buffer` passing `&mut []` gets:
     // "type annotations needed".
     /*
-    let _x = read(&input, &mut []).unwrap();
+    read(&mut []);
     */
 
     // The fix: make the element type explicit.
-    let _x = read(&input, &mut [0_u8; 0]).unwrap();
+    read(&mut [0_u8; 0]);
 }
 
 fn error_array_by_value() {
-    use rustix::io::read;
-    let input = std::fs::File::open("Cargo.toml").unwrap();
+    use rustix::buffer::Buffer;
+
+    fn read<B: Buffer<u8>>(b: B) -> B::Output {
+        unsafe { b.assume_init(0) }
+    }
 
     // This code is erroneously attempts to pass a buffer by value, but it
     // confusingly gets two error messages:
@@ -134,10 +136,10 @@ fn error_array_by_value() {
     // "the trait bound `[{integer}; 3]: buffer::private::Sealed<u8>` is not satisfied".
     /*
     let mut buf = [0, 0, 0];
-    let _x = read(&input, buf).unwrap();
+    read(buf);
     */
 
     // The fix: pass the buffer by reference.
     let mut buf = [0, 0, 0];
-    let _x = read(&input, &mut buf).unwrap();
+    read(&mut buf);
 }
