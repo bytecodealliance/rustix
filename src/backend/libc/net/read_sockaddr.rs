@@ -87,8 +87,10 @@ pub(crate) unsafe fn read_sa_family(storage: *const c::sockaddr) -> u16 {
             target_os = "vita"
         )))]
         sa_family: 0_u16,
-        #[cfg(not(target_os = "haiku"))]
+        #[cfg(not(any(target_os = "haiku", target_os = "horizon")))]
         sa_data: [0; 14],
+        #[cfg(target_os = "horizon")]
+        sa_data: [0; 26],
         #[cfg(target_os = "haiku")]
         sa_data: [0; 30],
     };

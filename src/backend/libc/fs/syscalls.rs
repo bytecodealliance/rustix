@@ -10,7 +10,7 @@ use crate::ffi;
 use crate::ffi::CStr;
 #[cfg(all(apple, feature = "alloc"))]
 use crate::ffi::CString;
-#[cfg(not(any(target_os = "espidf", target_os = "vita")))]
+#[cfg(not(any(target_os = "espidf", target_os = "horizon", target_os = "vita")))]
 use crate::fs::Access;
 #[cfg(not(any(target_os = "espidf", target_os = "redox")))]
 use crate::fs::AtFlags;
@@ -18,12 +18,18 @@ use crate::fs::AtFlags;
     netbsdlike,
     target_os = "dragonfly",
     target_os = "espidf",
+    target_os = "horizon",
     target_os = "nto",
     target_os = "redox",
     target_os = "vita",
 )))]
 use crate::fs::FallocateFlags;
-#[cfg(not(any(target_os = "espidf", target_os = "vita", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "espidf",
+    target_os = "horizon",
+    target_os = "vita",
+    target_os = "wasi"
+)))]
 use crate::fs::FlockOperation;
 #[cfg(any(linux_kernel, target_os = "freebsd"))]
 use crate::fs::MemfdFlags;
@@ -35,6 +41,7 @@ use crate::fs::SealFlags;
     solarish,
     target_os = "espidf",
     target_os = "haiku",
+    target_os = "horizon",
     target_os = "netbsd",
     target_os = "nto",
     target_os = "redox",
@@ -75,6 +82,7 @@ use {
     target_os = "dragonfly",
     target_os = "espidf",
     target_os = "haiku",
+    target_os = "horizon",
     target_os = "redox",
     target_os = "vita",
 )))]
@@ -247,6 +255,7 @@ pub(crate) fn openat(
     solarish,
     target_os = "espidf",
     target_os = "haiku",
+    target_os = "horizon",
     target_os = "netbsd",
     target_os = "nto",
     target_os = "redox",
@@ -777,7 +786,12 @@ fn statat_old(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::Result<
     }
 }
 
-#[cfg(not(any(target_os = "espidf", target_os = "emscripten", target_os = "vita")))]
+#[cfg(not(any(
+    target_os = "espidf",
+    target_os = "horizon",
+    target_os = "emscripten",
+    target_os = "vita"
+)))]
 pub(crate) fn access(path: &CStr, access: Access) -> io::Result<()> {
     unsafe { ret(c::access(c_str(path), access.bits())) }
 }
@@ -785,6 +799,7 @@ pub(crate) fn access(path: &CStr, access: Access) -> io::Result<()> {
 #[cfg(not(any(
     target_os = "emscripten",
     target_os = "espidf",
+    target_os = "horizon",
     target_os = "redox",
     target_os = "vita"
 )))]
@@ -853,7 +868,12 @@ pub(crate) fn accessat(
     Ok(())
 }
 
-#[cfg(not(any(target_os = "espidf", target_os = "redox", target_os = "vita")))]
+#[cfg(not(any(
+    target_os = "espidf",
+    target_os = "horizon",
+    target_os = "redox",
+    target_os = "vita"
+)))]
 pub(crate) fn utimensat(
     dirfd: BorrowedFd<'_>,
     path: &CStr,
@@ -1169,6 +1189,7 @@ pub(crate) fn chownat(
 #[cfg(not(any(
     apple,
     target_os = "espidf",
+    target_os = "horizon",
     target_os = "redox",
     target_os = "vita",
     target_os = "wasi"
@@ -1250,6 +1271,7 @@ pub(crate) fn copy_file_range(
     target_os = "dragonfly",
     target_os = "espidf",
     target_os = "haiku",
+    target_os = "horizon",
     target_os = "redox",
     target_os = "vita",
 )))]
@@ -1335,6 +1357,7 @@ pub(crate) fn fcntl_add_seals(fd: BorrowedFd<'_>, seals: SealFlags) -> io::Resul
     target_os = "emscripten",
     target_os = "espidf",
     target_os = "fuchsia",
+    target_os = "horizon",
     target_os = "redox",
     target_os = "vita",
     target_os = "wasi"
@@ -1460,6 +1483,7 @@ pub(crate) fn fchown(fd: BorrowedFd<'_>, owner: Option<Uid>, group: Option<Gid>)
 
 #[cfg(not(any(
     target_os = "espidf",
+    target_os = "horizon",
     target_os = "solaris",
     target_os = "vita",
     target_os = "wasi"
@@ -1487,6 +1511,7 @@ pub(crate) fn syncfs(fd: BorrowedFd<'_>) -> io::Result<()> {
 
 #[cfg(not(any(
     target_os = "espidf",
+    target_os = "horizon",
     target_os = "redox",
     target_os = "vita",
     target_os = "wasi"
@@ -1561,6 +1586,7 @@ fn fstat_old(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     solarish,
     target_os = "espidf",
     target_os = "haiku",
+    target_os = "horizon",
     target_os = "netbsd",
     target_os = "nto",
     target_os = "redox",
@@ -1604,7 +1630,7 @@ fn libc_statvfs_to_statvfs(from: c::statvfs) -> StatVfs {
     }
 }
 
-#[cfg(not(any(target_os = "espidf", target_os = "vita")))]
+#[cfg(not(any(target_os = "espidf", target_os = "horizon", target_os = "vita")))]
 pub(crate) fn futimens(fd: BorrowedFd<'_>, times: &Timestamps) -> io::Result<()> {
     // Old 32-bit version: libc has `futimens` but it is not y2038 safe by
     // default. But there may be a `__futimens64` we can use.
@@ -1708,6 +1734,7 @@ fn futimens_old(fd: BorrowedFd<'_>, times: &Timestamps) -> io::Result<()> {
     netbsdlike,
     target_os = "dragonfly",
     target_os = "espidf",
+    target_os = "horizon",
     target_os = "nto",
     target_os = "redox",
     target_os = "vita",
@@ -1787,6 +1814,7 @@ pub(crate) fn fsync(fd: BorrowedFd<'_>) -> io::Result<()> {
     target_os = "dragonfly",
     target_os = "espidf",
     target_os = "haiku",
+    target_os = "horizon",
     target_os = "redox",
     target_os = "vita",
 )))]

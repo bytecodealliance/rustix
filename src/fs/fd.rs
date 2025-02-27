@@ -11,6 +11,7 @@ use backend::fd::AsFd;
     netbsdlike,
     target_os = "dragonfly",
     target_os = "espidf",
+    target_os = "horizon",
     target_os = "nto",
     target_os = "redox",
     target_os = "vita",
@@ -18,6 +19,7 @@ use backend::fd::AsFd;
 use backend::fs::types::FallocateFlags;
 #[cfg(not(any(
     target_os = "espidf",
+    target_os = "horizon",
     target_os = "solaris",
     target_os = "vita",
     target_os = "wasi"
@@ -30,6 +32,7 @@ use backend::fs::types::Stat;
     solarish,
     target_os = "espidf",
     target_os = "haiku",
+    target_os = "horizon",
     target_os = "netbsd",
     target_os = "nto",
     target_os = "redox",
@@ -179,6 +182,7 @@ pub fn fstat<Fd: AsFd>(fd: Fd) -> io::Result<Stat> {
     solarish,
     target_os = "espidf",
     target_os = "haiku",
+    target_os = "horizon",
     target_os = "netbsd",
     target_os = "nto",
     target_os = "redox",
@@ -218,7 +222,7 @@ pub fn fstatvfs<Fd: AsFd>(fd: Fd) -> io::Result<StatVfs> {
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/futimens.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/utimensat.2.html
-#[cfg(not(any(target_os = "espidf", target_os = "vita")))]
+#[cfg(not(any(target_os = "espidf", target_os = "horizon", target_os = "vita")))]
 #[inline]
 pub fn futimens<Fd: AsFd>(fd: Fd, times: &Timestamps) -> io::Result<()> {
     backend::fs::syscalls::futimens(fd.as_fd(), times)
@@ -243,6 +247,7 @@ pub fn futimens<Fd: AsFd>(fd: Fd, times: &Timestamps) -> io::Result<()> {
     netbsdlike,
     target_os = "dragonfly",
     target_os = "espidf",
+    target_os = "horizon",
     target_os = "nto",
     target_os = "redox",
     target_os = "vita",
@@ -285,6 +290,7 @@ pub fn fsync<Fd: AsFd>(fd: Fd) -> io::Result<()> {
     target_os = "dragonfly",
     target_os = "espidf",
     target_os = "haiku",
+    target_os = "horizon",
     target_os = "redox",
     target_os = "vita",
 )))]
@@ -314,6 +320,7 @@ pub fn ftruncate<Fd: AsFd>(fd: Fd, length: u64) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/flock.2.html
 #[cfg(not(any(
     target_os = "espidf",
+    target_os = "horizon",
     target_os = "solaris",
     target_os = "vita",
     target_os = "wasi"

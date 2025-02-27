@@ -26,11 +26,13 @@ bitflags! {
         /// Return if a child has stopped (but not traced via [`ptrace`]).
         ///
         /// [`ptrace`]: https://man7.org/linux/man-pages/man2/ptrace.2.html
+        #[cfg(not(target_os = "horizon"))]
         const UNTRACED = bitcast!(backend::process::wait::WUNTRACED);
         /// Return if a stopped child has been resumed by delivery of
         /// [`Signal::Cont`].
         ///
         /// [`Signal::Cont`]: crate::process::Signal::Cont
+        #[cfg(not(target_os = "horizon"))]
         const CONTINUED = bitcast!(backend::process::wait::WCONTINUED);
 
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
@@ -38,7 +40,12 @@ bitflags! {
     }
 }
 
-#[cfg(not(any(target_os = "openbsd", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "horizon",
+    target_os = "openbsd",
+    target_os = "redox",
+    target_os = "wasi"
+)))]
 bitflags! {
     /// Options for modifying the behavior of [`waitid`].
     #[repr(transparent)]
@@ -142,7 +149,12 @@ impl WaitStatus {
 /// The status of a process after calling [`waitid`].
 #[derive(Clone, Copy)]
 #[repr(transparent)]
-#[cfg(not(any(target_os = "openbsd", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "horizon",
+    target_os = "openbsd",
+    target_os = "redox",
+    target_os = "wasi"
+)))]
 pub struct WaitIdStatus(pub(crate) backend::c::siginfo_t);
 
 #[cfg(linux_raw)]
@@ -154,7 +166,12 @@ unsafe impl Send for WaitIdStatus {}
 // SAFETY: Same as with `Send`.
 unsafe impl Sync for WaitIdStatus {}
 
-#[cfg(not(any(target_os = "openbsd", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "horizon",
+    target_os = "openbsd",
+    target_os = "redox",
+    target_os = "wasi"
+)))]
 impl WaitIdStatus {
     /// Returns whether the process is currently stopped.
     #[inline]
@@ -397,7 +414,12 @@ pub fn wait(waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
 
 /// `waitid(_, _, _, opts)`—Wait for the specified child process to change
 /// state.
-#[cfg(not(any(target_os = "openbsd", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "horizon",
+    target_os = "openbsd",
+    target_os = "redox",
+    target_os = "wasi"
+)))]
 #[inline]
 pub fn waitid<'a, Id: Into<WaitId<'a>>>(
     id: Id,

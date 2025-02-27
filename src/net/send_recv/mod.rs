@@ -11,10 +11,22 @@ use core::cmp::min;
 
 pub use backend::net::send_recv::{RecvFlags, ReturnFlags, SendFlags};
 
-#[cfg(not(any(windows, target_os = "espidf", target_os = "vita", target_os = "redox")))]
+#[cfg(not(any(
+    windows,
+    target_os = "espidf",
+    target_os = "horizon",
+    target_os = "redox",
+    target_os = "vita"
+)))]
 mod msg;
 
-#[cfg(not(any(windows, target_os = "espidf", target_os = "redox", target_os = "vita")))]
+#[cfg(not(any(
+    windows,
+    target_os = "espidf",
+    target_os = "horizon",
+    target_os = "redox",
+    target_os = "vita"
+)))]
 pub use msg::*;
 
 /// `recv(fd, buf, flags)`—Reads data from a socket.

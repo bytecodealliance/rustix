@@ -224,7 +224,13 @@ pub mod io;
 #[cfg_attr(docsrs, doc(cfg(feature = "io_uring")))]
 pub mod io_uring;
 pub mod ioctl;
-#[cfg(not(any(windows, target_os = "espidf", target_os = "vita", target_os = "wasi")))]
+#[cfg(not(any(
+    windows,
+    target_os = "espidf",
+    target_os = "horizon",
+    target_os = "vita",
+    target_os = "wasi"
+)))]
 #[cfg(feature = "mm")]
 #[cfg_attr(docsrs, doc(cfg(feature = "mm")))]
 pub mod mm;
@@ -268,6 +274,7 @@ pub mod rand;
     windows,
     target_os = "android",
     target_os = "espidf",
+    target_os = "horizon",
     target_os = "vita",
     target_os = "wasi"
 )))]
@@ -282,7 +289,7 @@ pub mod stdio;
 #[cfg(not(any(windows, target_os = "wasi")))]
 #[cfg_attr(docsrs, doc(cfg(feature = "system")))]
 pub mod system;
-#[cfg(not(any(windows, target_os = "vita")))]
+#[cfg(not(any(windows, target_os = "horizon", target_os = "vita")))]
 #[cfg(feature = "termios")]
 #[cfg_attr(docsrs, doc(cfg(feature = "termios")))]
 pub mod termios;

@@ -102,6 +102,7 @@ impl SocketAddrUnix {
                 bsd,
                 target_os = "aix",
                 target_os = "haiku",
+                target_os = "horizon",
                 target_os = "nto",
                 target_os = "hurd",
             ))]
@@ -109,9 +110,15 @@ impl SocketAddrUnix {
             #[cfg(target_os = "vita")]
             ss_len: 0,
             sun_family: c::AF_UNIX as _,
-            #[cfg(any(bsd, target_os = "nto"))]
+            #[cfg(any(bsd, target_os = "horizon", target_os = "nto"))]
             sun_path: [0; 104],
-            #[cfg(not(any(bsd, target_os = "aix", target_os = "haiku", target_os = "nto")))]
+            #[cfg(not(any(
+                bsd,
+                target_os = "aix",
+                target_os = "haiku",
+                target_os = "horizon",
+                target_os = "nto"
+            )))]
             sun_path: [0; 108],
             #[cfg(target_os = "haiku")]
             sun_path: [0; 126],
@@ -286,6 +293,7 @@ pub(crate) fn offsetof_sun_path() -> usize {
             bsd,
             target_os = "aix",
             target_os = "haiku",
+            target_os = "horizon",
             target_os = "hurd",
             target_os = "nto",
         ))]
@@ -312,9 +320,15 @@ pub(crate) fn offsetof_sun_path() -> usize {
             target_os = "vita"
         )))]
         sun_family: 0_u16,
-        #[cfg(any(bsd, target_os = "nto"))]
+        #[cfg(any(bsd, target_os = "horizon", target_os = "nto"))]
         sun_path: [0; 104],
-        #[cfg(not(any(bsd, target_os = "aix", target_os = "haiku", target_os = "nto")))]
+        #[cfg(not(any(
+            bsd,
+            target_os = "aix",
+            target_os = "haiku",
+            target_os = "horizon",
+            target_os = "nto"
+        )))]
         sun_path: [0; 108],
         #[cfg(target_os = "haiku")]
         sun_path: [0; 126],

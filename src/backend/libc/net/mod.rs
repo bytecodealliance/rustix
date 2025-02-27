@@ -1,6 +1,12 @@
 pub(crate) mod addr;
 pub(crate) mod ext;
-#[cfg(not(any(windows, target_os = "espidf", target_os = "redox", target_os = "vita")))]
+#[cfg(not(any(
+    windows,
+    target_os = "espidf",
+    target_os = "horizon",
+    target_os = "redox",
+    target_os = "vita"
+)))]
 pub(crate) mod msghdr;
 #[cfg(linux_kernel)]
 pub(crate) mod netdevice;

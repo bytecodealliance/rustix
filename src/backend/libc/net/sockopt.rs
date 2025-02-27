@@ -383,6 +383,7 @@ pub(crate) fn socket_send_buffer_size(fd: BorrowedFd<'_>) -> io::Result<usize> {
     target_os = "emscripten",
     target_os = "espidf",
     target_os = "haiku",
+    target_os = "horizon",
     target_os = "hurd",
     target_os = "netbsd",
     target_os = "nto",
@@ -851,6 +852,7 @@ pub(crate) fn ipv6_original_dst(fd: BorrowedFd<'_>) -> io::Result<SocketAddrV6> 
     windows,
     target_os = "espidf",
     target_os = "haiku",
+    target_os = "horizon",
     target_os = "redox",
     target_os = "vita"
 )))]
@@ -864,6 +866,7 @@ pub(crate) fn set_ipv6_tclass(fd: BorrowedFd<'_>, value: u32) -> io::Result<()> 
     windows,
     target_os = "espidf",
     target_os = "haiku",
+    target_os = "horizon",
     target_os = "redox",
     target_os = "vita"
 )))]

@@ -52,6 +52,7 @@ weak!(fn __nanosleep64(*const LibcTimespec, *mut LibcTimespec) -> c::c_int);
     target_os = "espidf",
     target_os = "freebsd", // FreeBSD 12 has clock_nanosleep, but libc targets FreeBSD 11.
     target_os = "haiku",
+    target_os = "horizon",
     target_os = "openbsd",
     target_os = "redox",
     target_os = "vita",
@@ -114,6 +115,7 @@ pub(crate) fn clock_nanosleep_relative(id: ClockId, request: &Timespec) -> Nanos
         apple,
         target_os = "emscripten",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "vita"
     ))
 ))]
@@ -161,6 +163,7 @@ fn clock_nanosleep_relative_old(
     target_os = "espidf",
     target_os = "freebsd", // FreeBSD 12 has clock_nanosleep, but libc targets FreeBSD 11.
     target_os = "haiku",
+    target_os = "horizon",
     target_os = "openbsd",
     target_os = "redox",
     target_os = "vita",
@@ -218,6 +221,7 @@ pub(crate) fn clock_nanosleep_absolute(id: ClockId, request: &Timespec) -> io::R
         apple,
         target_os = "emscripten",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "vita"
     ))
 ))]

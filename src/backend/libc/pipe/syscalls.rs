@@ -37,6 +37,7 @@ pub(crate) fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
     target_os = "aix",
     target_os = "espidf",
     target_os = "haiku",
+    target_os = "horizon",
     target_os = "nto",
     target_os = "wasi"
 )))]
