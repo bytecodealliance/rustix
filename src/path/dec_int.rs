@@ -8,6 +8,7 @@
 
 use crate::backend::fd::{AsFd, AsRawFd as _};
 use crate::ffi::CStr;
+use core::fmt;
 use core::hint::unreachable_unchecked;
 use core::mem::{self, MaybeUninit};
 use core::num::{NonZeroU8, NonZeroUsize};
@@ -20,7 +21,7 @@ use std::os::unix::ffi::OsStrExt;
 ))]
 use std::os::wasi::ffi::OsStrExt;
 #[cfg(feature = "std")]
-use {core::fmt, std::ffi::OsStr, std::path::Path};
+use {std::ffi::OsStr, std::path::Path};
 
 /// Format an integer into a decimal `Path` component, without constructing a
 /// temporary `PathBuf` or `String`.
@@ -253,7 +254,6 @@ impl AsRef<Path> for DecInt {
     }
 }
 
-#[cfg(feature = "std")]
 impl fmt::Debug for DecInt {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.as_str().fmt(f)
