@@ -75,9 +75,9 @@ impl SocketAddrBuf {
 #[doc(alias = "sockaddr_storage")]
 pub struct SocketAddrAny {
     // Invariants:
-    // * `len` is at least `size_of::<backend::c::sa_family_t>()`
-    // * `len` is at most `size_of::<SocketAddrStorage>()`
-    // * The first `len` bytes of `storage` are initialized.
+    //  - `len` is at least `size_of::<backend::c::sa_family_t>()`
+    //  - `len` is at most `size_of::<SocketAddrStorage>()`
+    //  - The first `len` bytes of `storage` are initialized.
     pub(crate) len: NonZeroU32,
     pub(crate) storage: MaybeUninit<SocketAddrStorage>,
 }
@@ -93,8 +93,8 @@ impl SocketAddrAny {
     ///
     /// # Safety
     ///
-    /// * `storage` must contain a valid socket address.
-    /// * `len` bytes must be initialized.
+    ///  - `storage` must contain a valid socket address.
+    ///  - `len` bytes must be initialized.
     #[inline]
     pub const unsafe fn new(storage: MaybeUninit<SocketAddrStorage>, len: SocketAddrLen) -> Self {
         assert!(len as usize >= size_of::<read_sockaddr::sockaddr_header>());
@@ -113,8 +113,8 @@ impl SocketAddrAny {
     ///
     /// # Safety
     ///
-    /// * `ptr` must be a pointer to memory containing a valid socket address.
-    /// * `len` bytes must be initialized.
+    ///  - `ptr` must be a pointer to memory containing a valid socket address.
+    ///  - `len` bytes must be initialized.
     pub unsafe fn read(ptr: *const SocketAddrStorage, len: SocketAddrLen) -> Self {
         assert!(len as usize >= size_of::<read_sockaddr::sockaddr_header>());
         assert!(len as usize <= size_of::<SocketAddrStorage>());

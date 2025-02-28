@@ -166,7 +166,7 @@ pub fn set_thread_res_gid(rgid: Gid, egid: Gid, sgid: Gid) -> io::Result<()> {
 /// behavior.
 ///
 /// # References
-/// - [Linux]
+///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/setgroups.2.html
 /// [linux_notes]: https://man7.org/linux/man-pages/man2/setgroups.2.html#NOTES

@@ -91,6 +91,7 @@ pub fn openat<P: path::Arg, Fd: AsFd>(
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/readlinkat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/readlinkat.2.html
 #[cfg(feature = "alloc")]
+#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
 #[inline]
 pub fn readlinkat<P: path::Arg, Fd: AsFd, B: Into<Vec<u8>>>(
     dirfd: Fd,

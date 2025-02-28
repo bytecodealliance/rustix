@@ -27,7 +27,7 @@ impl<const OPCODE: Opcode> NoArg<OPCODE> {
     ///
     /// # Safety
     ///
-    /// - `OPCODE` must provide a valid opcode.
+    ///  - `OPCODE` must provide a valid opcode.
     #[inline]
     pub const unsafe fn new() -> Self {
         Self {}
@@ -77,9 +77,9 @@ impl<const OPCODE: Opcode, Output> Getter<OPCODE, Output> {
     ///
     /// # Safety
     ///
-    /// - `OPCODE` must provide a valid opcode.
-    /// - For this opcode, `Output` must be the type that the kernel expects to
-    ///   write into.
+    ///  - `OPCODE` must provide a valid opcode.
+    ///  - For this opcode, `Output` must be the type that the kernel expects
+    ///    to write into.
     #[inline]
     pub const unsafe fn new() -> Self {
         Self {
@@ -134,9 +134,9 @@ impl<const OPCODE: Opcode, Input> Setter<OPCODE, Input> {
     ///
     /// # Safety
     ///
-    /// - `OPCODE` must provide a valid opcode.
-    /// - For this opcode, `Input` must be the type that the kernel expects to
-    ///   get.
+    ///  - `OPCODE` must provide a valid opcode.
+    ///  - For this opcode, `Input` must be the type that the kernel expects to
+    ///    get.
     #[inline]
     pub const unsafe fn new(input: Input) -> Self {
         Self { input }
@@ -180,9 +180,9 @@ impl<'a, const OPCODE: Opcode, Value> Updater<'a, OPCODE, Value> {
     ///
     /// # Safety
     ///
-    /// - `OPCODE` must provide a valid opcode.
-    /// - For this opcode, `Value` must be the type that the kernel expects to
-    ///   get.
+    ///  - `OPCODE` must provide a valid opcode.
+    ///  - For this opcode, `Value` must be the type that the kernel expects to
+    ///    get.
     #[inline]
     pub unsafe fn new(value: &'a mut Value) -> Self {
         Self { value }
@@ -225,9 +225,9 @@ impl<const OPCODE: Opcode> IntegerSetter<OPCODE> {
     ///
     /// # Safety
     ///
-    /// - `OPCODE` must provide a valid opcode.
-    /// - For this opcode, it must expect an integer.
-    /// - The integer is in the valid range for this opcode.
+    ///  - `OPCODE` must provide a valid opcode.
+    ///  - For this opcode, it must expect an integer.
+    ///  - The integer is in the valid range for this opcode.
     #[inline]
     pub const unsafe fn new_usize(value: usize) -> Self {
         Self { value: value as _ }
@@ -237,9 +237,9 @@ impl<const OPCODE: Opcode> IntegerSetter<OPCODE> {
     ///
     /// # Safety
     ///
-    /// - `OPCODE` must provide a valid opcode.
-    /// - For this opcode, it must expect an integer.
-    /// - The integer is in the valid range for this opcode.
+    ///  - `OPCODE` must provide a valid opcode.
+    ///  - For this opcode, it must expect an integer.
+    ///  - The integer is in the valid range for this opcode.
     #[inline]
     pub const unsafe fn new_pointer(value: *mut c::c_void) -> Self {
         Self { value }

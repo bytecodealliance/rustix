@@ -275,7 +275,6 @@ fn test_sockopts_tcp(s: &OwnedFd) {
         target_os = "fuchsia",
         target_os = "illumos"
     ))]
-    #[cfg(feature = "alloc")]
     {
         let algo = sockopt::tcp_congestion(s).unwrap();
         assert!(!algo.is_empty());

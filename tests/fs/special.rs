@@ -12,8 +12,8 @@ fn test_special_fds() {
     let cwd_path = OsStr::from_bytes(&cwd_path).to_owned();
     let cwd_path = PathBuf::from(cwd_path);
 
-    // Open the same file several ways using special constants and make sure
-    // we get the same file.
+    // Open the same file several ways using special constants and make sure we
+    // get the same file.
 
     // Use plain `open`.
     let a = open("Cargo.toml", OFlags::RDONLY, Mode::empty()).unwrap();

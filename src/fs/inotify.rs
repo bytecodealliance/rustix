@@ -161,7 +161,7 @@ impl<'a> Event<'a> {
 impl<'buf, Fd: AsFd> Reader<'buf, Fd> {
     /// Read the next inotify event.
     ///
-    /// This is similar to `[Iterator::next`] except that it doesn't return an
+    /// This is similar to [`Iterator::next`] except that it doesn't return an
     /// `Option`, because the stream doesn't have an ending. It always returns
     /// events or errors.
     ///

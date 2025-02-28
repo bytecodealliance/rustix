@@ -2,7 +2,7 @@ From Dan Gohman <dev@sunfishcode.online>
 Subject: [PATCH] Remove the `FD_SETSIZE` limitation in `select`
 
 The `fd_set` type is limited to a fixed `FD_SETSIZE` number of file
-descriptors, however Linux's `select has no such limitation. Change
+descriptors, however Linux's `select` has no such limitation. Change
 the `select` implementation to using manual bit-vector logic to better
 implement the Linux semantics.
 

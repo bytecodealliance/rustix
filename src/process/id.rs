@@ -178,6 +178,7 @@ pub fn setsid() -> io::Result<Pid> {
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/getgroups.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/getgroups.2.html
 #[cfg(feature = "alloc")]
+#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
 pub fn getgroups() -> io::Result<Vec<Gid>> {
     // This code would benefit from having a better way to read into
     // uninitialized memory, but that requires `unsafe`.

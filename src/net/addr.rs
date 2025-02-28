@@ -50,11 +50,11 @@ pub unsafe trait SocketAddrArg {
     /// valid only for the duration of the call.
     ///
     /// The API uses a closure so that:
-    ///   * The libc types are not exposed in the rustix API.
-    ///   * Types like `SocketAddrUnix` that contain their corresponding C type
-    ///     can pass it directly without a copy.
-    ///   * Other socket types can construct their C-compatible struct on the
-    ///     stack and call the closure with a pointer to it.
+    ///  - The libc types are not exposed in the rustix API.
+    ///  - Types like `SocketAddrUnix` that contain their corresponding C type
+    ///    can pass it directly without a copy.
+    ///  - Other socket types can construct their C-compatible struct on the
+    ///    stack and call the closure with a pointer to it.
     ///
     /// # Safety
     ///

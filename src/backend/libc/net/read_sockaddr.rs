@@ -127,8 +127,8 @@ pub(crate) unsafe fn sockaddr_nonempty(storage: *const c::sockaddr, len: SocketA
         return false;
     }
 
-    // On macOS, if we get an `AF_UNIX` with an empty path, treat it as
-    // an absent address.
+    // On macOS, if we get an `AF_UNIX` with an empty path, treat it as an
+    // absent address.
     #[cfg(apple)]
     if family == c::AF_UNIX && read_sun_path0(storage) == 0 {
         return false;

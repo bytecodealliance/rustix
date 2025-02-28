@@ -72,6 +72,7 @@ const PR_GET_NAME: c_int = 16;
 /// [`prctl(PR_GET_NAME,…)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
 #[cfg(feature = "alloc")]
+#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
 pub fn name() -> io::Result<CString> {
     let mut buffer = [0_u8; 16];
     unsafe { prctl_2args(PR_GET_NAME, buffer.as_mut_ptr().cast())? };
@@ -135,11 +136,11 @@ impl TryFrom<i32> for SecureComputingMode {
 ///
 /// If the caller is not in secure computing mode, this returns
 /// [`SecureComputingMode::Disabled`]. If the caller is in strict secure
-/// computing mode, then this call will cause a [`Signal::Kill`] signal to be
+/// computing mode, then this call will cause a [`Signal::KILL`] signal to be
 /// sent to the process. If the caller is in filter mode, and this system call
 /// is allowed by the seccomp filters, it returns
 /// [`SecureComputingMode::Filter`]; otherwise, the process is killed with a
-/// [`Signal::Kill`] signal.
+/// [`Signal::KILL`] signal.
 ///
 /// Since Linux 3.8, the Seccomp field of the `/proc/[pid]/status` file
 /// provides a method of obtaining the same information, without the risk that
@@ -148,6 +149,7 @@ impl TryFrom<i32> for SecureComputingMode {
 /// # References
 ///  - [`prctl(PR_GET_SECCOMP,…)`]
 ///
+/// [`Signal::KILL`]: crate::signal::Signal::KILL
 /// [`prctl(PR_GET_SECCOMP,…)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 /// [the `proc` manual page]: https://man7.org/linux/man-pages/man5/proc.5.html
 #[inline]

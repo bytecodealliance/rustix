@@ -14,6 +14,11 @@ pub use backend::event::poll_fd::{PollFd, PollFlags};
 ///
 /// [`select`]: crate::event::select()
 ///
+/// This function does not use the [`Buffer`] trait because the `fds` list is
+/// both an input and output buffer.
+///
+/// [`Buffer`]: crate::buffer::Buffer
+///
 /// # References
 ///  - [Beej's Guide to Network Programming]
 ///  - [POSIX]
