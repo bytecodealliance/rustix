@@ -9,7 +9,6 @@ use crate::net::addr::{SocketAddrArg, SocketAddrLen, SocketAddrOpaque, SocketAdd
 #[cfg(unix)]
 use crate::net::SocketAddrUnix;
 use crate::net::{AddressFamily, SocketAddr, SocketAddrV4, SocketAddrV6};
-#[cfg(feature = "std")]
 use core::fmt;
 use core::mem::{size_of, MaybeUninit};
 use core::num::NonZeroU32;
@@ -195,7 +194,6 @@ impl core::hash::Hash for SocketAddrAny {
     }
 }
 
-#[cfg(feature = "std")]
 impl fmt::Debug for SocketAddrAny {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.address_family() {

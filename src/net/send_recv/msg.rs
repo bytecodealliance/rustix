@@ -10,8 +10,6 @@ use crate::io::{self, IoSlice, IoSliceMut};
 use crate::net::addr::SocketAddrArg;
 #[cfg(linux_kernel)]
 use crate::net::UCred;
-#[cfg(feature = "std")]
-use core::fmt;
 use core::iter::FusedIterator;
 use core::marker::PhantomData;
 use core::mem::{align_of, size_of, size_of_val, take, MaybeUninit};
@@ -771,6 +769,7 @@ pub fn recvmsg<Fd: AsFd>(
 }
 
 /// The result of a successful [`recvmsg`] call.
+#[derive(Debug, Clone)]
 pub struct RecvMsg {
     /// The number of bytes received.
     ///
@@ -784,17 +783,6 @@ pub struct RecvMsg {
 
     /// The address of the socket we received from, if any.
     pub address: Option<SocketAddrAny>,
-}
-
-#[cfg(feature = "std")]
-impl fmt::Debug for RecvMsg {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("RecvMsg")
-            .field("bytes", &self.bytes)
-            .field("flags", &self.flags)
-            .field("address", &self.address)
-            .finish()
-    }
 }
 
 /// An iterator over data in an ancillary buffer.
