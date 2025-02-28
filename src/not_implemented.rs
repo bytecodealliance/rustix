@@ -207,8 +207,8 @@ pub mod libc_internals {
 /// rustix.
 ///
 /// These functions are provided by typical libc implementations, but are
-/// higher-level than the simple syscall-like functions that rustix focuses
-/// on. They could be implemented as a separate library built on top of rustix,
+/// higher-level than the simple syscall-like functions that rustix focuses on.
+/// They could be implemented as a separate library built on top of rustix,
 /// rather than being part of rustix itself. This module contains an incomplete
 /// list of such functions.
 pub mod higher_level {
@@ -251,8 +251,8 @@ pub mod higher_level {
 
 /// These functions are not yet implemented in rustix, but probably could be.
 ///
-/// These are functions that users have asked about, and which probably are
-/// in scope for rustix, but are not yet implemented. This module contains an
+/// These are functions that users have asked about, and which probably are in
+/// scope for rustix, but are not yet implemented. This module contains an
 /// incomplete list of such functions.
 pub mod yet {
     not_implemented!(tgkill);

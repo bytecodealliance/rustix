@@ -39,8 +39,8 @@ pub const CWD: BorrowedFd<'static> =
 /// causes them to fail with [`BADF`] if the accompanying path is not absolute.
 ///
 /// This corresponds to the undocumented by commonly used convention of
-/// passing `-EBADF` as the `dirfd` argument, which is ignored if the path
-/// is absolute, and evokes an `EBADF` error otherwise.
+/// passing `-EBADF` as the `dirfd` argument, which is ignored if the path is
+/// absolute, and evokes an `EBADF` error otherwise.
 ///
 /// [`openat`]: crate::fs::openat
 /// [`BADF`]: crate::io::Errno::BADF

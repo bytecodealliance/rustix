@@ -131,15 +131,15 @@ unsafe fn _ioctl_readonly(
 ///
 /// By implementing this trait, you guarantee that:
 ///
-/// - The `ioctl` call expects the input provided by `as_ptr` and produces the
-///   output as indicated by `output`.
-/// - That `output_from_ptr` can safely take the pointer from `as_ptr` and cast
-///   it to the correct type, *only* after the `ioctl` call.
-/// - That the return value of `opcode` uniquely identifies the `ioctl` call.
-/// - That, for whatever platforms you are targeting, the `ioctl` call is safe
-///   to make.
-/// - If `IS_MUTATING` is false, that no userspace data will be modified by the
-///   `ioctl` call.
+///  - The `ioctl` call expects the input provided by `as_ptr` and produces the
+///    output as indicated by `output`.
+///  - That `output_from_ptr` can safely take the pointer from `as_ptr` and
+///    cast it to the correct type, *only* after the `ioctl` call.
+///  - That the return value of `opcode` uniquely identifies the `ioctl` call.
+///  - That, for whatever platforms you are targeting, the `ioctl` call is safe
+///    to make.
+///  - If `IS_MUTATING` is false, that no userspace data will be modified by
+///    the `ioctl` call.
 pub unsafe trait Ioctl {
     /// The type of the output data.
     ///

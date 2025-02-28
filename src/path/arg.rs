@@ -1016,7 +1016,7 @@ where
     debug_assert!(bytes.len() + 1 <= SMALL_PATH_BUFFER_SIZE);
 
     // SAFETY: `bytes.len() < SMALL_PATH_BUFFER_SIZE` which means we have space
-    // for `bytes.len() + 1` u8s:
+    // for `bytes.len() + 1` `u8`s:
     unsafe {
         ptr::copy_nonoverlapping(bytes.as_ptr(), buf_ptr, bytes.len());
         buf_ptr.add(bytes.len()).write(0);
@@ -1064,7 +1064,7 @@ where
         }
 
         // SAFETY: `bytes.len() < LARGE_PATH_BUFFER_SIZE` which means we have
-        // space for `bytes.len() + 1` u8s:
+        // space for `bytes.len() + 1` `u8`s:
         unsafe {
             ptr::copy_nonoverlapping(bytes.as_ptr(), buf_ptr, bytes.len());
             buf_ptr.add(bytes.len()).write(0);

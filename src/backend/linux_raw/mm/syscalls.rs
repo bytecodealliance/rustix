@@ -226,8 +226,9 @@ pub(crate) fn mlockall(flags: MlockAllFlags) -> io::Result<()> {
     // because if a load happens and evokes a fault before the `mlockall`,
     // the memory doesn't get locked, but if the load and therefore
     // the fault happens after, then the memory does get locked.
-    // So to be conservative in this regard, we use `syscall` instead
-    // of `syscall_readonly`
+    //
+    // So to be conservative in this regard, we use `syscall` instead of
+    // `syscall_readonly`
     unsafe { ret(syscall!(__NR_mlockall, flags)) }
 }
 

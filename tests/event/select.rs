@@ -104,10 +104,10 @@ fn test_select_with_great_fds() {
     }
     setrlimit(Resource::Nofile, rlimit).unwrap();
 
-    // Create a fd at `FD_SETSIZE + 1` out of thin air. Use `libc` instead
-    // of `OwnedFd::from_raw_fd` because grabbing a fd out of thin air
-    // violates Rust's concept of I/O safety (and wouldn't make sense to do
-    // in anything other than a test like this).
+    // Create a fd at `FD_SETSIZE + 1` out of thin air. Use `libc` instead of
+    // `OwnedFd::from_raw_fd` because grabbing a fd out of thin air violates
+    // Rust's concept of I/O safety (and wouldn't make sense to do in anything
+    // other than a test like this).
     let great_fd = unsafe { libc::dup2(reader.as_raw_fd(), libc::FD_SETSIZE as RawFd + 1) };
     let reader = unsafe { OwnedFd::from_raw_fd(great_fd) };
 
@@ -185,8 +185,8 @@ fn test_select_with_sockets() {
 
     crate::init();
 
-    // Create a socket pair (but don't use `socketpair` because we want this
-    // to work on Windows too).
+    // Create a socket pair (but don't use `socketpair` because we want this to
+    // work on Windows too).
 
     let localhost = IpAddr::V4(Ipv4Addr::LOCALHOST);
     let addr = SocketAddr::new(localhost, 0);
@@ -269,8 +269,8 @@ fn test_select_with_sockets() {
     assert_eq!(fd_set_bound(&readfds), 0);
 }
 
-// Like `test_select_with_sockets` but test with the maximum permitted
-// fd value.
+// Like `test_select_with_sockets` but test with the maximum permitted fd
+// value.
 #[cfg(feature = "net")]
 #[cfg(feature = "process")]
 #[cfg(not(windows))] // for `dup2` usage

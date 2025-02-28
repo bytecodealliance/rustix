@@ -37,24 +37,19 @@ use core::mem::MaybeUninit;
 use core::ptr::null;
 #[cfg(any(bsd, linux_kernel, solarish, target_os = "redox", target_os = "wasi"))]
 use core::ptr::null_mut;
-#[cfg(any(
-    linux_kernel,
-    solarish,
-    target_os = "redox",
-    all(feature = "alloc", bsd)
-))]
+#[cfg(any(bsd, linux_kernel, solarish, target_os = "redox"))]
 use {crate::backend::conv::borrowed_fd, crate::fd::BorrowedFd};
 #[cfg(any(
+    bsd,
     linux_kernel,
     solarish,
     target_os = "freebsd",
     target_os = "illumos",
     target_os = "espidf",
-    target_os = "redox",
-    all(feature = "alloc", bsd)
+    target_os = "redox"
 ))]
 use {crate::backend::conv::ret_owned_fd, crate::fd::OwnedFd};
-#[cfg(all(feature = "alloc", bsd))]
+#[cfg(bsd)]
 use {crate::event::kqueue::Event, crate::utils::as_ptr};
 
 #[cfg(any(
@@ -93,12 +88,12 @@ pub(crate) fn eventfd(initval: u32, flags: EventfdFlags) -> io::Result<OwnedFd> 
     }
 }
 
-#[cfg(all(feature = "alloc", bsd))]
+#[cfg(bsd)]
 pub(crate) fn kqueue() -> io::Result<OwnedFd> {
     unsafe { ret_owned_fd(c::kqueue()) }
 }
 
-#[cfg(all(feature = "alloc", bsd))]
+#[cfg(bsd)]
 pub(crate) unsafe fn kevent(
     kq: BorrowedFd<'_>,
     changelist: &[Event],

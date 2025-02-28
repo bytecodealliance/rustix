@@ -20,8 +20,17 @@ use core::num::NonZeroI32;
 ///
 /// For additional constructors such as [`Signal::rt_min`]
 /// (aka `libc::SIGRTMIN`), [`Signal::rt_max`] (aka `libc::SIGRTMAX`),
-/// [`Signal::rt`] (aka `libc::SIGRTMIN() + n`), [`Signal::from_raw`], and
+/// [`Signal::rt`] (aka `|n| libc::SIGRTMIN() + n`), [`Signal::from_raw`], and
 /// [`Signal::from_raw_nonzero`], see [rustix-libc-wrappers].
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///  - [glibc]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/signal.h.html
+/// [Linux]: https://man7.org/linux/man-pages/man7/signal.7.html
+/// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Standard-Signals.html
 ///
 /// [`kill_process`]: crate::process::kill_process
 /// [`kill_process_group`]: crate::process::kill_process_group

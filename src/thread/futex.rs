@@ -603,7 +603,7 @@ pub fn waitv(
 bitflags::bitflags! {
     /// Flags for use with the flags argument in [`waitv`].
     ///
-    /// At this time, no flags ae defined.
+    /// At this time, no flags are defined.
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct WaitvFlags: u32 {

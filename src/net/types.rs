@@ -1154,8 +1154,8 @@ pub mod netlink {
     /// `NETLINK_GENERIC`
     // This is defined on FreeBSD too, but it has the value 0, so it doesn't
     // fit in or `NonZeroU32`. It's unclear whether FreeBSD intends
-    // `NETLINK_GENERIC` to be the default when Linux has `NETLINK_ROUTE`
-    // as the default.
+    // `NETLINK_GENERIC` to be the default when Linux has `NETLINK_ROUTE` as
+    // the default.
     #[cfg(linux_kernel)]
     pub const GENERIC: Protocol = Protocol(new_raw_protocol(c::NETLINK_GENERIC as _));
     /// `NETLINK_SCSITRANSPORT`

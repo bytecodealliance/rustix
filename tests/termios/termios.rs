@@ -234,8 +234,8 @@ fn test_termios_speeds() {
         assert_eq!(new_tio.output_speed(), custom_speed);
     }
 
-    // Similar, but using `set_input_speed` and `set_output_speed` instead
-    // of `set_speed`.
+    // Similar, but using `set_input_speed` and `set_output_speed` instead of
+    // `set_speed`.
     for custom_speed in [speed::B50, speed::B19200, speed::B38400] {
         tio.set_input_speed(custom_speed).unwrap();
         tio.set_output_speed(custom_speed).unwrap();

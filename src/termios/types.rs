@@ -180,8 +180,8 @@ impl Termios {
     /// constant value. Not all implementations support all integer values; use
     /// the constants in the [`speed`] module for known-supported speeds.
     ///
-    /// On some platforms, changing the input speed changes the output speed
-    /// to the same speed.
+    /// On some platforms, changing the input speed changes the output speed to
+    /// the same speed.
     #[doc(alias = "c_ispeed")]
     #[doc(alias = "cfsetispeed")]
     #[doc(alias = "CIBAUD")]
@@ -198,8 +198,8 @@ impl Termios {
     /// constant value. Not all implementations support all integer values; use
     /// the constants in the [`speed`] module for known-supported speeds.
     ///
-    /// On some platforms, changing the output speed changes the input speed
-    /// to the same speed.
+    /// On some platforms, changing the output speed changes the input speed to
+    /// the same speed.
     #[doc(alias = "c_ospeed")]
     #[doc(alias = "cfsetospeed")]
     #[doc(alias = "CBAUD")]
@@ -1097,8 +1097,8 @@ pub mod speed {
     }
 }
 
-/// An array indexed by [`SpecialCodeIndex`] indicating the current values
-/// of various special control codes.
+/// An array indexed by [`SpecialCodeIndex`] indicating the current values of
+/// various special control codes.
 #[repr(transparent)]
 #[derive(Clone, Debug)]
 pub struct SpecialCodes(pub(crate) [c::cc_t; c::NCCS as usize]);

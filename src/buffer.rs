@@ -12,8 +12,8 @@ use core::slice;
 /// There are three types that implement the `Buffer` trait, and the type you
 /// use determines the return type of the functions that use it:
 ///
-/// | If you pass a...         | You get back a... |
-/// | ------------------------ | ----------------- |
+/// | If you pass a…           | You get back a… |
+/// | ------------------------ | --------------- |
 /// | `&mut [u8]`              | `usize`, indicating the number of elements initialized. |
 /// | `&mut [MaybeUninit<u8>]` | `(&mut [u8], &[mut MaybeUninit<u8>])`, holding the initialized and uninitialized subslices. |
 /// | [`SpareCapacity`]        | `usize`, indicating the number of elements initialized. And the `Vec` is extended. |
@@ -35,7 +35,7 @@ use core::slice;
 ///
 /// ```rust
 /// # use rustix::io::read;
-/// # use core::mem::MaybeUninit;
+/// # use std::mem::MaybeUninit;
 /// # fn example(fd: rustix::fd::BorrowedFd) -> rustix::io::Result<()> {
 /// let mut buf = [MaybeUninit::<u8>::uninit(); 64];
 /// let (init, uninit) = read(fd, &mut buf)?;
@@ -67,7 +67,7 @@ use core::slice;
 /// "cannot move out of `self` which is behind a mutable reference"
 /// and
 /// "move occurs because `x` has type `&mut [u8]`, which does not implement the `Copy` trait",
-/// replace `x` with `&mut *x`. See `confusing_error_buffer_wrapper` in
+/// replace `x` with `&mut *x`. See `error_buffer_wrapper` in
 /// examples/buffer_errors.rs.
 ///
 /// If you see errors like
@@ -75,18 +75,18 @@ use core::slice;
 /// and
 /// "cannot infer type of the type parameter `Buf` declared on the function `read`",
 /// you may need to change a `&mut []` to `&mut [0_u8; 0]`. See
-/// `confusing_error_empty_slice` in examples/buffer_errors.rs.
+/// `error_empty_slice` in examples/buffer_errors.rs.
 ///
 /// If you see errors like
 /// "the trait bound `[MaybeUninit<u8>; 1]: Buffer<u8>` is not satisfied",
 /// add a `&mut` to pass the array by reference instead of by value. See
-/// `confusing_error_array_by_value` in examples/buffer_errors.rs.
+/// `error_array_by_value` in examples/buffer_errors.rs.
 ///
 /// If you see errors like
 /// "cannot move out of `x`, a captured variable in an `FnMut` closure",
-/// try replacing `x` with `&mut *x`, or, if that doesn't work, try moving
-/// a `let` into the closure body. See `confusing_error_retry_closure` and
-/// `confusing_error_retry_indirect_closure` in examples/buffer_errors.rs.
+/// try replacing `x` with `&mut *x`, or, if that doesn't work, try moving a
+/// `let` into the closure body. See `error_retry_closure` and
+/// `error_retry_indirect_closure` in examples/buffer_errors.rs.
 pub trait Buffer<T>: private::Sealed<T> {}
 
 // Implement `Buffer` for all the types that implement `Sealed`.
@@ -285,6 +285,12 @@ mod private {
         type Output;
 
         /// Return a pointer and length for this buffer.
+        ///
+        /// It's tempting to have this return `&mut [MaybeUninit<T>]` instead,
+        /// however that would require this function to be `unsafe`, because
+        /// callers could use the `&mut [MaybeUninit<T>]` slice to set elements
+        /// to `MaybeUninit::<T>::uninit()`, which would be a problem if `Self`
+        /// is `&mut [T]` or similar.
         fn parts_mut(&mut self) -> (*mut T, usize);
 
         /// Convert a finished buffer pointer into its result.
