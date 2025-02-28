@@ -1,11 +1,23 @@
-# Changes from 0.38.x to 1.0
+# Changes from 0.38.x to 1.x
 
-## Behavior changes
+## Silent behavior changes
 
 [`rustix::pipe::fcntl_setpipe_size`] now returns the new size, which may be
 greater than the requested size.
 
 [`rustix::pipe::fcntl_setpipe_size`]: https://docs.rs/rustix/1.0.0/rustix/pipe/fn.fcntl_setpipe_size.html
+
+When a `&mut Vec<_>` is passed to [`rustix::event::epoll::wait`] or
+[`rustix::event::kqueue::kevent`], these functions previously adjusted the
+length of the `Vec` to the number of elements written, and now do not. A common
+alternative is to wrap the `&mut Vec<_>` using [`spare_capacity`], and then to
+clear the `Vec` by iterating using `.drain(..)` after each call. For an example
+of using `spare_capacity` in this way, see [here].
+
+[`rustix::event::epoll::wait`]: https://docs.rs/rustix/1.0.0/rustix/event/epoll/fn.wait.html
+[`rustix::event::kqueue::kevent`]: https://docs.rs/rustix/1.0.0/x86_64-unknown-freebsd/rustix/event/kqueue/fn.kqueue.html
+[`spare_capacity`]: https://docs.rs/rustix/1.0.0/rustix/buffer/fn.spare_capacity.html
+[here]: https://docs.rs/rustix/1.0.0/rustix/event/epoll/index.html#examples
 
 ## API changes
 
@@ -53,11 +65,12 @@ the capitalization), for consistency with [`rustix::process::WaitId`].
 [`rustix::process::WaitId`]: https://docs.rs/rustix/1.0.0/rustix/process/enum.WaitId.html
 
 The offsets in [`rustix::fs::SeekFrom::Hole`] and
-[`rustix::fs::SeekFrom::Data`] are changed from `i64` to `u64` since they
-represent absolute offsets.
+[`rustix::fs::SeekFrom::Data`] are changed from `i64` to `u64`, to
+[align with std], since they represent absolute offsets.
 
 [`rustix::fs::SeekFrom::Hole`]: https://docs.rs/rustix/1.0.0/rustix/fs/enum.SeekFrom.html#variant.Hole
 [`rustix::fs::SeekFrom::Data`]: https://docs.rs/rustix/1.0.0/rustix/fs/enum.SeekFrom.html#variant.Data
+[align with std]: https://doc.rust-lang.org/stable/std/io/enum.SeekFrom.html#variant.Start
 
 Functions in [`rustix::net::sockopt`] are renamed to remove the `get_` prefix,
 to [align with Rust conventions].
