@@ -6,8 +6,10 @@
 //! [`CWD`]: crate::fs::CWD
 //! [`ABS`]: crate::fs::ABS
 
+#![allow(unsafe_code)]
+
+use crate::buffer::Buffer;
 use crate::fd::OwnedFd;
-use crate::ffi::CStr;
 #[cfg(not(any(target_os = "espidf", target_os = "horizon", target_os = "vita")))]
 use crate::fs::Access;
 #[cfg(not(target_os = "espidf"))]
@@ -24,11 +26,14 @@ use crate::fs::{Dev, FileType};
 use crate::fs::{Gid, Uid};
 use crate::fs::{Mode, OFlags};
 use crate::{backend, io, path};
-use backend::fd::{AsFd, BorrowedFd};
-use core::mem::MaybeUninit;
-use core::slice;
+use backend::fd::AsFd;
 #[cfg(feature = "alloc")]
-use {crate::ffi::CString, crate::path::SMALL_PATH_BUFFER_SIZE, alloc::vec::Vec};
+use {
+    crate::ffi::{CStr, CString},
+    crate::path::SMALL_PATH_BUFFER_SIZE,
+    alloc::vec::Vec,
+    backend::fd::BorrowedFd,
+};
 #[cfg(not(any(target_os = "espidf", target_os = "vita")))]
 use {crate::fs::Timestamps, crate::timespec::Nsecs};
 
@@ -108,8 +113,16 @@ fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, mut buffer: Vec<u8>) -> io::R
     buffer.reserve(SMALL_PATH_BUFFER_SIZE);
 
     loop {
-        let nread =
-            backend::fs::syscalls::readlinkat(dirfd.as_fd(), path, buffer.spare_capacity_mut())?;
+        let buf = buffer.spare_capacity_mut();
+
+        // SAFETY: `readlinkat` behaves.
+        let nread = unsafe {
+            backend::fs::syscalls::readlinkat(
+                dirfd.as_fd(),
+                path,
+                (buf.as_mut_ptr().cast(), buf.len()),
+            )?
+        };
 
         debug_assert!(nread <= buffer.capacity());
         if nread < buffer.capacity() {
@@ -147,14 +160,9 @@ fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, mut buffer: Vec<u8>) -> io::R
 /// `readlinkat(fd, path)`—Reads the contents of a symlink, without
 /// allocating.
 ///
-/// This is the "raw" version which avoids allocating, but which is
-/// significantly trickier to use; most users should use plain [`readlinkat`].
-///
-/// This version writes bytes into the buffer and returns two slices, one
-/// containing the written bytes, and one containing the remaining
-/// uninitialized space. If the number of written bytes is equal to the length
-/// of the buffer, it means the buffer wasn't big enough to hold the full
-/// string, and callers should try again with a bigger buffer.
+/// This is the "raw" version which avoids allocating, but which truncates the
+/// string if it doesn't fit in the provided buffer, and doesn't NUL-terminate
+/// the string.
 ///
 /// # References
 ///  - [POSIX]
@@ -163,27 +171,17 @@ fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, mut buffer: Vec<u8>) -> io::R
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/readlinkat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/readlinkat.2.html
 #[inline]
-pub fn readlinkat_raw<P: path::Arg, Fd: AsFd>(
+pub fn readlinkat_raw<P: path::Arg, Fd: AsFd, Buf: Buffer<u8>>(
     dirfd: Fd,
     path: P,
-    buf: &mut [MaybeUninit<u8>],
-) -> io::Result<(&mut [u8], &mut [MaybeUninit<u8>])> {
-    path.into_with_c_str(|path| _readlinkat_raw(dirfd.as_fd(), path, buf))
-}
-
-#[allow(unsafe_code)]
-fn _readlinkat_raw<'a>(
-    dirfd: BorrowedFd<'_>,
-    path: &CStr,
-    buf: &'a mut [MaybeUninit<u8>],
-) -> io::Result<(&'a mut [u8], &'a mut [MaybeUninit<u8>])> {
-    let n = backend::fs::syscalls::readlinkat(dirfd.as_fd(), path, buf)?;
-    unsafe {
-        Ok((
-            slice::from_raw_parts_mut(buf.as_mut_ptr().cast::<u8>(), n),
-            &mut buf[n..],
-        ))
-    }
+    mut buf: Buf,
+) -> io::Result<Buf::Output> {
+    // SAFETY: `readlinkat` behaves.
+    let len = path.into_with_c_str(|path| unsafe {
+        backend::fs::syscalls::readlinkat(dirfd.as_fd(), path, buf.parts_mut())
+    })?;
+    // SAFETY: `readlinkat` behaves.
+    unsafe { Ok(buf.assume_init(len)) }
 }
 
 /// `mkdirat(fd, path, mode)`—Creates a directory.

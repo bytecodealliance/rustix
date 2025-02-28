@@ -289,19 +289,12 @@ pub(crate) fn readlink(path: &CStr, buf: &mut [u8]) -> io::Result<usize> {
 
 #[cfg(not(target_os = "redox"))]
 #[inline]
-pub(crate) fn readlinkat(
+pub(crate) unsafe fn readlinkat(
     dirfd: BorrowedFd<'_>,
     path: &CStr,
-    buf: &mut [MaybeUninit<u8>],
+    buf: (*mut u8, usize),
 ) -> io::Result<usize> {
-    unsafe {
-        ret_usize(c::readlinkat(
-            borrowed_fd(dirfd),
-            c_str(path),
-            buf.as_mut_ptr().cast(),
-            buf.len(),
-        ) as isize)
-    }
+    ret_usize(c::readlinkat(borrowed_fd(dirfd), c_str(path), buf.0.cast(), buf.1) as isize)
 }
 
 pub(crate) fn mkdir(path: &CStr, mode: Mode) -> io::Result<()> {
