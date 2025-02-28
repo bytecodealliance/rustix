@@ -390,24 +390,29 @@ pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [MaybeUninit<u8>]) -> io::Re
     // SAFETY: We just wrote a valid C String.
     let proc_self_fd_path = unsafe { CStr::from_ptr(proc_self_fd_buf.as_ptr().cast()) };
 
-    // Gather the ttyname by reading the "fd" file inside `proc_self_fd`.
-    let r = crate::backend::fs::syscalls::readlinkat(crate::fs::CWD, proc_self_fd_path, buf)?;
+    let ptr = buf.as_mut_ptr();
+    let len = {
+        // Gather the ttyname by reading the "fd" file inside `proc_self_fd`.
+        let (init, uninit) = crate::fs::readlinkat_raw(crate::fs::CWD, proc_self_fd_path, buf)?;
 
-    // If the number of bytes is equal to the buffer length, truncation may
-    // have occurred. This check also ensures that we have enough space for
-    // adding a NUL terminator.
-    if r == buf.len() {
-        return Err(io::Errno::RANGE);
-    }
+        // If the number of bytes is equal to the buffer length, truncation may
+        // have occurred. This check also ensures that we have enough space for
+        // adding a NUL terminator.
+        if uninit.is_empty() {
+            return Err(io::Errno::RANGE);
+        }
 
-    // `readlinkat` returns the number of bytes placed in the buffer.
-    // NUL-terminate the string at that offset.
-    buf[r].write(b'\0');
+        // `readlinkat` returns the number of bytes placed in the buffer.
+        // NUL-terminate the string at that offset.
+        uninit[0].write(b'\0');
+
+        init.len()
+    };
 
     // Check that the path we read refers to the same file as `fd`.
     {
-        // SAFETY: We just wrote the NUL byte above
-        let path = unsafe { CStr::from_ptr(buf.as_ptr().cast()) };
+        // SAFETY: We just wrote the NUL byte above.
+        let path = unsafe { CStr::from_ptr(ptr.cast()) };
 
         let path_stat = crate::backend::fs::syscalls::stat(path)?;
         if path_stat.st_dev != fd_stat.st_dev || path_stat.st_ino != fd_stat.st_ino {
@@ -415,5 +420,6 @@ pub(crate) fn ttyname(fd: BorrowedFd<'_>, buf: &mut [MaybeUninit<u8>]) -> io::Re
         }
     }
 
-    Ok(r)
+    // Return the length, excluding the NUL terminator.
+    Ok(len)
 }
