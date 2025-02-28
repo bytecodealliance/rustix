@@ -19,8 +19,6 @@ use crate::event::EventfdFlags;
 use crate::event::FdSetElement;
 use crate::event::{PollFd, Timespec};
 use crate::io;
-#[cfg(solarish)]
-use crate::utils::as_mut_ptr;
 #[cfg(any(linux_kernel, target_os = "illumos", target_os = "redox"))]
 use crate::utils::as_ptr;
 #[cfg(solarish)]
@@ -362,52 +360,89 @@ pub(crate) unsafe fn port_dissociate(
 }
 
 #[cfg(solarish)]
-pub(crate) fn port_get(
-    port: BorrowedFd<'_>,
-    timeout: Option<&mut c::timespec>,
-) -> io::Result<Event> {
-    let mut event = MaybeUninit::<c::port_event>::uninit();
-    let timeout = timeout.map_or(null_mut(), as_mut_ptr);
+pub(crate) fn port_get(port: BorrowedFd<'_>, timeout: Option<&Timespec>) -> io::Result<Event> {
+    // If we don't have to fix y2038 on this platform, `Timespec` is
+    // the same as `c::timespec` and it's easy.
+    #[cfg(not(fix_y2038))]
+    let timeout = crate::timespec::option_as_libc_timespec_ptr(timeout);
 
+    // If we do have to fix y2038 on this platform, convert to
+    // `c::timespec`.
+    #[cfg(fix_y2038)]
+    let converted_timeout;
+    #[cfg(fix_y2038)]
+    let timeout = match timeout {
+        None => null(),
+        Some(timeout) => {
+            converted_timeout = c::timespec {
+                tv_sec: timeout.tv_sec.try_into().map_err(|_| io::Errno::OVERFLOW)?,
+                tv_nsec: timeout.tv_nsec as _,
+            };
+            &converted_timeout
+        }
+    };
+
+    let mut event = MaybeUninit::<c::port_event>::uninit();
+
+    // In Rust >= 1.65, the `as _` can be `.cast_mut()`.
     unsafe {
-        ret(c::port_get(borrowed_fd(port), event.as_mut_ptr(), timeout))?;
+        ret(c::port_get(
+            borrowed_fd(port),
+            event.as_mut_ptr(),
+            timeout as _,
+        ))?;
     }
 
     // If we're done, initialize the event and return it.
     Ok(Event(unsafe { event.assume_init() }))
 }
 
-#[cfg(all(feature = "alloc", solarish))]
-pub(crate) fn port_getn(
+#[cfg(solarish)]
+pub(crate) unsafe fn port_getn(
     port: BorrowedFd<'_>,
-    timeout: Option<&mut c::timespec>,
-    events: &mut Vec<Event>,
+    events: (*mut Event, usize),
     mut nget: u32,
-) -> io::Result<()> {
+    timeout: Option<&Timespec>,
+) -> io::Result<usize> {
+    // If we don't have to fix y2038 on this platform, `Timespec` is
+    // the same as `c::timespec` and it's easy.
+    #[cfg(not(fix_y2038))]
+    let timeout = crate::timespec::option_as_libc_timespec_ptr(timeout);
+
+    // If we do have to fix y2038 on this platform, convert to
+    // `c::timespec`.
+    #[cfg(fix_y2038)]
+    let converted_timeout;
+    #[cfg(fix_y2038)]
+    let timeout = match timeout {
+        None => null(),
+        Some(timeout) => {
+            converted_timeout = c::timespec {
+                tv_sec: timeout.tv_sec.try_into().map_err(|_| io::Errno::OVERFLOW)?,
+                tv_nsec: timeout.tv_nsec as _,
+            };
+            &converted_timeout
+        }
+    };
+
     // `port_getn` special-cases a max value of 0 to be a query that returns
-    // the number of events. We don't want to do the `set_len` in that case, so
-    // so bail out early if needed.
-    if events.capacity() == 0 {
-        return Ok(());
+    // the number of events, so so bail out early if needed.
+    if events.1 == 0 {
+        return Ok(0);
     }
 
-    let timeout = timeout.map_or(null_mut(), as_mut_ptr);
+    // In Rust >= 1.65, the `as _` can be `.cast_mut()`.
     unsafe {
         ret(c::port_getn(
             borrowed_fd(port),
-            events.as_mut_ptr().cast(),
-            events.capacity().try_into().unwrap(),
+            events.0.cast(),
+            events.1.try_into().unwrap_or(u32::MAX),
             &mut nget,
-            timeout,
+            timeout as _,
         ))?;
     }
 
-    // Update the vector length.
-    unsafe {
-        events.set_len(nget.try_into().unwrap());
-    }
-
-    Ok(())
+    Ok(nget as usize)
 }
 
 #[cfg(solarish)]

@@ -7,15 +7,17 @@ greater than the requested size.
 
 [`rustix::pipe::fcntl_setpipe_size`]: https://docs.rs/rustix/1.0.0/rustix/pipe/fn.fcntl_setpipe_size.html
 
-When a `&mut Vec<_>` is passed to [`rustix::event::epoll::wait`] or
-[`rustix::event::kqueue::kevent`], these functions previously adjusted the
-length of the `Vec` to the number of elements written, and now do not. A common
-alternative is to wrap the `&mut Vec<_>` using [`spare_capacity`], and then to
-clear the `Vec` by iterating using `.drain(..)` after each call. For an example
-of using `spare_capacity` in this way, see [here].
+When a `&mut Vec<_>` is passed to [`rustix::event::epoll::wait`],
+[`rustix::event::kqueue::kevent`], or [`rustix::event::port::getn`], these
+functions previously adjusted the length of the `Vec` to the number of elements
+written, and now do not. A common alternative is to wrap the `&mut Vec<_>`
+using [`spare_capacity`], and then to clear the `Vec` by iterating using
+`.drain(..)` after each call. For an example of using `spare_capacity` in this
+way, see [here].
 
 [`rustix::event::epoll::wait`]: https://docs.rs/rustix/1.0.0/rustix/event/epoll/fn.wait.html
-[`rustix::event::kqueue::kevent`]: https://docs.rs/rustix/1.0.0/x86_64-unknown-freebsd/rustix/event/kqueue/fn.kqueue.html
+[`rustix::event::kqueue::kevent`]: https://docs.rs/rustix/1.0.0/x86_64-unknown-freebsd/rustix/event/kqueue/fn.kevent.html
+[`rustix::event::port::getn`]: https://docs.rs/rustix/1.0.0/x86_64-unknown-illumos/rustix/event/port/fn.getn.html
 [`spare_capacity`]: https://docs.rs/rustix/1.0.0/rustix/buffer/fn.spare_capacity.html
 [here]: https://docs.rs/rustix/1.0.0/rustix/event/epoll/index.html#examples
 
@@ -287,18 +289,19 @@ a `[MaybeUninit<u8>]` instead of a `[u8]`.
 [`RecvAncillaryBuffer`]: https://docs.rs/rustix/1.0.0/rustix/net/struct.RecvAncillaryBuffer.html
 
 [`read`], [`pread`], [`recv`], [`recvfrom`], [`getrandom`], [`epoll::wait`],
-[`kqueue`], [`getxattr`], [`lgetxattr`], [`fgetxattr`], [`listxattr`],
-[`llistxattr`], and [`flistxattr`] now use the new [`Buffer` trait].
+[`kevent`], [`port::getn`], [`getxattr`], [`lgetxattr`], [`fgetxattr`],
+[`listxattr`], [`llistxattr`], and [`flistxattr`] now use the new
+[`Buffer` trait].
 
 This replaces `read_uninit`, `pread_uninit`, `recv_uninit`, `recvfrom_uninit`,
 and `getrandom_uninit`, as the `Buffer` trait supports reading into
 uninitialized slices.
 
-`epoll::wait` and `kqueue` previously took a `Vec` which it implicitly cleared
-before results were appended. When passing a `Vec` to `epoll::wait` or `kqueue`
-using [`spare_capacity`], the `Vec` is not cleared first. Consider clearing the
-vector before calling `epoll::wait` or `kqueue`, or consuming it using
-`.drain(..)` before reusing it.
+`epoll::wait`, `kevent`, and `port::getn` previously took a `Vec` which they
+implicitly cleared before results were appended. When passing a `Vec` to
+`epoll::wait`, `kevent`, or `port::getn` using [`spare_capacity`], the `Vec` is
+not cleared first. Consider clearing the vector before calling `epoll::wait`,
+`kevent`, or `port::getn`, or consuming it using `.drain(..)` before reusing it.
 
 [`read`]: https://docs.rs/rustix/1.0.0/rustix/io/fn.read.html
 [`pread`]: https://docs.rs/rustix/1.0.0/rustix/io/fn.pread.html
@@ -312,7 +315,8 @@ vector before calling `epoll::wait` or `kqueue`, or consuming it using
 [`listxattr`]: https://docs.rs/rustix/1.0.0/rustix/fs/fn.listxattr.html
 [`llistxattr`]: https://docs.rs/rustix/1.0.0/rustix/fs/fn.llistxattr.html
 [`flistxattr`]: https://docs.rs/rustix/1.0.0/rustix/fs/fn.flistxattr.html
-[`kqueue`]: https://docs.rs/rustix/1.0.0/x86_64-unknown-freebsd/rustix/event/kqueue/fn.kqueue.html
+[`kevent`]: https://docs.rs/rustix/1.0.0/x86_64-unknown-freebsd/rustix/event/kqueue/fn.kevent.html
+[`port::getn`]: https://docs.rs/rustix/1.0.0/x86_64-unknown-illumos/rustix/event/port/fn.getn.html
 [`Buffer` trait]: https://docs.rs/rustix/1.0.0/rustix/buffer/trait.Buffer.html
 [`spare_capacity`]: https://docs.rs/rustix/1.0.0/rustix/buffer/fn.spare_capacity.html
 
@@ -334,6 +338,11 @@ In place of `BadOpcode`, use the opcode value directly.
 
 [`rustix::ioctl::Opcode`]: https://docs.rs/rustix/1.0.0/rustix/ioctl/type.Opcode.html
 [`ioctl::opcode`]: https://docs.rs/rustix/1.0.0/rustix/ioctl/opcode/index.html
+
+[`rustix::event::port::getn`]'s `min_events` argument is now a `u32`, to
+reflect the type in the underlying system API.
+
+[`rustix::event::port::getn`]: https://docs.rs/rustix/1.0.0/x86_64-unknown-illumos/rustix/event/port/fn.getn.html
 
 All explicitly deprecated functions and types have been removed. Their
 deprecation messages will have identified alternatives.
