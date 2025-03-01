@@ -432,15 +432,13 @@ pub(crate) unsafe fn port_getn(
     }
 
     // In Rust >= 1.65, the `as _` can be `.cast_mut()`.
-    unsafe {
-        ret(c::port_getn(
-            borrowed_fd(port),
-            events.0.cast(),
-            events.1.try_into().unwrap_or(u32::MAX),
-            &mut nget,
-            timeout as _,
-        ))?;
-    }
+    ret(c::port_getn(
+        borrowed_fd(port),
+        events.0.cast(),
+        events.1.try_into().unwrap_or(u32::MAX),
+        &mut nget,
+        timeout as _,
+    ))?;
 
     Ok(nget as usize)
 }
