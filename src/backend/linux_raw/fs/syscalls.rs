@@ -976,21 +976,18 @@ pub(crate) fn readlink(path: &CStr, buf: &mut [u8]) -> io::Result<usize> {
 }
 
 #[inline]
-pub(crate) fn readlinkat(
+pub(crate) unsafe fn readlinkat(
     dirfd: BorrowedFd<'_>,
     path: &CStr,
-    buf: &mut [MaybeUninit<u8>],
+    buf: (*mut u8, usize),
 ) -> io::Result<usize> {
-    let (buf_addr_mut, buf_len) = slice_mut(buf);
-    unsafe {
-        ret_usize(syscall!(
-            __NR_readlinkat,
-            dirfd,
-            path,
-            buf_addr_mut,
-            buf_len
-        ))
-    }
+    ret_usize(syscall!(
+        __NR_readlinkat,
+        dirfd,
+        path,
+        buf.0,
+        pass_usize(buf.1)
+    ))
 }
 
 #[inline]

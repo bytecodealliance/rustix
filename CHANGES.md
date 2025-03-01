@@ -288,10 +288,10 @@ a `[MaybeUninit<u8>]` instead of a `[u8]`.
 [`SendAncillaryBuffer`]: https://docs.rs/rustix/1.0.0/rustix/net/struct.SendAncillaryBuffer.html
 [`RecvAncillaryBuffer`]: https://docs.rs/rustix/1.0.0/rustix/net/struct.RecvAncillaryBuffer.html
 
-[`read`], [`pread`], [`recv`], [`recvfrom`], [`getrandom`], [`epoll::wait`],
-[`kevent`], [`port::getn`], [`getxattr`], [`lgetxattr`], [`fgetxattr`],
-[`listxattr`], [`llistxattr`], and [`flistxattr`] now use the new
-[`Buffer` trait].
+[`read`], [`pread`], [`recv`], [`recvfrom`], [`getrandom`], [`readlinkat_raw`],
+[`epoll::wait`], [`kevent`], [`port::getn`], [`getxattr`], [`lgetxattr`],
+[`fgetxattr`], [`listxattr`], [`llistxattr`], and [`flistxattr`] now use the
+new [`Buffer` trait].
 
 This replaces `read_uninit`, `pread_uninit`, `recv_uninit`, `recvfrom_uninit`,
 and `getrandom_uninit`, as the `Buffer` trait supports reading into
@@ -308,6 +308,7 @@ not cleared first. Consider clearing the vector before calling `epoll::wait`,
 [`recv`]: https://docs.rs/rustix/1.0.0/rustix/net/fn.recv.html
 [`recvfrom`]: https://docs.rs/rustix/1.0.0/rustix/net/fn.recvfrom.html
 [`getrandom`]: https://docs.rs/rustix/1.0.0/rustix/rand/fn.getrandom.html
+[`readlinkat_raw`]: https://docs.rs/rustix/1.0.0/rustix/fs/fn.readlinkat_raw.html
 [`epoll::wait`]: https://docs.rs/rustix/1.0.0/rustix/event/epoll/fn.wait.html
 [`getxattr`]: https://docs.rs/rustix/1.0.0/rustix/fs/fn.getxattr.html
 [`lgetxattr`]: https://docs.rs/rustix/1.0.0/rustix/fs/fn.lgetxattr.html
