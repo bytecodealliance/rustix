@@ -223,7 +223,7 @@ fn do_test_unix_msg(addr: SocketAddrUnix) {
             // `SocketAddrUnix::path()` returned `None` for some reason.
             // illumos and NetBSD too.
             #[cfg(not(any(solarish, target_os = "freebsd", target_os = "netbsd")))]
-            assert_eq!(Some(addr.into()), result.address);
+            assert_eq!(Some(addr.clone().into()), result.address);
         }
 
         let data_socket = socket(AddressFamily::UNIX, SocketType::SEQPACKET, None).unwrap();
