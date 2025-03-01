@@ -179,14 +179,12 @@ pub(crate) fn clock_nanosleep_absolute(id: ClockId, request: &Timespec) -> io::R
         if let Some(libc_clock_nanosleep) = __clock_nanosleep_time64.get() {
             let flags = c::TIMER_ABSTIME;
             unsafe {
-                return match {
-                    libc_clock_nanosleep(
-                        id as c::clockid_t,
-                        flags,
-                        &request.clone().into(),
-                        core::ptr::null_mut(),
-                    )
-                } {
+                return match libc_clock_nanosleep(
+                    id as c::clockid_t,
+                    flags,
+                    &request.clone().into(),
+                    core::ptr::null_mut(),
+                ) {
                     0 => Ok(()),
                     err => Err(io::Errno(err)),
                 };

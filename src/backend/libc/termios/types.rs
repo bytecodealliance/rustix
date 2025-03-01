@@ -2,7 +2,7 @@
 
 #![allow(non_camel_case_types)]
 
-#[cfg(not(target_os = "redox"))]
+#[cfg(not(any(target_os = "espidf", target_os = "redox")))]
 use crate::ffi;
 
 // We don't want to use `tcflag_t` directly so we don't expose libc
@@ -13,5 +13,5 @@ use crate::ffi;
 pub type tcflag_t = ffi::c_ulong;
 #[cfg(target_os = "redox")]
 pub type tcflag_t = u32;
-#[cfg(not(any(apple, target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(apple, target_os = "espidf", target_os = "redox", target_os = "wasi")))]
 pub type tcflag_t = ffi::c_uint;

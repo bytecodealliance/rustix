@@ -879,10 +879,8 @@ pub(crate) fn utimensat(
     {
         #[cfg(target_env = "gnu")]
         if let Some(libc_utimensat) = __utimensat64.get() {
-            let libc_times: [LibcTimespec; 2] = [
-                times.last_access.clone().into(),
-                times.last_modification.clone().into(),
-            ];
+            let libc_times: [LibcTimespec; 2] =
+                [times.last_access.into(), times.last_modification.into()];
 
             unsafe {
                 return ret(libc_utimensat(
@@ -1631,10 +1629,8 @@ pub(crate) fn futimens(fd: BorrowedFd<'_>, times: &Timestamps) -> io::Result<()>
     {
         #[cfg(target_env = "gnu")]
         if let Some(libc_futimens) = __futimens64.get() {
-            let libc_times: [LibcTimespec; 2] = [
-                times.last_access.clone().into(),
-                times.last_modification.clone().into(),
-            ];
+            let libc_times: [LibcTimespec; 2] =
+                [times.last_access.into(), times.last_modification.into()];
 
             unsafe {
                 return ret(libc_futimens(borrowed_fd(fd), libc_times.as_ptr()));

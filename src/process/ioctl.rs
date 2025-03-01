@@ -35,7 +35,13 @@ pub fn ioctl_tiocsctty<Fd: AsFd>(fd: Fd) -> io::Result<()> {
     unsafe { ioctl::ioctl(fd, Tiocsctty) }
 }
 
-#[cfg(not(any(windows, target_os = "aix", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    windows,
+    target_os = "aix",
+    target_os = "horizon",
+    target_os = "redox",
+    target_os = "wasi"
+)))]
 struct Tiocsctty;
 
 #[cfg(not(any(
