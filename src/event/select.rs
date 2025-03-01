@@ -232,10 +232,22 @@ pub fn fd_set_num_elements(set_count: usize, nfds: RawFd) -> usize {
 #[cfg(any(windows, target_os = "wasi"))]
 #[inline]
 pub(crate) fn fd_set_num_elements_for_fd_array(set_count: usize) -> usize {
+    // Ensure that we always have a big enough set to derefence an `FD_SET`.
+    core::cmp::max(
+        fd_set_num_elements_for_fd_array_raw(set_count),
+        div_ceil(size_of::<FD_SET>(), size_of::<FdSetElement>()),
+    )
+}
+
+/// Compute the raw `fd_set_num_elements` value, before ensuring the value is
+/// big enough to dereference an `FD_SET`.
+#[cfg(any(windows, target_os = "wasi"))]
+#[inline]
+fn fd_set_num_elements_for_fd_array_raw(set_count: usize) -> usize {
     // Allocate space for an `fd_count` field, plus `set_count` elements
     // for the `fd_array` field.
     div_ceil(
-        align_of::<FD_SET>() + set_count * size_of::<RawFd>(),
+        core::cmp::max(align_of::<FD_SET>(), align_of::<RawFd>()) + set_count * size_of::<RawFd>(),
         size_of::<FdSetElement>(),
     )
 }
@@ -347,9 +359,21 @@ mod test {
         // The layout of `FD_SET` should match our layout of a set of the same
         // size.
         assert_eq!(
+            fd_set_num_elements_for_fd_array_raw(
+                memoffset::span_of!(FD_SET, fd_array).len() / size_of::<RawFd>()
+            ) * size_of::<FdSetElement>(),
+            size_of::<FD_SET>()
+        );
+        assert_eq!(
             fd_set_num_elements_for_fd_array(
                 memoffset::span_of!(FD_SET, fd_array).len() / size_of::<RawFd>()
             ) * size_of::<FdSetElement>(),
+            size_of::<FD_SET>()
+        );
+
+        // Don't create fd sets smaller than `FD_SET`.
+        assert_eq!(
+            fd_set_num_elements_for_fd_array(0) * size_of::<FdSetElement>(),
             size_of::<FD_SET>()
         );
     }
