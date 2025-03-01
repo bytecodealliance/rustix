@@ -29,10 +29,10 @@
 
 use crate::backend::c;
 use crate::backend::event::syscalls;
+use crate::buffer::Buffer;
 use crate::fd::{AsFd, AsRawFd, OwnedFd};
+use crate::timespec::Timespec;
 use crate::{ffi, io};
-
-use core::time::Duration;
 
 pub use super::PollFlags;
 
@@ -130,24 +130,16 @@ pub unsafe fn dissociate_fd<Fd: AsFd, RawFd: AsRawFd>(port: Fd, object: RawFd) -
 /// [OpenSolaris]: https://www.unix.com/man-page/opensolaris/3C/port_get/
 /// [illumos]: https://illumos.org/man/3C/port_get
 #[doc(alias = "port_get")]
-pub fn get<Fd: AsFd>(port: Fd, timeout: Option<Duration>) -> io::Result<Event> {
-    let mut timeout = timeout.map(|timeout| c::timespec {
-        tv_sec: timeout.as_secs().try_into().unwrap(),
-        tv_nsec: timeout.subsec_nanos() as _,
-    });
-
-    syscalls::port_get(port.as_fd(), timeout.as_mut())
+pub fn get<Fd: AsFd>(port: Fd, timeout: Option<&Timespec>) -> io::Result<Event> {
+    syscalls::port_get(port.as_fd(), timeout)
 }
 
-/// `port_getn(port, events, min_events, timeout)`—Gets multiple events from a
-/// port.
+/// `port_getn(port, events, min_events, timeout)`—Gets multiple events from
+/// a port.
 ///
-/// This requests up to a max of `events.capacity()` events, and then resizes
-/// `events` to the number of events retrieved. If `events.capacity()` is 0,
-/// this does nothing and returns immediately.
+/// If `events` is empty, this does nothing and returns immediately.
 ///
-/// To query the number of events without retrieving any, use
-/// [`getn_query`].
+/// To query the number of events without retrieving any, use [`getn_query`].
 ///
 /// # References
 ///  - [OpenSolaris]
@@ -155,27 +147,18 @@ pub fn get<Fd: AsFd>(port: Fd, timeout: Option<Duration>) -> io::Result<Event> {
 ///
 /// [OpenSolaris]: https://www.unix.com/man-page/opensolaris/3C/port_getn/
 /// [illumos]: https://illumos.org/man/3C/port_getn
-#[cfg(feature = "alloc")]
 #[doc(alias = "port_getn")]
-pub fn getn<Fd: AsFd>(
+pub fn getn<Fd: AsFd, Buf: Buffer<Event>>(
     port: Fd,
-    events: &mut Vec<Event>,
-    min_events: usize,
-    timeout: Option<Duration>,
-) -> io::Result<()> {
-    events.clear();
-
-    let mut timeout = timeout.map(|timeout| c::timespec {
-        tv_sec: timeout.as_secs().try_into().unwrap(),
-        tv_nsec: timeout.subsec_nanos() as _,
-    });
-
-    syscalls::port_getn(
-        port.as_fd(),
-        timeout.as_mut(),
-        events,
-        min_events.try_into().unwrap(),
-    )
+    mut events: Buf,
+    min_events: u32,
+    timeout: Option<&Timespec>,
+) -> io::Result<Buf::Output> {
+    // SAFETY: `port_getn` behaves.
+    let nevents =
+        unsafe { syscalls::port_getn(port.as_fd(), events.parts_mut(), min_events, timeout)? };
+    // SAFETY: `port_getn` behaves.
+    unsafe { Ok(events.assume_init(nevents)) }
 }
 
 /// `port_getn(port, NULL, 0, NULL)`—Queries the number of events
