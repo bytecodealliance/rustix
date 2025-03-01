@@ -14,6 +14,8 @@ mod epoll_timeout;
 #[cfg(not(target_os = "wasi"))]
 mod eventfd;
 mod poll;
+#[cfg(solarish)]
+mod port;
 #[cfg(any(bsd, linux_kernel, windows, target_os = "wasi"))]
 mod select;
 
