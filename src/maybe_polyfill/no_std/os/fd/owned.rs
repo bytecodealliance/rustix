@@ -114,7 +114,7 @@ impl OwnedFd {
         // no capabilities for multi-process execution. While F_DUPFD is also
         // not supported yet, it might be (currently it returns ENOSYS).
         #[cfg(target_os = "espidf")]
-        let fd = crate::io::fcntl_dupfd(self)?;
+        let fd = crate::io::fcntl_dupfd(self, 0)?;
 
         Ok(fd.into())
     }

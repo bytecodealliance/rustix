@@ -54,7 +54,10 @@ fn test_current_tagged_address_mode() {
 }
 
 #[test]
-#[ignore = "?"]
+#[cfg_attr(
+    not(any(target_arch = "x86", target_arch = "x86_64")),
+    ignore = "`transparent_huge_pages_are_disabled` doesn't work on qemu"
+)]
 fn test_transparent_huge_pages_are_disabled() {
     dbg!(transparent_huge_pages_are_disabled().unwrap());
 }

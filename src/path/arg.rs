@@ -1019,7 +1019,7 @@ where
     // for `bytes.len() + 1` u8s:
     unsafe {
         ptr::copy_nonoverlapping(bytes.as_ptr(), buf_ptr, bytes.len());
-        buf_ptr.add(bytes.len()).write(0);
+        buf_ptr.add(bytes.len()).write(b'\0');
     }
 
     // SAFETY: We just wrote the bytes above and they will remain valid for the
@@ -1046,11 +1046,26 @@ where
 
     #[cfg(not(feature = "alloc"))]
     {
-        #[cfg(all(libc, not(any(target_os = "hurd", target_os = "wasi"))))]
+        #[cfg(all(
+            libc,
+            not(any(
+                target_os = "espidf",
+                target_os = "horizon",
+                target_os = "hurd",
+                target_os = "vita",
+                target_os = "wasi"
+            ))
+        ))]
         const LARGE_PATH_BUFFER_SIZE: usize = libc::PATH_MAX as usize;
         #[cfg(linux_raw)]
         const LARGE_PATH_BUFFER_SIZE: usize = linux_raw_sys::general::PATH_MAX as usize;
-        #[cfg(any(target_os = "hurd", target_os = "wasi"))]
+        #[cfg(any(
+            target_os = "espidf",
+            target_os = "horizon",
+            target_os = "hurd",
+            target_os = "vita",
+            target_os = "wasi"
+        ))]
         const LARGE_PATH_BUFFER_SIZE: usize = 4096 as usize; // TODO: upstream this
 
         // Taken from
@@ -1067,7 +1082,7 @@ where
         // space for `bytes.len() + 1` u8s:
         unsafe {
             ptr::copy_nonoverlapping(bytes.as_ptr(), buf_ptr, bytes.len());
-            buf_ptr.add(bytes.len()).write(0);
+            buf_ptr.add(bytes.len()).write(b'\0');
         }
 
         // SAFETY: We just wrote the bytes above and they will remain valid for

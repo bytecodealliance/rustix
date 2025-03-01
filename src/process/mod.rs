@@ -29,12 +29,7 @@ mod pidfd_getfd;
 mod pivot_root;
 #[cfg(linux_kernel)]
 mod prctl;
-#[cfg(not(any(
-    target_os = "fuchsia",
-    target_os = "horizon",
-    target_os = "vita",
-    target_os = "wasi"
-)))]
+#[cfg(not(any(target_os = "fuchsia", target_os = "vita", target_os = "wasi")))]
 // WASI doesn't have [gs]etpriority.
 mod priority;
 #[cfg(freebsdlike)]
@@ -91,12 +86,7 @@ pub use pidfd_getfd::*;
 pub use pivot_root::*;
 #[cfg(linux_kernel)]
 pub use prctl::*;
-#[cfg(not(any(
-    target_os = "fuchsia",
-    target_os = "horizon",
-    target_os = "vita",
-    target_os = "wasi"
-)))]
+#[cfg(not(any(target_os = "fuchsia", target_os = "vita", target_os = "wasi")))]
 pub use priority::*;
 #[cfg(freebsdlike)]
 pub use procctl::*;

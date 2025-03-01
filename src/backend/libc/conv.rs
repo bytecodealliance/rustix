@@ -16,7 +16,13 @@ pub(super) fn c_str(c: &CStr) -> *const c::c_char {
     c.as_ptr().cast()
 }
 
-#[cfg(not(any(windows, target_os = "espidf", target_os = "vita", target_os = "wasi")))]
+#[cfg(not(any(
+    windows,
+    target_os = "espidf",
+    target_os = "horizon",
+    target_os = "vita",
+    target_os = "wasi"
+)))]
 #[inline]
 pub(super) fn no_fd() -> LibcFd {
     -1

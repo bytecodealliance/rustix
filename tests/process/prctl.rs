@@ -70,13 +70,11 @@ fn test_enabled_pointer_authentication_keys() {
 }
 
 #[test]
-#[ignore = "?"]
 fn test_child_subreaper() {
     dbg!(child_subreaper().unwrap());
 }
 
 #[test]
-#[ignore = "?"]
 fn test_speculative_feature_state() {
     dbg!(speculative_feature_state(SpeculationFeature::SpeculativeStoreBypass).unwrap());
     dbg!(speculative_feature_state(SpeculationFeature::IndirectBranchSpeculation).unwrap());
