@@ -202,16 +202,16 @@ fn test_sockopts_tcp(s: &OwnedFd) {
     assert!(!sockopt::tcp_nodelay(s).unwrap());
 
     #[cfg(not(any(
-        target_os = "openbsd",
         target_os = "haiku",
         target_os = "nto",
+        target_os = "openbsd",
         target_os = "redox"
     )))]
     {
         assert!(sockopt::tcp_keepcnt(s).is_ok());
         assert!(sockopt::tcp_keepintvl(s).is_ok());
     }
-    #[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
+    #[cfg(not(any(target_os = "haiku", target_os = "nto", target_os = "openbsd")))]
     {
         assert!(sockopt::tcp_keepidle(s).is_ok());
     }
@@ -228,7 +228,7 @@ fn test_sockopts_tcp(s: &OwnedFd) {
     // Check that the nodelay flag is cleared.
     assert!(!sockopt::tcp_nodelay(s).unwrap());
 
-    #[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
+    #[cfg(not(any(target_os = "haiku", target_os = "nto", target_os = "openbsd")))]
     {
         #[cfg(not(target_os = "redox"))]
         {

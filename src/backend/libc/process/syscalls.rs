@@ -1,7 +1,7 @@
 //! libc syscalls supporting `rustix::process`.
 
 use crate::backend::c;
-#[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
+#[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 use crate::backend::conv::borrowed_fd;
 #[cfg(any(target_os = "linux", feature = "fs"))]
 use crate::backend::conv::c_str;
@@ -20,7 +20,7 @@ use crate::backend::conv::ret_pid_t;
 #[cfg(all(feature = "alloc", not(target_os = "wasi")))]
 use crate::backend::conv::ret_usize;
 use crate::backend::conv::{ret, ret_c_int};
-#[cfg(not(any(target_os = "wasi", target_os = "fuchsia")))]
+#[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 use crate::fd::BorrowedFd;
 #[cfg(target_os = "linux")]
 use crate::fd::{AsRawFd as _, OwnedFd, RawFd};

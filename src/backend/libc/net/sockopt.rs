@@ -71,7 +71,7 @@ use alloc::borrow::ToOwned as _;
 use alloc::string::String;
 #[cfg(apple)]
 use c::TCP_KEEPALIVE as TCP_KEEPIDLE;
-#[cfg(not(any(apple, target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
+#[cfg(not(any(apple, target_os = "haiku", target_os = "nto", target_os = "openbsd")))]
 use c::TCP_KEEPIDLE;
 use core::mem::{size_of, MaybeUninit};
 use core::time::Duration;
@@ -887,9 +887,9 @@ pub(crate) fn tcp_nodelay(fd: BorrowedFd<'_>) -> io::Result<bool> {
 
 #[inline]
 #[cfg(not(any(
-    target_os = "openbsd",
     target_os = "haiku",
     target_os = "nto",
+    target_os = "openbsd",
     target_os = "redox"
 )))]
 pub(crate) fn set_tcp_keepcnt(fd: BorrowedFd<'_>, count: u32) -> io::Result<()> {
@@ -898,9 +898,9 @@ pub(crate) fn set_tcp_keepcnt(fd: BorrowedFd<'_>, count: u32) -> io::Result<()> 
 
 #[inline]
 #[cfg(not(any(
-    target_os = "openbsd",
     target_os = "haiku",
     target_os = "nto",
+    target_os = "openbsd",
     target_os = "redox"
 )))]
 pub(crate) fn tcp_keepcnt(fd: BorrowedFd<'_>) -> io::Result<u32> {
@@ -908,14 +908,14 @@ pub(crate) fn tcp_keepcnt(fd: BorrowedFd<'_>) -> io::Result<u32> {
 }
 
 #[inline]
-#[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
+#[cfg(not(any(target_os = "haiku", target_os = "nto", target_os = "openbsd")))]
 pub(crate) fn set_tcp_keepidle(fd: BorrowedFd<'_>, duration: Duration) -> io::Result<()> {
     let secs: c::c_uint = duration_to_secs(duration)?;
     setsockopt(fd, c::IPPROTO_TCP, TCP_KEEPIDLE, secs)
 }
 
 #[inline]
-#[cfg(not(any(target_os = "openbsd", target_os = "haiku", target_os = "nto")))]
+#[cfg(not(any(target_os = "haiku", target_os = "nto", target_os = "openbsd")))]
 pub(crate) fn tcp_keepidle(fd: BorrowedFd<'_>) -> io::Result<Duration> {
     let secs: c::c_uint = getsockopt(fd, c::IPPROTO_TCP, TCP_KEEPIDLE)?;
     Ok(Duration::from_secs(secs as u64))
@@ -923,9 +923,9 @@ pub(crate) fn tcp_keepidle(fd: BorrowedFd<'_>) -> io::Result<Duration> {
 
 #[inline]
 #[cfg(not(any(
-    target_os = "openbsd",
     target_os = "haiku",
     target_os = "nto",
+    target_os = "openbsd",
     target_os = "redox"
 )))]
 pub(crate) fn set_tcp_keepintvl(fd: BorrowedFd<'_>, duration: Duration) -> io::Result<()> {
@@ -935,9 +935,9 @@ pub(crate) fn set_tcp_keepintvl(fd: BorrowedFd<'_>, duration: Duration) -> io::R
 
 #[inline]
 #[cfg(not(any(
-    target_os = "openbsd",
     target_os = "haiku",
     target_os = "nto",
+    target_os = "openbsd",
     target_os = "redox"
 )))]
 pub(crate) fn tcp_keepintvl(fd: BorrowedFd<'_>) -> io::Result<Duration> {

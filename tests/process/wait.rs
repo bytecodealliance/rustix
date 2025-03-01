@@ -92,10 +92,10 @@ fn test_waitpgid() {
 }
 
 #[cfg(not(any(
-    target_os = "wasi",
     target_os = "emscripten",
+    target_os = "openbsd",
     target_os = "redox",
-    target_os = "openbsd"
+    target_os = "wasi"
 )))]
 #[test]
 #[serial]
