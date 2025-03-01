@@ -560,7 +560,7 @@ pub unsafe fn tkill(tid: Pid, sig: Signal) -> io::Result<()> {
 /// `rt_sigprocmask(how, set, oldset)`—Adjust the process signal mask.
 ///
 /// This uses `KernelSigSet` instead of `SigSet` because the Linux
-/// documentation says says the size "is currently required to have a fixed
+/// documentation says the size "is currently required to have a fixed
 /// architecture specific value (equal to `sizeof(kernel_sigset_t)`)".
 ///
 /// # Safety
@@ -804,7 +804,7 @@ mod tests {
             memoffset::span_of!(libc::siginfo_t, si_code)
         );
 
-        // c-scape assuemes rustix's `Stack` matches libc's. Similar to above.
+        // c-scape assumes rustix's `Stack` matches libc's. Similar to above.
         assert_eq_size!(Stack, libc::stack_t);
         assert_eq_align!(Stack, libc::stack_t);
         assert_eq!(

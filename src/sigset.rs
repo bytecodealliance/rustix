@@ -82,7 +82,18 @@ impl SigSet {
         }
     }
 
-    /// Remove all signals.
+    /// `sigclearset(self)`—Remove all signals.
+    ///
+    /// # References
+    ///  - [POSIX]
+    ///  - [Linux]
+    ///  - [FreeBSD]
+    ///  - [glibc]
+    ///
+    /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/sigemptyset.html
+    /// [Linux]: https://www.man7.org/linux/man-pages/man3/sigsetops.3.html
+    /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=sigemptyset
+    /// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Signal-Sets.html#index-sigemptyset
     #[doc(alias = "sigemptyset")]
     pub fn clear(&mut self) {
         #[cfg(linux_raw)]
@@ -98,7 +109,18 @@ impl SigSet {
         }
     }
 
-    /// Insert a signal.
+    /// `sigaddset(self, sig)`—Insert a signal.
+    ///
+    /// # References
+    ///  - [POSIX]
+    ///  - [Linux]
+    ///  - [FreeBSD]
+    ///  - [glibc]
+    ///
+    /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/sigaddset.html
+    /// [Linux]: https://www.man7.org/linux/man-pages/man3/sigsetops.3.html
+    /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=sigaddset
+    /// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Signal-Sets.html#index-sigaddset
     #[doc(alias = "sigaddset")]
     pub fn insert(&mut self, sig: Signal) {
         // This assumes the `Signal` does not contain any of the values
@@ -120,7 +142,18 @@ impl SigSet {
         }
     }
 
-    /// Remove a signal.
+    /// `sigdelset(self, sig)`—Remove a signal.
+    ///
+    /// # References
+    ///  - [POSIX]
+    ///  - [Linux]
+    ///  - [FreeBSD]
+    ///  - [glibc]
+    ///
+    /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/sigdelset.html
+    /// [Linux]: https://www.man7.org/linux/man-pages/man3/sigsetops.3.html
+    /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=sigdelset
+    /// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Signal-Sets.html#index-sigdelset
     #[doc(alias = "sigdelset")]
     pub fn remove(&mut self, sig: Signal) {
         // This assumes the `Signal` does not contain any of the values
@@ -142,7 +175,18 @@ impl SigSet {
         }
     }
 
-    /// Test whether a given signal is present.
+    /// `sigismember(self, sig)`—Test whether a given signal is present.
+    ///
+    /// # References
+    ///  - [POSIX]
+    ///  - [Linux]
+    ///  - [FreeBSD]
+    ///  - [glibc]
+    ///
+    /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/sigismember.html
+    /// [Linux]: https://www.man7.org/linux/man-pages/man3/sigsetops.3.html
+    /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=sigismember
+    /// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Signal-Sets.html#index-sigismember
     #[doc(alias = "sigismember")]
     pub fn contains(&self, sig: Signal) -> bool {
         #[cfg(linux_raw)]

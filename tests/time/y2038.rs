@@ -58,8 +58,8 @@ fn test_y2038_with_timerfd() {
         Ok(i) => i,
 
         // On 32-bit and mips64 platforms, accept `EOVERFLOW`, meaning that
-        // y2038 support in `timerfd` APIs is not available on this platform
-        // or this version of the platform.
+        // y2038 support in `timerfd` APIs is not available on this platform or
+        // this version of the platform.
         #[cfg(any(target_pointer_width = "32", target_arch = "mips64"))]
         Err(rustix::io::Errno::OVERFLOW) => return,
 

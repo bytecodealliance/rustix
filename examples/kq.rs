@@ -41,7 +41,7 @@ fn main() -> std::io::Result<()> {
         Event::new(
             EventFilter::Timer {
                 ident: 0,
-                timer: Some(core::time::Duration::from_secs(1)),
+                timer: Some(std::time::Duration::from_secs(1)),
             },
             EventFlags::ADD,
             null_mut(),
@@ -49,7 +49,7 @@ fn main() -> std::io::Result<()> {
         Event::new(
             EventFilter::Timer {
                 ident: 1,
-                timer: Some(core::time::Duration::from_secs(2)),
+                timer: Some(std::time::Duration::from_secs(2)),
             },
             EventFlags::ADD | EventFlags::ONESHOT,
             null_mut(),

@@ -127,9 +127,9 @@ fn net_recvmsg_trunc() {
     )
     .expect("recvmsg");
 
-    // We didn't use the `TRUNC` flag, but the buffer was big enough,
-    // so we should have received 15 bytes, and the `TRUNC` flag should
-    // have been returned.
+    // We didn't use the `TRUNC` flag, but the buffer was big enough, so we
+    // should have received 15 bytes, and the `TRUNC` flag should have been
+    // returned.
     assert_eq!(&response[..result.bytes], request);
     assert_eq!(result.flags, ReturnFlags::empty());
 

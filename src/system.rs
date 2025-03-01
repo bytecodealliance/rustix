@@ -228,16 +228,16 @@ pub enum RebootCommand {
 /// reboot.
 ///
 /// Among other things, it can:
-/// - Restart, Halt, Power Off, and Suspend the system
-/// - Enable and disable the Ctrl-Alt-Del keystroke
-/// - Execute other kernels
-/// - Terminate init inside PID namespaces
+///  - Restart, Halt, Power Off, and Suspend the system
+///  - Enable and disable the Ctrl-Alt-Del keystroke
+///  - Execute other kernels
+///  - Terminate init inside PID namespaces
 ///
 /// It is highly recommended to carefully read the kernel documentation before
 /// calling this function.
 ///
 /// # References
-/// - [Linux]
+///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/reboot.2.html
 #[cfg(target_os = "linux")]
@@ -248,7 +248,7 @@ pub fn reboot(cmd: RebootCommand) -> io::Result<()> {
 /// `init_module`—Load a kernel module.
 ///
 /// # References
-/// - [Linux]
+///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/init_module.2.html
 #[inline]
@@ -260,7 +260,7 @@ pub fn init_module(image: &[u8], param_values: &CStr) -> io::Result<()> {
 /// `finit_module`—Load a kernel module from a file descriptor.
 ///
 /// # References
-/// - [Linux]
+///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/finit_module.2.html
 #[inline]
@@ -272,7 +272,7 @@ pub fn finit_module<Fd: AsFd>(fd: Fd, param_values: &CStr, flags: c_int) -> io::
 /// `delete_module`—Unload a kernel module.
 ///
 /// # References
-/// - [Linux]
+///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/delete_module.2.html
 #[inline]

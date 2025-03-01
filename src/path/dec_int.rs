@@ -171,7 +171,7 @@ impl DecInt {
         loop {
             len += 1;
             if len > BUF_LEN {
-                // SAFETY: A stringified i64/u64 cannot be longer than
+                // SAFETY: A stringified `i64`/`u64` cannot be longer than
                 // `U64_MAX_STR_LEN` bytes.
                 unsafe { unreachable_unchecked() };
             }
@@ -184,7 +184,7 @@ impl DecInt {
         if is_neg {
             len += 1;
             if len > BUF_LEN {
-                // SAFETY: A stringified i64/u64 cannot be longer than
+                // SAFETY: A stringified `i64`/`u64` cannot be longer than
                 // `U64_MAX_STR_LEN` bytes.
                 unsafe { unreachable_unchecked() };
             }
@@ -227,7 +227,7 @@ impl DecInt {
     pub fn as_bytes_with_nul(&self) -> &[u8] {
         let len = NonZeroUsize::from(self.len).get();
         if len > BUF_LEN {
-            // SAFETY: A stringified i64/u64 cannot be longer than
+            // SAFETY: A stringified `i64`/`u64` cannot be longer than
             // `U64_MAX_STR_LEN` bytes.
             unsafe { unreachable_unchecked() };
         }

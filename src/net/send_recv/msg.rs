@@ -26,7 +26,7 @@ use super::{RecvFlags, ReturnFlags, SendFlags, SocketAddrAny};
 ///
 /// Allocate a buffer for a single file descriptor:
 /// ```
-/// # use core::mem::MaybeUninit;
+/// # use std::mem::MaybeUninit;
 /// # use rustix::cmsg_space;
 /// let mut space = [MaybeUninit::uninit(); rustix::cmsg_space!(ScmRights(1))];
 /// # let _: &[MaybeUninit<u8>] = space.as_slice();
@@ -36,7 +36,7 @@ use super::{RecvFlags, ReturnFlags, SendFlags, SocketAddrAny};
 /// ```
 /// # #[cfg(linux_kernel)]
 /// # {
-/// # use core::mem::MaybeUninit;
+/// # use std::mem::MaybeUninit;
 /// # use rustix::cmsg_space;
 /// let mut space = [MaybeUninit::uninit(); rustix::cmsg_space!(ScmCredentials(1))];
 /// # let _: &[MaybeUninit<u8>] = space.as_slice();
@@ -47,7 +47,7 @@ use super::{RecvFlags, ReturnFlags, SendFlags, SocketAddrAny};
 /// ```
 /// # #[cfg(linux_kernel)]
 /// # {
-/// # use core::mem::MaybeUninit;
+/// # use std::mem::MaybeUninit;
 /// # use rustix::cmsg_space;
 /// let mut space = [MaybeUninit::uninit(); rustix::cmsg_space!(ScmRights(2), ScmCredentials(1))];
 /// # let _: &[MaybeUninit<u8>] = space.as_slice();
@@ -209,7 +209,7 @@ impl<'buf, 'slice, 'fd> SendAncillaryBuffer<'buf, 'slice, 'fd> {
     ///
     /// Allocate a buffer for a single file descriptor:
     /// ```
-    /// # use core::mem::MaybeUninit;
+    /// # use std::mem::MaybeUninit;
     /// # use rustix::cmsg_space;
     /// # use rustix::net::SendAncillaryBuffer;
     /// let mut space = [MaybeUninit::uninit(); rustix::cmsg_space!(ScmRights(1))];
@@ -220,7 +220,7 @@ impl<'buf, 'slice, 'fd> SendAncillaryBuffer<'buf, 'slice, 'fd> {
     /// ```
     /// # #[cfg(linux_kernel)]
     /// # {
-    /// # use core::mem::MaybeUninit;
+    /// # use std::mem::MaybeUninit;
     /// # use rustix::cmsg_space;
     /// # use rustix::net::SendAncillaryBuffer;
     /// let mut space = [MaybeUninit::uninit(); rustix::cmsg_space!(ScmCredentials(1))];
@@ -232,7 +232,7 @@ impl<'buf, 'slice, 'fd> SendAncillaryBuffer<'buf, 'slice, 'fd> {
     /// ```
     /// # #[cfg(linux_kernel)]
     /// # {
-    /// # use core::mem::MaybeUninit;
+    /// # use std::mem::MaybeUninit;
     /// # use rustix::cmsg_space;
     /// # use rustix::net::SendAncillaryBuffer;
     /// let mut space = [MaybeUninit::uninit(); rustix::cmsg_space!(ScmRights(2), ScmCredentials(1))];
@@ -377,7 +377,7 @@ impl<'buf> RecvAncillaryBuffer<'buf> {
     ///
     /// Allocate a buffer for a single file descriptor:
     /// ```
-    /// # use core::mem::MaybeUninit;
+    /// # use std::mem::MaybeUninit;
     /// # use rustix::cmsg_space;
     /// # use rustix::net::RecvAncillaryBuffer;
     /// let mut space = [MaybeUninit::uninit(); rustix::cmsg_space!(ScmRights(1))];
@@ -388,7 +388,7 @@ impl<'buf> RecvAncillaryBuffer<'buf> {
     /// ```
     /// # #[cfg(linux_kernel)]
     /// # {
-    /// # use core::mem::MaybeUninit;
+    /// # use std::mem::MaybeUninit;
     /// # use rustix::cmsg_space;
     /// # use rustix::net::RecvAncillaryBuffer;
     /// let mut space = [MaybeUninit::uninit(); rustix::cmsg_space!(ScmCredentials(1))];
@@ -400,7 +400,7 @@ impl<'buf> RecvAncillaryBuffer<'buf> {
     /// ```
     /// # #[cfg(linux_kernel)]
     /// # {
-    /// # use core::mem::MaybeUninit;
+    /// # use std::mem::MaybeUninit;
     /// # use rustix::cmsg_space;
     /// # use rustix::net::RecvAncillaryBuffer;
     /// let mut space = [MaybeUninit::uninit(); rustix::cmsg_space!(ScmRights(2), ScmCredentials(1))];

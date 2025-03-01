@@ -23,7 +23,7 @@ use crate::fd::{AsRawFd as _, BorrowedFd};
 #[inline]
 #[doc(alias = "BLKSSZGET")]
 pub fn ioctl_blksszget<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
-    // SAFETY: `BLZSSZGET` is a getter opcode that gets a u32.
+    // SAFETY: `BLZSSZGET` is a getter opcode that gets a `u32`.
     unsafe {
         let ctl = ioctl::Getter::<{ c::BLKSSZGET }, c::c_uint>::new();
         ioctl::ioctl(fd, ctl)
@@ -35,7 +35,7 @@ pub fn ioctl_blksszget<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
 #[inline]
 #[doc(alias = "BLKPBSZGET")]
 pub fn ioctl_blkpbszget<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
-    // SAFETY: `BLKPBSZGET` is a getter opcode that gets a u32.
+    // SAFETY: `BLKPBSZGET` is a getter opcode that gets a `u32`.
     unsafe {
         let ctl = ioctl::Getter::<{ c::BLKPBSZGET }, c::c_uint>::new();
         ioctl::ioctl(fd, ctl)

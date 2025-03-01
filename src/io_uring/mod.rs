@@ -1745,7 +1745,7 @@ mod tests {
         assert_eq_size!(io_uring_ptr, u64);
         assert_eq_align!(io_uring_ptr, u64);
 
-        // Test that pointers are stored in io_uring_ptr` in the way that
+        // Test that pointers are stored in `io_uring_ptr` in the way that
         // io_uring stores them in a `u64`.
         unsafe {
             const MAGIC: u64 = !0x0123_4567_89ab_cdef;

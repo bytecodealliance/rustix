@@ -5,9 +5,9 @@
 #[cfg(not(target_os = "redox"))]
 use crate::ffi;
 
-// We don't want to use tcflag_t directly so we don't expose libc
-// publicly. Redox uses u32, apple uses c_ulong, everything else
-// seems to use c_uint.
+// We don't want to use `tcflag_t` directly so we don't expose libc
+// publicly. Redox uses `u32`, apple uses `c_ulong`, everything else
+// seems to use `c_uint`.
 
 #[cfg(apple)]
 pub type tcflag_t = ffi::c_ulong;

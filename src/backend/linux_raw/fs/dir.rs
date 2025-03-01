@@ -176,7 +176,7 @@ impl Dir {
         let name = name.to_owned();
         assert!(name.as_bytes().len() <= self.buf.len() - name_start);
 
-        // Do an unaligned u64 load for `d_ino`.
+        // Do an unaligned `u64` load for `d_ino`.
         let d_ino = u64::from_ne_bytes([
             self.buf[pos + offsetof_d_ino],
             self.buf[pos + offsetof_d_ino + 1],
@@ -188,7 +188,7 @@ impl Dir {
             self.buf[pos + offsetof_d_ino + 7],
         ]);
 
-        // Do an unaligned i64 load for `d_off`
+        // Do an unaligned `i64` load for `d_off`.
         let d_off = i64::from_ne_bytes([
             self.buf[pos + offsetof_d_off],
             self.buf[pos + offsetof_d_off + 1],
