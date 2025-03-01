@@ -42,7 +42,6 @@ use backend::fs::types::Stat;
 use backend::fs::types::StatFs;
 #[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
 use backend::fs::types::StatVfs;
-use core::fmt;
 
 /// Timestamps used by [`utimensat`] and [`futimens`].
 ///
@@ -51,24 +50,13 @@ use core::fmt;
 // This is `repr(C)` and specifically laid out to match the representation used
 // by `utimensat` and `futimens`, which expect 2-element arrays of timestamps.
 #[repr(C)]
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct Timestamps {
     /// The timestamp of the last access to a filesystem object.
     pub last_access: Timespec,
 
     /// The timestamp of the last modification of a filesystem object.
     pub last_modification: Timespec,
-}
-
-impl fmt::Debug for Timestamps {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("Timestamps")
-            .field("last_access.tv_sec", &self.last_access.tv_sec)
-            .field("last_access.tv_nsec", &self.last_access.tv_nsec)
-            .field("last_modification.tv_sec", &self.last_modification.tv_sec)
-            .field("last_modification.tv_nsec", &self.last_modification.tv_nsec)
-            .finish()
-    }
 }
 
 /// The filesystem magic number for procfs.
