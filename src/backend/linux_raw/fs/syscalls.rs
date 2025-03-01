@@ -981,15 +981,13 @@ pub(crate) unsafe fn readlinkat(
     path: &CStr,
     buf: (*mut u8, usize),
 ) -> io::Result<usize> {
-    unsafe {
-        ret_usize(syscall!(
-            __NR_readlinkat,
-            dirfd,
-            path,
-            buf.0,
-            pass_usize(buf.1)
-        ))
-    }
+    ret_usize(syscall!(
+        __NR_readlinkat,
+        dirfd,
+        path,
+        buf.0,
+        pass_usize(buf.1)
+    ))
 }
 
 #[inline]
