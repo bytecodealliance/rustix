@@ -378,6 +378,7 @@ fn test_unix_msg() {
         Some(CString::new(path.as_os_str().as_bytes()).unwrap().into())
     );
     assert_eq!(name.path_bytes(), Some(path.as_os_str().as_bytes()));
+    #[cfg(linux_kernel)]
     assert!(!name.is_unnamed());
     do_test_unix_msg(name);
 
@@ -402,6 +403,7 @@ fn test_unix_msg_unconnected() {
         Some(CString::new(path.as_os_str().as_bytes()).unwrap().into())
     );
     assert_eq!(name.path_bytes(), Some(path.as_os_str().as_bytes()));
+    #[cfg(linux_kernel)]
     assert!(!name.is_unnamed());
     do_test_unix_msg_unconnected(name);
 
@@ -998,6 +1000,7 @@ fn test_long_named_address() {
             Some(CString::new(path.as_os_str().as_bytes()).unwrap().into())
         );
         assert_eq!(name.path_bytes(), Some(path.as_os_str().as_bytes()));
+        #[cfg(linux_kernel)]
         assert!(!name.is_unnamed());
     }
 }
