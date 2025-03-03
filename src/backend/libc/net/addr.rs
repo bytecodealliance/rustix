@@ -14,10 +14,7 @@ use {
     core::slice,
 };
 #[cfg(all(unix, feature = "alloc"))]
-use {
-    crate::ffi::CString,
-    alloc::borrow::{Cow, ToOwned},
-};
+use {crate::ffi::CString, alloc::borrow::Cow, alloc::vec::Vec};
 
 /// `struct sockaddr_un`
 #[cfg(unix)]
@@ -143,7 +140,8 @@ impl SocketAddrUnix {
         let bytes = self.bytes()?;
         if !bytes.is_empty() && bytes[0] != 0 {
             if self.unix.sun_path.len() == bytes.len() {
-                self.path_with_termination(bytes)
+                // SAFETY: no NULs are contained in bytes
+                unsafe { self.path_with_termination(bytes) }
             } else {
                 // SAFETY: `from_bytes_with_nul_unchecked` since the string is
                 // NUL-terminated.
@@ -155,11 +153,18 @@ impl SocketAddrUnix {
     }
 
     /// If the `sun_path` field is not NUL-terminated, terminate it.
+    ///
+    /// SAFETY: the input `bytes` must not contain any NULs
     #[cfg(feature = "alloc")]
-    fn path_with_termination(&self, bytes: &[u8]) -> Option<Cow<'_, CStr>> {
-        let mut owned = bytes.to_owned();
+    unsafe fn path_with_termination(&self, bytes: &[u8]) -> Option<Cow<'_, CStr>> {
+        let mut owned = Vec::with_capacity(bytes.len() + 1);
+        owned.extend_from_slice(bytes);
         owned.push(b'\0');
-        Some(CString::from_vec_with_nul(owned).unwrap().into())
+        // SAFETY: `from_vec_with_nul_unchecked` since the string is
+        // NUL-terminated and `bytes` does not conain any NULs.
+        Some(Cow::Owned(
+            CString::from_vec_with_nul_unchecked(owned).into(),
+        ))
     }
 
     /// For a filesystem path address, return the path as a byte sequence,
