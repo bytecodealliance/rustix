@@ -98,7 +98,7 @@ impl SocketAddrUnix {
     #[inline]
     #[cfg(feature = "alloc")]
     #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
-    pub fn path(&self) -> Option<Cow<CStr>> {
+    pub fn path(&self) -> Option<Cow<'_, CStr>> {
         let bytes = self.bytes()?;
         if !bytes.is_empty() && bytes[0] != 0 {
             if self.unix.sun_path.len() == bytes.len() {
@@ -115,7 +115,7 @@ impl SocketAddrUnix {
 
     /// If the `sun_path` field is not NUL-terminated, terminate it.
     #[cfg(feature = "alloc")]
-    fn path_with_termination(&self, bytes: &[u8]) -> Option<Cow<CStr>> {
+    fn path_with_termination(&self, bytes: &[u8]) -> Option<Cow<'_, CStr>> {
         let mut owned = bytes.to_owned();
         owned.push(b'\0');
         Some(CString::from_vec_with_nul(owned).unwrap().into())
