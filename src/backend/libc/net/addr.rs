@@ -13,6 +13,8 @@ use {
     core::hash::{Hash, Hasher},
     core::slice,
 };
+#[cfg(all(unix, feature = "alloc"))]
+use {crate::ffi::CString, alloc::borrow::Cow, alloc::vec::Vec};
 
 /// `struct sockaddr_un`
 #[cfg(unix)]
@@ -35,9 +37,12 @@ impl SocketAddrUnix {
     #[inline]
     fn _new(path: &CStr) -> io::Result<Self> {
         let mut unix = Self::init();
-        let bytes = path.to_bytes_with_nul();
+        let mut bytes = path.to_bytes_with_nul();
         if bytes.len() > unix.sun_path.len() {
-            return Err(io::Errno::NAMETOOLONG);
+            bytes = path.to_bytes(); // without NUL
+            if bytes.len() > unix.sun_path.len() {
+                return Err(io::Errno::NAMETOOLONG);
+            }
         }
         for (i, b) in bytes.iter().enumerate() {
             unix.sun_path[i] = *b as c::c_char;
@@ -129,12 +134,52 @@ impl SocketAddrUnix {
 
     /// For a filesystem path address, return the path.
     #[inline]
-    pub fn path(&self) -> Option<&CStr> {
+    #[cfg(feature = "alloc")]
+    #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
+    pub fn path(&self) -> Option<Cow<'_, CStr>> {
         let bytes = self.bytes()?;
         if !bytes.is_empty() && bytes[0] != 0 {
-            // SAFETY: `from_bytes_with_nul_unchecked` since the string is
-            // NUL-terminated.
-            Some(unsafe { CStr::from_bytes_with_nul_unchecked(bytes) })
+            if self.unix.sun_path.len() == bytes.len() {
+                // SAFETY: no NULs are contained in bytes
+                unsafe { self.path_with_termination(bytes) }
+            } else {
+                // SAFETY: `from_bytes_with_nul_unchecked` since the string is
+                // NUL-terminated.
+                Some(unsafe { CStr::from_bytes_with_nul_unchecked(bytes) }.into())
+            }
+        } else {
+            None
+        }
+    }
+
+    /// If the `sun_path` field is not NUL-terminated, terminate it.
+    ///
+    /// SAFETY: the input `bytes` must not contain any NULs
+    #[cfg(feature = "alloc")]
+    unsafe fn path_with_termination(&self, bytes: &[u8]) -> Option<Cow<'_, CStr>> {
+        let mut owned = Vec::with_capacity(bytes.len() + 1);
+        owned.extend_from_slice(bytes);
+        owned.push(b'\0');
+        // SAFETY: `from_vec_with_nul_unchecked` since the string is
+        // NUL-terminated and `bytes` does not conain any NULs.
+        Some(Cow::Owned(
+            CString::from_vec_with_nul_unchecked(owned).into(),
+        ))
+    }
+
+    /// For a filesystem path address, return the path as a byte sequence,
+    /// excluding the NUL terminator.
+    #[inline]
+    pub fn path_bytes(&self) -> Option<&[u8]> {
+        let bytes = self.bytes()?;
+        if !bytes.is_empty() && bytes[0] != 0 {
+            if self.unix.sun_path.len() == self.len() - offsetof_sun_path() {
+                // There is no NUL terminator.
+                Some(bytes)
+            } else {
+                // Remove the NUL terminator.
+                Some(&bytes[..bytes.len() - 1])
+            }
         } else {
             None
         }
@@ -231,16 +276,21 @@ impl Hash for SocketAddrUnix {
 #[cfg(unix)]
 impl fmt::Debug for SocketAddrUnix {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        #[cfg(feature = "alloc")]
         if let Some(path) = self.path() {
-            path.fmt(f)
-        } else {
-            #[cfg(linux_kernel)]
-            if let Some(name) = self.abstract_name() {
-                return name.fmt(f);
-            }
-
-            "(unnamed)".fmt(f)
+            return path.fmt(f);
         }
+        if let Some(bytes) = self.path_bytes() {
+            if let Ok(s) = core::str::from_utf8(bytes) {
+                return s.fmt(f);
+            }
+            return bytes.fmt(f);
+        }
+        #[cfg(linux_kernel)]
+        if let Some(name) = self.abstract_name() {
+            return name.fmt(f);
+        }
+        "(unnamed)".fmt(f)
     }
 }
 

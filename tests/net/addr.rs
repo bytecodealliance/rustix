@@ -31,19 +31,19 @@ fn test_unix_addr() {
 
     assert_eq!(
         SocketAddrUnix::new("/").unwrap().path().unwrap(),
-        cstr!("/")
+        cstr!("/").into()
     );
     assert_eq!(
         SocketAddrUnix::new("//").unwrap().path().unwrap(),
-        cstr!("//")
+        cstr!("//").into()
     );
     assert_eq!(
         SocketAddrUnix::new("/foo/bar").unwrap().path().unwrap(),
-        cstr!("/foo/bar")
+        cstr!("/foo/bar").into()
     );
     assert_eq!(
         SocketAddrUnix::new("foo").unwrap().path().unwrap(),
-        cstr!("foo")
+        cstr!("foo").into()
     );
     SocketAddrUnix::new("/foo\0/bar").unwrap_err();
     assert!(SocketAddrUnix::new("").unwrap().path().is_none());
