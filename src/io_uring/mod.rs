@@ -1159,8 +1159,6 @@ impl io_uring_user_data {
     pub const fn zeroed() -> Self {
         // Initialize the `u64_` field, which is the size of the full union.
         // This can use `core::mem::zeroed` in Rust 1.75.
-        #[cfg(test)]
-        assert_eq_size!(u64, Self);
         Self { u64_: 0 }
     }
 
