@@ -251,11 +251,15 @@ advice applies to the end of the file. To convert an arbitrary `u64` value to
 
 [`rustix::fs::fadvise`]: https://docs.rs/rustix/1.0.0/rustix/fs/fn.fadvise.html
 
-[`rustix::io_uring::io_uring_enter`] has a new signature; instead of `arg` and
-`size` providing a raw `*mut c_void` and `usize`, it now takes any `&T` and
-infers the size.
+[`rustix::io_uring::io_uring_enter`] no longer has `arg` and `size` arguments
+providing a raw `*mut c_void` and `usize` describing the argument value. To
+pass argumentts, there are now additional functions, `io_uring_enter_sigmask`,
+and `io_uring_enter_arg`, which take a [`KernelSigSet`] or an
+`io_uring_getevents_arg`, respectively. These are more ergonomic, and provide
+a better path to adding `IORING_ENTER_EXT_ARG_REG` support in the future.
 
 [`rustix::io_uring::io_uring_enter`]: https://docs.rs/rustix/1.0.0/rustix/io_uring/fn.io_uring_enter.html
+[`KernelSigSet`]: https://docs.rs/rustix/1.0.0/rustix/io_uring/struct.KernelSigSet.html
 
 The [`sigmask`] and [`ts`] fields of [`rustix::io_uring::getevents_arg`]
 changed from `u64` to [`rustix::io_uring::io_uring_ptr`], to better preserve
