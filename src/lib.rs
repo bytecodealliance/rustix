@@ -350,8 +350,8 @@ pub(crate) mod path;
 #[cfg(not(any(windows, target_os = "espidf")))]
 #[cfg(any(feature = "thread", feature = "time", target_arch = "x86"))]
 mod clockid;
-#[cfg(linux_raw)]
-#[cfg(feature = "runtime")]
+#[cfg(linux_kernel)]
+#[cfg(any(feature = "io_uring", feature = "runtime"))]
 mod kernel_sigset;
 #[cfg(not(any(windows, target_os = "wasi")))]
 #[cfg(any(
@@ -374,9 +374,6 @@ mod prctl;
     all(bsd, feature = "event")
 ))]
 mod signal;
-#[cfg(linux_kernel)]
-#[cfg(any(feature = "runtime", feature = "io_uring"))]
-mod sigset;
 #[cfg(any(
     feature = "fs",
     feature = "event",

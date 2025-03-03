@@ -3,25 +3,30 @@
 #![allow(unsafe_code)]
 #![allow(non_camel_case_types)]
 
+use crate::backend::c;
 use crate::signal::Signal;
 use core::fmt;
 use linux_raw_sys::general::{kernel_sigset_t, _NSIG};
 
 /// `kernel_sigset_t`—A set of signal numbers, as used by some syscalls.
 ///
-/// Like [`SigSet`] but with only enough space for the signals currently known
-/// to be used by the kernel. It is used in functions where Linux's
-/// documentation states that the size "is currently required to have a fixed
-/// architecture specific value (equal to `sizeof(kernel_sigset_t)`)".
+/// This is similar to `libc::sigset_t`, but with only enough space for the
+/// signals currently known to be used by the kernel. libc implementaions
+/// reserve extra space so that if Linux defines new signals in the future
+/// they can add support without breaking their dynamic linking ABI. Rustix
+/// doesn't support a dynamic linking ABI, so if we need to increase the
+/// size of `KernelSigSet` in the future, we can do so.
 ///
-/// This type is guaranteed to have a subset of the layout of `libc::sigset_t`.
+/// It's also the case that the last time Linux changed the size of its
+/// `kernel_sigset_t` was when it added support for POSIX.1b signals in 1999.
 ///
-/// libc implementations typically reserve some signal values for internal use.
-/// In a process that contains a libc, some unsafe functions invoke undefined
-/// behavior if passed a `KernelSigSet` that contains one of the signals that
-/// the libc reserves.
+/// `KernelSigSet` is guaranteed to have a subset of the layout of
+/// `libc::sigset_t`.
 ///
-/// [`SigSet`]: crate::sigset::SigSet
+/// libc implementations typically also reserve some signal values for internal
+/// use. In a process that contains a libc, some unsafe functions invoke
+/// undefined behavior if passed a `KernelSigSet` that contains one of the
+/// signals that the libc reserves.
 #[repr(transparent)]
 #[derive(Clone)]
 pub struct KernelSigSet(kernel_sigset_t);
@@ -29,24 +34,20 @@ pub struct KernelSigSet(kernel_sigset_t);
 impl KernelSigSet {
     /// Create a new empty `KernelSigSet`.
     pub const fn empty() -> Self {
-        Self(kernel_sigset_t {
-            #[cfg(target_pointer_width = "64")]
-            sig: [0; 1],
-            #[cfg(target_pointer_width = "32")]
-            sig: [0; 2],
-        })
+        const fn zeros<const N: usize>() -> [c::c_ulong; N] {
+            [0; N]
+        }
+        Self(kernel_sigset_t { sig: zeros() })
     }
 
     /// Create a new `KernelSigSet` with all signals set.
     ///
     /// This includes signals which are typically reserved for libc.
     pub const fn all() -> Self {
-        Self(kernel_sigset_t {
-            #[cfg(target_pointer_width = "64")]
-            sig: [!0; 1],
-            #[cfg(target_pointer_width = "32")]
-            sig: [!0; 2],
-        })
+        const fn ones<const N: usize>() -> [c::c_ulong; N] {
+            [!0; N]
+        }
+        Self(kernel_sigset_t { sig: ones() })
     }
 
     /// Remove all signals.
@@ -115,12 +116,13 @@ impl fmt::Debug for KernelSigSet {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[cfg(linux_raw)]
     use crate::runtime::{KERNEL_SIGRTMAX, KERNEL_SIGRTMIN};
-    use crate::sigset::SigSet;
     use core::mem::{align_of, size_of};
 
     #[test]
     fn test_assumptions() {
+        #[cfg(linux_raw)]
         assert!(KERNEL_SIGRTMAX as usize - 1 < size_of::<KernelSigSet>() * 8);
     }
 
@@ -131,56 +133,105 @@ mod tests {
     }
 
     /// A bunch of signals for testing.
-    const SIGS: [Signal; 31] = [
-        Signal::HUP,
-        Signal::INT,
-        Signal::QUIT,
-        Signal::ILL,
-        Signal::TRAP,
-        Signal::ABORT,
-        Signal::BUS,
-        Signal::FPE,
-        Signal::KILL,
-        Signal::USR1,
-        Signal::SEGV,
-        Signal::USR2,
-        Signal::PIPE,
-        Signal::ALARM,
-        Signal::TERM,
-        Signal::CHILD,
-        Signal::CONT,
-        Signal::STOP,
-        Signal::TSTP,
-        Signal::TTIN,
-        Signal::TTOU,
-        Signal::URG,
-        Signal::XCPU,
-        Signal::XFSZ,
-        Signal::VTALARM,
-        Signal::PROF,
-        Signal::WINCH,
-        Signal::SYS,
-        unsafe { Signal::from_raw_unchecked(KERNEL_SIGRTMIN) },
-        unsafe { Signal::from_raw_unchecked(KERNEL_SIGRTMIN + 7) },
-        unsafe { Signal::from_raw_unchecked(KERNEL_SIGRTMAX) },
-    ];
+    fn sigs() -> Vec<Signal> {
+        #[allow(unused_mut)]
+        let mut sigs = vec![
+            Signal::HUP,
+            Signal::INT,
+            Signal::QUIT,
+            Signal::ILL,
+            Signal::TRAP,
+            Signal::ABORT,
+            Signal::BUS,
+            Signal::FPE,
+            Signal::KILL,
+            Signal::USR1,
+            Signal::SEGV,
+            Signal::USR2,
+            Signal::PIPE,
+            Signal::ALARM,
+            Signal::TERM,
+            Signal::CHILD,
+            Signal::CONT,
+            Signal::STOP,
+            Signal::TSTP,
+            Signal::TTIN,
+            Signal::TTOU,
+            Signal::URG,
+            Signal::XCPU,
+            Signal::XFSZ,
+            Signal::VTALARM,
+            Signal::PROF,
+            Signal::WINCH,
+            Signal::SYS,
+            unsafe { Signal::from_raw_unchecked(libc::SIGRTMIN()) },
+            unsafe { Signal::from_raw_unchecked(libc::SIGRTMIN() + 7) },
+            unsafe { Signal::from_raw_unchecked(libc::SIGRTMAX()) },
+        ];
+
+        #[cfg(linux_raw)]
+        {
+            sigs.push(unsafe { Signal::from_raw_unchecked(KERNEL_SIGRTMIN) });
+            sigs.push(unsafe { Signal::from_raw_unchecked(KERNEL_SIGRTMIN + 7) });
+            sigs.push(unsafe { Signal::from_raw_unchecked(KERNEL_SIGRTMAX) });
+        }
+
+        sigs
+    }
+
+    /// A bunch of non-reserved signals for testing.
+    fn libc_sigs() -> [Signal; 31] {
+        [
+            Signal::HUP,
+            Signal::INT,
+            Signal::QUIT,
+            Signal::ILL,
+            Signal::TRAP,
+            Signal::ABORT,
+            Signal::BUS,
+            Signal::FPE,
+            Signal::KILL,
+            Signal::USR1,
+            Signal::SEGV,
+            Signal::USR2,
+            Signal::PIPE,
+            Signal::ALARM,
+            Signal::TERM,
+            Signal::CHILD,
+            Signal::CONT,
+            Signal::STOP,
+            Signal::TSTP,
+            Signal::TTIN,
+            Signal::TTOU,
+            Signal::URG,
+            Signal::XCPU,
+            Signal::XFSZ,
+            Signal::VTALARM,
+            Signal::PROF,
+            Signal::WINCH,
+            Signal::SYS,
+            unsafe { Signal::from_raw_unchecked(libc::SIGRTMIN()) },
+            unsafe { Signal::from_raw_unchecked(libc::SIGRTMIN() + 7) },
+            unsafe { Signal::from_raw_unchecked(libc::SIGRTMAX()) },
+        ]
+    }
 
     #[test]
     fn test_ops_plain() {
-        for sig in SIGS {
+        for sig in sigs() {
             let mut set = KernelSigSet::empty();
-            for sig in SIGS {
+            for sig in sigs() {
                 assert!(!set.contains(sig));
             }
 
             set.insert(sig);
             assert!(set.contains(sig));
-            for sig in SIGS.iter().filter(|s| **s != sig) {
+            for sig in sigs().iter().filter(|s| **s != sig) {
                 assert!(!set.contains(*sig));
             }
 
             set.remove(sig);
-            for sig in SIGS {
+            for sig in sigs() {
                 assert!(!set.contains(sig));
             }
         }
@@ -189,78 +240,83 @@ mod tests {
     #[test]
     fn test_clear() {
         let mut set = KernelSigSet::empty();
-        for sig in SIGS {
+        for sig in sigs() {
             set.insert(sig);
         }
 
         set.clear();
 
-        for sig in SIGS {
+        for sig in sigs() {
             assert!(!set.contains(sig));
         }
     }
 
-    // We guarantee that `KernelSigSet` has a subset of the layout of `SigSet`.
-    // Test this.
+    // io_uring libraries assume that libc's `sigset_t` matches the layout
+    // of the Linux kernel's `kernel_sigset_t`. Test that rustix's layout
+    // matches as well.
     #[test]
-    fn test_sigset_layout_compatibility() {
+    fn test_libc_layout_compatibility() {
         use crate::utils::as_ptr;
 
-        let mut s = SigSet::empty();
-        let mut k = KernelSigSet::empty();
+        let mut lc = unsafe { core::mem::zeroed::<libc::sigset_t>() };
+        let mut ru = KernelSigSet::empty();
+        let r = unsafe { libc::sigemptyset(&mut lc) };
 
+        assert_eq!(r, 0);
         assert_eq!(
             unsafe {
                 libc::memcmp(
-                    as_ptr(&s).cast(),
-                    as_ptr(&k).cast(),
-                    (KERNEL_SIGRTMAX as usize + 7) / 8,
+                    as_ptr(&lc).cast(),
+                    as_ptr(&ru).cast(),
+                    core::mem::size_of::<KernelSigSet>(),
                 )
             },
             0
         );
 
-        for sig in SIGS {
-            k.insert(sig);
+        for sig in libc_sigs() {
+            ru.insert(sig);
             assert_ne!(
                 unsafe {
                     libc::memcmp(
-                        as_ptr(&s).cast(),
-                        as_ptr(&k).cast(),
-                        (KERNEL_SIGRTMAX as usize + 7) / 8,
+                        as_ptr(&lc).cast(),
+                        as_ptr(&ru).cast(),
+                        core::mem::size_of::<KernelSigSet>(),
                     )
                 },
                 0
             );
-            s.insert(sig);
+            let r = unsafe { libc::sigaddset(&mut lc, sig.as_raw()) };
+            assert_eq!(r, 0);
             assert_eq!(
                 unsafe {
                     libc::memcmp(
-                        as_ptr(&s).cast(),
-                        as_ptr(&k).cast(),
-                        (KERNEL_SIGRTMAX as usize + 7) / 8,
+                        as_ptr(&lc).cast(),
+                        as_ptr(&ru).cast(),
+                        core::mem::size_of::<KernelSigSet>(),
                     )
                 },
                 0
             );
-            k.remove(sig);
+            ru.remove(sig);
             assert_ne!(
                 unsafe {
                     libc::memcmp(
-                        as_ptr(&s).cast(),
-                        as_ptr(&k).cast(),
-                        (KERNEL_SIGRTMAX as usize + 7) / 8,
+                        as_ptr(&lc).cast(),
+                        as_ptr(&ru).cast(),
+                        core::mem::size_of::<KernelSigSet>(),
                     )
                 },
                 0
             );
-            s.remove(sig);
+            let r = unsafe { libc::sigdelset(&mut lc, sig.as_raw()) };
+            assert_eq!(r, 0);
             assert_eq!(
                 unsafe {
                     libc::memcmp(
-                        as_ptr(&s).cast(),
-                        as_ptr(&k).cast(),
-                        (KERNEL_SIGRTMAX as usize + 7) / 8,
+                        as_ptr(&lc).cast(),
+                        as_ptr(&ru).cast(),
+                        core::mem::size_of::<KernelSigSet>(),
                     )
                 },
                 0
