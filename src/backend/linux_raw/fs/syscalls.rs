@@ -1676,31 +1676,44 @@ fn test_sizes() {
 // Some linux_raw_sys structs have unsigned types for values which are
 // interpreted as signed. This defines a utility or casting to the
 // same-sized signed type.
-trait AsSigned {
-    type Signed;
-    fn as_signed(self) -> Self::Signed;
-}
-impl AsSigned for u32 {
-    type Signed = i32;
-    fn as_signed(self) -> Self::Signed {
-        self as _
+#[cfg(any(
+    target_pointer_width = "32",
+    target_arch = "mips64",
+    target_arch = "mips64r6"
+))]
+mod as_signed {
+    pub(super) trait AsSigned {
+        type Signed;
+        fn as_signed(self) -> Self::Signed;
+    }
+    impl AsSigned for u32 {
+        type Signed = i32;
+        fn as_signed(self) -> Self::Signed {
+            self as _
+        }
+    }
+    impl AsSigned for i32 {
+        type Signed = i32;
+        fn as_signed(self) -> Self::Signed {
+            self
+        }
+    }
+    impl AsSigned for u64 {
+        type Signed = i64;
+        fn as_signed(self) -> Self::Signed {
+            self as _
+        }
+    }
+    impl AsSigned for i64 {
+        type Signed = i64;
+        fn as_signed(self) -> Self::Signed {
+            self
+        }
     }
 }
-impl AsSigned for i32 {
-    type Signed = i32;
-    fn as_signed(self) -> Self::Signed {
-        self
-    }
-}
-impl AsSigned for u64 {
-    type Signed = i64;
-    fn as_signed(self) -> Self::Signed {
-        self as _
-    }
-}
-impl AsSigned for i64 {
-    type Signed = i64;
-    fn as_signed(self) -> Self::Signed {
-        self
-    }
-}
+#[cfg(any(
+    target_pointer_width = "32",
+    target_arch = "mips64",
+    target_arch = "mips64r6"
+))]
+use as_signed::*;
