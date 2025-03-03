@@ -73,7 +73,7 @@ pub(crate) unsafe fn kernel_fork() -> io::Result<Fork> {
     ))?;
 
     Ok(if let Some(pid) = Pid::from_raw(pid) {
-        Fork::Parent(pid)
+        Fork::ParentOf(pid)
     } else {
         Fork::Child(Pid::from_raw_unchecked(child_pid.assume_init()))
     })
