@@ -33,8 +33,8 @@ use bindgen_types::*;
 use core::cmp::Ordering;
 use core::ffi::c_void;
 use core::hash::{Hash, Hasher};
-use core::mem::{size_of, MaybeUninit};
-use core::ptr::{null_mut, write_bytes};
+use core::mem::size_of;
+use core::ptr::null_mut;
 use linux_raw_sys::net;
 
 // Export types used in io_uring APIs.
@@ -1157,13 +1157,11 @@ pub union io_uring_user_data {
 impl io_uring_user_data {
     /// Create a zero-initialized `Self`.
     pub const fn zeroed() -> Self {
+        // Initialize the `u64_` field, which is the size of the full union.
         // This can use `core::mem::zeroed` in Rust 1.75.
-        let mut s = MaybeUninit::<Self>::uninit();
-        // SAFETY: All of Linux's io_uring structs may be zero-initialized.
-        unsafe {
-            write_bytes(s.as_mut_ptr(), 0, 1);
-            s.assume_init()
-        }
+        #[cfg(test)]
+        assert_eq_size!(u64, Self);
+        Self { u64_: 0 }
     }
 
     /// Return the `u64` value.
