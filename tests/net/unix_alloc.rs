@@ -361,12 +361,22 @@ fn do_test_unix_msg_unconnected(addr: SocketAddrUnix) {
 #[cfg(not(any(target_os = "espidf", target_os = "redox", target_os = "wasi")))]
 #[test]
 fn test_unix_msg() {
+    use rustix::ffi::CString;
+    use std::os::unix::ffi::OsStrExt as _;
+
     crate::init();
 
     let tmpdir = tempfile::tempdir().unwrap();
     let path = tmpdir.path().join("scp_4804");
 
     let name = SocketAddrUnix::new(&path).unwrap();
+    assert_eq!(
+        name.path(),
+        Some(CString::new(path.as_os_str().as_bytes()).unwrap().into())
+    );
+    assert_eq!(name.path_bytes(), Some(path.as_os_str().as_bytes()));
+    #[cfg(linux_kernel)]
+    assert!(!name.is_unnamed());
     do_test_unix_msg(name);
 
     unlinkat(CWD, path, AtFlags::empty()).unwrap();
@@ -376,12 +386,22 @@ fn test_unix_msg() {
 #[cfg(not(any(target_os = "espidf", target_os = "redox", target_os = "wasi")))]
 #[test]
 fn test_unix_msg_unconnected() {
+    use rustix::ffi::CString;
+    use std::os::unix::ffi::OsStrExt as _;
+
     crate::init();
 
     let tmpdir = tempfile::tempdir().unwrap();
     let path = tmpdir.path().join("scp_4804");
 
     let name = SocketAddrUnix::new(&path).unwrap();
+    assert_eq!(
+        name.path(),
+        Some(CString::new(path.as_os_str().as_bytes()).unwrap().into())
+    );
+    assert_eq!(name.path_bytes(), Some(path.as_os_str().as_bytes()));
+    #[cfg(linux_kernel)]
+    assert!(!name.is_unnamed());
     do_test_unix_msg_unconnected(name);
 
     unlinkat(CWD, path, AtFlags::empty()).unwrap();
@@ -398,6 +418,8 @@ fn test_abstract_unix_msg() {
     let path = tmpdir.path().join("scp_4804");
 
     let name = SocketAddrUnix::new_abstract_name(path.as_os_str().as_bytes()).unwrap();
+    assert_eq!(name.abstract_name(), Some(path.as_os_str().as_bytes()));
+    assert!(!name.is_unnamed());
     do_test_unix_msg(name);
 }
 
@@ -413,6 +435,8 @@ fn test_abstract_unix_msg_unconnected() {
     let path = tmpdir.path().join("scp_4804");
 
     let name = SocketAddrUnix::new_abstract_name(path.as_os_str().as_bytes()).unwrap();
+    assert_eq!(name.abstract_name(), Some(path.as_os_str().as_bytes()));
+    assert!(!name.is_unnamed());
     do_test_unix_msg_unconnected(name);
 }
 
