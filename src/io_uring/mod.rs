@@ -144,8 +144,13 @@ pub unsafe fn io_uring_register_with<Fd: AsFd>(
     backend::io_uring::syscalls::io_uring_register_with(fd.as_fd(), opcode, flags, arg, nr_args)
 }
 
-/// `io_uring_enter2(fd, to_submit, min_complete, flags, arg,
-/// size_of_val(arg))`—Initiate and/or complete asynchronous I/O.
+/// `io_uring_enter(fd, to_submit, min_complete, flags, 0, 0)`—Initiate
+/// and/or complete asynchronous I/O.
+///
+/// This version has no `arg` argument. To pass:
+///  - a signal mask, use [`io_uring_enter_sigmask`].
+///  - an [`io_uring_getevents_arg`], use [`io_uring_enter_arg`] (aka
+///    `io_uring_enter2`).
 ///
 /// # Safety
 ///
@@ -153,9 +158,8 @@ pub unsafe fn io_uring_register_with<Fd: AsFd>(
 /// responsible for ensuring that memory and resources are only accessed in
 /// valid ways.
 ///
-/// And, `arg` must either be a [`SigSet`] or a [`io_uring_getevents_arg`], and
-/// `flags` must contain [`IoringEnterFlags::EXT_ARG`] if and only if it's a
-/// `io_uring_getevents_arg`.
+/// And, `flags` must not have [`IoringEnterFlags::EXT_ARG`] or
+/// [`IoringEnterFlags::EXT_ARG_REG`] set.
 ///
 /// # References
 ///  - [Linux]
@@ -163,21 +167,99 @@ pub unsafe fn io_uring_register_with<Fd: AsFd>(
 /// [Linux]: https://www.man7.org/linux/man-pages/man2/io_uring_enter.2.html
 #[doc(alias = "io_uring_enter2")]
 #[inline]
-pub unsafe fn io_uring_enter<Fd: AsFd, T>(
+pub unsafe fn io_uring_enter<Fd: AsFd>(
     fd: Fd,
     to_submit: u32,
     min_complete: u32,
     flags: IoringEnterFlags,
-    arg: Option<&T>,
 ) -> io::Result<u32> {
-    debug_assert!(
-        size_of::<T>() == size_of::<KernelSigSet>()
-            || size_of::<T>() == size_of::<io_uring_getevents_arg>()
-    );
-    debug_assert!(
-        (size_of::<T>() == size_of::<io_uring_getevents_arg>())
-            == (flags.contains(IoringEnterFlags::EXT_ARG))
-    );
+    debug_assert!(!flags.contains(IoringEnterFlags::EXT_ARG));
+    debug_assert!(!flags.contains(IoringEnterFlags::EXT_ARG_REG));
+
+    backend::io_uring::syscalls::io_uring_enter(
+        fd.as_fd(),
+        to_submit,
+        min_complete,
+        flags,
+        null_mut(),
+        0,
+    )
+}
+
+/// `io_uring_enter(fd, to_submit, min_complete, flags, sigmask,
+/// sizeof(*sigmask))`— Initiate and/or complete asynchronous I/O, with a
+/// signal mask.
+///
+/// # Safety
+///
+/// io_uring operates on raw pointers and raw file descriptors. Users are
+/// responsible for ensuring that memory and resources are only accessed in
+/// valid ways.
+///
+/// And, `flags` must not have [`IoringEnterFlags::EXT_ARG`] or
+/// [`IoringEnterFlags::EXT_ARG_REG`] set.
+///
+/// And, the `KernelSigSet` referred to by `arg` must not contain any signal
+/// numbers reserved by libc.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://www.man7.org/linux/man-pages/man2/io_uring_enter.2.html
+#[doc(alias = "io_uring_enter")]
+#[inline]
+pub unsafe fn io_uring_enter_sigmask<Fd: AsFd>(
+    fd: Fd,
+    to_submit: u32,
+    min_complete: u32,
+    flags: IoringEnterFlags,
+    sigmask: Option<&KernelSigSet>,
+) -> io::Result<u32> {
+    debug_assert!(!flags.contains(IoringEnterFlags::EXT_ARG));
+    debug_assert!(!flags.contains(IoringEnterFlags::EXT_ARG_REG));
+
+    backend::io_uring::syscalls::io_uring_enter(
+        fd.as_fd(),
+        to_submit,
+        min_complete,
+        flags,
+        option_as_ptr(sigmask).cast::<c_void>(),
+        size_of::<KernelSigSet>(),
+    )
+}
+
+/// `io_uring_enter2(fd, to_submit, min_complete, flags, arg, sizeof(*arg))`—
+/// Initiate and/or complete asynchronous I/O, with a signal mask and a
+/// timeout.
+///
+/// # Safety
+///
+/// io_uring operates on raw pointers and raw file descriptors. Users are
+/// responsible for ensuring that memory and resources are only accessed in
+/// valid ways.
+///
+/// And, `flags` must have [`IoringEnterFlags::EXT_ARG`] set, and must not have
+/// [`IoringEnterFlags::EXT_ARG_REG`] set.
+///
+/// And, the `KernelSigSet` pointed to by the `io_uring_getenvets_arg` referred
+/// to by `arg` must not contain any signal numbers reserved by libc.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://www.man7.org/linux/man-pages/man2/io_uring_enter.2.html
+#[doc(alias = "io_uring_enter")]
+#[doc(alias = "io_uring_enter2")]
+#[inline]
+pub unsafe fn io_uring_enter_arg<Fd: AsFd>(
+    fd: Fd,
+    to_submit: u32,
+    min_complete: u32,
+    flags: IoringEnterFlags,
+    arg: Option<&io_uring_getevents_arg>,
+) -> io::Result<u32> {
+    debug_assert!(flags.contains(IoringEnterFlags::EXT_ARG));
+    debug_assert!(!flags.contains(IoringEnterFlags::EXT_ARG_REG));
 
     backend::io_uring::syscalls::io_uring_enter(
         fd.as_fd(),
@@ -185,7 +267,51 @@ pub unsafe fn io_uring_enter<Fd: AsFd, T>(
         min_complete,
         flags,
         option_as_ptr(arg).cast::<c_void>(),
-        size_of::<T>(),
+        size_of::<io_uring_getevents_arg>(),
+    )
+}
+
+/// `io_uring_enter2(fd, to_submit, min_complete, flags, offset,
+/// sizeof(io_uring_reg_wait))`— Initiate and/or complete asynchronous I/O,
+/// using a previously regisered `io_uring_reg_wait`.
+///
+/// `offset` is an offset into an area of wait regions previously registered
+/// with [`io_uring_register`] using the [`IoringRegisterOp::CQWAIT_REG`]
+/// operation.
+///
+/// # Safety
+///
+/// io_uring operates on raw pointers and raw file descriptors. Users are
+/// responsible for ensuring that memory and resources are only accessed in
+/// valid ways.
+///
+/// And, `flags` must have [`IoringEnterFlags::EXT_ARG_REG`] set, and must not
+/// have [`IoringEnterFlags::EXT_ARG`] set.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://www.man7.org/linux/man-pages/man2/io_uring_enter.2.html
+#[doc(alias = "io_uring_enter")]
+#[doc(alias = "io_uring_enter2")]
+#[inline]
+pub unsafe fn io_uring_enter_reg_wait<Fd: AsFd>(
+    fd: Fd,
+    to_submit: u32,
+    min_complete: u32,
+    flags: IoringEnterFlags,
+    reg_wait: usize,
+) -> io::Result<u32> {
+    debug_assert!(!flags.contains(IoringEnterFlags::EXT_ARG));
+    debug_assert!(flags.contains(IoringEnterFlags::EXT_ARG_REG));
+
+    backend::io_uring::syscalls::io_uring_enter(
+        fd.as_fd(),
+        to_submit,
+        min_complete,
+        flags,
+        reg_wait as *mut c_void,
+        size_of::<io_uring_reg_wait>(),
     )
 }
 
@@ -203,11 +329,17 @@ bitflags::bitflags! {
         /// `IORING_ENTER_SQ_WAIT`
         const SQ_WAIT = sys::IORING_ENTER_SQ_WAIT;
 
-        /// `IORING_ENTER_EXT_ARG`
+        /// `IORING_ENTER_EXT_ARG` (since Linux 5.11)
         const EXT_ARG = sys::IORING_ENTER_EXT_ARG;
 
         /// `IORING_ENTER_REGISTERED_RING`
         const REGISTERED_RING = sys::IORING_ENTER_REGISTERED_RING;
+
+        /// `IORING_ENTER_ABS_TIMER` (since Linux 6.12)
+        const ABS_TIMER = sys::IORING_ENTER_ABS_TIMER;
+
+        /// `IORING_ENTER_EXT_ARG_REG` (since Linux 6.12)
+        const EXT_ARG_REG = sys::IORING_ENTER_EXT_ARG_REG;
 
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
@@ -297,6 +429,27 @@ pub enum IoringRegisterOp {
 
     /// `IORING_REGISTER_FILE_ALLOC_RANGE`
     RegisterFileAllocRange = sys::io_uring_register_op::IORING_REGISTER_FILE_ALLOC_RANGE as _,
+
+    /// `IORING_REGISTER_PBUF_STATUS` (since Linux 6.8)
+    RegisterPbufStatus = sys::io_uring_register_op::IORING_REGISTER_PBUF_STATUS as _,
+
+    /// `IORING_REGISTER_NAPI` (since Linux 6.9)
+    RegisterNapi = sys::io_uring_register_op::IORING_REGISTER_NAPI as _,
+
+    /// `IORING_UNREGISTER_NAPI` (since Linux 6.9)
+    UnregisterNapi = sys::io_uring_register_op::IORING_UNREGISTER_NAPI as _,
+
+    /// `IORING_REGISTER_CLOCK` (since Linux 6.12)
+    RegisterClock = sys::io_uring_register_op::IORING_REGISTER_CLOCK as _,
+
+    /// `IORING_REGISTER_CLONE_BUFFERS ` (since Linux 6.12)
+    RegisterCloneBuffers = sys::io_uring_register_op::IORING_REGISTER_CLONE_BUFFERS as _,
+
+    /// `IORING_REGISTER_SEND_MSG_RING` (since Linux 6.12)
+    RegisterSendMsgRing = sys::io_uring_register_op::IORING_REGISTER_SEND_MSG_RING as _,
+
+    /// `IORING_REGISTER_RESIZE_RINGS`(since Linux 6.13)
+    RegisterResizeRings = sys::io_uring_register_op::IORING_REGISTER_RESIZE_RINGS as _,
 }
 
 bitflags::bitflags! {
@@ -464,31 +617,31 @@ pub enum IoringOp {
     /// `IORING_OP_SENDMSG_ZC`
     SendmsgZc = sys::io_uring_op::IORING_OP_SENDMSG_ZC as _,
 
-    /// `IORING_OP_READ_MULTISHOT`
+    /// `IORING_OP_READ_MULTISHOT` (since Linux 6.7)
     ReadMultishot = sys::io_uring_op::IORING_OP_READ_MULTISHOT as _,
 
-    /// `IORING_OP_WAITID`
+    /// `IORING_OP_WAITID` (since Linux 6.5)
     Waitid = sys::io_uring_op::IORING_OP_WAITID as _,
 
-    /// `IORING_OP_FUTEX_WAIT`
+    /// `IORING_OP_FUTEX_WAIT` (since Linux 6.7)
     FutexWait = sys::io_uring_op::IORING_OP_FUTEX_WAIT as _,
 
-    /// `IORING_OP_FUTEX_WAKE`
+    /// `IORING_OP_FUTEX_WAKE` (since Linux 6.7)
     FutexWake = sys::io_uring_op::IORING_OP_FUTEX_WAKE as _,
 
-    /// `IORING_OP_FUTEX_WAITV`
+    /// `IORING_OP_FUTEX_WAITV` (since Linux 6.7)
     FutexWaitv = sys::io_uring_op::IORING_OP_FUTEX_WAITV as _,
 
-    /// `IORING_OP_FIXED_FD_INSTALL`
+    /// `IORING_OP_FIXED_FD_INSTALL` (since Linux 6.8)
     FixedFdInstall = sys::io_uring_op::IORING_OP_FIXED_FD_INSTALL as _,
 
-    /// `IORING_OP_FTRUNCATE`
+    /// `IORING_OP_FTRUNCATE` (since Linux 6.9)
     Ftruncate = sys::io_uring_op::IORING_OP_FTRUNCATE as _,
 
-    /// `IORING_OP_BIND`
+    /// `IORING_OP_BIND` (since Linux 6.11)
     Bind = sys::io_uring_op::IORING_OP_BIND as _,
 
-    /// `IORING_OP_LISTEN`
+    /// `IORING_OP_LISTEN` (since Linux 6.11)
     Listen = sys::io_uring_op::IORING_OP_LISTEN as _,
 }
 
@@ -1702,6 +1855,51 @@ pub struct io_uring_buf_ring {
     pub tail_or_bufs: tail_or_bufs_struct,
 }
 
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Default)]
+#[non_exhaustive]
+pub struct io_uring_napi {
+    pub busy_poll_to: u32,
+    pub prefer_busy_poll: u8,
+    pub opcode: u8,
+    #[doc(hidden)]
+    pub pad: [u8; 2],
+    pub op_param: u32,
+    #[doc(hidden)]
+    pub resv: u32,
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Default)]
+#[non_exhaustive]
+pub struct io_uring_clone_buffers {
+    pub src_fd: u32,
+    pub flags: u32,
+    pub src_off: u32,
+    pub dst_off: u32,
+    pub nr: u32,
+    #[doc(hidden)]
+    pub pad: [u32; 3],
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Default)]
+#[non_exhaustive]
+pub struct io_uring_reg_wait {
+    pub ts: Timespec,
+    pub min_wait_usec: u32,
+    pub flags: u32,
+    pub sigmask: io_uring_ptr,
+    pub sigmask_sz: u32,
+    #[doc(hidden)]
+    pub pad: [u32; 3],
+    #[doc(hidden)]
+    pub pad2: [u64; 2],
+}
+
 impl Default for ioprio_union {
     #[inline]
     fn default() -> Self {
@@ -1939,6 +2137,35 @@ mod tests {
             io_uring_buf_ring__bindgen_ty_1__bindgen_ty_2
         );
         check_struct_renamed_field!(io_uring_buf_ring, tail_or_bufs, __bindgen_anon_1);
+
+        check_struct!(
+            io_uring_napi,
+            busy_poll_to,
+            prefer_busy_poll,
+            opcode,
+            pad,
+            op_param,
+            resv
+        );
+        check_struct!(
+            io_uring_clone_buffers,
+            src_fd,
+            flags,
+            src_off,
+            dst_off,
+            nr,
+            pad
+        );
+        check_struct!(
+            io_uring_reg_wait,
+            ts,
+            min_wait_usec,
+            flags,
+            sigmask,
+            sigmask_sz,
+            pad,
+            pad2
+        );
 
         check_renamed_struct!(
             MsgHdr,
