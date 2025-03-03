@@ -1538,7 +1538,7 @@ pub struct io_uring_probe_op {
 pub struct io_uring_files_update {
     pub offset: u32,
     pub resv: u32,
-    pub fds: u64,
+    pub fds: io_uring_ptr,
 }
 
 #[allow(missing_docs)]
@@ -1548,8 +1548,8 @@ pub struct io_uring_rsrc_register {
     pub nr: u32,
     pub flags: IoringRsrcFlags,
     pub resv2: u64,
-    pub data: u64,
-    pub tags: u64,
+    pub data: io_uring_ptr,
+    pub tags: io_uring_ptr,
 }
 
 #[allow(missing_docs)]
@@ -1558,7 +1558,7 @@ pub struct io_uring_rsrc_register {
 pub struct io_uring_rsrc_update {
     pub offset: u32,
     pub resv: u32,
-    pub data: u64,
+    pub data: io_uring_ptr,
 }
 
 #[allow(missing_docs)]
@@ -1567,8 +1567,8 @@ pub struct io_uring_rsrc_update {
 pub struct io_uring_rsrc_update2 {
     pub offset: u32,
     pub resv: u32,
-    pub data: u64,
-    pub tags: u64,
+    pub data: io_uring_ptr,
+    pub tags: io_uring_ptr,
     pub nr: u32,
     pub resv2: u32,
 }
