@@ -364,12 +364,21 @@ fn do_test_unix_msg_unconnected(addr: SocketAddrUnix) {
 #[cfg(not(any(target_os = "espidf", target_os = "redox", target_os = "wasi")))]
 #[test]
 fn test_unix_msg() {
+    use rustix::ffi::CString;
+    use std::os::unix::ffi::OsStrExt as _;
+
     crate::init();
 
     let tmpdir = tempfile::tempdir().unwrap();
     let path = tmpdir.path().join("scp_4804");
 
     let name = SocketAddrUnix::new(&path).unwrap();
+    assert_eq!(
+        name.path(),
+        Some(CString::new(path.as_os_str().as_bytes()).unwrap().into())
+    );
+    assert_eq!(name.path_bytes(), Some(path.as_os_str().as_bytes()));
+    assert!(!name.is_unnamed());
     do_test_unix_msg(name);
 
     unlinkat(CWD, path, AtFlags::empty()).unwrap();
@@ -379,12 +388,21 @@ fn test_unix_msg() {
 #[cfg(not(any(target_os = "espidf", target_os = "redox", target_os = "wasi")))]
 #[test]
 fn test_unix_msg_unconnected() {
+    use rustix::ffi::CString;
+    use std::os::unix::ffi::OsStrExt as _;
+
     crate::init();
 
     let tmpdir = tempfile::tempdir().unwrap();
     let path = tmpdir.path().join("scp_4804");
 
     let name = SocketAddrUnix::new(&path).unwrap();
+    assert_eq!(
+        name.path(),
+        Some(CString::new(path.as_os_str().as_bytes()).unwrap().into())
+    );
+    assert_eq!(name.path_bytes(), Some(path.as_os_str().as_bytes()));
+    assert!(!name.is_unnamed());
     do_test_unix_msg_unconnected(name);
 
     unlinkat(CWD, path, AtFlags::empty()).unwrap();
@@ -401,6 +419,8 @@ fn test_abstract_unix_msg() {
     let path = tmpdir.path().join("scp_4804");
 
     let name = SocketAddrUnix::new_abstract_name(path.as_os_str().as_bytes()).unwrap();
+    assert_eq!(name.abstract_name(), Some(path.as_os_str().as_bytes()));
+    assert!(!name.is_unnamed());
     do_test_unix_msg(name);
 }
 
@@ -416,6 +436,8 @@ fn test_abstract_unix_msg_unconnected() {
     let path = tmpdir.path().join("scp_4804");
 
     let name = SocketAddrUnix::new_abstract_name(path.as_os_str().as_bytes()).unwrap();
+    assert_eq!(name.abstract_name(), Some(path.as_os_str().as_bytes()));
+    assert!(!name.is_unnamed());
     do_test_unix_msg_unconnected(name);
 }
 
@@ -947,4 +969,35 @@ fn test_bind_unnamed_address() {
     assert!(!address.is_unnamed());
     assert_ne!(address.abstract_name(), None);
     assert_eq!(address.path(), None);
+}
+
+/// Test that names long enough to not have room for the NUL terminator are
+/// handled properly.
+#[test]
+fn test_long_named_address() {
+    use memoffset::span_of;
+    use rustix::ffi::CString;
+    use std::os::unix::ffi::OsStrExt;
+    use std::path::PathBuf;
+
+    let lens = [
+        span_of!(libc::sockaddr_un, sun_path).len(),
+        #[cfg(linux_kernel)]
+        span_of!(linux_raw_sys::net::sockaddr_un, sun_path).len(),
+    ];
+
+    for len in lens {
+        let path = PathBuf::from("a".repeat(len));
+        let name = SocketAddrUnix::new(&path).unwrap();
+        assert_eq!(
+            name.path(),
+            Some(CString::new(path.as_os_str().as_bytes()).unwrap().into())
+        );
+        assert_eq!(
+            name.path(),
+            Some(CString::new(path.as_os_str().as_bytes()).unwrap().into())
+        );
+        assert_eq!(name.path_bytes(), Some(path.as_os_str().as_bytes()));
+        assert!(!name.is_unnamed());
+    }
 }
