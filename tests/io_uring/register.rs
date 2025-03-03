@@ -4,9 +4,9 @@ use libc::c_void;
 use rustix::fd::{AsFd, AsRawFd, BorrowedFd};
 use rustix::io::{Errno, Result};
 use rustix::io_uring::{
-    io_uring_buf, io_uring_buf_reg, io_uring_buf_ring, io_uring_params, io_uring_register_with,
-    io_uring_rsrc_update, io_uring_setup, IoringFeatureFlags, IoringRegisterFlags,
-    IoringRegisterOp,
+    io_uring_buf, io_uring_buf_reg, io_uring_buf_ring, io_uring_params, io_uring_ptr,
+    io_uring_register_with, io_uring_rsrc_update, io_uring_setup, IoringFeatureFlags,
+    IoringRegisterFlags, IoringRegisterOp,
 };
 #[cfg(feature = "mm")]
 use rustix::mm::{MapFlags, ProtFlags};
@@ -36,7 +36,7 @@ where
 
 fn register_ring(fd: BorrowedFd<'_>) -> Result<BorrowedFd<'_>> {
     let update = io_uring_rsrc_update {
-        data: fd.as_raw_fd() as u64,
+        data: io_uring_ptr::new(fd.as_raw_fd() as u64 as *mut c_void),
         offset: u32::MAX,
         resv: 0,
     };
@@ -59,7 +59,7 @@ where
 {
     let update = io_uring_rsrc_update {
         offset: fd.as_raw_fd() as u32,
-        data: 0,
+        data: io_uring_ptr::null(),
         resv: 0,
     };
 
