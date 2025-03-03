@@ -33,8 +33,8 @@ use bindgen_types::*;
 use core::cmp::Ordering;
 use core::ffi::c_void;
 use core::hash::{Hash, Hasher};
-use core::mem::{size_of, MaybeUninit};
-use core::ptr::{null_mut, write_bytes};
+use core::mem::size_of;
+use core::ptr::null_mut;
 use linux_raw_sys::net;
 
 // Export types used in io_uring APIs.
@@ -1155,6 +1155,13 @@ pub union io_uring_user_data {
 }
 
 impl io_uring_user_data {
+    /// Create a zero-initialized `Self`.
+    pub const fn zeroed() -> Self {
+        // Initialize the `u64_` field, which is the size of the full union.
+        // This can use `core::mem::zeroed` in Rust 1.75.
+        Self { u64_: 0 }
+    }
+
     /// Return the `u64` value.
     #[inline]
     pub const fn u64_(self) -> u64 {
@@ -1236,12 +1243,7 @@ impl Hash for io_uring_user_data {
 impl Default for io_uring_user_data {
     #[inline]
     fn default() -> Self {
-        let mut s = MaybeUninit::<Self>::uninit();
-        // SAFETY: All of Linux's io_uring structs may be zero-initialized.
-        unsafe {
-            write_bytes(s.as_mut_ptr(), 0, 1);
-            s.assume_init()
-        }
+        Self::zeroed()
     }
 }
 
@@ -1449,10 +1451,13 @@ pub struct io_uring_cqe {
 #[allow(missing_docs)]
 #[repr(C)]
 #[derive(Copy, Clone, Default)]
+#[non_exhaustive]
 pub struct io_uring_restriction {
     pub opcode: IoringRestrictionOp,
     pub register_or_sqe_op_or_sqe_flags: register_or_sqe_op_or_sqe_flags_union,
+    #[doc(hidden)]
     pub resv: u8,
+    #[doc(hidden)]
     pub resv2: [u32; 3],
 }
 
@@ -1468,6 +1473,7 @@ pub union register_or_sqe_op_or_sqe_flags_union {
 #[allow(missing_docs)]
 #[repr(C)]
 #[derive(Debug, Copy, Clone, Default)]
+#[non_exhaustive]
 pub struct io_uring_params {
     pub sq_entries: u32,
     pub cq_entries: u32,
@@ -1476,6 +1482,7 @@ pub struct io_uring_params {
     pub sq_thread_idle: u32,
     pub features: IoringFeatureFlags,
     pub wq_fd: RawFd,
+    #[doc(hidden)]
     pub resv: [u32; 3],
     pub sq_off: io_sqring_offsets,
     pub cq_off: io_cqring_offsets,
@@ -1484,6 +1491,7 @@ pub struct io_uring_params {
 #[allow(missing_docs)]
 #[repr(C)]
 #[derive(Debug, Copy, Clone, Default)]
+#[non_exhaustive]
 pub struct io_sqring_offsets {
     pub head: u32,
     pub tail: u32,
@@ -1492,6 +1500,7 @@ pub struct io_sqring_offsets {
     pub flags: u32,
     pub dropped: u32,
     pub array: u32,
+    #[doc(hidden)]
     pub resv1: u32,
     pub user_addr: io_uring_ptr,
 }
@@ -1499,6 +1508,7 @@ pub struct io_sqring_offsets {
 #[allow(missing_docs)]
 #[repr(C)]
 #[derive(Debug, Copy, Clone, Default)]
+#[non_exhaustive]
 pub struct io_cqring_offsets {
     pub head: u32,
     pub tail: u32,
@@ -1507,6 +1517,7 @@ pub struct io_cqring_offsets {
     pub overflow: u32,
     pub cqes: u32,
     pub flags: u32,
+    #[doc(hidden)]
     pub resv1: u32,
     pub user_addr: io_uring_ptr,
 }
@@ -1514,10 +1525,13 @@ pub struct io_cqring_offsets {
 #[allow(missing_docs)]
 #[repr(C)]
 #[derive(Debug, Default)]
+#[non_exhaustive]
 pub struct io_uring_probe {
     pub last_op: IoringOp,
     pub ops_len: u8,
+    #[doc(hidden)]
     pub resv: u16,
+    #[doc(hidden)]
     pub resv2: [u32; 3],
     pub ops: IncompleteArrayField<io_uring_probe_op>,
 }
@@ -1525,18 +1539,23 @@ pub struct io_uring_probe {
 #[allow(missing_docs)]
 #[repr(C)]
 #[derive(Debug, Copy, Clone, Default)]
+#[non_exhaustive]
 pub struct io_uring_probe_op {
     pub op: IoringOp,
+    #[doc(hidden)]
     pub resv: u8,
     pub flags: IoringOpFlags,
+    #[doc(hidden)]
     pub resv2: u32,
 }
 
 #[allow(missing_docs)]
 #[repr(C, align(8))]
 #[derive(Debug, Copy, Clone, Default)]
+#[non_exhaustive]
 pub struct io_uring_files_update {
     pub offset: u32,
+    #[doc(hidden)]
     pub resv: u32,
     pub fds: io_uring_ptr,
 }
@@ -1544,9 +1563,11 @@ pub struct io_uring_files_update {
 #[allow(missing_docs)]
 #[repr(C, align(8))]
 #[derive(Debug, Copy, Clone, Default)]
+#[non_exhaustive]
 pub struct io_uring_rsrc_register {
     pub nr: u32,
     pub flags: IoringRsrcFlags,
+    #[doc(hidden)]
     pub resv2: u64,
     pub data: io_uring_ptr,
     pub tags: io_uring_ptr,
@@ -1555,8 +1576,10 @@ pub struct io_uring_rsrc_register {
 #[allow(missing_docs)]
 #[repr(C, align(8))]
 #[derive(Debug, Copy, Clone, Default)]
+#[non_exhaustive]
 pub struct io_uring_rsrc_update {
     pub offset: u32,
+    #[doc(hidden)]
     pub resv: u32,
     pub data: io_uring_ptr,
 }
@@ -1564,12 +1587,15 @@ pub struct io_uring_rsrc_update {
 #[allow(missing_docs)]
 #[repr(C, align(8))]
 #[derive(Debug, Copy, Clone, Default)]
+#[non_exhaustive]
 pub struct io_uring_rsrc_update2 {
     pub offset: u32,
+    #[doc(hidden)]
     pub resv: u32,
     pub data: io_uring_ptr,
     pub tags: io_uring_ptr,
     pub nr: u32,
+    #[doc(hidden)]
     pub resv2: u32,
 }
 
@@ -1617,30 +1643,38 @@ pub struct open_how {
 #[allow(missing_docs)]
 #[repr(C)]
 #[derive(Debug, Copy, Clone, Default)]
+#[non_exhaustive]
 pub struct io_uring_buf_reg {
     pub ring_addr: io_uring_ptr,
     pub ring_entries: u32,
     pub bgid: u16,
     pub flags: u16,
+    #[doc(hidden)]
     pub resv: [u64; 3_usize],
 }
 
 #[allow(missing_docs)]
 #[repr(C)]
 #[derive(Debug, Copy, Clone, Default)]
+#[non_exhaustive]
 pub struct io_uring_buf {
     pub addr: io_uring_ptr,
     pub len: u32,
     pub bid: u16,
+    #[doc(hidden)]
     pub resv: u16,
 }
 
 #[allow(missing_docs)]
 #[repr(C)]
 #[derive(Debug, Copy, Clone, Default)]
+#[non_exhaustive]
 pub struct buf_ring_tail_struct {
+    #[doc(hidden)]
     pub resv1: u64,
+    #[doc(hidden)]
     pub resv2: u32,
+    #[doc(hidden)]
     pub resv3: u16,
     pub tail: u16,
 }
