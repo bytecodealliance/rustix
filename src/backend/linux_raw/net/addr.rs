@@ -215,13 +215,20 @@ impl Hash for SocketAddrUnix {
 
 impl fmt::Debug for SocketAddrUnix {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        #[cfg(feature = "alloc")]
         if let Some(path) = self.path() {
-            path.fmt(f)
-        } else if let Some(name) = self.abstract_name() {
-            name.fmt(f)
-        } else {
-            "(unnamed)".fmt(f)
+            return path.fmt(f);
         }
+        if let Some(bytes) = self.path_bytes() {
+            if let Ok(s) = core::str::from_utf8(bytes) {
+                return s.fmt(f);
+            }
+            return bytes.fmt(f);
+        }
+        if let Some(name) = self.abstract_name() {
+            return name.fmt(f);
+        }
+        "(unnamed)".fmt(f)
     }
 }
 
