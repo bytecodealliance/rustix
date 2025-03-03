@@ -55,7 +55,7 @@ use backend::fd::AsFd;
 use core::ffi::c_void;
 
 #[cfg(linux_raw)]
-pub use crate::{kernel_sigset::KernelSigSet, signal::Signal, sigset::SigSet};
+pub use crate::{kernel_sigset::KernelSigSet, signal::Signal};
 
 /// `kernel_sigaction`
 ///
@@ -500,7 +500,7 @@ pub unsafe fn execve(path: &CStr, argv: *const *const u8, envp: *const *const u8
     backend::runtime::syscalls::execve(path, argv, envp)
 }
 
-/// `sigaction(signal, &new, &old)`—Modify or query a signal handler.
+/// `sigaction(signal, &new, &old)`—Modify and/or query a signal handler.
 ///
 /// # Safety
 ///
@@ -522,12 +522,31 @@ pub unsafe fn kernel_sigaction(
     backend::runtime::syscalls::kernel_sigaction(signal, new)
 }
 
-/// `sigaltstack(new, old)`—Modify or query a signal stack.
+/// `sigaltstack(new, old)`—Modify and/or query a signal stack.
 ///
 /// # Safety
 ///
-/// You're on your own. And on top of all the troubles with signal handlers,
-/// this implementation is highly experimental.
+/// The memory region described by `new` must readable and writable and larger
+/// than the platform minimum signal stack size, and must have a guard region
+/// that conforms to the platform conventions for stack guard regions. The
+/// flags in `new` must be valid. This function does not diagnose all the
+/// errors that libc `sigaltstack` functions are documented as diagnosing.
+///
+/// While the memory region pointed to by `new` is registered as a signal
+/// stack, it must remain readable and writable, and must not be mutated in
+/// any way other than by having a signal handler run in it, and must not be
+/// the referant of a Rust reference from outside the signal handler.
+///
+/// If code elsewhere in the program is depending on signal handlers being run
+/// on a particular stack, this could break that code's assumptions. And if the
+/// caller is depending on signal handlers being run on the stack specified in
+/// the call, its assumptions could be broken by code elsewhere in the program
+/// calling this function.
+///
+/// There are probably things out there that assume that all alternate signal
+/// stack registration goes through libc, and this does not go through libc.
+///
+/// There may be further safety hazards not yet documented here.
 ///
 /// # References
 ///  - [POSIX]
@@ -536,17 +555,22 @@ pub unsafe fn kernel_sigaction(
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/sigaltstack.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/sigaltstack.2.html
 #[inline]
-pub unsafe fn sigaltstack(new: Option<Stack>) -> io::Result<Stack> {
-    backend::runtime::syscalls::sigaltstack(new)
+pub unsafe fn kernel_sigaltstack(new: Option<Stack>) -> io::Result<Stack> {
+    backend::runtime::syscalls::kernel_sigaltstack(new)
 }
 
 /// `tkill(tid, sig)`—Send a signal to a thread.
 ///
 /// # Safety
 ///
-/// You're on your own. And on top of all the troubles with signal handlers,
-/// this implementation is highly experimental. Also, this is not `tgkill`, so
-/// the warning about the hazard of recycled thread ID's applies.
+/// Causing an individual thread to abruptly terminate without involving the
+/// process' thread runtime (such as the libpthread or the libc) evokes
+/// undefined behavior.
+///
+/// Also, this is not `tgkill`, so the warning about the hazard of recycled
+/// thread IDs applies.
+///
+/// There may be further safety hazards not yet documented here.
 ///
 /// # References
 ///  - [Linux]
@@ -559,15 +583,21 @@ pub unsafe fn tkill(tid: Pid, sig: Signal) -> io::Result<()> {
 
 /// `rt_sigprocmask(how, set, oldset)`—Adjust the process signal mask.
 ///
-/// This uses `KernelSigSet` instead of `SigSet` because the Linux
-/// documentation says the size "is currently required to have a fixed
-/// architecture specific value (equal to `sizeof(kernel_sigset_t)`)".
+/// If this is ever exposed publicly, we should think about whether it should
+/// mask out signals reserved by libc.
 ///
 /// # Safety
 ///
-/// You're on your own. And on top of all the troubles with signal handlers,
-/// this implementation is highly experimental. Even further, it differs from
-/// the libc `sigprocmask` in several non-obvious and unsafe ways.
+/// If there is a libc in the process, the `set` must not contain any signal
+/// reserved by the libc.
+///
+/// If code elsewhere in the program is depending on delivery of a signal for
+/// any reason, for example to prevent it from executing some code, this could
+/// cause it to miss that signal, and for example execute that code. And if the
+/// caller is depending on delivery of a signal for any reason, its assumptions
+/// could be broken by code elsewhere in the program calling this function.
+///
+/// There may be further safety hazards not yet documented here.
 ///
 /// # References
 ///  - [Linux `rt_sigprocmask`]
@@ -592,8 +622,8 @@ pub unsafe fn kernel_sigprocmask(how: How, set: Option<&KernelSigSet>) -> io::Re
 ///
 /// [Linux `sigpending`]: https://man7.org/linux/man-pages/man2/sigpending.2.html
 #[inline]
-pub fn sigpending() -> SigSet {
-    backend::runtime::syscalls::sigpending()
+pub fn kernel_sigpending() -> KernelSigSet {
+    backend::runtime::syscalls::kernel_sigpending()
 }
 
 /// `sigsuspend(set)`—Suspend the calling thread and wait for signals.
@@ -606,59 +636,92 @@ pub fn sigpending() -> SigSet {
 ///
 /// [Linux `sigsuspend`]: https://man7.org/linux/man-pages/man2/sigsuspend.2.html
 #[inline]
-pub fn sigsuspend(set: &SigSet) -> io::Result<()> {
-    backend::runtime::syscalls::sigsuspend(set)
+pub fn kernel_sigsuspend(set: &KernelSigSet) -> io::Result<()> {
+    backend::runtime::syscalls::kernel_sigsuspend(set)
 }
 
 /// `sigwait(set)`—Wait for signals.
 ///
+/// If this is ever exposed publicly, we should think about whether it should
+/// mask out signals reserved by libc.
+///
 /// # Safety
 ///
-/// If code elsewhere in the process is depending on delivery of a signal to
-/// prevent it from executing some code, this could cause it to miss that
-/// signal and execute that code.
+/// If there is a libc in the process, the `set` must not contain any signal
+/// reserved by the libc.
+///
+/// If code elsewhere in the program is depending on delivery of a signal for
+/// any reason, for example to prevent it from executing some code, this could
+/// cause it to miss that signal, and for example execute that code. And if the
+/// caller is depending on delivery of a signal for any reason, its assumptions
+/// could be broken by code elsewhere in the program calling this function.
+///
+/// There may be further safety hazards not yet documented here.
 ///
 /// # References
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man3/sigwait.3.html
 #[inline]
-pub unsafe fn sigwait(set: &SigSet) -> io::Result<Signal> {
-    backend::runtime::syscalls::sigwait(set)
+pub unsafe fn kernel_sigwait(set: &KernelSigSet) -> io::Result<Signal> {
+    backend::runtime::syscalls::kernel_sigwait(set)
 }
 
 /// `sigwaitinfo(set)`—Wait for signals, returning a [`Siginfo`].
 ///
+/// If this is ever exposed publicly, we should think about whether it should
+/// mask out signals reserved by libc.
+///
 /// # Safety
 ///
-/// If code elsewhere in the process is depending on delivery of a signal to
-/// prevent it from executing some code, this could cause it to miss that
-/// signal and execute that code.
+/// If there is a libc in the process, the `set` must not contain any signal
+/// reserved by the libc.
+///
+/// If code elsewhere in the program is depending on delivery of a signal for
+/// any reason, for example to prevent it from executing some code, this could
+/// cause it to miss that signal, and for example execute that code. And if the
+/// caller is depending on delivery of a signal for any reason, its assumptions
+/// could be broken by code elsewhere in the program calling this function.
+///
+/// There may be further safety hazards not yet documented here.
 ///
 /// # References
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/sigwaitinfo.2.html
 #[inline]
-pub unsafe fn sigwaitinfo(set: &SigSet) -> io::Result<Siginfo> {
-    backend::runtime::syscalls::sigwaitinfo(set)
+pub unsafe fn kernel_sigwaitinfo(set: &KernelSigSet) -> io::Result<Siginfo> {
+    backend::runtime::syscalls::kernel_sigwaitinfo(set)
 }
 
 /// `sigtimedwait(set)`—Wait for signals, optionally with a timeout.
 ///
+/// If this is ever exposed publicly, we should think about whether it should
+/// mask out signals reserved by libc.
+///
 /// # Safety
 ///
-/// If code elsewhere in the process is depending on delivery of a signal to
-/// prevent it from executing some code, this could cause it to miss that
-/// signal and execute that code.
+/// If there is a libc in the process, the `set` must not contain any signal
+/// reserved by the libc.
+///
+/// If code elsewhere in the program is depending on delivery of a signal for
+/// any reason, for example to prevent it from executing some code, this could
+/// cause it to miss that signal, and for example execute that code. And if the
+/// caller is depending on delivery of a signal for any reason, its assumptions
+/// could be broken by code elsewhere in the program calling this function.
+///
+/// There may be further safety hazards not yet documented here.
 ///
 /// # References
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/sigtimedwait.2.html
 #[inline]
-pub unsafe fn sigtimedwait(set: &SigSet, timeout: Option<Timespec>) -> io::Result<Siginfo> {
-    backend::runtime::syscalls::sigtimedwait(set, timeout)
+pub unsafe fn kernel_sigtimedwait(
+    set: &KernelSigSet,
+    timeout: Option<Timespec>,
+) -> io::Result<Siginfo> {
+    backend::runtime::syscalls::kernel_sigtimedwait(set, timeout)
 }
 
 /// `getauxval(AT_SECURE)`—Returns the Linux “secure execution” mode.
@@ -774,7 +837,6 @@ mod tests {
         assert!(libc::SIGRTMAX() as u32 <= linux_raw_sys::general::_NSIG);
 
         assert!(KERNEL_SIGRTMAX as usize - 1 < core::mem::size_of::<KernelSigSet>() * 8);
-        assert!(core::mem::size_of::<KernelSigSet>() <= core::mem::size_of::<SigSet>());
     }
 
     #[test]

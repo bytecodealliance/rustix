@@ -47,10 +47,10 @@ pub use crate::fs::{
     Advice, AtFlags, Mode, OFlags, RenameFlags, ResolveFlags, Statx, StatxFlags, XattrFlags,
 };
 pub use crate::io::ReadWriteFlags;
+pub use crate::kernel_sigset::KernelSigSet;
 pub use crate::net::addr::{SocketAddrLen, SocketAddrOpaque, SocketAddrStorage};
 pub use crate::net::{RecvFlags, SendFlags, SocketFlags};
 pub use crate::signal::Signal;
-pub use crate::sigset::SigSet;
 pub use crate::thread::futex::{
     Wait as FutexWait, WaitFlags as FutexWaitFlags, WaitPtr as FutexWaitPtr,
     WaitvFlags as FutexWaitvFlags,
@@ -171,7 +171,7 @@ pub unsafe fn io_uring_enter<Fd: AsFd, T>(
     arg: Option<&T>,
 ) -> io::Result<u32> {
     debug_assert!(
-        size_of::<T>() == size_of::<SigSet>()
+        size_of::<T>() == size_of::<KernelSigSet>()
             || size_of::<T>() == size_of::<io_uring_getevents_arg>()
     );
     debug_assert!(
