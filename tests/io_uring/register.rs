@@ -35,11 +35,9 @@ where
 }
 
 fn register_ring(fd: BorrowedFd<'_>) -> Result<BorrowedFd<'_>> {
-    let update = io_uring_rsrc_update {
-        data: io_uring_ptr::new(fd.as_raw_fd() as u64 as *mut c_void),
-        offset: u32::MAX,
-        resv: 0,
-    };
+    let mut update = io_uring_rsrc_update::default();
+    update.data = io_uring_ptr::new(fd.as_raw_fd() as usize as *mut c_void);
+    update.offset = u32::MAX;
 
     do_register(
         fd,
@@ -57,11 +55,9 @@ fn unregister_ring<FD>(fd: FD) -> Result<()>
 where
     FD: AsRawFd + AsFd,
 {
-    let update = io_uring_rsrc_update {
-        offset: fd.as_raw_fd() as u32,
-        data: io_uring_ptr::null(),
-        resv: 0,
-    };
+    let mut update = io_uring_rsrc_update::default();
+    update.offset = fd.as_raw_fd() as u32;
+    update.data = io_uring_ptr::null();
 
     do_register(
         fd,
@@ -158,13 +154,11 @@ fn io_uring_buf_ring_can_be_registered() {
 
     let br = unsafe { br_ptr.as_mut() }.expect("A valid io_uring_buf_ring struct");
 
-    let reg = io_uring_buf_reg {
-        ring_addr: br_ptr.cast::<c_void>().into(),
-        ring_entries: ENTRIES as u32,
-        bgid: BGID,
-        flags: 0,
-        resv: [0_u64; 3],
-    };
+    let mut reg = io_uring_buf_reg::default();
+    reg.ring_addr = br_ptr.cast::<c_void>().into();
+    reg.ring_entries = ENTRIES as u32;
+    reg.bgid = BGID;
+    reg.flags = 0;
 
     assert_eq!(register_buf_ring(ring_fd, &reg), Ok(()));
 

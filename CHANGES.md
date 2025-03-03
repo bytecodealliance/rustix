@@ -57,6 +57,19 @@ constant.
 [`IORING_REGISTER_FILES_SKIP`]: https://docs.rs/rustix/1.0.0/rustix/io_uring/constant.IORING_REGISTER_FILES_SKIP.html
 [`rustix::fs::CWD`]: https://docs.rs/rustix/1.0.0/rustix/fs/constant.CWD.html
 
+[`rustix::io_uring::io_uring_register`] now has a [`IoringRegisterFlags`]
+argument, and `rustix::io_uring::io_uring_register_with` is removed.
+
+[`rustix::io_uring::io_uring_register`]: https://docs.rs/rustix/1.0.0/rustix/io_uring/fn.io_uring_register.html
+[`IoringRegisterFlags`]: https://docs.rs/rustix/1.0.0/rustix/io_uring/struct.IoringRegisterFlags.html
+
+Several structs in [`rustix::io_uring`] are now marked `#[non_exhaustive]`
+because they contain padding or reserved fields. Instead of constructing
+them with field values and `..Default::default()`, construct them with
+`Default::default()` and separately assign the fields.
+
+[`rustix::io_uring`]: https://docs.rs/rustix/1.0.0/rustix/io_uring/index.html
+
 `rustix::process::WaitidOptions` and `rustix::process::WaitidStatus` are
 renamed to
 [`rustix::process::WaitIdOptions`] and [`rustix::process::WaitIdStatus`] (note
@@ -155,12 +168,6 @@ from the number of bytes written to the buffer when
 [`rustix::net::recv`]: https://docs.rs/rustix/1.0.0/rustix/net/fn.recv.html
 [`rustix::net::recvfrom`]: https://docs.rs/rustix/1.0.0/rustix/net/fn.recvfrom.html
 [`rustix::net::RecvFlags::TRUNC`]: https://docs.rs/rustix/1.0.0/rustix/net/struct.RecvFlags.html#associatedconstant.TRUNC
-
-[`rustix::io_uring::io_uring_register`] now has a [`IoringRegisterFlags`]
-argument, and `rustix::io_uring::io_uring_register_with` is removed.
-
-[`rustix::io_uring::io_uring_register`]: https://docs.rs/rustix/1.0.0/rustix/io_uring/fn.io_uring_register.html
-[`IoringRegisterFlags`]: https://docs.rs/rustix/1.0.0/rustix/io_uring/struct.IoringRegisterFlags.html
 
 [`rustix::process::Signal`] constants are now upper-cased; for example,
 `Signal::Int` is now named [`Signal::INT`]. Also, `Signal` is no longer
