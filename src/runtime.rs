@@ -352,8 +352,9 @@ pub use backend::runtime::tls::StartupTlsInfo;
 
 /// `fork()`—Creates a new process by duplicating the calling process.
 ///
-/// On success, the pid of the child process is returned in the parent, and
-/// `None` is returned in the child.
+/// On success, `Fork::ParentOf` containing the pid of the child process is
+/// returned in the parent, and `Fork::Child` containing the pid of the child
+/// process is returned in the child.
 ///
 /// Unlike its POSIX and libc counterparts, this `fork` does not invoke any
 /// handlers (such as those registered with `pthread_atfork`).
@@ -447,7 +448,7 @@ pub enum Fork {
 
     /// This is returned in the parent process after a `fork`. It holds the PID
     /// of the child.
-    Parent(Pid),
+    ParentOf(Pid),
 }
 
 /// `execveat(dirfd, path.as_c_str(), argv, envp, flags)`—Execute a new
