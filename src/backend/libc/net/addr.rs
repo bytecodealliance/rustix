@@ -14,7 +14,10 @@ use {
     core::slice,
 };
 #[cfg(all(unix, feature = "alloc"))]
-use {crate::ffi::CString, alloc::borrow::Cow};
+use {
+    crate::ffi::CString,
+    alloc::borrow::{Cow, ToOwned},
+};
 
 /// `struct sockaddr_un`
 #[cfg(unix)]
