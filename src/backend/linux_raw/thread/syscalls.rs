@@ -223,9 +223,9 @@ pub(crate) unsafe fn futex_val2(
     #[cfg(target_pointer_width = "32")]
     {
         // Linux 5.1 added `futex_time64`; if we have that, use it. We don't
-        // need it, because `timeout` is just passing `val2` and not a real
-        // timeout, but it's nice to `futex_time64` for consistency with the
-        // other futex calls that do.
+        // need it here, because `timeout` is just passing `val2` and not a
+        // real timeout, but it's nice to use `futex_time64` for consistency
+        // with the other futex calls that do.
         #[cfg(feature = "linux_5_1")]
         {
             ret_usize(syscall!(
@@ -240,10 +240,6 @@ pub(crate) unsafe fn futex_val2(
         }
 
         // If we don't have Linux 5.1, use plain `futex`.
-        //
-        // We do this unconditionally, rather than trying `futex_time64` and
-        // falling back on `Errno::NOSYS`, because seccomp configurations will
-        // sometimes abort the process on syscalls they don't recognize.
         #[cfg(not(feature = "linux_5_1"))]
         {
             ret_usize(syscall!(

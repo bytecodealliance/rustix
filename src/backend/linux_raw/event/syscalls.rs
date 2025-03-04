@@ -6,13 +6,12 @@
 #![allow(unsafe_code, clippy::undocumented_unsafe_blocks)]
 
 use crate::backend::conv::{
-    by_ref, c_int, c_uint, opt_ref, pass_usize, ret, ret_c_int, ret_error, ret_owned_fd, ret_usize,
-    size_of, slice_mut, zero,
+    by_ref, c_int, c_uint, opt_mut, opt_ref, pass_usize, ret, ret_c_int, ret_error, ret_owned_fd,
+    ret_usize, size_of, slice_mut, zero,
 };
 use crate::event::{epoll, EventfdFlags, FdSetElement, PollFd, Timespec};
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io;
-use crate::utils::as_mut_ptr;
 use core::ptr::null_mut;
 use linux_raw_sys::general::{kernel_sigset_t, EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD};
 
@@ -52,19 +51,16 @@ pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: Option<&Timespec>) -> io::Re
                 Some(None)
             };
             if let Some(mut old_timeout) = old_timeout {
+                // Call `ppoll`.
+                //
                 // Linux's `ppoll` mutates the timeout argument. Our public
                 // interface does not do this, because it's not portable to other
                 // platforms, so we create a temporary value to hide this behavior.
-                let old_timeout_ptr = match &mut old_timeout {
-                    Some(old_timeout) => as_mut_ptr(old_timeout),
-                    None => null_mut(),
-                };
-
                 return ret_usize(syscall!(
                     __NR_ppoll,
                     fds_addr_mut,
                     fds_len,
-                    old_timeout_ptr,
+                    opt_mut(old_timeout.as_mut()),
                     zero(),
                     size_of::<kernel_sigset_t, _>()
                 ));
@@ -75,23 +71,16 @@ pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: Option<&Timespec>) -> io::Re
         // `__kernel_old_timespec` so `__NR_ppoll_time64` will either
         // succeed or fail due to our having no other options.
 
+        // Call `ppoll_time64`.
+        //
         // Linux's `ppoll_time64` mutates the timeout argument. Our public
         // interface does not do this, because it's not portable to other
         // platforms, so we create a temporary value to hide this behavior.
-        let mut timeout_data;
-        let timeout_ptr = match timeout {
-            Some(timeout) => {
-                timeout_data = *timeout;
-                as_mut_ptr(&mut timeout_data)
-            }
-            None => null_mut(),
-        };
-
         ret_usize(syscall!(
             __NR_ppoll_time64,
             fds_addr_mut,
             fds_len,
-            timeout_ptr,
+            opt_mut(timeout.copied().as_mut()),
             zero(),
             size_of::<kernel_sigset_t, _>()
         ))
@@ -99,23 +88,16 @@ pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: Option<&Timespec>) -> io::Re
 
     #[cfg(target_pointer_width = "64")]
     unsafe {
+        // Call `ppoll`.
+        //
         // Linux's `ppoll` mutates the timeout argument. Our public interface
         // does not do this, because it's not portable to other platforms, so
         // we create a temporary value to hide this behavior.
-        let mut timeout_data;
-        let timeout_ptr = match timeout {
-            Some(timeout) => {
-                timeout_data = *timeout;
-                as_mut_ptr(&mut timeout_data)
-            }
-            None => null_mut(),
-        };
-
         ret_usize(syscall!(
             __NR_ppoll,
             fds_addr_mut,
             fds_len,
-            timeout_ptr,
+            opt_mut(timeout.copied().as_mut()),
             zero(),
             size_of::<kernel_sigset_t, _>()
         ))
@@ -185,21 +167,18 @@ pub(crate) unsafe fn select(
                 Some(None)
             };
             if let Some(mut old_timeout) = old_timeout {
+                // Call `pselect6`.
+                //
                 // Linux's `pselect6` mutates the timeout argument. Our public
                 // interface does not do this, because it's not portable to other
                 // platforms, so we create a temporary value to hide this behavior.
-                let old_timeout_ptr = match &mut old_timeout {
-                    Some(old_timeout) => as_mut_ptr(old_timeout),
-                    None => null_mut(),
-                };
-
                 return ret_c_int(syscall!(
                     __NR_pselect6,
                     c_int(nfds),
                     readfds,
                     writefds,
                     exceptfds,
-                    old_timeout_ptr,
+                    opt_mut(old_timeout.as_mut()),
                     zero()
                 ));
             }
@@ -209,50 +188,36 @@ pub(crate) unsafe fn select(
         // `__kernel_old_timespec` so `__NR_pselect6_time64` will either
         // succeed or fail due to our having no other options.
 
+        // Call `pselect6_time64`.
+        //
         // Linux's `pselect6_time64` mutates the timeout argument. Our public
         // interface does not do this, because it's not portable to other
         // platforms, so we create a temporary value to hide this behavior.
-        let mut timeout_data;
-        let timeout_ptr = match timeout {
-            Some(timeout) => {
-                timeout_data = *timeout;
-                as_mut_ptr(&mut timeout_data)
-            }
-            None => null_mut(),
-        };
-
         ret_c_int(syscall!(
             __NR_pselect6_time64,
             c_int(nfds),
             readfds,
             writefds,
             exceptfds,
-            timeout_ptr,
+            opt_mut(timeout.copied().as_mut()),
             zero()
         ))
     }
 
     #[cfg(target_pointer_width = "64")]
     {
+        // Call `pselect6`.
+        //
         // Linux's `pselect6` mutates the timeout argument. Our public interface
         // does not do this, because it's not portable to other platforms, so we
         // create a temporary value to hide this behavior.
-        let mut timeout_data;
-        let timeout_ptr = match timeout {
-            Some(timeout) => {
-                timeout_data = *timeout;
-                as_mut_ptr(&mut timeout_data)
-            }
-            None => null_mut(),
-        };
-
         ret_c_int(syscall!(
             __NR_pselect6,
             c_int(nfds),
             readfds,
             writefds,
             exceptfds,
-            timeout_ptr,
+            opt_mut(timeout.copied().as_mut()),
             zero()
         ))
     }
@@ -341,6 +306,7 @@ pub(crate) unsafe fn epoll_wait(
             Some(-1)
         };
         if let Some(old_timeout) = old_timeout {
+            // Call `epoll_pwait`.
             return ret_usize(syscall!(
                 __NR_epoll_pwait,
                 epfd,
@@ -352,6 +318,8 @@ pub(crate) unsafe fn epoll_wait(
         }
     }
 
+    // Call `epoll_pwait2`.
+    //
     // We either have Linux 5.1 or the timeout didn't fit in an `i32`, so
     // `__NR_epoll_pwait2` will either succeed or fail due to our having no
     // other options.
