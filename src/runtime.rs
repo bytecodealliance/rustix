@@ -536,7 +536,7 @@ pub unsafe fn kernel_sigaction(
 /// While the memory region pointed to by `new` is registered as a signal
 /// stack, it must remain readable and writable, and must not be mutated in
 /// any way other than by having a signal handler run in it, and must not be
-/// the referant of a Rust reference from outside the signal handler.
+/// the referent of a Rust reference from outside the signal handler.
 ///
 /// If code elsewhere in the program is depending on signal handlers being run
 /// on a particular stack, this could break that code's assumptions. And if the
