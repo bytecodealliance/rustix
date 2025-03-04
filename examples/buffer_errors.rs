@@ -76,7 +76,7 @@ fn error_retry_closure_uninit() {
     rustix::io::retry_on_intr(|| b(&mut event_buf)).unwrap();
     */
 
-    // The fix: Don't use `retry_on_intr`, unfortunatetly.
+    // The fix: Don't use `retry_on_intr`, unfortunately.
     loop {
         match b(&mut event_buf) {
             Ok((_init, _unini)) => break,
