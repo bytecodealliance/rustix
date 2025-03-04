@@ -1797,6 +1797,17 @@ pub struct open_how {
     pub resolve: ResolveFlags,
 }
 
+impl open_how {
+    /// Create a zero-initialized `Self`.
+    pub const fn zeroed() -> Self {
+        Self {
+            flags: 0,
+            mode: 0,
+            resolve: ResolveFlags::empty(),
+        }
+    }
+}
+
 #[allow(missing_docs)]
 #[repr(C)]
 #[derive(Debug, Copy, Clone, Default)]
