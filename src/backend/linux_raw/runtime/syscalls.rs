@@ -11,8 +11,8 @@ use crate::backend::conv::by_mut;
 #[cfg(target_arch = "x86_64")]
 use crate::backend::conv::c_uint;
 use crate::backend::conv::{
-    by_ref, c_int, ret, ret_c_int, ret_c_int_infallible, ret_error, ret_infallible, ret_void_star,
-    size_of, zero,
+    by_ref, c_int, opt_ref, ret, ret_c_int, ret_c_int_infallible, ret_error, ret_infallible,
+    ret_void_star, size_of, zero,
 };
 #[cfg(feature = "fs")]
 use crate::fd::BorrowedFd;
@@ -24,7 +24,6 @@ use crate::pid::{Pid, RawPid};
 use crate::runtime::{Fork, How, KernelSigSet, KernelSigaction, Siginfo, Stack};
 use crate::signal::Signal;
 use crate::timespec::Timespec;
-use crate::utils::option_as_ptr;
 use core::ffi::c_void;
 use core::mem::MaybeUninit;
 #[cfg(target_pointer_width = "32")]
@@ -153,7 +152,7 @@ pub(crate) unsafe fn kernel_sigaction(
     new: Option<KernelSigaction>,
 ) -> io::Result<KernelSigaction> {
     let mut old = MaybeUninit::<KernelSigaction>::uninit();
-    let new = option_as_ptr(new.as_ref());
+    let new = opt_ref(new.as_ref());
     ret(syscall!(
         __NR_rt_sigaction,
         signal,
@@ -167,7 +166,7 @@ pub(crate) unsafe fn kernel_sigaction(
 #[inline]
 pub(crate) unsafe fn kernel_sigaltstack(new: Option<Stack>) -> io::Result<Stack> {
     let mut old = MaybeUninit::<Stack>::uninit();
-    let new = option_as_ptr(new.as_ref());
+    let new = opt_ref(new.as_ref());
     ret(syscall!(__NR_sigaltstack, new, &mut old))?;
     Ok(old.assume_init())
 }
@@ -183,7 +182,7 @@ pub(crate) unsafe fn kernel_sigprocmask(
     new: Option<&KernelSigSet>,
 ) -> io::Result<KernelSigSet> {
     let mut old = MaybeUninit::<KernelSigSet>::uninit();
-    let new = option_as_ptr(new);
+    let new = opt_ref(new);
     ret(syscall!(
         __NR_rt_sigprocmask,
         how,
@@ -248,7 +247,7 @@ pub(crate) unsafe fn kernel_sigtimedwait(
     timeout: Option<&Timespec>,
 ) -> io::Result<Siginfo> {
     let mut info = MaybeUninit::<Siginfo>::uninit();
-    let timeout_ptr = option_as_ptr(timeout);
+    let timeout_arg = opt_ref(timeout);
 
     // `rt_sigtimedwait_time64` was introduced in Linux 5.1. The old
     // `rt_sigtimedwait` syscall is not y2038-compatible on 32-bit
@@ -259,7 +258,7 @@ pub(crate) unsafe fn kernel_sigtimedwait(
             __NR_rt_sigtimedwait_time64,
             by_ref(set),
             &mut info,
-            timeout_ptr,
+            timeout_arg,
             size_of::<KernelSigSet, _>()
         )) {
             Ok(_signum) => (),
@@ -275,7 +274,7 @@ pub(crate) unsafe fn kernel_sigtimedwait(
             __NR_rt_sigtimedwait,
             by_ref(set),
             &mut info,
-            timeout_ptr,
+            timeout_arg,
             size_of::<KernelSigSet, _>()
         ))?;
         Ok(info.assume_init())
@@ -296,13 +295,13 @@ unsafe fn kernel_sigtimedwait_old(
         None => None,
     };
 
-    let old_timeout_ptr = option_as_ptr(old_timeout.as_ref());
+    let old_timeout_arg = opt_ref(old_timeout.as_ref());
 
     let _signum = ret_c_int(syscall!(
         __NR_rt_sigtimedwait,
         by_ref(set),
         info,
-        old_timeout_ptr,
+        old_timeout_arg,
         size_of::<KernelSigSet, _>()
     ))?;
 

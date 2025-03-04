@@ -8,8 +8,8 @@
 use super::types::RawCpuSet;
 use crate::backend::c;
 use crate::backend::conv::{
-    by_mut, by_ref, c_int, c_uint, ret, ret_c_int, ret_c_int_infallible, ret_c_uint, ret_usize,
-    size_of, slice, slice_just_addr, slice_just_addr_mut, zero,
+    by_mut, by_ref, c_int, c_uint, opt_ref, ret, ret_c_int, ret_c_int_infallible, ret_c_uint,
+    ret_usize, size_of, slice, slice_just_addr, slice_just_addr_mut, zero,
 };
 use crate::fd::BorrowedFd;
 use crate::io;
@@ -17,7 +17,7 @@ use crate::pid::Pid;
 use crate::thread::{
     futex, ClockId, Cpuid, MembarrierCommand, MembarrierQuery, NanosleepRelativeResult, Timespec,
 };
-use crate::utils::{as_mut_ptr, option_as_ptr};
+use crate::utils::as_mut_ptr;
 use core::mem::MaybeUninit;
 use core::sync::atomic::AtomicU32;
 #[cfg(target_pointer_width = "32")]
@@ -317,7 +317,7 @@ pub(crate) unsafe fn futex_timeout(
                     uaddr,
                     (op, flags),
                     c_uint(val),
-                    option_as_ptr(old_timeout.as_ref()),
+                    opt_ref(old_timeout.as_ref()),
                     uaddr2,
                     c_uint(val3)
                 ));
@@ -332,7 +332,7 @@ pub(crate) unsafe fn futex_timeout(
             uaddr,
             (op, flags),
             c_uint(val),
-            option_as_ptr(timeout),
+            opt_ref(timeout),
             uaddr2,
             c_uint(val3)
         ))
@@ -343,7 +343,7 @@ pub(crate) unsafe fn futex_timeout(
         uaddr,
         (op, flags),
         c_uint(val),
-        option_as_ptr(timeout),
+        opt_ref(timeout),
         uaddr2,
         c_uint(val3)
     ))
@@ -363,7 +363,7 @@ pub(crate) fn futex_waitv(
             waiters_addr,
             waiters_len,
             c_uint(flags.bits()),
-            option_as_ptr(timeout),
+            opt_ref(timeout),
             clockid
         ))
     }

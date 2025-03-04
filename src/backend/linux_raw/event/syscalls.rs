@@ -12,7 +12,7 @@ use crate::backend::conv::{
 use crate::event::{epoll, EventfdFlags, FdSetElement, PollFd, Timespec};
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io;
-use crate::utils::{as_mut_ptr, option_as_ptr};
+use crate::utils::as_mut_ptr;
 use core::ptr::null_mut;
 use linux_raw_sys::general::{kernel_sigset_t, EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD};
 
@@ -355,15 +355,12 @@ pub(crate) unsafe fn epoll_wait(
     // We either have Linux 5.1 or the timeout didn't fit in an `i32`, so
     // `__NR_epoll_pwait2` will either succeed or fail due to our having no
     // other options.
-
-    let timeout = option_as_ptr(timeout);
-
     ret_usize(syscall!(
         __NR_epoll_pwait2,
         epfd,
         events.0,
         pass_usize(events.1),
-        timeout,
+        opt_ref(timeout),
         zero()
     ))
 }
