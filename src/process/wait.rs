@@ -115,7 +115,7 @@ impl WaitStatus {
     /// Returns the number of the signal that stopped the process, if the
     /// process was stopped by a signal.
     #[inline]
-    pub fn stopping_signal(self) -> Option<u32> {
+    pub fn stopping_signal(self) -> Option<i32> {
         if self.stopped() {
             Some(backend::process::wait::WSTOPSIG(self.0 as _) as _)
         } else {
@@ -137,7 +137,7 @@ impl WaitStatus {
     /// Returns the number of the signal that terminated the process, if the
     /// process was terminated by a signal.
     #[inline]
-    pub fn terminating_signal(self) -> Option<u32> {
+    pub fn terminating_signal(self) -> Option<i32> {
         if self.signaled() {
             Some(backend::process::wait::WTERMSIG(self.0 as _) as _)
         } else {
@@ -215,7 +215,7 @@ impl WaitIdStatus {
     /// process was stopped by a signal.
     #[inline]
     #[cfg(not(any(target_os = "emscripten", target_os = "fuchsia", target_os = "netbsd")))]
-    pub fn stopping_signal(&self) -> Option<u32> {
+    pub fn stopping_signal(&self) -> Option<i32> {
         if self.stopped() {
             Some(self.si_status() as _)
         } else {
@@ -227,7 +227,7 @@ impl WaitIdStatus {
     /// process was trapped by a signal.
     #[inline]
     #[cfg(not(any(target_os = "emscripten", target_os = "fuchsia", target_os = "netbsd")))]
-    pub fn trapping_signal(&self) -> Option<u32> {
+    pub fn trapping_signal(&self) -> Option<i32> {
         if self.trapped() {
             Some(self.si_status() as _)
         } else {
@@ -251,7 +251,7 @@ impl WaitIdStatus {
     /// process was terminated by a signal.
     #[inline]
     #[cfg(not(any(target_os = "emscripten", target_os = "fuchsia", target_os = "netbsd")))]
-    pub fn terminating_signal(&self) -> Option<u32> {
+    pub fn terminating_signal(&self) -> Option<i32> {
         if self.killed() || self.dumped() {
             Some(self.si_status() as _)
         } else {

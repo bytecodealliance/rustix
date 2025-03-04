@@ -33,6 +33,14 @@ the functions in the [`rustix::thread::futex`] module instead.
 
 [`rustix::process::waitpid`]: https://docs.rs/rustix/1.0.0/rustix/process/fn.waitpid.html
 
+[`terminating_signal`] and other functions in [`rustix::process::WaitStatus`] changed
+from returning `u32` to returning `i32`, for better compatibility with the new
+[`Signal`] type.
+
+[`terminating_signal`]: https://docs.rs/rustix/1.0.0/rustix/process/struct.WaitStatus.html#method.terminating_signal
+[`rustix::process::WaitStatus`]: https://docs.rs/rustix/1.0.0/rustix/process/struct.WaitStatus.html
+[`Signal`]: https://docs.rs/rustix/1.0.0/rustix/process/struct.Signal.html
+
 The `SLAVE` flag in [`rustix::mount::MountPropagationFlags`] is renamed to
 [`DOWNSTREAM`].
 
