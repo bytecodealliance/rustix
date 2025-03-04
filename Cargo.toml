@@ -211,8 +211,11 @@ use-explicitly-provided-auxv = []
 # Specialize for Linux 4.11 or later
 linux_4_11 = []
 
+# Specialize for Linux 5.1 or later
+linux_5_1 = ["linux_4_11"]
+
 # Specialize for Linux 5.11 or later
-linux_5_11 = ["linux_4_11"]
+linux_5_11 = ["linux_5_1"]
 
 # Enable all specializations for the latest Linux versions.
 linux_latest = ["linux_5_11"]

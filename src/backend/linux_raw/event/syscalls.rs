@@ -77,7 +77,7 @@ pub(crate) unsafe fn select(
     ))]
     {
         // Linux 5.1 added `pselect6_time64`; if we have that, use it.
-        #[cfg(feature = "linux_5_11")]
+        #[cfg(feature = "linux_5_1")]
         {
             // Linux's `pselect6` mutates the timeout argument. Our public
             // interface does not do this, because it's not portable to other
@@ -107,7 +107,7 @@ pub(crate) unsafe fn select(
         // We do this unconditionally, rather than trying `pselect6_time64` and
         // falling back on `Errno::NOSYS`, because seccomp configurations will
         // sometimes abort the process on syscalls they don't recognize.
-        #[cfg(not(feature = "linux_5_11"))]
+        #[cfg(not(feature = "linux_5_1"))]
         {
             let mut timeout = match timeout {
                 Some(timeout) => Some(linux_raw_sys::general::__kernel_old_timespec {
