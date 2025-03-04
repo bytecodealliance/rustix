@@ -65,18 +65,6 @@ pub(crate) unsafe fn select(
         None => null_mut(),
     };
 
-    // Linux's `pselect6` mutates the timeout argument. Our public interface
-    // does not do this, because it's not portable to other platforms, so we
-    // create a temporary value to hide this behavior.
-    let mut timeout_data;
-    let timeout_ptr = match timeout {
-        Some(timeout) => {
-            timeout_data = *timeout;
-            as_mut_ptr(&mut timeout_data)
-        }
-        None => null_mut(),
-    };
-
     #[cfg(any(
         target_arch = "arm",
         target_arch = "powerpc",
@@ -88,19 +76,81 @@ pub(crate) unsafe fn select(
         target_arch = "mips"
     ))]
     {
-        ret_c_int(syscall!(
-            __NR_pselect6_time64,
-            c_int(nfds),
-            readfds,
-            writefds,
-            exceptfds,
-            timeout_ptr,
-            zero()
-        ))
+        // Linux 5.1 added `pselect6_time64`; if we have that, use it.
+        #[cfg(feature = "linux_5_11")]
+        {
+            // Linux's `pselect6` mutates the timeout argument. Our public
+            // interface does not do this, because it's not portable to other
+            // platforms, so we create a temporary value to hide this behavior.
+            let mut timeout_data;
+            let timeout_ptr = match timeout {
+                Some(timeout) => {
+                    timeout_data = *timeout;
+                    as_mut_ptr(&mut timeout_data)
+                }
+                None => null_mut(),
+            };
+
+            ret_c_int(syscall!(
+                __NR_pselect6_time64,
+                c_int(nfds),
+                readfds,
+                writefds,
+                exceptfds,
+                timeout_ptr,
+                zero()
+            ))
+        }
+
+        // If we don't have Linux 5.1, use `pselect6`.
+        //
+        // We do this unconditionally, rather than trying `pselect6_time64` and
+        // falling back on `Errno::NOSYS`, because seccomp configurations will
+        // sometimes abort the process on syscalls they don't recognize.
+        #[cfg(not(feature = "linux_5_11"))]
+        {
+            let mut timeout = match timeout {
+                Some(timeout) => Some(linux_raw_sys::general::__kernel_old_timespec {
+                    tv_sec: timeout.tv_sec.try_into().map_err(|_| io::Errno::OVERFLOW)?,
+                    tv_nsec: timeout.tv_nsec.try_into().map_err(|_| io::Errno::INVAL)?,
+                }),
+                None => None,
+            };
+
+            // Linux's `pselect6` mutates the timeout argument. Our public
+            // interface does not do this, because it's not portable to other
+            // platforms, so we create a temporary value to hide this behavior.
+            let timeout_ptr = match &mut timeout {
+                Some(timeout) => as_mut_ptr(timeout),
+                None => null_mut(),
+            };
+
+            ret_c_int(syscall!(
+                __NR_pselect6,
+                c_int(nfds),
+                readfds,
+                writefds,
+                exceptfds,
+                timeout_ptr,
+                zero()
+            ))
+        }
     }
 
     #[cfg(target_pointer_width = "64")]
     {
+        // Linux's `pselect6` mutates the timeout argument. Our public interface
+        // does not do this, because it's not portable to other platforms, so we
+        // create a temporary value to hide this behavior.
+        let mut timeout_data;
+        let timeout_ptr = match timeout {
+            Some(timeout) => {
+                timeout_data = *timeout;
+                as_mut_ptr(&mut timeout_data)
+            }
+            None => null_mut(),
+        };
+
         ret_c_int(syscall!(
             __NR_pselect6,
             c_int(nfds),
