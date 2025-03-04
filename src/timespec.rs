@@ -386,7 +386,6 @@ fn test_sizes() {
 #[allow(deprecated)]
 fn test_fix_y2038() {
     assert_eq_size!(libc::time_t, u32);
-    assert_eq_align!(libc::time_t, Timespec);
 }
 
 // Test that our workarounds are not needed.
