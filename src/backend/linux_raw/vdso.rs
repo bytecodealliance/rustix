@@ -424,6 +424,7 @@ impl Vdso {
 #[cfg(linux_raw)]
 #[test]
 #[cfg_attr(any(target_arch = "mips", target_arch = "mips64"), ignore)]
+#[allow(unused_variables)]
 fn test_vdso() {
     let vdso = Vdso::new().unwrap();
     assert!(!vdso.symtab.is_null());
