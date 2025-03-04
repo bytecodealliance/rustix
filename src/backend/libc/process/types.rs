@@ -24,6 +24,7 @@ use crate::backend::c;
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(not(target_os = "l4re"), repr(u32))]
 #[cfg_attr(target_os = "l4re", repr(u64))]
+#[non_exhaustive]
 pub enum Resource {
     /// `RLIMIT_CPU`
     Cpu = bitcast!(c::RLIMIT_CPU),

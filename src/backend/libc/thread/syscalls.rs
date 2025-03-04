@@ -631,11 +631,8 @@ unsafe fn futex_old_timespec(
 
     let old_timeout = if let Some(timeout) = timeout {
         Some(linux_raw_sys::general::__kernel_old_timespec {
-            tv_sec: (*timeout).tv_sec.try_into().map_err(|_| io::Errno::INVAL)?,
-            tv_nsec: (*timeout)
-                .tv_nsec
-                .try_into()
-                .map_err(|_| io::Errno::INVAL)?,
+            tv_sec: timeout.tv_sec.try_into().map_err(|_| io::Errno::INVAL)?,
+            tv_nsec: timeout.tv_nsec.try_into().map_err(|_| io::Errno::INVAL)?,
         })
     } else {
         None

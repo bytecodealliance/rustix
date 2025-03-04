@@ -6,6 +6,7 @@
 /// [`prlimit`]: crate::process::prlimit
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[repr(u32)]
+#[non_exhaustive]
 pub enum Resource {
     /// `RLIMIT_CPU`
     Cpu = linux_raw_sys::general::RLIMIT_CPU,

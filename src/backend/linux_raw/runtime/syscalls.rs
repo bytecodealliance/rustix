@@ -26,7 +26,7 @@ use crate::signal::Signal;
 use crate::timespec::Timespec;
 use core::ffi::c_void;
 use core::mem::MaybeUninit;
-#[cfg(target_pointer_width = "32")]
+#[cfg(all(target_pointer_width = "32", not(feature = "linux_5_1")))]
 use linux_raw_sys::general::__kernel_old_timespec;
 #[cfg(target_arch = "x86_64")]
 use linux_raw_sys::general::ARCH_SET_FS;
@@ -266,8 +266,8 @@ pub(crate) unsafe fn kernel_sigtimedwait(
             // a `__kernel_old_timespec`, the use `__NR_futex`.
             fn convert(timeout: &Timespec) -> Option<__kernel_old_timespec> {
                 Some(__kernel_old_timespec {
-                    tv_sec: (*timeout).tv_sec.try_into().ok()?,
-                    tv_nsec: (*timeout).tv_nsec.try_into().ok()?,
+                    tv_sec: timeout.tv_sec.try_into().ok()?,
+                    tv_nsec: timeout.tv_nsec.try_into().ok()?,
                 })
             }
             let old_timeout = if let Some(timeout) = timeout {
