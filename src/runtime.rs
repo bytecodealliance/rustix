@@ -720,7 +720,7 @@ pub unsafe fn kernel_sigwaitinfo(set: &KernelSigSet) -> io::Result<Siginfo> {
 #[inline]
 pub unsafe fn kernel_sigtimedwait(
     set: &KernelSigSet,
-    timeout: Option<Timespec>,
+    timeout: Option<&Timespec>,
 ) -> io::Result<Siginfo> {
     backend::runtime::syscalls::kernel_sigtimedwait(set, timeout)
 }

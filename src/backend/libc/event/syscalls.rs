@@ -572,14 +572,12 @@ pub(crate) unsafe fn epoll_wait(
     // If we're on Linux >= 5.11, use `epoll_pwait2` via `libc::syscall`.
     #[cfg(all(linux_kernel, feature = "linux_5_11"))]
     {
-        use linux_raw_sys::general::__kernel_timespec as timespec;
-
         syscall! {
             fn epoll_pwait2(
                 epfd: c::c_int,
                 events: *mut c::epoll_event,
                 maxevents: c::c_int,
-                timeout: *const timespec,
+                timeout: *const Timespec,
                 sigmask: *const c::sigset_t
             ) via SYS_epoll_pwait2 -> c::c_int
         }

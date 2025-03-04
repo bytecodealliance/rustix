@@ -505,7 +505,7 @@ pub(crate) unsafe fn futex_val2(
                 uaddr: *const AtomicU32,
                 futex_op: c::c_int,
                 val: u32,
-                timeout: *const linux_raw_sys::general::__kernel_timespec,
+                timeout: *const Timespec,
                 uaddr2: *const AtomicU32,
                 val3: u32
             ) via SYS_futex -> c::c_long
@@ -531,7 +531,7 @@ pub(crate) unsafe fn futex_timeout(
     op: super::futex::Operation,
     flags: futex::Flags,
     val: u32,
-    timeout: *const Timespec,
+    timeout: Option<&Timespec>,
     uaddr2: *const AtomicU32,
     val3: u32,
 ) -> io::Result<usize> {
@@ -559,7 +559,7 @@ pub(crate) unsafe fn futex_timeout(
             uaddr,
             op as i32 | flags.bits() as i32,
             val,
-            timeout,
+            option_as_ptr(timeout),
             uaddr2,
             val3,
         ))
@@ -584,7 +584,7 @@ pub(crate) unsafe fn futex_timeout(
                 uaddr: *const AtomicU32,
                 futex_op: c::c_int,
                 val: u32,
-                timeout: *const linux_raw_sys::general::__kernel_timespec,
+                timeout: *const Timespec,
                 uaddr2: *const AtomicU32,
                 val3: u32
             ) via SYS_futex -> c::c_long
@@ -594,7 +594,7 @@ pub(crate) unsafe fn futex_timeout(
             uaddr,
             op as i32 | flags.bits() as i32,
             val,
-            timeout.cast(),
+            option_as_ptr(timeout).cast(),
             uaddr2,
             val3,
         ) as isize)
@@ -614,7 +614,7 @@ unsafe fn futex_old_timespec(
     op: super::futex::Operation,
     flags: futex::Flags,
     val: u32,
-    timeout: *const Timespec,
+    timeout: Option<&Timespec>,
     uaddr2: *const AtomicU32,
     val3: u32,
 ) -> io::Result<usize> {
@@ -629,9 +629,7 @@ unsafe fn futex_old_timespec(
         ) via SYS_futex -> c::c_long
     }
 
-    let old_timeout = if timeout.is_null() {
-        None
-    } else {
+    let old_timeout = if let Some(timeout) = timeout {
         Some(linux_raw_sys::general::__kernel_old_timespec {
             tv_sec: (*timeout).tv_sec.try_into().map_err(|_| io::Errno::INVAL)?,
             tv_nsec: (*timeout)
@@ -639,6 +637,8 @@ unsafe fn futex_old_timespec(
                 .try_into()
                 .map_err(|_| io::Errno::INVAL)?,
         })
+    } else {
+        None
     };
     ret_usize(futex(
         uaddr,
@@ -658,21 +658,18 @@ pub(crate) fn futex_waitv(
     clockid: ClockId,
 ) -> io::Result<usize> {
     use futex::Wait as FutexWait;
-    use linux_raw_sys::general::{__kernel_clockid_t as clockid_t, __kernel_timespec as timespec};
+    use linux_raw_sys::general::__kernel_clockid_t as clockid_t;
     syscall! {
         fn futex_waitv(
             waiters: *const FutexWait,
             nr_futexes: c::c_uint,
             flags: c::c_uint,
-            timeout: *const timespec,
+            timeout: *const Timespec,
             clockid: clockid_t
         ) via SYS_futex_waitv -> c::c_int
     }
 
     let nr_futexes: c::c_uint = waiters.len().try_into().map_err(|_| io::Errno::INVAL)?;
-
-    #[cfg(test)]
-    assert_eq_size!(timespec, Timespec);
 
     unsafe {
         ret_c_int(futex_waitv(

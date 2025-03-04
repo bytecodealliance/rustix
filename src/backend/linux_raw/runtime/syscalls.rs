@@ -11,8 +11,8 @@ use crate::backend::conv::by_mut;
 #[cfg(target_arch = "x86_64")]
 use crate::backend::conv::c_uint;
 use crate::backend::conv::{
-    by_ref, c_int, ret, ret_c_int, ret_c_int_infallible, ret_error, ret_infallible, ret_void_star,
-    size_of, zero,
+    by_ref, c_int, opt_ref, ret, ret_c_int, ret_c_int_infallible, ret_error, ret_infallible,
+    ret_void_star, size_of, zero,
 };
 #[cfg(feature = "fs")]
 use crate::fd::BorrowedFd;
@@ -24,7 +24,6 @@ use crate::pid::{Pid, RawPid};
 use crate::runtime::{Fork, How, KernelSigSet, KernelSigaction, Siginfo, Stack};
 use crate::signal::Signal;
 use crate::timespec::Timespec;
-use crate::utils::option_as_ptr;
 use core::ffi::c_void;
 use core::mem::MaybeUninit;
 #[cfg(target_pointer_width = "32")]
@@ -153,7 +152,7 @@ pub(crate) unsafe fn kernel_sigaction(
     new: Option<KernelSigaction>,
 ) -> io::Result<KernelSigaction> {
     let mut old = MaybeUninit::<KernelSigaction>::uninit();
-    let new = option_as_ptr(new.as_ref());
+    let new = opt_ref(new.as_ref());
     ret(syscall!(
         __NR_rt_sigaction,
         signal,
@@ -167,7 +166,7 @@ pub(crate) unsafe fn kernel_sigaction(
 #[inline]
 pub(crate) unsafe fn kernel_sigaltstack(new: Option<Stack>) -> io::Result<Stack> {
     let mut old = MaybeUninit::<Stack>::uninit();
-    let new = option_as_ptr(new.as_ref());
+    let new = opt_ref(new.as_ref());
     ret(syscall!(__NR_sigaltstack, new, &mut old))?;
     Ok(old.assume_init())
 }
@@ -183,7 +182,7 @@ pub(crate) unsafe fn kernel_sigprocmask(
     new: Option<&KernelSigSet>,
 ) -> io::Result<KernelSigSet> {
     let mut old = MaybeUninit::<KernelSigSet>::uninit();
-    let new = option_as_ptr(new);
+    let new = opt_ref(new);
     ret(syscall!(
         __NR_rt_sigprocmask,
         how,
@@ -245,28 +244,81 @@ pub(crate) unsafe fn kernel_sigwaitinfo(set: &KernelSigSet) -> io::Result<Siginf
 #[inline]
 pub(crate) unsafe fn kernel_sigtimedwait(
     set: &KernelSigSet,
-    timeout: Option<Timespec>,
+    timeout: Option<&Timespec>,
 ) -> io::Result<Siginfo> {
     let mut info = MaybeUninit::<Siginfo>::uninit();
-    let timeout_ptr = option_as_ptr(timeout.as_ref());
 
     // `rt_sigtimedwait_time64` was introduced in Linux 5.1. The old
     // `rt_sigtimedwait` syscall is not y2038-compatible on 32-bit
     // architectures.
     #[cfg(target_pointer_width = "32")]
     {
-        match ret_c_int(syscall!(
+        // If we don't have Linux 5.1, and the timeout fits in a
+        // `__kernel_old_timespec`, use plain `rt_sigtimedwait`.
+        //
+        // We do this unconditionally, rather than trying
+        // `rt_sigtimedwait_time64` and falling back on `Errno::NOSYS`, because
+        // seccomp configurations will sometimes abort the process on syscalls
+        // they don't recognize.
+        #[cfg(not(feature = "linux_5_1"))]
+        {
+            // If we don't have a timeout, or if we can convert the timeout to
+            // a `__kernel_old_timespec`, the use `__NR_futex`.
+            fn convert(timeout: &Timespec) -> Option<__kernel_old_timespec> {
+                Some(__kernel_old_timespec {
+                    tv_sec: (*timeout).tv_sec.try_into().ok()?,
+                    tv_nsec: (*timeout).tv_nsec.try_into().ok()?,
+                })
+            }
+            let old_timeout = if let Some(timeout) = timeout {
+                match convert(timeout) {
+                    // Could not convert timeout.
+                    None => None,
+                    // Could convert timeout. Ok!
+                    Some(old_timeout) => Some(Some(old_timeout)),
+                }
+            } else {
+                // No timeout. Ok!
+                Some(None)
+            };
+            if let Some(old_timeout) = old_timeout {
+                return ret_c_int(syscall!(
+                    __NR_rt_sigtimedwait,
+                    by_ref(set),
+                    &mut info,
+                    opt_ref(old_timeout.as_ref()),
+                    size_of::<KernelSigSet, _>()
+                ))
+                .map(|sig| {
+                    debug_assert_eq!(
+                        sig,
+                        info.assume_init_ref()
+                            .__bindgen_anon_1
+                            .__bindgen_anon_1
+                            .si_signo
+                    );
+                    info.assume_init()
+                });
+            }
+        }
+
+        ret_c_int(syscall!(
             __NR_rt_sigtimedwait_time64,
             by_ref(set),
             &mut info,
-            timeout_ptr,
+            opt_ref(timeout),
             size_of::<KernelSigSet, _>()
-        )) {
-            Ok(_signum) => (),
-            Err(io::Errno::NOSYS) => kernel_sigtimedwait_old(set, timeout, &mut info)?,
-            Err(err) => return Err(err),
-        }
-        Ok(info.assume_init())
+        ))
+        .map(|sig| {
+            debug_assert_eq!(
+                sig,
+                info.assume_init_ref()
+                    .__bindgen_anon_1
+                    .__bindgen_anon_1
+                    .si_signo
+            );
+            info.assume_init()
+        })
     }
 
     #[cfg(target_pointer_width = "64")]
@@ -275,38 +327,11 @@ pub(crate) unsafe fn kernel_sigtimedwait(
             __NR_rt_sigtimedwait,
             by_ref(set),
             &mut info,
-            timeout_ptr,
+            opt_ref(timeout),
             size_of::<KernelSigSet, _>()
         ))?;
         Ok(info.assume_init())
     }
-}
-
-#[cfg(target_pointer_width = "32")]
-unsafe fn kernel_sigtimedwait_old(
-    set: &KernelSigSet,
-    timeout: Option<Timespec>,
-    info: &mut MaybeUninit<Siginfo>,
-) -> io::Result<()> {
-    let old_timeout = match timeout {
-        Some(timeout) => Some(__kernel_old_timespec {
-            tv_sec: timeout.tv_sec.try_into().map_err(|_| io::Errno::OVERFLOW)?,
-            tv_nsec: timeout.tv_nsec as _,
-        }),
-        None => None,
-    };
-
-    let old_timeout_ptr = option_as_ptr(old_timeout.as_ref());
-
-    let _signum = ret_c_int(syscall!(
-        __NR_rt_sigtimedwait,
-        by_ref(set),
-        info,
-        old_timeout_ptr,
-        size_of::<KernelSigSet, _>()
-    ))?;
-
-    Ok(())
 }
 
 #[inline]

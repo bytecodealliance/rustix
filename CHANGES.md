@@ -140,6 +140,22 @@ fields are `tv_sec` which holds seconds and `tv_nsec` which holds nanoseconds.
 [`rustix::event::epoll`]: https://docs.rs/rustix/1.0.0/rustix/event/epoll/index.html
 [`Timespec`]: https://docs.rs/rustix/1.0.0/rustix/time/struct.Timespec.html
 
+The timeout argument in [`rustix::thread::futex::wait`],
+[`rustix::thread::futex::lock_pi`], [`rustix::thread::futex::wait_bitset`],
+[`rustix::thread::futex::wait_requeue_pi`], and
+[`rustix::thread::futex::lock_pi2`] changed from `Option<Timespec>` to
+`Option<&Timespec>`, for consistency with the rest of rustix's API, and for
+low-level efficiency, as it means the implementation doesn't need to make a
+copy of the `Timespec` to take its address. An easy way to convert an
+`Option<Timespec>` to an `Option<&Timespec> is to use [`Option::as_ref`].
+
+[`rustix::thread::futex::wait`]: https://docs.rs/rustix/1.0.0/rustix/thread/futex/fn.wait.html
+[`rustix::thread::futex::lock_pi`]: https://docs.rs/rustix/1.0.0/rustix/thread/futex/fn.lock_pi.html
+[`rustix::thread::futex::wait_bitset`]: https://docs.rs/rustix/1.0.0/rustix/thread/futex/fn.wait_bitset.html
+[`rustix::thread::futex::wait_requeue_pi`]: https://docs.rs/rustix/1.0.0/rustix/thread/futex/fn.wait_requeue_pi.html
+[`rustix::thread::futex::lock_pi2`]: https://docs.rs/rustix/1.0.0/rustix/thread/futex/fn.lock_pi2.html
+[`Option::as_ref`]: https://doc.rust-lang.org/stable/std/option/enum.Option.html#method.as_ref
+
 Functions in [`rustix::event::port`] are renamed to remove the redundant
 `port_*` prefix.
 

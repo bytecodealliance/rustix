@@ -157,7 +157,7 @@ fn test_wait_timeout() {
         &lock,
         futex::Flags::empty(),
         0,
-        Some(Timespec {
+        Some(&Timespec {
             tv_sec: 1,
             tv_nsec: 13,
         }),
@@ -169,7 +169,7 @@ fn test_wait_timeout() {
         &lock,
         futex::Flags::empty(),
         0,
-        Some(Timespec {
+        Some(&Timespec {
             tv_sec: 0,
             tv_nsec: 1_000_000_000,
         }),
@@ -181,7 +181,7 @@ fn test_wait_timeout() {
         &lock,
         futex::Flags::empty(),
         0,
-        Some(Timespec {
+        Some(&Timespec {
             tv_sec: -1,
             tv_nsec: 0,
         }),
