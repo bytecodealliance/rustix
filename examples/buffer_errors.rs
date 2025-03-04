@@ -6,6 +6,7 @@
 fn main() {
     error_buffer_wrapper();
     error_retry_closure();
+    error_retry_closure_uninit();
     error_retry_indirect_closure();
     error_empty_slice();
     error_array_by_value();
@@ -40,8 +41,8 @@ fn error_retry_closure() {
     use rustix::io;
     use rustix::io::retry_on_intr;
 
-    fn b<B: Buffer<u8>>(_: B) -> io::Result<()> {
-        Ok(())
+    fn b<B: Buffer<u8>>(b: B) -> io::Result<B::Output> {
+        unsafe { Ok(b.assume_init(0)) }
     }
 
     let mut event_buf = [0; 4];
@@ -56,6 +57,33 @@ fn error_retry_closure() {
     // The fix: Add `&mut *`.
     let event_buf_slice = event_buf.as_mut_slice();
     retry_on_intr(|| b(&mut *event_buf_slice)).unwrap();
+}
+
+fn error_retry_closure_uninit() {
+    use rustix::buffer::Buffer;
+    use rustix::io;
+    use std::mem::MaybeUninit;
+
+    fn b<B: Buffer<u8>>(b: B) -> io::Result<B::Output> {
+        unsafe { Ok(b.assume_init(0)) }
+    }
+
+    let mut event_buf = [MaybeUninit::<u8>::uninit(); 4];
+
+    // Ideally we'd write this, but it gets:
+    // "captured variable cannot escape `FnMut` closure body".
+    /*
+    rustix::io::retry_on_intr(|| b(&mut event_buf)).unwrap();
+    */
+
+    // The fix: Don't use `retry_on_intr`, unfortunatetly.
+    loop {
+        match b(&mut event_buf) {
+            Ok((_init, _unini)) => break,
+            Err(io::Errno::INTR) => continue,
+            Err(err) => Err(err).unwrap(),
+        }
+    }
 }
 
 fn error_retry_indirect_closure() {
