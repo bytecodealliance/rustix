@@ -245,10 +245,10 @@ pub(crate) unsafe fn kernel_sigwaitinfo(set: &KernelSigSet) -> io::Result<Siginf
 #[inline]
 pub(crate) unsafe fn kernel_sigtimedwait(
     set: &KernelSigSet,
-    timeout: Option<Timespec>,
+    timeout: Option<&Timespec>,
 ) -> io::Result<Siginfo> {
     let mut info = MaybeUninit::<Siginfo>::uninit();
-    let timeout_ptr = option_as_ptr(timeout.as_ref());
+    let timeout_ptr = option_as_ptr(timeout);
 
     // `rt_sigtimedwait_time64` was introduced in Linux 5.1. The old
     // `rt_sigtimedwait` syscall is not y2038-compatible on 32-bit
@@ -285,7 +285,7 @@ pub(crate) unsafe fn kernel_sigtimedwait(
 #[cfg(target_pointer_width = "32")]
 unsafe fn kernel_sigtimedwait_old(
     set: &KernelSigSet,
-    timeout: Option<Timespec>,
+    timeout: Option<&Timespec>,
     info: &mut MaybeUninit<Siginfo>,
 ) -> io::Result<()> {
     let old_timeout = match timeout {

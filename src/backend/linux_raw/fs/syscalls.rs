@@ -1668,9 +1668,11 @@ pub(crate) fn fremovexattr(fd: BorrowedFd<'_>, name: &CStr) -> io::Result<()> {
 #[test]
 fn test_sizes() {
     assert_eq_size!(linux_raw_sys::general::__kernel_loff_t, u64);
+    assert_eq_align!(linux_raw_sys::general::__kernel_loff_t, u64);
 
     // Assert that `Timestamps` has the expected layout.
     assert_eq_size!([linux_raw_sys::general::__kernel_timespec; 2], Timestamps);
+    assert_eq_align!([linux_raw_sys::general::__kernel_timespec; 2], Timestamps);
 }
 
 // Some linux_raw_sys structs have unsigned types for values which are
@@ -1688,24 +1690,28 @@ mod as_signed {
     }
     impl AsSigned for u32 {
         type Signed = i32;
+
         fn as_signed(self) -> Self::Signed {
             self as _
         }
     }
     impl AsSigned for i32 {
         type Signed = i32;
+
         fn as_signed(self) -> Self::Signed {
             self
         }
     }
     impl AsSigned for u64 {
         type Signed = i64;
+
         fn as_signed(self) -> Self::Signed {
             self as _
         }
     }
     impl AsSigned for i64 {
         type Signed = i64;
+
         fn as_signed(self) -> Self::Signed {
             self
         }

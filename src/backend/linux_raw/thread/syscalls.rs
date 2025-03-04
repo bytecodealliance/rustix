@@ -222,15 +222,40 @@ pub(crate) unsafe fn futex_val2(
 
     #[cfg(target_pointer_width = "32")]
     {
-        ret_usize(syscall!(
-            __NR_futex_time64,
-            uaddr,
-            (op, flags),
-            c_uint(val),
-            timeout,
-            uaddr2,
-            c_uint(val3)
-        ))
+        // Linux 5.1 added `futex_time64`; if we have that, use it. We don't
+        // need it, because `timeout` is just passing `val2` and not a real
+        // timeout, but it's nice to `futex_time64` for consistency with the
+        // other futex calls that do.
+        #[cfg(feature = "linux_5_1")]
+        {
+            ret_usize(syscall!(
+                __NR_futex_time64,
+                uaddr,
+                (op, flags),
+                c_uint(val),
+                timeout,
+                uaddr2,
+                c_uint(val3)
+            ))
+        }
+
+        // If we don't have Linux 5.1, use plain `futex`.
+        //
+        // We do this unconditionally, rather than trying `futex_time64` and
+        // falling back on `Errno::NOSYS`, because seccomp configurations will
+        // sometimes abort the process on syscalls they don't recognize.
+        #[cfg(not(feature = "linux_5_1"))]
+        {
+            ret_usize(syscall!(
+                __NR_futex,
+                uaddr,
+                (op, flags),
+                c_uint(val),
+                timeout,
+                uaddr2,
+                c_uint(val3)
+            ))
+        }
     }
     #[cfg(target_pointer_width = "64")]
     ret_usize(syscall!(
@@ -253,29 +278,64 @@ pub(crate) unsafe fn futex_timeout(
     op: super::futex::Operation,
     flags: futex::Flags,
     val: u32,
-    timeout: *const Timespec,
+    timeout: Option<&Timespec>,
     uaddr2: *const AtomicU32,
     val3: u32,
 ) -> io::Result<usize> {
     #[cfg(target_pointer_width = "32")]
     {
+        // If we don't have Linux 5.1, and the timeout fits in a
+        // `__kernel_old_timespec`, use plain `futex`.
+        //
+        // We do this unconditionally, rather than trying `futex_time64` and
+        // falling back on `Errno::NOSYS`, because seccomp configurations will
+        // sometimes abort the process on syscalls they don't recognize.
+        #[cfg(not(feature = "linux_5_1"))]
+        {
+            // If we don't have a timeout, or if we can convert the timeout to
+            // a `__kernel_old_timespec`, the use `__NR_futex`.
+            fn convert(timeout: &Timespec) -> Option<__kernel_old_timespec> {
+                Some(__kernel_old_timespec {
+                    tv_sec: (*timeout).tv_sec.try_into().ok()?,
+                    tv_nsec: (*timeout).tv_nsec.try_into().ok()?,
+                })
+            }
+            let old_timeout = if let Some(timeout) = timeout {
+                match convert(timeout) {
+                    // Could not convert timeout.
+                    None => None,
+                    // Could convert timeout. Ok!
+                    Some(old_timeout) => Some(Some(old_timeout)),
+                }
+            } else {
+                // No timeout. Ok!
+                Some(None)
+            };
+            if let Some(old_timeout) = old_timeout {
+                return ret_usize(syscall!(
+                    __NR_futex,
+                    uaddr,
+                    (op, flags),
+                    c_uint(val),
+                    option_as_ptr(old_timeout.as_ref()),
+                    uaddr2,
+                    c_uint(val3)
+                ));
+            }
+        }
+
+        // We either have Linux 5.1 or the timeout didn't fit in
+        // `__kernel_old_timespec` so `__NR_futex_time64` will either succeed
+        // or fail due to our having no other options.
         ret_usize(syscall!(
             __NR_futex_time64,
             uaddr,
             (op, flags),
             c_uint(val),
-            timeout,
+            option_as_ptr(timeout),
             uaddr2,
             c_uint(val3)
         ))
-        .or_else(|err| {
-            // See the comments in `clock_gettime_via_syscall` about emulation.
-            if err == io::Errno::NOSYS {
-                futex_old_timespec(uaddr, op, flags, val, timeout, uaddr2, val3)
-            } else {
-                Err(err)
-            }
-        })
     }
     #[cfg(target_pointer_width = "64")]
     ret_usize(syscall!(
@@ -283,42 +343,7 @@ pub(crate) unsafe fn futex_timeout(
         uaddr,
         (op, flags),
         c_uint(val),
-        timeout,
-        uaddr2,
-        c_uint(val3)
-    ))
-}
-
-/// # Safety
-///
-/// The raw pointers must point to valid aligned memory.
-#[cfg(target_pointer_width = "32")]
-unsafe fn futex_old_timespec(
-    uaddr: *const AtomicU32,
-    op: super::futex::Operation,
-    flags: futex::Flags,
-    val: u32,
-    timeout: *const Timespec,
-    uaddr2: *const AtomicU32,
-    val3: u32,
-) -> io::Result<usize> {
-    let old_timeout = if timeout.is_null() {
-        None
-    } else {
-        Some(__kernel_old_timespec {
-            tv_sec: (*timeout).tv_sec.try_into().map_err(|_| io::Errno::INVAL)?,
-            tv_nsec: (*timeout)
-                .tv_nsec
-                .try_into()
-                .map_err(|_| io::Errno::INVAL)?,
-        })
-    };
-    ret_usize(syscall!(
-        __NR_futex,
-        uaddr,
-        (op, flags),
-        c_uint(val),
-        option_as_ptr(old_timeout.as_ref()),
+        option_as_ptr(timeout),
         uaddr2,
         c_uint(val3)
     ))

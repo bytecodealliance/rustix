@@ -386,17 +386,29 @@ fn test_sizes() {
 #[allow(deprecated)]
 fn test_fix_y2038() {
     assert_eq_size!(libc::time_t, u32);
-
-    #[cfg(linux_kernel)]
-    assert_eq_size!(Timespec, linux_raw_sys::general::__kernel_timespec);
+    assert_eq_align!(libc::time_t, Timespec);
 }
 
+// Test that our workarounds are not needed.
 #[cfg(not(fix_y2038))]
 #[test]
 fn timespec_layouts() {
     use crate::backend::c;
-    check_renamed_type!(Timespec, timespec);
+    check_renamed_struct!(Timespec, timespec, tv_sec, tv_nsec);
+}
 
-    #[cfg(linux_kernel)]
+// Test that `Timespec` matches Linux's `__kernel_timespec`.
+#[cfg(linux_kernel)]
+#[test]
+fn test_against_kernel_timespec() {
     assert_eq_size!(Timespec, linux_raw_sys::general::__kernel_timespec);
+    assert_eq_align!(Timespec, linux_raw_sys::general::__kernel_timespec);
+    assert_eq!(
+        memoffset::span_of!(Timespec, tv_sec),
+        memoffset::span_of!(linux_raw_sys::general::__kernel_timespec, tv_sec)
+    );
+    assert_eq!(
+        memoffset::span_of!(Timespec, tv_nsec),
+        memoffset::span_of!(linux_raw_sys::general::__kernel_timespec, tv_nsec)
+    );
 }

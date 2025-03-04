@@ -32,7 +32,6 @@ use core::sync::atomic::AtomicU32;
 use crate::backend::thread::futex::Operation;
 use crate::backend::thread::syscalls::{futex_timeout, futex_val2};
 use crate::fd::{FromRawFd as _, OwnedFd, RawFd};
-use crate::utils::option_as_ptr;
 use crate::{backend, io};
 
 pub use crate::clockid::ClockId;
@@ -56,20 +55,11 @@ pub fn wait(
     uaddr: &AtomicU32,
     flags: Flags,
     val: u32,
-    timeout: Option<Timespec>,
+    timeout: Option<&Timespec>,
 ) -> io::Result<()> {
     // SAFETY: The raw pointers come from references or null.
     unsafe {
-        futex_timeout(
-            uaddr,
-            Operation::Wait,
-            flags,
-            val,
-            option_as_ptr(timeout.as_ref()),
-            ptr::null(),
-            0,
-        )
-        .map(|val| {
+        futex_timeout(uaddr, Operation::Wait, flags, val, timeout, ptr::null(), 0).map(|val| {
             debug_assert_eq!(
                 val, 0,
                 "The return value should always equal zero, if the call is successful"
@@ -257,19 +247,10 @@ pub fn wake_op(
 /// [Linux `futex` system call]: https://man7.org/linux/man-pages/man2/futex.2.html
 /// [Linux `futex` feature]: https://man7.org/linux/man-pages/man7/futex.7.html
 #[inline]
-pub fn lock_pi(uaddr: &AtomicU32, flags: Flags, timeout: Option<Timespec>) -> io::Result<()> {
+pub fn lock_pi(uaddr: &AtomicU32, flags: Flags, timeout: Option<&Timespec>) -> io::Result<()> {
     // SAFETY: The raw pointers come from references or null.
     unsafe {
-        futex_timeout(
-            uaddr,
-            Operation::LockPi,
-            flags,
-            0,
-            option_as_ptr(timeout.as_ref()),
-            ptr::null(),
-            0,
-        )
-        .map(|val| {
+        futex_timeout(uaddr, Operation::LockPi, flags, 0, timeout, ptr::null(), 0).map(|val| {
             debug_assert_eq!(
                 val, 0,
                 "The return value should always equal zero, if the call is successful"
@@ -337,7 +318,7 @@ pub fn wait_bitset(
     uaddr: &AtomicU32,
     flags: Flags,
     val: u32,
-    timeout: Option<Timespec>,
+    timeout: Option<&Timespec>,
     val3: NonZeroU32,
 ) -> io::Result<()> {
     // SAFETY: The raw pointers come from references or null.
@@ -347,7 +328,7 @@ pub fn wait_bitset(
             Operation::WaitBitset,
             flags,
             val,
-            option_as_ptr(timeout.as_ref()),
+            timeout,
             ptr::null(),
             val3.get(),
         )
@@ -408,7 +389,7 @@ pub fn wait_requeue_pi(
     uaddr: &AtomicU32,
     flags: Flags,
     val: u32,
-    timeout: Option<Timespec>,
+    timeout: Option<&Timespec>,
     uaddr2: &AtomicU32,
 ) -> io::Result<()> {
     // SAFETY: The raw pointers come from references or null.
@@ -418,7 +399,7 @@ pub fn wait_requeue_pi(
             Operation::WaitRequeuePi,
             flags,
             val,
-            option_as_ptr(timeout.as_ref()),
+            timeout,
             uaddr2,
             0,
         )
@@ -466,19 +447,10 @@ pub fn cmp_requeue_pi(
 /// [Linux `futex` system call]: https://man7.org/linux/man-pages/man2/futex.2.html
 /// [Linux `futex` feature]: https://man7.org/linux/man-pages/man7/futex.7.html
 #[inline]
-pub fn lock_pi2(uaddr: &AtomicU32, flags: Flags, timeout: Option<Timespec>) -> io::Result<()> {
+pub fn lock_pi2(uaddr: &AtomicU32, flags: Flags, timeout: Option<&Timespec>) -> io::Result<()> {
     // SAFETY: The raw pointers come from references or null.
     unsafe {
-        futex_timeout(
-            uaddr,
-            Operation::LockPi2,
-            flags,
-            0,
-            option_as_ptr(timeout.as_ref()),
-            ptr::null(),
-            0,
-        )
-        .map(|val| {
+        futex_timeout(uaddr, Operation::LockPi2, flags, 0, timeout, ptr::null(), 0).map(|val| {
             debug_assert_eq!(
                 val, 0,
                 "The return value should always equal zero, if the call is successful"
