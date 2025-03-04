@@ -232,7 +232,7 @@ pub fn fd_set_num_elements(set_count: usize, nfds: RawFd) -> usize {
 #[cfg(any(windows, target_os = "wasi"))]
 #[inline]
 pub(crate) fn fd_set_num_elements_for_fd_array(set_count: usize) -> usize {
-    // Ensure that we always have a big enough set to derefence an `FD_SET`.
+    // Ensure that we always have a big enough set to dereference an `FD_SET`.
     core::cmp::max(
         fd_set_num_elements_for_fd_array_raw(set_count),
         div_ceil(size_of::<FD_SET>(), size_of::<FdSetElement>()),

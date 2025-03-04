@@ -11,7 +11,7 @@ use linux_raw_sys::general::{kernel_sigset_t, _NSIG};
 /// `kernel_sigset_t`—A set of signal numbers, as used by some syscalls.
 ///
 /// This is similar to `libc::sigset_t`, but with only enough space for the
-/// signals currently known to be used by the kernel. libc implementaions
+/// signals currently known to be used by the kernel. libc implementations
 /// reserve extra space so that if Linux defines new signals in the future
 /// they can add support without breaking their dynamic linking ABI. Rustix
 /// doesn't support a dynamic linking ABI, so if we need to increase the

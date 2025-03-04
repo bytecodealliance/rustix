@@ -271,9 +271,11 @@ pub unsafe fn io_uring_enter_arg<Fd: AsFd>(
     )
 }
 
+// TODO: Uncomment this when we support `IoringRegisterOp::CQWAIT_REG`.
+/*
 /// `io_uring_enter2(fd, to_submit, min_complete, flags, offset,
 /// sizeof(io_uring_reg_wait))`— Initiate and/or complete asynchronous I/O,
-/// using a previously regisered `io_uring_reg_wait`.
+/// using a previously registered `io_uring_reg_wait`.
 ///
 /// `offset` is an offset into an area of wait regions previously registered
 /// with [`io_uring_register`] using the [`IoringRegisterOp::CQWAIT_REG`]
@@ -314,6 +316,7 @@ pub unsafe fn io_uring_enter_reg_wait<Fd: AsFd>(
         size_of::<io_uring_reg_wait>(),
     )
 }
+*/
 
 bitflags::bitflags! {
     /// `IORING_ENTER_*` flags for use with [`io_uring_enter`].
