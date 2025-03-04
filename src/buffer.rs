@@ -91,6 +91,7 @@ use core::slice;
 /// If you ses errors like
 /// "captured variable cannot escape `FnMut` closure body",
 /// use an explicit loop instead of `retry_on_intr`, assuing you're using that.
+/// See `error_retry_closure_uninit` in examples.rs.
 pub trait Buffer<T>: private::Sealed<T> {}
 
 // Implement `Buffer` for all the types that implement `Sealed`.
