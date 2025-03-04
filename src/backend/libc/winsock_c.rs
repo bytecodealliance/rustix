@@ -62,6 +62,6 @@ pub(crate) use WinSock::{
 // in its public API. So define one, and we'll convert it internally.
 pub struct timespec {
     pub tv_sec: time_t,
-    pub tv_nsec: i64,
+    pub tv_nsec: ffi::c_long,
 }
 pub type time_t = i64;
