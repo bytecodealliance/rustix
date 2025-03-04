@@ -70,6 +70,14 @@ them with field values and `..Default::default()`, construct them with
 
 [`rustix::io_uring`]: https://docs.rs/rustix/1.0.0/rustix/io_uring/index.html
 
+[`rustix::process::Resource`], [`rustix::thread::MembarrierCommand`], and
+[`rustix::thread::Capability`] are now marked `#[non_exhaustive]` to ease
+migration in case new constants are defined in the future.
+
+[`rustix::process::Resource`]: https://docs.rs/rustix/1.0.0/rustix/process/enum.Resource.html
+[`rustix::thread::MembarrierCommand`]: https://docs.rs/rustix/1.0.0/rustix/thread/enum.MembarrierCommand.html
+[`rustix::thread::Capability`]: https://docs.rs/rustix/1.0.0/rustix/thread/enum.Capability.html
+
 `rustix::process::WaitidOptions` and `rustix::process::WaitidStatus` are
 renamed to
 [`rustix::process::WaitIdOptions`] and [`rustix::process::WaitIdStatus`] (note

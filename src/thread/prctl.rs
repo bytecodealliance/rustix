@@ -180,6 +180,7 @@ const PR_CAPBSET_READ: c_int = 23;
 /// Linux per-thread capability.
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[repr(u32)]
+#[non_exhaustive]
 pub enum Capability {
     /// In a system with the `_POSIX_CHOWN_RESTRICTED` option defined, this
     /// overrides the restriction of changing file ownership and group

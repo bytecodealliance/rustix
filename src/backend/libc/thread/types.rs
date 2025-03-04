@@ -14,6 +14,7 @@ use crate::backend::c;
 #[cfg(linux_kernel)]
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 #[repr(u32)]
+#[non_exhaustive]
 pub enum MembarrierCommand {
     /// `MEMBARRIER_CMD_GLOBAL`
     #[doc(alias = "Shared")]

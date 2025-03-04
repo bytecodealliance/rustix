@@ -103,7 +103,7 @@ impl SocketAddrUnix {
         if !bytes.is_empty() && bytes[0] != 0 {
             if self.unix.sun_path.len() == bytes.len() {
                 // SAFETY: no NULs are contained in bytes
-                unsafe { self.path_with_termination(bytes) }
+                unsafe { Self::path_with_termination(bytes) }
             } else {
                 // SAFETY: `from_bytes_with_nul_unchecked` since the string is
                 // NUL-terminated.
@@ -118,7 +118,8 @@ impl SocketAddrUnix {
     ///
     /// SAFETY: the input `bytes` must not contain any NULs
     #[cfg(feature = "alloc")]
-    unsafe fn path_with_termination(&self, bytes: &[u8]) -> Option<Cow<'_, CStr>> {
+    #[cold]
+    unsafe fn path_with_termination(bytes: &[u8]) -> Option<Cow<'_, CStr>> {
         let mut owned = Vec::with_capacity(bytes.len() + 1);
         owned.extend_from_slice(bytes);
         owned.push(b'\0');

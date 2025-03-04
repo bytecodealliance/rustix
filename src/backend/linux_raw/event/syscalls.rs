@@ -35,8 +35,8 @@ pub(crate) fn poll(fds: &mut [PollFd<'_>], timeout: Option<&Timespec>) -> io::Re
             // a `__kernel_old_timespec`, the use `__NR_ppoll`.
             fn convert(timeout: &Timespec) -> Option<__kernel_old_timespec> {
                 Some(__kernel_old_timespec {
-                    tv_sec: (*timeout).tv_sec.try_into().ok()?,
-                    tv_nsec: (*timeout).tv_nsec.try_into().ok()?,
+                    tv_sec: timeout.tv_sec.try_into().ok()?,
+                    tv_nsec: timeout.tv_nsec.try_into().ok()?,
                 })
             }
             let old_timeout = if let Some(timeout) = timeout {
@@ -151,8 +151,8 @@ pub(crate) unsafe fn select(
             // a `__kernel_old_timespec`, the use `__NR_pselect6`.
             fn convert(timeout: &Timespec) -> Option<__kernel_old_timespec> {
                 Some(__kernel_old_timespec {
-                    tv_sec: (*timeout).tv_sec.try_into().ok()?,
-                    tv_nsec: (*timeout).tv_nsec.try_into().ok()?,
+                    tv_sec: timeout.tv_sec.try_into().ok()?,
+                    tv_nsec: timeout.tv_nsec.try_into().ok()?,
                 })
             }
             let old_timeout = if let Some(timeout) = timeout {

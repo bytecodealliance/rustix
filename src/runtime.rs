@@ -63,6 +63,7 @@ pub use crate::{kernel_sigset::KernelSigSet, signal::Signal};
 ///
 /// This type does not have the same layout as `libc::sigaction`.
 #[cfg(linux_raw)]
+#[allow(missing_docs)]
 #[derive(Debug, Default, Clone)]
 #[repr(C)]
 pub struct KernelSigaction {

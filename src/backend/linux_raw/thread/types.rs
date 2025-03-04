@@ -9,6 +9,7 @@ use linux_raw_sys::general::membarrier_cmd;
 /// [`membarrier_query`]: crate::thread::membarrier_query
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 #[repr(u32)]
+#[non_exhaustive]
 pub enum MembarrierCommand {
     /// `MEMBARRIER_CMD_GLOBAL`
     #[doc(alias = "Shared")]

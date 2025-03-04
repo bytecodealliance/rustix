@@ -1786,6 +1786,7 @@ pub struct iovec {
 #[allow(missing_docs)]
 #[repr(C)]
 #[derive(Debug, Copy, Clone, Default)]
+#[non_exhaustive]
 pub struct open_how {
     /// An [`OFlags`] value represented as a `u64`.
     pub flags: u64,
