@@ -12,7 +12,7 @@ use std::process::Command;
 #[serial]
 fn test_pidfd_waitid() {
     // Create a new process.
-    let child = Command::new("yes")
+    let mut child = Command::new("yes")
         .stdout(std::process::Stdio::null())
         .stderr(std::process::Stdio::null())
         .spawn()
@@ -25,6 +25,7 @@ fn test_pidfd_waitid() {
         Err(io::Errno::NOSYS) => {
             // The kernel does not support pidfds.
             unsafe { kill(child.id() as _, SIGINT) };
+            child.wait().unwrap();
             return;
         }
         Err(e) => panic!("failed to open pidfd: {}", e),
@@ -104,7 +105,7 @@ fn test_pidfd_waitid() {
 #[serial]
 fn test_pidfd_send_signal() {
     // Create a new process.
-    let child = Command::new("yes")
+    let mut child = Command::new("yes")
         .stdout(std::process::Stdio::null())
         .stderr(std::process::Stdio::null())
         .spawn()
@@ -117,6 +118,7 @@ fn test_pidfd_send_signal() {
         Err(io::Errno::NOSYS) => {
             // The kernel does not support pidfds.
             process::kill_process(process::Pid::from_child(&child), process::Signal::INT).unwrap();
+            child.wait().unwrap();
             return;
         }
         Err(e) => panic!("failed to open pidfd: {}", e),
@@ -195,7 +197,7 @@ fn test_pidfd_send_signal() {
 #[serial]
 fn test_pidfd_poll() {
     // Create a new process.
-    let child = Command::new("sleep")
+    let mut child = Command::new("sleep")
         .arg("1")
         .stdout(std::process::Stdio::null())
         .stderr(std::process::Stdio::null())
@@ -209,6 +211,7 @@ fn test_pidfd_poll() {
         Err(io::Errno::NOSYS) | Err(io::Errno::INVAL) => {
             // The kernel does not support non-blocking pidfds.
             process::kill_process(process::Pid::from_child(&child), process::Signal::INT).unwrap();
+            child.wait().unwrap();
             return;
         }
         Err(e) => panic!("failed to open pidfd: {}", e),
