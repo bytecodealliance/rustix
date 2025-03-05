@@ -215,7 +215,7 @@ impl WaitIdStatus {
     /// Returns the number of the signal that stopped the process, if the
     /// process was stopped by a signal.
     #[inline]
-    #[cfg(not(any(target_os = "emscripten", target_os = "fuchsia")))]
+    #[cfg(not(any(target_os = "emscripten", target_os = "fuchsia", target_os = "netbsd")))]
     pub fn stopping_signal(&self) -> Option<i32> {
         if self.stopped() {
             Some(self.si_status() as _)
@@ -227,7 +227,7 @@ impl WaitIdStatus {
     /// Returns the number of the signal that trapped the process, if the
     /// process was trapped by a signal.
     #[inline]
-    #[cfg(not(any(target_os = "emscripten", target_os = "fuchsia")))]
+    #[cfg(not(any(target_os = "emscripten", target_os = "fuchsia", target_os = "netbsd")))]
     pub fn trapping_signal(&self) -> Option<i32> {
         if self.trapped() {
             Some(self.si_status() as _)
@@ -239,7 +239,7 @@ impl WaitIdStatus {
     /// Returns the exit status number returned by the process, if it exited
     /// normally.
     #[inline]
-    #[cfg(not(any(target_os = "emscripten", target_os = "fuchsia")))]
+    #[cfg(not(any(target_os = "emscripten", target_os = "fuchsia", target_os = "netbsd")))]
     pub fn exit_status(&self) -> Option<i32> {
         if self.exited() {
             Some(self.si_status())
@@ -251,7 +251,7 @@ impl WaitIdStatus {
     /// Returns the number of the signal that terminated the process, if the
     /// process was terminated by a signal.
     #[inline]
-    #[cfg(not(any(target_os = "emscripten", target_os = "fuchsia")))]
+    #[cfg(not(any(target_os = "emscripten", target_os = "fuchsia", target_os = "netbsd")))]
     pub fn terminating_signal(&self) -> Option<i32> {
         if self.killed() || self.dumped() {
             Some(self.si_status() as _)
@@ -296,7 +296,11 @@ impl WaitIdStatus {
         self.0.si_code
     }
 
-    #[cfg(not(any(target_os = "emscripten", target_os = "fuchsia")))]
+    // This is disabled on NetBSD because the libc crate's `si_status()`
+    // implementation doesn't appear to match what's in NetBSD's headers and we
+    // don't get a meaningful value returned.
+    // TODO: Report this upstream.
+    #[cfg(not(any(target_os = "emscripten", target_os = "fuchsia", target_os = "netbsd")))]
     #[allow(unsafe_code)]
     fn si_status(&self) -> crate::ffi::c_int {
         // SAFETY: POSIX [specifies] that the `siginfo_t` returned by a
@@ -322,19 +326,19 @@ impl fmt::Debug for WaitIdStatus {
         s.field("trapped", &self.trapped());
         s.field("dumped", &self.dumped());
         s.field("continued", &self.continued());
-        #[cfg(not(any(target_os = "emscripten", target_os = "fuchsia")))]
+        #[cfg(not(any(target_os = "emscripten", target_os = "fuchsia", target_os = "netbsd")))]
         if let Some(stopping_signal) = self.stopping_signal() {
             s.field("stopping_signal", &stopping_signal);
         }
-        #[cfg(not(any(target_os = "emscripten", target_os = "fuchsia")))]
+        #[cfg(not(any(target_os = "emscripten", target_os = "fuchsia", target_os = "netbsd")))]
         if let Some(trapping_signal) = self.trapping_signal() {
             s.field("trapping_signal", &trapping_signal);
         }
-        #[cfg(not(any(target_os = "emscripten", target_os = "fuchsia")))]
+        #[cfg(not(any(target_os = "emscripten", target_os = "fuchsia", target_os = "netbsd")))]
         if let Some(exit_status) = self.exit_status() {
             s.field("exit_status", &exit_status);
         }
-        #[cfg(not(any(target_os = "emscripten", target_os = "fuchsia")))]
+        #[cfg(not(any(target_os = "emscripten", target_os = "fuchsia", target_os = "netbsd")))]
         if let Some(terminating_signal) = self.terminating_signal() {
             s.field("terminating_signal", &terminating_signal);
         }

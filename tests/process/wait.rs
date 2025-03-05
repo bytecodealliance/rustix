@@ -117,7 +117,7 @@ fn test_waitid() {
         .unwrap();
 
     assert!(status.stopped());
-    #[cfg(not(target_os = "fuchsia"))]
+    #[cfg(not(any(target_os = "fuchsia", target_os = "netbsd")))]
     assert_eq!(status.stopping_signal(), Some(SIGSTOP as _));
     assert_eq!(status.raw_signo(), libc::SIGCHLD);
     assert_eq!(status.raw_errno(), 0);
@@ -143,7 +143,7 @@ fn test_waitid() {
     .unwrap();
 
     assert!(status.stopped());
-    #[cfg(not(target_os = "fuchsia"))]
+    #[cfg(not(any(target_os = "fuchsia", target_os = "netbsd")))]
     assert_eq!(status.stopping_signal(), Some(SIGSTOP as _));
     assert_eq!(status.raw_signo(), libc::SIGCHLD);
     assert_eq!(status.raw_errno(), 0);
@@ -178,7 +178,7 @@ fn test_waitid() {
     .unwrap();
 
     assert!(status.killed());
-    #[cfg(not(target_os = "fuchsia"))]
+    #[cfg(not(any(target_os = "fuchsia", target_os = "netbsd")))]
     assert_eq!(status.terminating_signal(), Some(SIGKILL as _));
 
     let status = process::waitid(process::WaitId::Pid(pid), process::WaitIdOptions::EXITED)
@@ -186,6 +186,6 @@ fn test_waitid() {
         .unwrap();
 
     assert!(status.killed());
-    #[cfg(not(target_os = "fuchsia"))]
+    #[cfg(not(any(target_os = "fuchsia", target_os = "netbsd")))]
     assert_eq!(status.terminating_signal(), Some(SIGKILL as _));
 }
