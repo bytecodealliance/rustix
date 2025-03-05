@@ -154,7 +154,7 @@ pub(crate) fn linux_secure() -> bool {
 #[inline]
 pub(crate) fn exe_phdrs() -> (*const c::c_void, usize, usize) {
     unsafe {
-        let phdr = getauxval(AT_PHDR) as *const c::c_void;
+        let phdr: *const c::c_void = getauxval(AT_PHDR);
         let phent = getauxval(AT_PHENT) as usize;
         let phnum = getauxval(AT_PHNUM) as usize;
         (phdr, phent, phnum)

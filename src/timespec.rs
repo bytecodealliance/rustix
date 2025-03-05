@@ -21,6 +21,13 @@ pub struct Timespec {
     pub tv_sec: Secs,
 
     /// Nanoseconds. Must be less than 1_000_000_000.
+    ///
+    /// When passed to [`rustix::fs::utimensat`], this field may instead be
+    /// assigned the values [`UTIME_NOW`] or [`UTIME_OMIT`].
+    ///
+    /// [`UTIME_NOW`]: crate::fs::UTIME_NOW
+    /// [`UTIME_OMIT`]: crate::fs::UTIME_OMIT
+    /// [`rustix::fs::utimensat`]: crate::fs::utimensat
     pub tv_nsec: Nsecs,
 }
 

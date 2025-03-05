@@ -41,7 +41,7 @@ pub(crate) unsafe fn kernel_fork() -> io::Result<Fork> {
     //
     // Architectures differ on the order of the parameters.
     #[cfg(target_arch = "x86_64")]
-    let pid = ret_c_int(syscall_readonly!(
+    let pid = ret_c_int(syscall!(
         __NR_clone,
         c_int(c::SIGCHLD | c::CLONE_CHILD_SETTID),
         zero(),
@@ -62,7 +62,7 @@ pub(crate) unsafe fn kernel_fork() -> io::Result<Fork> {
         target_arch = "s390x",
         target_arch = "x86"
     ))]
-    let pid = ret_c_int(syscall_readonly!(
+    let pid = ret_c_int(syscall!(
         __NR_clone,
         c_int(c::SIGCHLD | c::CLONE_CHILD_SETTID),
         zero(),

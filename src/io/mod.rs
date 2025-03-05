@@ -1,9 +1,9 @@
 //! I/O operations.
 //!
-//! If you're looking for [`SeekFrom`], that's in the [`fs`] module.
+//! If you're looking for [`SeekFrom`], it's in the [`fs`] module.
 //!
-//! [`SeekFrom`]: https://docs.rs/rustix/*/rustix/fs/enum.SeekFrom.html
-//! [`fs`]: https://docs.rs/rustix/*/rustix/fs/index.html
+//! [`SeekFrom`]: crate::fs::SeekFrom
+//! [`fs`]: crate::fs
 
 mod close;
 #[cfg(not(windows))]
