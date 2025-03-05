@@ -7,37 +7,37 @@ pub(crate) use linux_raw_sys::general::{
 };
 
 #[inline]
-pub(crate) fn WIFSTOPPED(status: u32) -> bool {
+pub(crate) fn WIFSTOPPED(status: i32) -> bool {
     (status & 0xff) == 0x7f
 }
 
 #[inline]
-pub(crate) fn WSTOPSIG(status: u32) -> u32 {
+pub(crate) fn WSTOPSIG(status: i32) -> i32 {
     (status >> 8) & 0xff
 }
 
 #[inline]
-pub(crate) fn WIFCONTINUED(status: u32) -> bool {
+pub(crate) fn WIFCONTINUED(status: i32) -> bool {
     status == 0xffff
 }
 
 #[inline]
-pub(crate) fn WIFSIGNALED(status: u32) -> bool {
+pub(crate) fn WIFSIGNALED(status: i32) -> bool {
     ((status & 0x7f) + 1) as i8 >= 2
 }
 
 #[inline]
-pub(crate) fn WTERMSIG(status: u32) -> u32 {
+pub(crate) fn WTERMSIG(status: i32) -> i32 {
     status & 0x7f
 }
 
 #[inline]
-pub(crate) fn WIFEXITED(status: u32) -> bool {
+pub(crate) fn WIFEXITED(status: i32) -> bool {
     (status & 0x7f) == 0
 }
 
 #[inline]
-pub(crate) fn WEXITSTATUS(status: u32) -> u32 {
+pub(crate) fn WEXITSTATUS(status: i32) -> i32 {
     (status >> 8) & 0xff
 }
 
@@ -107,15 +107,17 @@ mod tests {
             4095,
             4096,
             4097,
-            u32::MAX,
+            i32::MAX,
+            i32::MIN,
+            u32::MAX as i32,
         ] {
-            assert_eq!(WIFSTOPPED(status), libc::WIFSTOPPED(status as i32));
-            assert_eq!(WSTOPSIG(status), libc::WSTOPSIG(status as i32) as u32);
-            assert_eq!(WIFCONTINUED(status), libc::WIFCONTINUED(status as i32));
-            assert_eq!(WIFSIGNALED(status), libc::WIFSIGNALED(status as i32));
-            assert_eq!(WTERMSIG(status), libc::WTERMSIG(status as i32) as u32);
-            assert_eq!(WIFEXITED(status), libc::WIFEXITED(status as i32));
-            assert_eq!(WEXITSTATUS(status), libc::WEXITSTATUS(status as i32) as u32);
+            assert_eq!(WIFSTOPPED(status), libc::WIFSTOPPED(status));
+            assert_eq!(WSTOPSIG(status), libc::WSTOPSIG(status));
+            assert_eq!(WIFCONTINUED(status), libc::WIFCONTINUED(status));
+            assert_eq!(WIFSIGNALED(status), libc::WIFSIGNALED(status));
+            assert_eq!(WTERMSIG(status), libc::WTERMSIG(status));
+            assert_eq!(WIFEXITED(status), libc::WIFEXITED(status));
+            assert_eq!(WEXITSTATUS(status), libc::WEXITSTATUS(status));
         }
     }
 }

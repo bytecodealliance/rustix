@@ -9,6 +9,7 @@
 use crate::process::Pid;
 use crate::{backend, io};
 use bitflags::bitflags;
+use core::fmt;
 
 #[cfg(target_os = "linux")]
 use crate::fd::BorrowedFd;
@@ -73,43 +74,43 @@ bitflags! {
 /// The status of a child process after calling [`wait`]/[`waitpid`].
 #[derive(Debug, Clone, Copy)]
 #[repr(transparent)]
-pub struct WaitStatus(u32);
+pub struct WaitStatus(i32);
 
 impl WaitStatus {
     /// Creates a `WaitStatus` out of an integer.
     #[inline]
-    pub(crate) fn new(status: u32) -> Self {
+    pub(crate) fn new(status: i32) -> Self {
         Self(status)
     }
 
     /// Converts a `WaitStatus` into its raw representation as an integer.
     #[inline]
-    pub const fn as_raw(self) -> u32 {
+    pub const fn as_raw(self) -> i32 {
         self.0
     }
 
     /// Returns whether the process is currently stopped.
     #[inline]
     pub fn stopped(self) -> bool {
-        backend::process::wait::WIFSTOPPED(self.0 as _)
+        backend::process::wait::WIFSTOPPED(self.0)
     }
 
     /// Returns whether the process has exited normally.
     #[inline]
     pub fn exited(self) -> bool {
-        backend::process::wait::WIFEXITED(self.0 as _)
+        backend::process::wait::WIFEXITED(self.0)
     }
 
     /// Returns whether the process was terminated by a signal.
     #[inline]
     pub fn signaled(self) -> bool {
-        backend::process::wait::WIFSIGNALED(self.0 as _)
+        backend::process::wait::WIFSIGNALED(self.0)
     }
 
     /// Returns whether the process has continued from a job control stop.
     #[inline]
     pub fn continued(self) -> bool {
-        backend::process::wait::WIFCONTINUED(self.0 as _)
+        backend::process::wait::WIFCONTINUED(self.0)
     }
 
     /// Returns the number of the signal that stopped the process, if the
@@ -117,7 +118,7 @@ impl WaitStatus {
     #[inline]
     pub fn stopping_signal(self) -> Option<i32> {
         if self.stopped() {
-            Some(backend::process::wait::WSTOPSIG(self.0 as _) as _)
+            Some(backend::process::wait::WSTOPSIG(self.0))
         } else {
             None
         }
@@ -126,9 +127,9 @@ impl WaitStatus {
     /// Returns the exit status number returned by the process, if it exited
     /// normally.
     #[inline]
-    pub fn exit_status(self) -> Option<u32> {
+    pub fn exit_status(self) -> Option<i32> {
         if self.exited() {
-            Some(backend::process::wait::WEXITSTATUS(self.0 as _) as _)
+            Some(backend::process::wait::WEXITSTATUS(self.0))
         } else {
             None
         }
@@ -139,7 +140,7 @@ impl WaitStatus {
     #[inline]
     pub fn terminating_signal(self) -> Option<i32> {
         if self.signaled() {
-            Some(backend::process::wait::WTERMSIG(self.0 as _) as _)
+            Some(backend::process::wait::WTERMSIG(self.0))
         } else {
             None
         }
@@ -239,9 +240,9 @@ impl WaitIdStatus {
     /// normally.
     #[inline]
     #[cfg(not(any(target_os = "emscripten", target_os = "fuchsia", target_os = "netbsd")))]
-    pub fn exit_status(&self) -> Option<u32> {
+    pub fn exit_status(&self) -> Option<i32> {
         if self.exited() {
-            Some(self.si_status() as _)
+            Some(self.si_status())
         } else {
             None
         }
@@ -303,6 +304,31 @@ impl WaitIdStatus {
         //
         // [specifies]: https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/signal.h.html
         unsafe { self.0.si_status() }
+    }
+}
+
+impl fmt::Debug for WaitIdStatus {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut s = f.debug_struct("WaitIdStatus");
+        s.field("stopped", &self.stopped());
+        s.field("exited", &self.exited());
+        s.field("killed", &self.killed());
+        s.field("trapped", &self.trapped());
+        s.field("dumped", &self.dumped());
+        s.field("continued", &self.continued());
+        if let Some(stopping_signal) = self.stopping_signal() {
+            s.field("stopping_signal", &stopping_signal);
+        }
+        if let Some(trapping_signal) = self.trapping_signal() {
+            s.field("trapping_signal", &trapping_signal);
+        }
+        if let Some(exit_status) = self.exit_status() {
+            s.field("exit_status", &exit_status);
+        }
+        if let Some(terminating_signal) = self.terminating_signal() {
+            s.field("terminating_signal", &terminating_signal);
+        }
+        s.finish()
     }
 }
 

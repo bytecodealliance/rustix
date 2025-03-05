@@ -298,7 +298,7 @@ pub(crate) fn _waitpid(
     waitopts: WaitOptions,
 ) -> io::Result<Option<(Pid, WaitStatus)>> {
     unsafe {
-        let mut status = MaybeUninit::<u32>::uninit();
+        let mut status = MaybeUninit::<i32>::uninit();
         let pid = ret_c_int(syscall!(
             __NR_wait4,
             c_int(pid as _),

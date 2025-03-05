@@ -161,7 +161,7 @@ fn test_waitid() {
     assert!(status.continued());
 
     let status = process::waitid(
-        process::WaitId::All,
+        process::WaitId::Pid(pid),
         process::WaitIdOptions::EXITED | process::WaitIdOptions::NOHANG,
     )
     .expect("failed to wait");
