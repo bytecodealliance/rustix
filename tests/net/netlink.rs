@@ -1,7 +1,7 @@
 use rustix::net::netlink::{self, SocketAddrNetlink};
 use rustix::net::{
-    bind, getsockname, recvfrom, sendto, socket_with, AddressFamily, RecvFlags, SendFlags,
-    SocketAddrAny, SocketFlags, SocketType,
+    AddressFamily, RecvFlags, SendFlags, SocketAddrAny, SocketFlags, SocketType, bind, getsockname,
+    recvfrom, sendto, socket_with,
 };
 
 #[test]

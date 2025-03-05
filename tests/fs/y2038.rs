@@ -10,7 +10,7 @@
 #[test]
 fn test_y2038_with_utimensat() {
     use rustix::fs::{
-        fstat, openat, statat, utimensat, AtFlags, Mode, OFlags, Timespec, Timestamps, CWD,
+        AtFlags, CWD, Mode, OFlags, Timespec, Timestamps, fstat, openat, statat, utimensat,
     };
 
     let tmp = tempfile::tempdir().unwrap();
@@ -86,7 +86,7 @@ fn test_y2038_with_utimensat() {
 #[test]
 fn test_y2038_with_futimens() {
     use rustix::fs::{
-        fstat, futimens, openat, statat, AtFlags, Mode, OFlags, Timespec, Timestamps, CWD,
+        AtFlags, CWD, Mode, OFlags, Timespec, Timestamps, fstat, futimens, openat, statat,
     };
 
     let tmp = tempfile::tempdir().unwrap();
@@ -160,7 +160,7 @@ fn test_y2038_with_futimens() {
 #[cfg(not(target_os = "cygwin"))]
 #[test]
 fn test_y2038_with_futimens_and_stat() {
-    use rustix::fs::{fstat, futimens, open, stat, Mode, OFlags, Timespec, Timestamps};
+    use rustix::fs::{Mode, OFlags, Timespec, Timestamps, fstat, futimens, open, stat};
 
     let tmp = tempfile::tempdir().unwrap();
 

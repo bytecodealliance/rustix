@@ -39,7 +39,7 @@ use crate::{backend, io};
 pub use crate::clockid::ClockId;
 pub use crate::timespec::{Nsecs, Secs, Timespec};
 
-pub use backend::thread::futex::{Flags, WaitFlags, OWNER_DIED, WAITERS};
+pub use backend::thread::futex::{Flags, OWNER_DIED, WAITERS, WaitFlags};
 
 /// `syscall(SYS_futex, uaddr, FUTEX_WAIT, val, timeout, NULL, 0)`
 ///

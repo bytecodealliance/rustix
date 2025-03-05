@@ -1,7 +1,7 @@
 #[cfg(not(any(target_os = "redox", target_os = "solaris")))]
 #[test]
 fn test_flock() {
-    use rustix::fs::{flock, openat, FlockOperation, Mode, OFlags, CWD};
+    use rustix::fs::{CWD, FlockOperation, Mode, OFlags, flock, openat};
 
     let f = openat(CWD, "Cargo.toml", OFlags::RDONLY, Mode::empty()).unwrap();
     flock(&f, FlockOperation::LockExclusive).unwrap();

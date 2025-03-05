@@ -10,9 +10,9 @@ use crate::backend::c;
 use crate::backend::conv::owned_fd;
 use crate::fd::{AsFd, BorrowedFd, OwnedFd};
 use crate::ffi::{CStr, CString};
-use crate::fs::{fcntl_getfl, openat, Mode, OFlags};
+use crate::fs::{Mode, OFlags, fcntl_getfl, openat};
 #[cfg(not(target_os = "vita"))]
-use crate::fs::{fstat, Stat};
+use crate::fs::{Stat, fstat};
 #[cfg(not(any(
     solarish,
     target_os = "haiku",
@@ -23,7 +23,7 @@ use crate::fs::{fstat, Stat};
     target_os = "vita",
     target_os = "wasi",
 )))]
-use crate::fs::{fstatfs, StatFs};
+use crate::fs::{StatFs, fstatfs};
 #[cfg(not(any(
     solarish,
     target_os = "haiku",
@@ -31,7 +31,7 @@ use crate::fs::{fstatfs, StatFs};
     target_os = "vita",
     target_os = "wasi"
 )))]
-use crate::fs::{fstatvfs, StatVfs};
+use crate::fs::{StatVfs, fstatvfs};
 use crate::io;
 #[cfg(not(any(target_os = "fuchsia", target_os = "vita", target_os = "wasi")))]
 #[cfg(feature = "process")]
@@ -43,7 +43,7 @@ use c::readdir as libc_readdir;
 use c::readdir64 as libc_readdir;
 use core::fmt;
 use core::ptr::NonNull;
-use libc_errno::{errno, set_errno, Errno};
+use libc_errno::{Errno, errno, set_errno};
 
 /// `DIR*`
 pub struct Dir {
@@ -296,7 +296,10 @@ impl fmt::Debug for Dir {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut s = f.debug_struct("Dir");
         #[cfg(not(any(target_os = "horizon", target_os = "vita")))]
-        s.field("fd", unsafe { &c::dirfd(self.libc_dir.as_ptr()) });
+        {
+            let fd = unsafe { c::dirfd(self.libc_dir.as_ptr()) };
+            s.field("fd", &fd);
+        }
         s.finish()
     }
 }

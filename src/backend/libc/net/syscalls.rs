@@ -8,14 +8,14 @@ use crate::backend::conv::ret_u32;
 use crate::backend::conv::{borrowed_fd, ret, ret_owned_fd, ret_send_recv, send_recv_len};
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io;
-use crate::net::addr::SocketAddrArg;
 #[cfg(target_os = "linux")]
 use crate::net::MMsgHdr;
+use crate::net::addr::SocketAddrArg;
 use crate::net::{
     AddressFamily, Protocol, Shutdown, SocketAddrAny, SocketAddrBuf, SocketFlags, SocketType,
 };
 use crate::utils::as_ptr;
-use core::mem::{size_of, MaybeUninit};
+use core::mem::{MaybeUninit, size_of};
 use core::ptr::null_mut;
 #[cfg(not(any(
     windows,
@@ -36,12 +36,14 @@ pub(crate) unsafe fn recv(
     buf: (*mut u8, usize),
     flags: RecvFlags,
 ) -> io::Result<usize> {
-    ret_send_recv(c::recv(
-        borrowed_fd(fd),
-        buf.0.cast(),
-        send_recv_len(buf.1),
-        bitflags_bits!(flags),
-    ))
+    unsafe {
+        ret_send_recv(c::recv(
+            borrowed_fd(fd),
+            buf.0.cast(),
+            send_recv_len(buf.1),
+            bitflags_bits!(flags),
+        ))
+    }
 }
 
 pub(crate) fn send(fd: BorrowedFd<'_>, buf: &[u8], flags: SendFlags) -> io::Result<usize> {
@@ -60,23 +62,25 @@ pub(crate) unsafe fn recvfrom(
     buf: (*mut u8, usize),
     flags: RecvFlags,
 ) -> io::Result<(usize, Option<SocketAddrAny>)> {
-    let mut addr = SocketAddrBuf::new();
+    unsafe {
+        let mut addr = SocketAddrBuf::new();
 
-    // `recvfrom` does not write to the storage if the socket is
-    // connection-oriented sockets, so we initialize the family field to
-    // `AF_UNSPEC` so that we can detect this case.
-    initialize_family_to_unspec(addr.storage.as_mut_ptr().cast::<c::sockaddr>());
+        // `recvfrom` does not write to the storage if the socket is
+        // connection-oriented sockets, so we initialize the family field to
+        // `AF_UNSPEC` so that we can detect this case.
+        initialize_family_to_unspec(addr.storage.as_mut_ptr().cast::<c::sockaddr>());
 
-    let nread = ret_send_recv(c::recvfrom(
-        borrowed_fd(fd),
-        buf.0.cast(),
-        send_recv_len(buf.1),
-        bitflags_bits!(flags),
-        addr.storage.as_mut_ptr().cast::<c::sockaddr>(),
-        &mut addr.len,
-    ))?;
+        let nread = ret_send_recv(c::recvfrom(
+            borrowed_fd(fd),
+            buf.0.cast(),
+            send_recv_len(buf.1),
+            bitflags_bits!(flags),
+            addr.storage.as_mut_ptr().cast::<c::sockaddr>(),
+            &mut addr.len,
+        ))?;
 
-    Ok((nread, addr.into_any_option()))
+        Ok((nread, addr.into_any_option()))
+    }
 }
 
 pub(crate) fn sendto(

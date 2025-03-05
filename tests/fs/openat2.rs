@@ -1,5 +1,5 @@
 use rustix::fd::{AsFd, AsRawFd as _, OwnedFd};
-use rustix::fs::{mkdirat, openat, openat2, symlinkat, Mode, OFlags, ResolveFlags, CWD};
+use rustix::fs::{CWD, Mode, OFlags, ResolveFlags, mkdirat, openat, openat2, symlinkat};
 use rustix::{io, path};
 
 /// Like `openat2`, but keep retrying until it fails or succeeds.

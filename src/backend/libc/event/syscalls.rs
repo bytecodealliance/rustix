@@ -6,8 +6,6 @@ use crate::backend::conv::ret;
 use crate::backend::conv::ret_c_int;
 #[cfg(any(linux_kernel, target_os = "illumos", target_os = "redox"))]
 use crate::backend::conv::ret_u32;
-#[cfg(solarish)]
-use crate::event::port::Event;
 #[cfg(any(
     linux_kernel,
     target_os = "freebsd",
@@ -17,6 +15,8 @@ use crate::event::port::Event;
 use crate::event::EventfdFlags;
 #[cfg(any(bsd, linux_kernel, target_os = "wasi"))]
 use crate::event::FdSetElement;
+#[cfg(solarish)]
+use crate::event::port::Event;
 use crate::event::{PollFd, Timespec};
 use crate::io;
 #[cfg(any(linux_kernel, target_os = "illumos", target_os = "redox"))]
@@ -200,71 +200,73 @@ pub(crate) unsafe fn select(
     exceptfds: Option<&mut [FdSetElement]>,
     timeout: Option<&Timespec>,
 ) -> io::Result<i32> {
-    let len = crate::event::fd_set_num_elements_for_bitvector(nfds);
+    unsafe {
+        let len = crate::event::fd_set_num_elements_for_bitvector(nfds);
 
-    let readfds = match readfds {
-        Some(readfds) => {
-            assert!(readfds.len() >= len);
-            readfds.as_mut_ptr()
-        }
-        None => null_mut(),
-    };
-    let writefds = match writefds {
-        Some(writefds) => {
-            assert!(writefds.len() >= len);
-            writefds.as_mut_ptr()
-        }
-        None => null_mut(),
-    };
-    let exceptfds = match exceptfds {
-        Some(exceptfds) => {
-            assert!(exceptfds.len() >= len);
-            exceptfds.as_mut_ptr()
-        }
-        None => null_mut(),
-    };
+        let readfds = match readfds {
+            Some(readfds) => {
+                assert!(readfds.len() >= len);
+                readfds.as_mut_ptr()
+            }
+            None => null_mut(),
+        };
+        let writefds = match writefds {
+            Some(writefds) => {
+                assert!(writefds.len() >= len);
+                writefds.as_mut_ptr()
+            }
+            None => null_mut(),
+        };
+        let exceptfds = match exceptfds {
+            Some(exceptfds) => {
+                assert!(exceptfds.len() >= len);
+                exceptfds.as_mut_ptr()
+            }
+            None => null_mut(),
+        };
 
-    let timeout_data;
-    let timeout_ptr = match timeout {
-        Some(timeout) => {
-            // Convert from `Timespec` to `c::timeval`.
-            timeout_data = c::timeval {
-                tv_sec: timeout.tv_sec.try_into().map_err(|_| io::Errno::INVAL)?,
-                tv_usec: ((timeout.tv_nsec + 999) / 1000) as _,
-            };
-            &timeout_data
+        let timeout_data;
+        let timeout_ptr = match timeout {
+            Some(timeout) => {
+                // Convert from `Timespec` to `c::timeval`.
+                timeout_data = c::timeval {
+                    tv_sec: timeout.tv_sec.try_into().map_err(|_| io::Errno::INVAL)?,
+                    tv_usec: timeout.tv_nsec.div_ceil(1000) as _,
+                };
+                &timeout_data
+            }
+            None => null(),
+        };
+
+        // On Apple platforms, use the specially mangled `select` which doesn't
+        // have an `FD_SETSIZE` limitation.
+        #[cfg(apple)]
+        {
+            extern "C" {
+                #[link_name = "select$DARWIN_EXTSN$NOCANCEL"]
+                fn select(
+                    nfds: c::c_int,
+                    readfds: *mut FdSetElement,
+                    writefds: *mut FdSetElement,
+                    errorfds: *mut FdSetElement,
+                    timeout: *const c::timeval,
+                ) -> c::c_int;
+            }
+
+            ret_c_int(select(nfds, readfds, writefds, exceptfds, timeout_ptr))
         }
-        None => null(),
-    };
 
-    // On Apple platforms, use the specially mangled `select` which doesn't
-    // have an `FD_SETSIZE` limitation.
-    #[cfg(apple)]
-    {
-        extern "C" {
-            #[link_name = "select$DARWIN_EXTSN$NOCANCEL"]
-            fn select(
-                nfds: c::c_int,
-                readfds: *mut FdSetElement,
-                writefds: *mut FdSetElement,
-                errorfds: *mut FdSetElement,
-                timeout: *const c::timeval,
-            ) -> c::c_int;
+        // Otherwise just use the normal `select`.
+        #[cfg(not(apple))]
+        {
+            ret_c_int(c::select(
+                nfds,
+                readfds.cast(),
+                writefds.cast(),
+                exceptfds.cast(),
+                timeout_ptr as *mut c::timeval,
+            ))
         }
-
-        ret_c_int(select(nfds, readfds, writefds, exceptfds, timeout_ptr))
-    }
-
-    // Otherwise just use the normal `select`.
-    #[cfg(not(apple))]
-    {
-        ret_c_int(c::select(
-            nfds,
-            readfds.cast(),
-            writefds.cast(),
-            exceptfds.cast(),
-            timeout_ptr as *mut c::timeval,
-        ))
     }
 }
 
@@ -307,7 +309,7 @@ pub(crate) unsafe fn select(
             // Convert from `Timespec` to `c::timeval`.
             timeout_data = c::timeval {
                 tv_sec: timeout.tv_sec.try_into().map_err(|_| io::Errno::INVAL)?,
-                tv_usec: ((timeout.tv_nsec + 999) / 1000) as _,
+                tv_usec: timeout.tv_nsec.div_ceil(1000) as _,
             };
             &timeout_data
         }
@@ -379,12 +381,11 @@ pub(crate) fn port_get(port: BorrowedFd<'_>, timeout: Option<&Timespec>) -> io::
 
     let mut event = MaybeUninit::<c::port_event>::uninit();
 
-    // In Rust ≥ 1.65, the `as _` can be `.cast_mut()`.
     unsafe {
         ret(c::port_get(
             borrowed_fd(port),
             event.as_mut_ptr(),
-            timeout as _,
+            timeout.cast_mut(),
         ))?;
     }
 
@@ -426,13 +427,12 @@ pub(crate) unsafe fn port_getn(
         return Ok(0);
     }
 
-    // In Rust ≥ 1.65, the `as _` can be `.cast_mut()`.
     ret(c::port_getn(
         borrowed_fd(port),
         events.0.cast(),
         events.1.try_into().unwrap_or(u32::MAX),
         &mut nget,
-        timeout as _,
+        timeout.cast_mut(),
     ))?;
 
     Ok(nget as usize)
@@ -546,7 +546,7 @@ pub(crate) unsafe fn epoll_wait(
         target_env = "gnu",
         not(fix_y2038)
     ))]
-    {
+    unsafe {
         weak! {
             fn epoll_pwait2(
                 c::c_int,
@@ -569,7 +569,7 @@ pub(crate) unsafe fn epoll_wait(
         }
     }
 
-    // If we're on Linux ≥ 5.11, use `epoll_pwait2` via `libc::syscall`.
+    // If we're on Linux >= 5.11, use `epoll_pwait2` via `libc::syscall`.
     #[cfg(all(linux_kernel, feature = "linux_5_11"))]
     {
         syscall! {
@@ -594,7 +594,7 @@ pub(crate) unsafe fn epoll_wait(
 
     // Otherwise just use `epoll_wait`.
     #[cfg(not(all(linux_kernel, feature = "linux_5_11")))]
-    {
+    unsafe {
         let timeout = match timeout {
             None => -1,
             Some(timeout) => timeout.as_c_int_millis().ok_or(io::Errno::INVAL)?,

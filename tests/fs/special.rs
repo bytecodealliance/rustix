@@ -2,7 +2,7 @@
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 #[test]
 fn test_special_fds() {
-    use rustix::fs::{fstat, open, openat, Mode, OFlags, Stat, ABS, CWD};
+    use rustix::fs::{ABS, CWD, Mode, OFlags, Stat, fstat, open, openat};
     use rustix::process::getcwd;
     use std::ffi::OsStr;
     use std::os::unix::ffi::OsStrExt as _;

@@ -27,20 +27,22 @@ pub(crate) struct sockaddr_header {
 /// `storage` must point to a least an initialized `sockaddr_header`.
 #[inline]
 pub(crate) const unsafe fn read_sa_family(storage: *const c::sockaddr) -> u16 {
-    // Assert that we know the layout of `sockaddr`.
-    let _ = c::sockaddr {
-        __storage: c::sockaddr_storage {
-            __bindgen_anon_1: linux_raw_sys::net::__kernel_sockaddr_storage__bindgen_ty_1 {
-                __bindgen_anon_1:
-                    linux_raw_sys::net::__kernel_sockaddr_storage__bindgen_ty_1__bindgen_ty_1 {
-                        ss_family: 0_u16,
-                        __data: [0; 126_usize],
-                    },
+    unsafe {
+        // Assert that we know the layout of `sockaddr`.
+        let _ = c::sockaddr {
+            __storage: c::sockaddr_storage {
+                __bindgen_anon_1: linux_raw_sys::net::__kernel_sockaddr_storage__bindgen_ty_1 {
+                    __bindgen_anon_1:
+                        linux_raw_sys::net::__kernel_sockaddr_storage__bindgen_ty_1__bindgen_ty_1 {
+                            ss_family: 0_u16,
+                            __data: [0; 126_usize],
+                        },
+                },
             },
-        },
-    };
+        };
 
-    (*storage.cast::<sockaddr_header>()).sa_family
+        (*storage.cast::<sockaddr_header>()).sa_family
+    }
 }
 
 /// Set the `sa_family` field of a socket address to `AF_UNSPEC`, so that we
@@ -51,7 +53,9 @@ pub(crate) const unsafe fn read_sa_family(storage: *const c::sockaddr) -> u16 {
 /// `storage` must point to a least an initialized `sockaddr_header`.
 #[inline]
 pub(crate) unsafe fn initialize_family_to_unspec(storage: *mut c::sockaddr) {
-    (*storage.cast::<sockaddr_header>()).sa_family = c::AF_UNSPEC as _;
+    unsafe {
+        (*storage.cast::<sockaddr_header>()).sa_family = c::AF_UNSPEC as _;
+    }
 }
 
 /// Check if a socket address returned from the OS is considered non-empty.

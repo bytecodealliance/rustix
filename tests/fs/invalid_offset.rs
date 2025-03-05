@@ -13,7 +13,7 @@ use rustix::fs::SeekFrom;
 
 #[test]
 fn invalid_offset_seek() {
-    use rustix::fs::{openat, seek, Mode, OFlags, CWD};
+    use rustix::fs::{CWD, Mode, OFlags, openat, seek};
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
     let file = openat(
@@ -40,7 +40,7 @@ fn invalid_offset_seek() {
 )))]
 #[test]
 fn invalid_offset_fallocate() {
-    use rustix::fs::{fallocate, openat, FallocateFlags, Mode, OFlags, CWD};
+    use rustix::fs::{CWD, FallocateFlags, Mode, OFlags, fallocate, openat};
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
     let file = openat(
@@ -69,7 +69,7 @@ fn invalid_offset_fallocate() {
 #[test]
 fn invalid_offset_fadvise() {
     use core::num::NonZeroU64;
-    use rustix::fs::{fadvise, openat, Advice, Mode, OFlags, CWD};
+    use rustix::fs::{Advice, CWD, Mode, OFlags, fadvise, openat};
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
     let file = openat(
@@ -142,7 +142,7 @@ fn invalid_offset_fadvise() {
 
 #[test]
 fn invalid_offset_pread() {
-    use rustix::fs::{openat, Mode, OFlags, CWD};
+    use rustix::fs::{CWD, Mode, OFlags, openat};
     use rustix::io::pread;
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
@@ -162,7 +162,7 @@ fn invalid_offset_pread() {
 #[cfg(not(any(apple, target_os = "cygwin")))]
 #[test]
 fn invalid_offset_pwrite() {
-    use rustix::fs::{openat, Mode, OFlags, CWD};
+    use rustix::fs::{CWD, Mode, OFlags, openat};
     use rustix::io::pwrite;
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
@@ -182,7 +182,7 @@ fn invalid_offset_pwrite() {
 #[cfg(linux_kernel)]
 #[test]
 fn invalid_offset_copy_file_range() {
-    use rustix::fs::{copy_file_range, openat, Mode, OFlags, CWD};
+    use rustix::fs::{CWD, Mode, OFlags, copy_file_range, openat};
     use rustix::io::write;
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();

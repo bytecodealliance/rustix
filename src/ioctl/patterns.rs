@@ -102,7 +102,7 @@ unsafe impl<const OPCODE: Opcode, Output> Ioctl for Getter<OPCODE, Output> {
     }
 
     unsafe fn output_from_ptr(_: IoctlOutput, ptr: *mut c::c_void) -> Result<Self::Output> {
-        Ok(ptr.cast::<Output>().read())
+        unsafe { Ok(ptr.cast::<Output>().read()) }
     }
 }
 

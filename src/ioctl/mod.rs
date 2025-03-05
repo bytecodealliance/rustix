@@ -89,25 +89,27 @@ use bsd as platform;
 /// [illumos]: https://illumos.org/man/2/ioctl
 #[inline]
 pub unsafe fn ioctl<F: AsFd, I: Ioctl>(fd: F, mut ioctl: I) -> Result<I::Output> {
-    let fd = fd.as_fd();
-    let request = ioctl.opcode();
-    let arg = ioctl.as_ptr();
+    unsafe {
+        let fd = fd.as_fd();
+        let request = ioctl.opcode();
+        let arg = ioctl.as_ptr();
 
-    // SAFETY: The variant of `Ioctl` asserts that this is a valid IOCTL call
-    // to make.
-    let output = if I::IS_MUTATING {
-        _ioctl(fd, request, arg)?
-    } else {
-        _ioctl_readonly(fd, request, arg)?
-    };
+        // SAFETY: The variant of `Ioctl` asserts that this is a valid IOCTL call
+        // to make.
+        let output = if I::IS_MUTATING {
+            _ioctl(fd, request, arg)?
+        } else {
+            _ioctl_readonly(fd, request, arg)?
+        };
 
-    // SAFETY: The variant of `Ioctl` asserts that this is a valid pointer to
-    // the output data.
-    I::output_from_ptr(output, arg)
+        // SAFETY: The variant of `Ioctl` asserts that this is a valid pointer to
+        // the output data.
+        I::output_from_ptr(output, arg)
+    }
 }
 
 unsafe fn _ioctl(fd: BorrowedFd<'_>, request: Opcode, arg: *mut c::c_void) -> Result<IoctlOutput> {
-    crate::backend::io::syscalls::ioctl(fd, request, arg)
+    unsafe { crate::backend::io::syscalls::ioctl(fd, request, arg) }
 }
 
 unsafe fn _ioctl_readonly(
@@ -115,7 +117,7 @@ unsafe fn _ioctl_readonly(
     request: Opcode,
     arg: *mut c::c_void,
 ) -> Result<IoctlOutput> {
-    crate::backend::io::syscalls::ioctl_readonly(fd, request, arg)
+    unsafe { crate::backend::io::syscalls::ioctl_readonly(fd, request, arg) }
 }
 
 /// A trait defining the properties of an `ioctl` command.

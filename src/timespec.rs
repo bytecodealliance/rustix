@@ -198,8 +198,7 @@ impl Timespec {
         secs.checked_mul(1000)
             .and_then(|millis| {
                 // Add the nanoseconds, converted to milliseconds, rounding up.
-                // With Rust 1.73.0 this can use `div_ceil`.
-                millis.checked_add((i64::from(self.tv_nsec) + 999_999) / 1_000_000)
+                millis.checked_add(i64::from(self.tv_nsec).div_ceil(1_000_000))
             })
             .and_then(|millis| c::c_int::try_from(millis).ok())
     }

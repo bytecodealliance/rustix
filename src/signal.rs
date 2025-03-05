@@ -51,40 +51,40 @@ pub struct Signal(NonZeroI32);
 #[rustfmt::skip]
 impl Signal {
     /// `SIGHUP`
-    pub const HUP: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGHUP) });
+    pub const HUP: Self = Self( NonZeroI32::new(c::SIGHUP).unwrap() );
     /// `SIGINT`
-    pub const INT: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGINT) });
+    pub const INT: Self = Self( NonZeroI32::new(c::SIGINT).unwrap() );
     /// `SIGQUIT`
-    pub const QUIT: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGQUIT) });
+    pub const QUIT: Self = Self( NonZeroI32::new(c::SIGQUIT).unwrap() );
     /// `SIGILL`
-    pub const ILL: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGILL) });
+    pub const ILL: Self = Self( NonZeroI32::new(c::SIGILL).unwrap() );
     /// `SIGTRAP`
-    pub const TRAP: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGTRAP) });
+    pub const TRAP: Self = Self( NonZeroI32::new(c::SIGTRAP).unwrap() );
     /// `SIGABRT`, aka `SIGIOT`
     #[doc(alias = "IOT")]
     #[doc(alias = "ABRT")]
-    pub const ABORT: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGABRT) });
+    pub const ABORT: Self = Self( NonZeroI32::new(c::SIGABRT).unwrap() );
     /// `SIGBUS`
-    pub const BUS: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGBUS) });
+    pub const BUS: Self = Self( NonZeroI32::new(c::SIGBUS).unwrap() );
     /// `SIGFPE`
-    pub const FPE: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGFPE) });
+    pub const FPE: Self = Self( NonZeroI32::new(c::SIGFPE).unwrap() );
     /// `SIGKILL`
-    pub const KILL: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGKILL) });
+    pub const KILL: Self = Self( NonZeroI32::new(c::SIGKILL).unwrap() );
     /// `SIGUSR1`
     #[cfg(not(target_os = "vita"))]
-    pub const USR1: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGUSR1) });
+    pub const USR1: Self = Self( NonZeroI32::new(c::SIGUSR1).unwrap() );
     /// `SIGSEGV`
-    pub const SEGV: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGSEGV) });
+    pub const SEGV: Self = Self( NonZeroI32::new(c::SIGSEGV).unwrap() );
     /// `SIGUSR2`
     #[cfg(not(target_os = "vita"))]
-    pub const USR2: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGUSR2) });
+    pub const USR2: Self = Self( NonZeroI32::new(c::SIGUSR2).unwrap() );
     /// `SIGPIPE`
-    pub const PIPE: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGPIPE) });
+    pub const PIPE: Self = Self( NonZeroI32::new(c::SIGPIPE).unwrap() );
     /// `SIGALRM`
     #[doc(alias = "ALRM")]
-    pub const ALARM: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGALRM) });
+    pub const ALARM: Self = Self( NonZeroI32::new(c::SIGALRM).unwrap() );
     /// `SIGTERM`
-    pub const TERM: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGTERM) });
+    pub const TERM: Self = Self( NonZeroI32::new(c::SIGTERM).unwrap() );
     /// `SIGSTKFLT`
     #[cfg(not(any(
         bsd,
@@ -108,49 +108,49 @@ impl Signal {
             ),
         ),
     )))]
-    pub const STKFLT: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGSTKFLT) });
+    pub const STKFLT: Self = Self( NonZeroI32::new(c::SIGSTKFLT).unwrap() );
     /// `SIGCHLD`
     #[cfg(not(target_os = "vita"))]
     #[doc(alias = "CHLD")]
-    pub const CHILD: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGCHLD) });
+    pub const CHILD: Self = Self( NonZeroI32::new(c::SIGCHLD).unwrap() );
     /// `SIGCONT`
     #[cfg(not(target_os = "vita"))]
-    pub const CONT: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGCONT) });
+    pub const CONT: Self = Self( NonZeroI32::new(c::SIGCONT).unwrap() );
     /// `SIGSTOP`
     #[cfg(not(target_os = "vita"))]
-    pub const STOP: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGSTOP) });
+    pub const STOP: Self = Self( NonZeroI32::new(c::SIGSTOP).unwrap() );
     /// `SIGTSTP`
     #[cfg(not(target_os = "vita"))]
-    pub const TSTP: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGTSTP) });
+    pub const TSTP: Self = Self( NonZeroI32::new(c::SIGTSTP).unwrap() );
     /// `SIGTTIN`
     #[cfg(not(target_os = "vita"))]
-    pub const TTIN: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGTTIN) });
+    pub const TTIN: Self = Self( NonZeroI32::new(c::SIGTTIN).unwrap() );
     /// `SIGTTOU`
     #[cfg(not(target_os = "vita"))]
-    pub const TTOU: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGTTOU) });
+    pub const TTOU: Self = Self( NonZeroI32::new(c::SIGTTOU).unwrap() );
     /// `SIGURG`
     #[cfg(not(target_os = "vita"))]
-    pub const URG: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGURG) });
+    pub const URG: Self = Self( NonZeroI32::new(c::SIGURG).unwrap() );
     /// `SIGXCPU`
     #[cfg(not(target_os = "vita"))]
-    pub const XCPU: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGXCPU) });
+    pub const XCPU: Self = Self( NonZeroI32::new(c::SIGXCPU).unwrap() );
     /// `SIGXFSZ`
     #[cfg(not(target_os = "vita"))]
-    pub const XFSZ: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGXFSZ) });
+    pub const XFSZ: Self = Self( NonZeroI32::new(c::SIGXFSZ).unwrap() );
     /// `SIGVTALRM`
     #[cfg(not(target_os = "vita"))]
     #[doc(alias = "VTALRM")]
-    pub const VTALARM: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGVTALRM) });
+    pub const VTALARM: Self = Self( NonZeroI32::new(c::SIGVTALRM).unwrap() );
     /// `SIGPROF`
     #[cfg(not(target_os = "vita"))]
-    pub const PROF: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGPROF) });
+    pub const PROF: Self = Self( NonZeroI32::new(c::SIGPROF).unwrap() );
     /// `SIGWINCH`
     #[cfg(not(target_os = "vita"))]
-    pub const WINCH: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGWINCH) });
+    pub const WINCH: Self = Self( NonZeroI32::new(c::SIGWINCH).unwrap() );
     /// `SIGIO`, aka `SIGPOLL`
     #[doc(alias = "POLL")]
     #[cfg(not(any(target_os = "haiku", target_os = "vita")))]
-    pub const IO: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGIO) });
+    pub const IO: Self = Self( NonZeroI32::new(c::SIGIO).unwrap() );
     /// `SIGPWR`
     #[cfg(not(any(
         bsd,
@@ -160,10 +160,10 @@ impl Signal {
         target_os = "vita"
     )))]
     #[doc(alias = "PWR")]
-    pub const POWER: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGPWR) });
+    pub const POWER: Self = Self( NonZeroI32::new(c::SIGPWR).unwrap() );
     /// `SIGSYS`, aka `SIGUNUSED`
     #[doc(alias = "UNUSED")]
-    pub const SYS: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGSYS) });
+    pub const SYS: Self = Self( NonZeroI32::new(c::SIGSYS).unwrap() );
     /// `SIGEMT`
     #[cfg(any(
         bsd,
@@ -182,17 +182,17 @@ impl Signal {
             )
         )
     ))]
-    pub const EMT: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGEMT) });
+    pub const EMT: Self = Self( NonZeroI32::new(c::SIGEMT).unwrap() );
     /// `SIGINFO`
     #[cfg(bsd)]
-    pub const INFO: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGINFO) });
+    pub const INFO: Self = Self( NonZeroI32::new(c::SIGINFO).unwrap() );
     /// `SIGTHR`
     #[cfg(target_os = "freebsd")]
     #[doc(alias = "LWP")]
-    pub const THR: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGTHR) });
+    pub const THR: Self = Self( NonZeroI32::new(c::SIGTHR).unwrap() );
     /// `SIGLIBRT`
     #[cfg(target_os = "freebsd")]
-    pub const LIBRT: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGLIBRT) });
+    pub const LIBRT: Self = Self( NonZeroI32::new(c::SIGLIBRT).unwrap() );
 }
 
 impl Signal {
@@ -230,7 +230,7 @@ impl Signal {
     /// [`SIGRTMAX`]: https://docs.rs/libc/*/libc/fn.SIGRTMAX.html
     #[inline]
     pub const unsafe fn from_raw_unchecked(sig: i32) -> Self {
-        Self::from_raw_nonzero_unchecked(NonZeroI32::new_unchecked(sig))
+        unsafe { Self::from_raw_nonzero_unchecked(NonZeroI32::new_unchecked(sig)) }
     }
 
     /// Convert a raw non-zero signal number into a `Signal` without checks.

@@ -26,5 +26,5 @@ pub use backend::mm::types::UserfaultfdFlags;
 /// [Linux userfaultfd]: https://www.kernel.org/doc/Documentation/vm/userfaultfd.txt
 #[inline]
 pub unsafe fn userfaultfd(flags: UserfaultfdFlags) -> io::Result<OwnedFd> {
-    backend::mm::syscalls::userfaultfd(flags)
+    unsafe { backend::mm::syscalls::userfaultfd(flags) }
 }

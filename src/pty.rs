@@ -92,7 +92,7 @@ pub fn openpt(flags: OpenptFlags) -> io::Result<OwnedFd> {
     // On Linux, open the device ourselves so that we can support `CLOEXEC`.
     #[cfg(linux_kernel)]
     {
-        use crate::fs::{open, Mode};
+        use crate::fs::{Mode, open};
         match open(cstr!("/dev/ptmx"), flags.into(), Mode::empty()) {
             // Match libc `openat` behavior with `ENOSPC`.
             Err(io::Errno::NOSPC) => Err(io::Errno::AGAIN),
@@ -218,6 +218,6 @@ unsafe impl ioctl::Ioctl for Tiocgptpeer {
         ret: ioctl::IoctlOutput,
         _arg: *mut c::c_void,
     ) -> io::Result<Self::Output> {
-        Ok(OwnedFd::from_raw_fd(ret))
+        unsafe { Ok(OwnedFd::from_raw_fd(ret)) }
     }
 }

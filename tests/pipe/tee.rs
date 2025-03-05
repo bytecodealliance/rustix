@@ -3,7 +3,7 @@
 #[test]
 fn test_tee() {
     use rustix::io::{read, write};
-    use rustix::pipe::{pipe, tee, SpliceFlags};
+    use rustix::pipe::{SpliceFlags, pipe, tee};
 
     let message = b"Hello, tee!";
     assert!(message.len() <= rustix::pipe::PIPE_BUF);

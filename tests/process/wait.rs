@@ -1,5 +1,5 @@
 #[allow(unused_imports)]
-use libc::{kill, SIGCONT, SIGKILL, SIGSTOP};
+use libc::{SIGCONT, SIGKILL, SIGSTOP, kill};
 use rustix::process;
 use serial_test::serial;
 use std::process::{Command, Stdio};

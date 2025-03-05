@@ -2,7 +2,7 @@
 #[cfg(linux_kernel)]
 #[test]
 fn test_splice_cursor() {
-    use rustix::pipe::{pipe, splice, SpliceFlags};
+    use rustix::pipe::{SpliceFlags, pipe, splice};
     use std::io::{Read as _, Seek as _, SeekFrom, Write as _};
 
     let mut src = tempfile::tempfile().unwrap();
@@ -27,7 +27,7 @@ fn test_splice_cursor() {
 #[cfg(linux_kernel)]
 #[test]
 fn test_splice_offset() {
-    use rustix::pipe::{pipe, splice, SpliceFlags};
+    use rustix::pipe::{SpliceFlags, pipe, splice};
     use std::io::{Read as _, Write as _};
 
     let mut src = tempfile::tempfile().unwrap();
@@ -69,7 +69,7 @@ fn test_splice_offset() {
 #[test]
 fn test_splice_pipe2pipe() {
     use rustix::io::{read, write};
-    use rustix::pipe::{pipe, splice, SpliceFlags};
+    use rustix::pipe::{SpliceFlags, pipe, splice};
 
     let (read_p1, write_p1) = pipe().unwrap();
     let (read_p2, write_p2) = pipe().unwrap();
@@ -87,7 +87,7 @@ fn test_splice_pipe2pipe() {
 #[test]
 fn test_vmsplice_write() {
     use rustix::io::read;
-    use rustix::pipe::{pipe, vmsplice, IoSliceRaw, SpliceFlags};
+    use rustix::pipe::{IoSliceRaw, SpliceFlags, pipe, vmsplice};
 
     let (read_p, write_p) = pipe().unwrap();
     let mut output = [0; 11];
@@ -108,7 +108,7 @@ fn test_vmsplice_write() {
 #[test]
 fn test_vmsplice_read() {
     use rustix::io::write;
-    use rustix::pipe::{pipe, vmsplice, IoSliceRaw, SpliceFlags};
+    use rustix::pipe::{IoSliceRaw, SpliceFlags, pipe, vmsplice};
 
     let (read_p, write_p) = pipe().unwrap();
     let mut outputs = ([0; 5], [0; 1], [0; 5]);

@@ -11,9 +11,7 @@ pub(super) const fn compose_opcode(
     size: Opcode,
 ) -> Opcode {
     macro_rules! mask_and_shift {
-        ($val:expr, $shift:expr, $mask:expr) => {{
-            ($val & $mask) << $shift
-        }};
+        ($val:expr_2021, $shift:expr_2021, $mask:expr_2021) => {{ ($val & $mask) << $shift }};
     }
 
     let dir = match dir {

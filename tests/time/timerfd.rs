@@ -1,6 +1,6 @@
 use rustix::time::{
-    timerfd_create, timerfd_gettime, timerfd_settime, Itimerspec, TimerfdClockId, TimerfdFlags,
-    TimerfdTimerFlags, Timespec,
+    Itimerspec, TimerfdClockId, TimerfdFlags, TimerfdTimerFlags, Timespec, timerfd_create,
+    timerfd_gettime, timerfd_settime,
 };
 
 #[test]

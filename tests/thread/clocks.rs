@@ -7,11 +7,11 @@
     target_os = "redox",
     target_os = "wasi",
 )))]
-use rustix::thread::{clock_nanosleep_absolute, clock_nanosleep_relative, ClockId};
+use rustix::thread::{ClockId, clock_nanosleep_absolute, clock_nanosleep_relative};
 #[cfg(not(target_os = "redox"))]
 use {
     rustix::io,
-    rustix::thread::{nanosleep, NanosleepRelativeResult, Timespec},
+    rustix::thread::{NanosleepRelativeResult, Timespec, nanosleep},
 };
 
 #[cfg(not(target_os = "redox"))]

@@ -1,6 +1,6 @@
 use rustix::event::{
-    fd_set_bound, fd_set_insert, fd_set_num_elements, fd_set_remove, select, FdSetElement,
-    FdSetIter, Timespec,
+    FdSetElement, FdSetIter, Timespec, fd_set_bound, fd_set_insert, fd_set_num_elements,
+    fd_set_remove, select,
 };
 use rustix::fd::{AsRawFd as _, RawFd};
 #[cfg(feature = "pipe")]
@@ -90,7 +90,7 @@ fn test_select_with_great_fds() {
     use core::cmp::max;
     use rustix::io::{read, write};
     use rustix::pipe::pipe;
-    use rustix::process::{getrlimit, setrlimit, Resource};
+    use rustix::process::{Resource, getrlimit, setrlimit};
 
     // Create a pipe.
     let (reader, writer) = pipe().unwrap();
@@ -180,7 +180,7 @@ fn test_select_with_great_fds() {
 #[test]
 #[serial] // for `crate::init`
 fn test_select_with_sockets() {
-    use rustix::net::{recv, send, AddressFamily, RecvFlags, SendFlags, SocketType};
+    use rustix::net::{AddressFamily, RecvFlags, SendFlags, SocketType, recv, send};
     use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 
     crate::init();
@@ -277,8 +277,8 @@ fn test_select_with_sockets() {
 #[test]
 #[serial] // for `setrlimit` usage, and `crate::init`
 fn test_select_with_maxfd_sockets() {
-    use rustix::net::{recv, send, AddressFamily, RecvFlags, SendFlags, SocketType};
-    use rustix::process::{getrlimit, setrlimit, Resource};
+    use rustix::net::{AddressFamily, RecvFlags, SendFlags, SocketType, recv, send};
+    use rustix::process::{Resource, getrlimit, setrlimit};
     use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 
     crate::init();

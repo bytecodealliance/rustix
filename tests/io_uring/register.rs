@@ -4,9 +4,9 @@ use libc::c_void;
 use rustix::fd::{AsFd, AsRawFd, BorrowedFd};
 use rustix::io::{Errno, Result};
 use rustix::io_uring::{
-    io_uring_buf, io_uring_buf_reg, io_uring_buf_ring, io_uring_params, io_uring_ptr,
-    io_uring_register_with, io_uring_rsrc_update, io_uring_setup, IoringFeatureFlags,
-    IoringRegisterFlags, IoringRegisterOp,
+    IoringFeatureFlags, IoringRegisterFlags, IoringRegisterOp, io_uring_buf, io_uring_buf_reg,
+    io_uring_buf_ring, io_uring_params, io_uring_ptr, io_uring_register_with, io_uring_rsrc_update,
+    io_uring_setup,
 };
 #[cfg(feature = "mm")]
 use rustix::mm::{MapFlags, ProtFlags};

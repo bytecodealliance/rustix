@@ -1,5 +1,5 @@
 use rustix::io::Errno;
-use rustix::termios::{tcgetpgrp, tcsetpgrp, Pid};
+use rustix::termios::{Pid, tcgetpgrp, tcsetpgrp};
 use tempfile::tempdir;
 
 #[cfg(feature = "fs")]

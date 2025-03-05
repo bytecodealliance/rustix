@@ -143,8 +143,6 @@
 #![doc(alias = "getsockopt")]
 #![doc(alias = "setsockopt")]
 
-#[cfg(target_os = "linux")]
-use crate::net::xdp::{XdpMmapOffsets, XdpOptionsFlags, XdpStatistics, XdpUmemReg};
 #[cfg(not(any(
     apple,
     windows,
@@ -172,6 +170,8 @@ use crate::net::Protocol;
 use crate::net::SocketAddrV4;
 #[cfg(linux_kernel)]
 use crate::net::SocketAddrV6;
+#[cfg(target_os = "linux")]
+use crate::net::xdp::{XdpMmapOffsets, XdpOptionsFlags, XdpStatistics, XdpUmemReg};
 use crate::net::{Ipv4Addr, Ipv6Addr, SocketType};
 use crate::{backend, io};
 #[cfg(feature = "alloc")]

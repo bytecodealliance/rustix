@@ -117,7 +117,7 @@ pub unsafe fn io_uring_register<Fd: AsFd>(
     arg: *const c_void,
     nr_args: u32,
 ) -> io::Result<u32> {
-    backend::io_uring::syscalls::io_uring_register(fd.as_fd(), opcode, arg, nr_args)
+    unsafe { backend::io_uring::syscalls::io_uring_register(fd.as_fd(), opcode, arg, nr_args) }
 }
 
 /// `io_uring_register_with(fd, opcode, flags, arg, nr_args)`—Register files or
@@ -141,7 +141,9 @@ pub unsafe fn io_uring_register_with<Fd: AsFd>(
     arg: *const c_void,
     nr_args: u32,
 ) -> io::Result<u32> {
-    backend::io_uring::syscalls::io_uring_register_with(fd.as_fd(), opcode, flags, arg, nr_args)
+    unsafe {
+        backend::io_uring::syscalls::io_uring_register_with(fd.as_fd(), opcode, flags, arg, nr_args)
+    }
 }
 
 /// `io_uring_enter(fd, to_submit, min_complete, flags, 0, 0)`—Initiate
@@ -173,17 +175,19 @@ pub unsafe fn io_uring_enter<Fd: AsFd>(
     min_complete: u32,
     flags: IoringEnterFlags,
 ) -> io::Result<u32> {
-    debug_assert!(!flags.contains(IoringEnterFlags::EXT_ARG));
-    debug_assert!(!flags.contains(IoringEnterFlags::EXT_ARG_REG));
+    unsafe {
+        debug_assert!(!flags.contains(IoringEnterFlags::EXT_ARG));
+        debug_assert!(!flags.contains(IoringEnterFlags::EXT_ARG_REG));
 
-    backend::io_uring::syscalls::io_uring_enter(
-        fd.as_fd(),
-        to_submit,
-        min_complete,
-        flags,
-        null_mut(),
-        0,
-    )
+        backend::io_uring::syscalls::io_uring_enter(
+            fd.as_fd(),
+            to_submit,
+            min_complete,
+            flags,
+            null_mut(),
+            0,
+        )
+    }
 }
 
 /// `io_uring_enter(fd, to_submit, min_complete, flags, sigmask,
@@ -215,17 +219,19 @@ pub unsafe fn io_uring_enter_sigmask<Fd: AsFd>(
     flags: IoringEnterFlags,
     sigmask: Option<&KernelSigSet>,
 ) -> io::Result<u32> {
-    debug_assert!(!flags.contains(IoringEnterFlags::EXT_ARG));
-    debug_assert!(!flags.contains(IoringEnterFlags::EXT_ARG_REG));
+    unsafe {
+        debug_assert!(!flags.contains(IoringEnterFlags::EXT_ARG));
+        debug_assert!(!flags.contains(IoringEnterFlags::EXT_ARG_REG));
 
-    backend::io_uring::syscalls::io_uring_enter(
-        fd.as_fd(),
-        to_submit,
-        min_complete,
-        flags,
-        option_as_ptr(sigmask).cast::<c_void>(),
-        size_of::<KernelSigSet>(),
-    )
+        backend::io_uring::syscalls::io_uring_enter(
+            fd.as_fd(),
+            to_submit,
+            min_complete,
+            flags,
+            option_as_ptr(sigmask).cast::<c_void>(),
+            size_of::<KernelSigSet>(),
+        )
+    }
 }
 
 /// `io_uring_enter2(fd, to_submit, min_complete, flags, arg, sizeof(*arg))`—
@@ -258,17 +264,19 @@ pub unsafe fn io_uring_enter_arg<Fd: AsFd>(
     flags: IoringEnterFlags,
     arg: Option<&io_uring_getevents_arg>,
 ) -> io::Result<u32> {
-    debug_assert!(flags.contains(IoringEnterFlags::EXT_ARG));
-    debug_assert!(!flags.contains(IoringEnterFlags::EXT_ARG_REG));
+    unsafe {
+        debug_assert!(flags.contains(IoringEnterFlags::EXT_ARG));
+        debug_assert!(!flags.contains(IoringEnterFlags::EXT_ARG_REG));
 
-    backend::io_uring::syscalls::io_uring_enter(
-        fd.as_fd(),
-        to_submit,
-        min_complete,
-        flags,
-        option_as_ptr(arg).cast::<c_void>(),
-        size_of::<io_uring_getevents_arg>(),
-    )
+        backend::io_uring::syscalls::io_uring_enter(
+            fd.as_fd(),
+            to_submit,
+            min_complete,
+            flags,
+            option_as_ptr(arg).cast::<c_void>(),
+            size_of::<io_uring_getevents_arg>(),
+        )
+    }
 }
 
 // TODO: Uncomment this when we support `IoringRegisterOp::CQWAIT_REG`.
@@ -1314,8 +1322,7 @@ impl io_uring_user_data {
     /// Create a zero-initialized `Self`.
     pub const fn zeroed() -> Self {
         // Initialize the `u64_` field, which is the size of the full union.
-        // This can use `core::mem::zeroed` in Rust 1.75.
-        Self { u64_: 0 }
+        unsafe { core::mem::zeroed() }
     }
 
     /// Return the `u64` value.

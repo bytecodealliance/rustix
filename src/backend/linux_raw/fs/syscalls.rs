@@ -27,9 +27,9 @@ use crate::ffi::CStr;
 #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
 use crate::fs::CWD;
 use crate::fs::{
-    inotify, Access, Advice, AtFlags, FallocateFlags, FileType, FlockOperation, Fsid, Gid,
-    MemfdFlags, Mode, OFlags, RenameFlags, ResolveFlags, SealFlags, SeekFrom, Stat, StatFs,
-    StatVfs, StatVfsMountFlags, Statx, StatxFlags, Timestamps, Uid, XattrFlags,
+    Access, Advice, AtFlags, FallocateFlags, FileType, FlockOperation, Fsid, Gid, MemfdFlags, Mode,
+    OFlags, RenameFlags, ResolveFlags, SealFlags, SeekFrom, Stat, StatFs, StatVfs,
+    StatVfsMountFlags, Statx, StatxFlags, Timestamps, Uid, XattrFlags, inotify,
 };
 use crate::io;
 use core::mem::MaybeUninit;
@@ -37,8 +37,8 @@ use core::num::NonZeroU64;
 #[cfg(any(target_arch = "mips64", target_arch = "mips64r6"))]
 use linux_raw_sys::general::stat as linux_stat64;
 use linux_raw_sys::general::{
-    open_how, AT_EACCESS, AT_FDCWD, AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW, F_ADD_SEALS, F_GETFL,
-    F_GET_SEALS, F_SETFL, SEEK_CUR, SEEK_DATA, SEEK_END, SEEK_HOLE, SEEK_SET, STATX__RESERVED,
+    AT_EACCESS, AT_FDCWD, AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW, F_ADD_SEALS, F_GET_SEALS, F_GETFL,
+    F_SETFL, SEEK_CUR, SEEK_DATA, SEEK_END, SEEK_HOLE, SEEK_SET, STATX__RESERVED, open_how,
 };
 #[cfg(target_pointer_width = "32")]
 use {
@@ -973,13 +973,15 @@ pub(crate) unsafe fn readlinkat(
     path: &CStr,
     buf: (*mut u8, usize),
 ) -> io::Result<usize> {
-    ret_usize(syscall!(
-        __NR_readlinkat,
-        dirfd,
-        path,
-        buf.0,
-        pass_usize(buf.1)
-    ))
+    unsafe {
+        ret_usize(syscall!(
+            __NR_readlinkat,
+            dirfd,
+            path,
+            buf.0,
+            pass_usize(buf.1)
+        ))
+    }
 }
 
 #[inline]
@@ -1048,11 +1050,11 @@ pub(crate) fn fcntl_add_seals(fd: BorrowedFd<'_>, seals: SealFlags) -> io::Resul
 
 #[inline]
 pub(crate) fn fcntl_lock(fd: BorrowedFd<'_>, operation: FlockOperation) -> io::Result<()> {
-    #[cfg(target_pointer_width = "64")]
-    use linux_raw_sys::general::{flock, F_SETLK, F_SETLKW};
-    #[cfg(target_pointer_width = "32")]
-    use linux_raw_sys::general::{flock64 as flock, F_SETLK64 as F_SETLK, F_SETLKW64 as F_SETLKW};
     use linux_raw_sys::general::{F_RDLCK, F_UNLCK, F_WRLCK};
+    #[cfg(target_pointer_width = "64")]
+    use linux_raw_sys::general::{F_SETLK, F_SETLKW, flock};
+    #[cfg(target_pointer_width = "32")]
+    use linux_raw_sys::general::{F_SETLK64 as F_SETLK, F_SETLKW64 as F_SETLKW, flock64 as flock};
 
     let (cmd, l_type) = match operation {
         FlockOperation::LockShared => (F_SETLKW, F_RDLCK),
@@ -1528,13 +1530,15 @@ pub(crate) unsafe fn getxattr(
     name: &CStr,
     value: (*mut u8, usize),
 ) -> io::Result<usize> {
-    ret_usize(syscall!(
-        __NR_getxattr,
-        path,
-        name,
-        value.0,
-        pass_usize(value.1)
-    ))
+    unsafe {
+        ret_usize(syscall!(
+            __NR_getxattr,
+            path,
+            name,
+            value.0,
+            pass_usize(value.1)
+        ))
+    }
 }
 
 #[inline]
@@ -1543,13 +1547,15 @@ pub(crate) unsafe fn lgetxattr(
     name: &CStr,
     value: (*mut u8, usize),
 ) -> io::Result<usize> {
-    ret_usize(syscall!(
-        __NR_lgetxattr,
-        path,
-        name,
-        value.0,
-        pass_usize(value.1)
-    ))
+    unsafe {
+        ret_usize(syscall!(
+            __NR_lgetxattr,
+            path,
+            name,
+            value.0,
+            pass_usize(value.1)
+        ))
+    }
 }
 
 #[inline]
@@ -1558,13 +1564,15 @@ pub(crate) unsafe fn fgetxattr(
     name: &CStr,
     value: (*mut u8, usize),
 ) -> io::Result<usize> {
-    ret_usize(syscall!(
-        __NR_fgetxattr,
-        fd,
-        name,
-        value.0,
-        pass_usize(value.1)
-    ))
+    unsafe {
+        ret_usize(syscall!(
+            __NR_fgetxattr,
+            fd,
+            name,
+            value.0,
+            pass_usize(value.1)
+        ))
+    }
 }
 
 #[inline]
@@ -1629,17 +1637,17 @@ pub(crate) fn fsetxattr(
 
 #[inline]
 pub(crate) unsafe fn listxattr(path: &CStr, list: (*mut u8, usize)) -> io::Result<usize> {
-    ret_usize(syscall!(__NR_listxattr, path, list.0, pass_usize(list.1)))
+    unsafe { ret_usize(syscall!(__NR_listxattr, path, list.0, pass_usize(list.1))) }
 }
 
 #[inline]
 pub(crate) unsafe fn llistxattr(path: &CStr, list: (*mut u8, usize)) -> io::Result<usize> {
-    ret_usize(syscall!(__NR_llistxattr, path, list.0, pass_usize(list.1)))
+    unsafe { ret_usize(syscall!(__NR_llistxattr, path, list.0, pass_usize(list.1))) }
 }
 
 #[inline]
 pub(crate) unsafe fn flistxattr(fd: BorrowedFd<'_>, list: (*mut u8, usize)) -> io::Result<usize> {
-    ret_usize(syscall!(__NR_flistxattr, fd, list.0, pass_usize(list.1)))
+    unsafe { ret_usize(syscall!(__NR_flistxattr, fd, list.0, pass_usize(list.1))) }
 }
 
 #[inline]

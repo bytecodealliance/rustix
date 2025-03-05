@@ -107,28 +107,30 @@ pub(crate) unsafe fn with_recv_msghdr<R>(
     control: &mut RecvAncillaryBuffer<'_>,
     f: impl FnOnce(&mut c::msghdr) -> io::Result<R>,
 ) -> io::Result<R> {
-    control.clear();
+    unsafe {
+        control.clear();
 
-    let mut msghdr = zero_msghdr();
-    msghdr.msg_name = name.storage.as_mut_ptr().cast();
-    msghdr.msg_namelen = name.len;
-    msghdr.msg_iov = iov.as_mut_ptr().cast();
-    msghdr.msg_iovlen = msg_iov_len(iov.len());
-    msghdr.msg_control = control.as_control_ptr().cast();
-    msghdr.msg_controllen = msg_control_len(control.control_len());
+        let mut msghdr = zero_msghdr();
+        msghdr.msg_name = name.storage.as_mut_ptr().cast();
+        msghdr.msg_namelen = name.len;
+        msghdr.msg_iov = iov.as_mut_ptr().cast();
+        msghdr.msg_iovlen = msg_iov_len(iov.len());
+        msghdr.msg_control = control.as_control_ptr().cast();
+        msghdr.msg_controllen = msg_control_len(control.control_len());
 
-    let res = f(&mut msghdr);
+        let res = f(&mut msghdr);
 
-    // Reset the control length.
-    if res.is_ok() {
-        // SAFETY: `f` returned `Ok`, so our safety condition requires `f` to
-        // have initialized `msg_controllen` bytes.
-        control.set_control_len(msghdr.msg_controllen as usize);
+        // Reset the control length.
+        if res.is_ok() {
+            // SAFETY: `f` returned `Ok`, so our safety condition requires `f` to
+            // have initialized `msg_controllen` bytes.
+            control.set_control_len(msghdr.msg_controllen as usize);
+        }
+
+        name.len = msghdr.msg_namelen;
+
+        res
     }
-
-    name.len = msghdr.msg_namelen;
-
-    res
 }
 
 /// Create a message header intended to send without an address.
@@ -163,19 +165,21 @@ pub(crate) unsafe fn with_msghdr<R>(
     control: &mut SendAncillaryBuffer<'_, '_, '_>,
     f: impl FnOnce(&c::msghdr) -> R,
 ) -> R {
-    addr.with_sockaddr(|addr_ptr, addr_len| {
-        let mut h = zero_msghdr();
-        h.msg_name = addr_ptr as *mut _;
-        h.msg_namelen = bitcast!(addr_len);
-        h.msg_iov = iov.as_ptr() as _;
-        h.msg_iovlen = msg_iov_len(iov.len());
-        h.msg_control = control.as_control_ptr().cast();
-        h.msg_controllen = msg_control_len(control.control_len());
-        // Pass a reference to the `c::msghdr` instead of passing it by value
-        // because it may contain pointers to temporary objects that won't
-        // live beyond the call to `with_sockaddr`.
-        f(&h)
-    })
+    unsafe {
+        addr.with_sockaddr(|addr_ptr, addr_len| {
+            let mut h = zero_msghdr();
+            h.msg_name = addr_ptr as *mut _;
+            h.msg_namelen = bitcast!(addr_len);
+            h.msg_iov = iov.as_ptr() as _;
+            h.msg_iovlen = msg_iov_len(iov.len());
+            h.msg_control = control.as_control_ptr().cast();
+            h.msg_controllen = msg_control_len(control.control_len());
+            // Pass a reference to the `c::msghdr` instead of passing it by value
+            // because it may contain pointers to temporary objects that won't
+            // live beyond the call to `with_sockaddr`.
+            f(&h)
+        })
+    }
 }
 
 /// Create a zero-initialized message header struct value.

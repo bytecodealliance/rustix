@@ -5,12 +5,12 @@
 use crate::backend::c;
 use crate::backend::net::read_sockaddr;
 use crate::io::Errno;
-use crate::net::addr::{SocketAddrArg, SocketAddrLen, SocketAddrOpaque, SocketAddrStorage};
 #[cfg(unix)]
 use crate::net::SocketAddrUnix;
+use crate::net::addr::{SocketAddrArg, SocketAddrLen, SocketAddrOpaque, SocketAddrStorage};
 use crate::net::{AddressFamily, SocketAddr, SocketAddrV4, SocketAddrV6};
 use core::fmt;
-use core::mem::{size_of, MaybeUninit};
+use core::mem::{MaybeUninit, size_of};
 use core::num::NonZeroU32;
 
 /// Temporary buffer for creating a `SocketAddrAny` from a syscall that writes
@@ -40,7 +40,7 @@ impl SocketAddrBuf {
     /// length written into `self.len`.
     #[inline]
     pub(crate) unsafe fn into_any(self) -> SocketAddrAny {
-        SocketAddrAny::new(self.storage, bitcast!(self.len))
+        unsafe { SocketAddrAny::new(self.storage, bitcast!(self.len)) }
     }
 
     /// Convert the buffer into [`Option<SocketAddrAny>`].
@@ -54,11 +54,13 @@ impl SocketAddrBuf {
     /// length written into `self.len`, or `self.len` must have been set to 0.
     #[inline]
     pub(crate) unsafe fn into_any_option(self) -> Option<SocketAddrAny> {
-        let len = bitcast!(self.len);
-        if read_sockaddr::sockaddr_nonempty(self.storage.as_ptr().cast(), len) {
-            Some(SocketAddrAny::new(self.storage, len))
-        } else {
-            None
+        unsafe {
+            let len = bitcast!(self.len);
+            if read_sockaddr::sockaddr_nonempty(self.storage.as_ptr().cast(), len) {
+                Some(SocketAddrAny::new(self.storage, len))
+            } else {
+                None
+            }
         }
     }
 }
@@ -97,10 +99,12 @@ impl SocketAddrAny {
     ///  - `len` bytes must be initialized.
     #[inline]
     pub const unsafe fn new(storage: MaybeUninit<SocketAddrStorage>, len: SocketAddrLen) -> Self {
-        assert!(len as usize >= size_of::<read_sockaddr::sockaddr_header>());
-        assert!(len as usize <= size_of::<SocketAddrStorage>());
-        let len = NonZeroU32::new_unchecked(len);
-        Self { storage, len }
+        unsafe {
+            assert!(len as usize >= size_of::<read_sockaddr::sockaddr_header>());
+            assert!(len as usize <= size_of::<SocketAddrStorage>());
+            let len = NonZeroU32::new_unchecked(len);
+            Self { storage, len }
+        }
     }
 
     /// Creates a socket address from reading from `ptr`, which points at `len`
@@ -116,16 +120,18 @@ impl SocketAddrAny {
     ///  - `ptr` must be a pointer to memory containing a valid socket address.
     ///  - `len` bytes must be initialized.
     pub unsafe fn read(ptr: *const SocketAddrStorage, len: SocketAddrLen) -> Self {
-        assert!(len as usize >= size_of::<read_sockaddr::sockaddr_header>());
-        assert!(len as usize <= size_of::<SocketAddrStorage>());
-        let mut storage = MaybeUninit::<SocketAddrStorage>::uninit();
-        core::ptr::copy_nonoverlapping(
-            ptr.cast::<u8>(),
-            storage.as_mut_ptr().cast::<u8>(),
-            len as usize,
-        );
-        let len = NonZeroU32::new_unchecked(len);
-        Self { storage, len }
+        unsafe {
+            assert!(len as usize >= size_of::<read_sockaddr::sockaddr_header>());
+            assert!(len as usize <= size_of::<SocketAddrStorage>());
+            let mut storage = MaybeUninit::<SocketAddrStorage>::uninit();
+            core::ptr::copy_nonoverlapping(
+                ptr.cast::<u8>(),
+                storage.as_mut_ptr().cast::<u8>(),
+                len as usize,
+            );
+            let len = NonZeroU32::new_unchecked(len);
+            Self { storage, len }
+        }
     }
 
     /// Gets the initialized part of the storage as bytes.

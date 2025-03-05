@@ -7,12 +7,12 @@ use crate::backend::net::msghdr::noaddr_msghdr;
 use crate::backend::{self, c};
 use crate::fd::{AsFd, BorrowedFd, OwnedFd};
 use crate::io::{self, IoSlice, IoSliceMut};
-use crate::net::addr::SocketAddrArg;
 #[cfg(linux_kernel)]
 use crate::net::UCred;
+use crate::net::addr::SocketAddrArg;
 use core::iter::FusedIterator;
 use core::marker::PhantomData;
-use core::mem::{align_of, size_of, size_of_val, take, MaybeUninit};
+use core::mem::{MaybeUninit, align_of, size_of, size_of_val, take};
 #[cfg(linux_kernel)]
 use core::ptr::addr_of;
 use core::{ptr, slice};
@@ -56,19 +56,19 @@ use super::{RecvFlags, ReturnFlags, SendFlags, SocketAddrAny};
 #[macro_export]
 macro_rules! cmsg_space {
     // Base Rules
-    (ScmRights($len:expr)) => {
+    (ScmRights($len:expr_2021)) => {
         $crate::net::__cmsg_space(
             $len * ::core::mem::size_of::<$crate::fd::BorrowedFd<'static>>(),
         )
     };
-    (ScmCredentials($len:expr)) => {
+    (ScmCredentials($len:expr_2021)) => {
         $crate::net::__cmsg_space(
             $len * ::core::mem::size_of::<$crate::net::UCred>(),
         )
     };
 
     // Combo Rules
-    ($firstid:ident($firstex:expr), $($restid:ident($restex:expr)),*) => {{
+    ($firstid:ident($firstex:expr_2021), $($restid:ident($restex:expr_2021)),*) => {{
         // We only have to add `cmsghdr` alignment once; all other times we can
         // use `cmsg_aligned_space`.
         let sum = $crate::cmsg_space!($firstid($firstex));
@@ -84,19 +84,19 @@ macro_rules! cmsg_space {
 #[macro_export]
 macro_rules! cmsg_aligned_space {
     // Base Rules
-    (ScmRights($len:expr)) => {
+    (ScmRights($len:expr_2021)) => {
         $crate::net::__cmsg_aligned_space(
             $len * ::core::mem::size_of::<$crate::fd::BorrowedFd<'static>>(),
         )
     };
-    (ScmCredentials($len:expr)) => {
+    (ScmCredentials($len:expr_2021)) => {
         $crate::net::__cmsg_aligned_space(
             $len * ::core::mem::size_of::<$crate::net::UCred>(),
         )
     };
 
     // Combo Rules
-    ($firstid:ident($firstex:expr), $($restid:ident($restex:expr)),*) => {{
+    ($firstid:ident($firstex:expr_2021), $($restid:ident($restex:expr_2021)),*) => {{
         let sum = cmsg_aligned_space!($firstid($firstex));
         $(
             let sum = sum + cmsg_aligned_space!($restid($restex));
@@ -297,7 +297,7 @@ impl<'buf, 'slice, 'fd> SendAncillaryBuffer<'buf, 'slice, 'fd> {
     /// Pushes an ancillary message to the buffer.
     fn push_ancillary(&mut self, source: &[u8], cmsg_level: c::c_int, cmsg_type: c::c_int) -> bool {
         macro_rules! leap {
-            ($e:expr) => {{
+            ($e:expr_2021) => {{
                 match ($e) {
                     Some(x) => x,
                     None => return false,

@@ -1,6 +1,6 @@
 use crate::io;
 use core::mem::MaybeUninit;
-use windows_sys::Win32::Networking::WinSock::{WSACleanup, WSAGetLastError, WSAStartup, WSADATA};
+use windows_sys::Win32::Networking::WinSock::{WSACleanup, WSADATA, WSAGetLastError, WSAStartup};
 
 /// `WSAStartup()`—Initialize process-wide Windows support for sockets.
 ///

@@ -2,8 +2,8 @@ use rustix::buffer::spare_capacity;
 use rustix::event::epoll;
 use rustix::io::{ioctl_fionbio, read, write};
 use rustix::net::{
-    accept, bind, connect, getsockname, listen, socket, AddressFamily, Ipv4Addr, SocketAddrV4,
-    SocketType,
+    AddressFamily, Ipv4Addr, SocketAddrV4, SocketType, accept, bind, connect, getsockname, listen,
+    socket,
 };
 use std::collections::HashMap;
 use std::ffi::c_void;

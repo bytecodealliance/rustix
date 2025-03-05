@@ -1,6 +1,6 @@
 use std::fs::File;
 
-use rustix::fs::{open, openat, Mode, OFlags, CWD};
+use rustix::fs::{CWD, Mode, OFlags, open, openat};
 use std::io::Write as _;
 
 #[test]

@@ -11,7 +11,7 @@ use linux_raw_sys::ctypes::c_char;
 use linux_raw_sys::ioctl::SIOCGIFINDEX;
 #[cfg(feature = "alloc")]
 use linux_raw_sys::ioctl::SIOCGIFNAME;
-use linux_raw_sys::net::{ifreq, ifreq__bindgen_ty_1, ifreq__bindgen_ty_2, IFNAMSIZ};
+use linux_raw_sys::net::{IFNAMSIZ, ifreq, ifreq__bindgen_ty_1, ifreq__bindgen_ty_2};
 #[cfg(feature = "alloc")]
 use {alloc::borrow::ToOwned, alloc::string::String};
 

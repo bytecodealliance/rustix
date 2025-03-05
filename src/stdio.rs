@@ -144,7 +144,7 @@ pub const unsafe fn stdin() -> BorrowedFd<'static> {
 #[doc(alias = "STDIN_FILENO")]
 #[inline]
 pub unsafe fn take_stdin() -> OwnedFd {
-    backend::fd::OwnedFd::from_raw_fd(c::STDIN_FILENO as RawFd)
+    unsafe { backend::fd::OwnedFd::from_raw_fd(c::STDIN_FILENO as RawFd) }
 }
 
 /// `STDOUT_FILENO`—Standard output, borrowed.
@@ -266,7 +266,7 @@ pub const unsafe fn stdout() -> BorrowedFd<'static> {
 #[doc(alias = "STDOUT_FILENO")]
 #[inline]
 pub unsafe fn take_stdout() -> OwnedFd {
-    backend::fd::OwnedFd::from_raw_fd(c::STDOUT_FILENO as RawFd)
+    unsafe { backend::fd::OwnedFd::from_raw_fd(c::STDOUT_FILENO as RawFd) }
 }
 
 /// `STDERR_FILENO`—Standard error, borrowed.
@@ -381,7 +381,7 @@ pub const unsafe fn stderr() -> BorrowedFd<'static> {
 #[doc(alias = "STDERR_FILENO")]
 #[inline]
 pub unsafe fn take_stderr() -> OwnedFd {
-    backend::fd::OwnedFd::from_raw_fd(c::STDERR_FILENO as RawFd)
+    unsafe { backend::fd::OwnedFd::from_raw_fd(c::STDERR_FILENO as RawFd) }
 }
 
 /// `STDIN_FILENO`—Standard input, raw.

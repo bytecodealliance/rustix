@@ -803,7 +803,7 @@ pub struct Protocol(pub(crate) RawProtocol);
 ///
 /// For `IPPROTO_IP`, pass `None` as the `protocol` argument.
 pub mod ipproto {
-    use super::{new_raw_protocol, Protocol};
+    use super::{Protocol, new_raw_protocol};
     use crate::backend::c;
 
     /// `IPPROTO_ICMP`
@@ -1119,7 +1119,7 @@ pub mod ipproto {
 pub mod sysproto {
     #[cfg(apple)]
     use {
-        super::{new_raw_protocol, Protocol},
+        super::{Protocol, new_raw_protocol},
         crate::backend::c,
     };
 
@@ -1138,12 +1138,12 @@ pub mod sysproto {
 pub mod netlink {
     #[cfg(linux_kernel)]
     use {
-        super::{new_raw_protocol, Protocol},
+        super::{Protocol, new_raw_protocol},
         crate::backend::c,
         crate::backend::net::read_sockaddr::read_sockaddr_netlink,
         crate::net::{
-            addr::{call_with_sockaddr, SocketAddrArg, SocketAddrLen, SocketAddrOpaque},
             SocketAddrAny,
+            addr::{SocketAddrArg, SocketAddrLen, SocketAddrOpaque, call_with_sockaddr},
         },
         core::mem,
     };
@@ -1273,11 +1273,13 @@ pub mod netlink {
             &self,
             f: impl FnOnce(*const SocketAddrOpaque, SocketAddrLen) -> R,
         ) -> R {
-            let mut addr: c::sockaddr_nl = mem::zeroed();
-            addr.nl_family = c::AF_NETLINK as _;
-            addr.nl_pid = self.pid;
-            addr.nl_groups = self.groups;
-            call_with_sockaddr(&addr, f)
+            unsafe {
+                let mut addr: c::sockaddr_nl = mem::zeroed();
+                addr.nl_family = c::AF_NETLINK as _;
+                addr.nl_pid = self.pid;
+                addr.nl_groups = self.groups;
+                call_with_sockaddr(&addr, f)
+            }
         }
     }
 
@@ -1307,7 +1309,7 @@ pub mod netlink {
 pub mod eth {
     #[cfg(linux_kernel)]
     use {
-        super::{new_raw_protocol, Protocol},
+        super::{Protocol, new_raw_protocol},
         crate::backend::c,
     };
 
@@ -1727,8 +1729,8 @@ bitflags! {
 pub mod xdp {
     use crate::backend::net::read_sockaddr::read_sockaddr_xdp;
     use crate::fd::{AsRawFd, BorrowedFd};
-    use crate::net::addr::{call_with_sockaddr, SocketAddrArg, SocketAddrLen, SocketAddrOpaque};
     use crate::net::SocketAddrAny;
+    use crate::net::addr::{SocketAddrArg, SocketAddrLen, SocketAddrOpaque, call_with_sockaddr};
 
     use super::{bitflags, c};
 
@@ -1861,15 +1863,17 @@ pub mod xdp {
             &self,
             f: impl FnOnce(*const SocketAddrOpaque, SocketAddrLen) -> R,
         ) -> R {
-            let addr = c::sockaddr_xdp {
-                sxdp_family: c::AF_XDP as _,
-                sxdp_flags: self.flags().bits(),
-                sxdp_ifindex: self.interface_index(),
-                sxdp_queue_id: self.queue_id(),
-                sxdp_shared_umem_fd: !0,
-            };
+            unsafe {
+                let addr = c::sockaddr_xdp {
+                    sxdp_family: c::AF_XDP as _,
+                    sxdp_flags: self.flags().bits(),
+                    sxdp_ifindex: self.interface_index(),
+                    sxdp_queue_id: self.queue_id(),
+                    sxdp_shared_umem_fd: !0,
+                };
 
-            call_with_sockaddr(&addr, f)
+                call_with_sockaddr(&addr, f)
+            }
         }
     }
 
@@ -1909,15 +1913,17 @@ pub mod xdp {
             &self,
             f: impl FnOnce(*const SocketAddrOpaque, SocketAddrLen) -> R,
         ) -> R {
-            let addr = c::sockaddr_xdp {
-                sxdp_family: c::AF_XDP as _,
-                sxdp_flags: self.addr.flags().bits(),
-                sxdp_ifindex: self.addr.interface_index(),
-                sxdp_queue_id: self.addr.queue_id(),
-                sxdp_shared_umem_fd: self.shared_umem_fd.as_raw_fd() as u32,
-            };
+            unsafe {
+                let addr = c::sockaddr_xdp {
+                    sxdp_family: c::AF_XDP as _,
+                    sxdp_flags: self.addr.flags().bits(),
+                    sxdp_ifindex: self.addr.interface_index(),
+                    sxdp_queue_id: self.addr.queue_id(),
+                    sxdp_shared_umem_fd: self.shared_umem_fd.as_raw_fd() as u32,
+                };
 
-            call_with_sockaddr(&addr, f)
+                call_with_sockaddr(&addr, f)
+            }
         }
     }
 

@@ -27,7 +27,7 @@ use super::io::errno::{
     try_decode_c_int, try_decode_c_uint, try_decode_raw_fd, try_decode_usize, try_decode_void,
     try_decode_void_star,
 };
-use super::reg::{raw_arg, ArgNumber, ArgReg, RetReg, R0};
+use super::reg::{ArgNumber, ArgReg, R0, RetReg, raw_arg};
 #[cfg(feature = "time")]
 use super::time::types::TimerfdClockId;
 #[cfg(any(feature = "thread", feature = "time"))]
@@ -779,7 +779,7 @@ impl<'a, Num: ArgNumber> From<(crate::net::SocketType, crate::net::SocketFlags)>
 {
     #[inline]
     fn from(pair: (crate::net::SocketType, crate::net::SocketFlags)) -> Self {
-        c_uint(pair.0 .0 | pair.1.bits())
+        c_uint(pair.0.0 | pair.1.bits())
     }
 }
 
@@ -867,7 +867,7 @@ impl<'a, Num: ArgNumber> From<crate::runtime::How> for ArgReg<'a, Num> {
 /// just returns 0 on success.
 #[inline]
 pub(super) unsafe fn ret(raw: RetReg<R0>) -> io::Result<()> {
-    try_decode_void(raw)
+    unsafe { try_decode_void(raw) }
 }
 
 /// Convert a `usize` returned from a syscall that doesn't return on success.
@@ -879,7 +879,7 @@ pub(super) unsafe fn ret(raw: RetReg<R0>) -> io::Result<()> {
 #[cfg(any(feature = "event", feature = "runtime", feature = "system"))]
 #[inline]
 pub(super) unsafe fn ret_error(raw: RetReg<R0>) -> io::Errno {
-    try_decode_error(raw)
+    unsafe { try_decode_error(raw) }
 }
 
 /// Convert a `usize` returned from a syscall that effectively always returns
@@ -891,12 +891,14 @@ pub(super) unsafe fn ret_error(raw: RetReg<R0>) -> io::Errno {
 /// always returns `()`.
 #[inline]
 pub(super) unsafe fn ret_infallible(raw: RetReg<R0>) {
-    #[cfg(debug_assertions)]
-    {
-        try_decode_void(raw).unwrap()
+    unsafe {
+        #[cfg(debug_assertions)]
+        {
+            try_decode_void(raw).unwrap()
+        }
+        #[cfg(not(debug_assertions))]
+        drop(raw);
     }
-    #[cfg(not(debug_assertions))]
-    drop(raw);
 }
 
 /// Convert a `usize` returned from a syscall that effectively returns a
@@ -994,8 +996,10 @@ pub(super) unsafe fn ret_c_uint_infallible(raw: RetReg<R0>) -> c::c_uint {
 /// returns an owned file descriptor.
 #[inline]
 pub(super) unsafe fn ret_owned_fd(raw: RetReg<R0>) -> io::Result<OwnedFd> {
-    let raw_fd = try_decode_raw_fd(raw)?;
-    Ok(crate::backend::fd::OwnedFd::from_raw_fd(raw_fd))
+    unsafe {
+        let raw_fd = try_decode_raw_fd(raw)?;
+        Ok(crate::backend::fd::OwnedFd::from_raw_fd(raw_fd))
+    }
 }
 
 /// Convert the return value of `dup2` and `dup3`.
@@ -1009,8 +1013,10 @@ pub(super) unsafe fn ret_owned_fd(raw: RetReg<R0>) -> io::Result<OwnedFd> {
 /// returns a file descriptor.
 #[inline]
 pub(super) unsafe fn ret_discarded_fd(raw: RetReg<R0>) -> io::Result<()> {
-    let _raw_fd = try_decode_raw_fd(raw)?;
-    Ok(())
+    unsafe {
+        let _raw_fd = try_decode_raw_fd(raw)?;
+        Ok(())
+    }
 }
 
 /// Convert a `usize` returned from a syscall that effectively returns a

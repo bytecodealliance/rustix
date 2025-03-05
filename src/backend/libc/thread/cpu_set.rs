@@ -2,7 +2,7 @@
 
 #![allow(non_snake_case)]
 
-use super::types::{RawCpuSet, CPU_SETSIZE};
+use super::types::{CPU_SETSIZE, RawCpuSet};
 use crate::backend::c;
 
 #[inline]

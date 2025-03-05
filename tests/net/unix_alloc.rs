@@ -5,10 +5,10 @@
 #![cfg(not(any(apple, target_os = "espidf", target_os = "redox", target_os = "wasi")))]
 #![cfg(feature = "fs")]
 
-use rustix::fs::{unlinkat, AtFlags, CWD};
+use rustix::fs::{AtFlags, CWD, unlinkat};
 use rustix::io::{read, write};
 use rustix::net::{
-    accept, bind, connect, listen, socket, AddressFamily, SocketAddrUnix, SocketType,
+    AddressFamily, SocketAddrUnix, SocketType, accept, bind, connect, listen, socket,
 };
 use rustix::path::DecInt;
 use std::path::Path;
@@ -127,7 +127,7 @@ fn test_unix() {
 #[cfg(not(any(target_os = "espidf", target_os = "redox", target_os = "wasi")))]
 fn do_test_unix_msg(addr: SocketAddrUnix) {
     use rustix::io::{IoSlice, IoSliceMut};
-    use rustix::net::{recvmsg, sendmsg, RecvFlags, ReturnFlags, SendFlags};
+    use rustix::net::{RecvFlags, ReturnFlags, SendFlags, recvmsg, sendmsg};
 
     let server = {
         let connection_socket = socket(AddressFamily::UNIX, SocketType::SEQPACKET, None).unwrap();
@@ -256,7 +256,7 @@ fn do_test_unix_msg(addr: SocketAddrUnix) {
 #[cfg(not(any(target_os = "espidf", target_os = "redox", target_os = "wasi")))]
 fn do_test_unix_msg_unconnected(addr: SocketAddrUnix) {
     use rustix::io::{IoSlice, IoSliceMut};
-    use rustix::net::{recvmsg, sendmsg_addr, RecvFlags, ReturnFlags, SendFlags};
+    use rustix::net::{RecvFlags, ReturnFlags, SendFlags, recvmsg, sendmsg_addr};
 
     let server = {
         let runs: &[i32] = &[3, 184, 187, 0];
@@ -449,8 +449,8 @@ fn test_unix_msg_with_scm_rights() {
     use rustix::fd::AsFd as _;
     use rustix::io::{IoSlice, IoSliceMut};
     use rustix::net::{
-        recvmsg, sendmsg, RecvAncillaryBuffer, RecvAncillaryMessage, RecvFlags, ReturnFlags,
-        SendAncillaryBuffer, SendAncillaryMessage, SendFlags,
+        RecvAncillaryBuffer, RecvAncillaryMessage, RecvFlags, ReturnFlags, SendAncillaryBuffer,
+        SendAncillaryMessage, SendFlags, recvmsg, sendmsg,
     };
     use rustix::pipe::pipe;
     use std::string::ToString as _;
@@ -626,8 +626,8 @@ fn test_unix_peercred() {
 
     use rustix::io::{IoSlice, IoSliceMut};
     use rustix::net::{
-        recvmsg, sendmsg, sockopt, RecvAncillaryBuffer, RecvAncillaryMessage, RecvFlags,
-        SendAncillaryBuffer, SendAncillaryMessage, SendFlags, SocketFlags,
+        RecvAncillaryBuffer, RecvAncillaryMessage, RecvFlags, SendAncillaryBuffer,
+        SendAncillaryMessage, SendFlags, SocketFlags, recvmsg, sendmsg, sockopt,
     };
     use rustix::process::{getgid, getpid, getuid};
 
@@ -688,8 +688,8 @@ fn test_unix_msg_with_combo() {
     use rustix::fd::AsFd as _;
     use rustix::io::{IoSlice, IoSliceMut};
     use rustix::net::{
-        recvmsg, sendmsg, RecvAncillaryBuffer, RecvAncillaryMessage, RecvFlags, ReturnFlags,
-        SendAncillaryBuffer, SendAncillaryMessage, SendFlags,
+        RecvAncillaryBuffer, RecvAncillaryMessage, RecvFlags, ReturnFlags, SendAncillaryBuffer,
+        SendAncillaryMessage, SendFlags, recvmsg, sendmsg,
     };
     use rustix::pipe::pipe;
     use std::string::ToString as _;

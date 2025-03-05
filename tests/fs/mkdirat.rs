@@ -1,6 +1,6 @@
 #[test]
 fn test_mkdir() {
-    use rustix::fs::{access, mkdir, rmdir, stat, unlink, Access, FileType, Mode};
+    use rustix::fs::{Access, FileType, Mode, access, mkdir, rmdir, stat, unlink};
 
     let tmp = tempfile::tempdir().unwrap();
 
@@ -19,7 +19,7 @@ fn test_mkdir() {
 #[test]
 fn test_mkdirat() {
     use rustix::fs::{
-        accessat, mkdirat, openat, statat, unlinkat, Access, AtFlags, FileType, Mode, OFlags, CWD,
+        Access, AtFlags, CWD, FileType, Mode, OFlags, accessat, mkdirat, openat, statat, unlinkat,
     };
 
     let tmp = tempfile::tempdir().unwrap();
@@ -40,7 +40,7 @@ fn test_mkdirat() {
 #[test]
 fn test_mkdirat_with_o_path() {
     use rustix::fs::{
-        accessat, mkdirat, openat, statat, unlinkat, Access, AtFlags, FileType, Mode, OFlags, CWD,
+        Access, AtFlags, CWD, FileType, Mode, OFlags, accessat, mkdirat, openat, statat, unlinkat,
     };
 
     let tmp = tempfile::tempdir().unwrap();

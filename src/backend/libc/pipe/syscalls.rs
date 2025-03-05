@@ -14,8 +14,8 @@ use crate::pipe::PipeFlags;
 use core::mem::MaybeUninit;
 #[cfg(linux_kernel)]
 use {
-    crate::backend::conv::{borrowed_fd, ret_c_int, ret_usize},
     crate::backend::MAX_IOV,
+    crate::backend::conv::{borrowed_fd, ret_c_int, ret_usize},
     crate::fd::BorrowedFd,
     crate::pipe::{IoSliceRaw, SpliceFlags},
     crate::utils::option_as_mut_ptr,
@@ -85,12 +85,14 @@ pub(crate) unsafe fn vmsplice(
     bufs: &[IoSliceRaw<'_>],
     flags: SpliceFlags,
 ) -> io::Result<usize> {
-    ret_usize(c::vmsplice(
-        borrowed_fd(fd),
-        bufs.as_ptr().cast::<c::iovec>(),
-        min(bufs.len(), MAX_IOV),
-        flags.bits(),
-    ))
+    unsafe {
+        ret_usize(c::vmsplice(
+            borrowed_fd(fd),
+            bufs.as_ptr().cast::<c::iovec>(),
+            min(bufs.len(), MAX_IOV),
+            flags.bits(),
+        ))
+    }
 }
 
 #[cfg(linux_kernel)]

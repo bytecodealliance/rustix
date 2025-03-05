@@ -8,7 +8,7 @@ use std::io::{IoSlice, IoSliceMut};
 #[cfg(not(target_os = "cygwin"))] // no preadv/pwritev
 #[test]
 fn test_readwrite_pv() {
-    use rustix::fs::{openat, Mode, OFlags, CWD};
+    use rustix::fs::{CWD, Mode, OFlags, openat};
     use rustix::io::{preadv, pwritev};
 
     let tmp = tempfile::tempdir().unwrap();
@@ -47,7 +47,7 @@ fn test_readwrite_pv() {
 #[cfg(feature = "fs")]
 #[test]
 fn test_readwrite_p() {
-    use rustix::fs::{openat, Mode, OFlags, CWD};
+    use rustix::fs::{CWD, Mode, OFlags, openat};
     use rustix::io::{pread, pwrite};
 
     let tmp = tempfile::tempdir().unwrap();
@@ -73,7 +73,7 @@ fn test_readwrite_p() {
 #[test]
 fn test_readwrite_p_uninit() {
     use core::mem::MaybeUninit;
-    use rustix::fs::{openat, Mode, OFlags, CWD};
+    use rustix::fs::{CWD, Mode, OFlags, openat};
     use rustix::io::{pread, pwrite};
 
     let tmp = tempfile::tempdir().unwrap();
@@ -99,7 +99,7 @@ fn test_readwrite_p_uninit() {
 #[cfg(feature = "fs")]
 #[test]
 fn test_readwrite_v() {
-    use rustix::fs::{openat, seek, Mode, OFlags, SeekFrom, CWD};
+    use rustix::fs::{CWD, Mode, OFlags, SeekFrom, openat, seek};
     use rustix::io::{readv, writev};
 
     let tmp = tempfile::tempdir().unwrap();
@@ -125,7 +125,7 @@ fn test_readwrite_v() {
 #[cfg(feature = "fs")]
 #[test]
 fn test_readwrite() {
-    use rustix::fs::{openat, seek, Mode, OFlags, SeekFrom, CWD};
+    use rustix::fs::{CWD, Mode, OFlags, SeekFrom, openat, seek};
     use rustix::io::{read, write};
 
     let tmp = tempfile::tempdir().unwrap();
@@ -152,7 +152,7 @@ fn test_readwrite() {
 #[test]
 fn test_readwrite_uninit() {
     use core::mem::MaybeUninit;
-    use rustix::fs::{openat, seek, Mode, OFlags, SeekFrom, CWD};
+    use rustix::fs::{CWD, Mode, OFlags, SeekFrom, openat, seek};
     use rustix::io::{read, write};
 
     let tmp = tempfile::tempdir().unwrap();
@@ -206,8 +206,8 @@ fn test_rwf_values() {
 #[cfg(feature = "fs")]
 #[test]
 fn test_pwritev2() {
-    use rustix::fs::{openat, seek, Mode, OFlags, SeekFrom, CWD};
-    use rustix::io::{preadv2, pwritev2, writev, ReadWriteFlags};
+    use rustix::fs::{CWD, Mode, OFlags, SeekFrom, openat, seek};
+    use rustix::io::{ReadWriteFlags, preadv2, pwritev2, writev};
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
@@ -260,8 +260,8 @@ fn test_pwritev2() {
 #[cfg(all(feature = "net", feature = "pipe"))]
 #[test]
 fn test_preadv2_nowait() {
-    use rustix::io::{preadv2, ReadWriteFlags};
-    use rustix::net::{socketpair, AddressFamily, SocketFlags, SocketType};
+    use rustix::io::{ReadWriteFlags, preadv2};
+    use rustix::net::{AddressFamily, SocketFlags, SocketType, socketpair};
     use rustix::pipe::pipe;
 
     let mut buf = [0_u8; 5];
@@ -305,10 +305,10 @@ fn test_preadv2_nowait() {
 #[cfg(not(target_os = "haiku"))] // no preadv/pwritev
 #[test]
 fn test_p_offsets() {
-    use rustix::fs::{openat, Mode, OFlags, CWD};
-    use rustix::io::{pread, preadv, pwrite, pwritev};
+    use rustix::fs::{CWD, Mode, OFlags, openat};
     #[cfg(linux_kernel)]
-    use rustix::io::{preadv2, pwritev2, ReadWriteFlags};
+    use rustix::io::{ReadWriteFlags, preadv2, pwritev2};
+    use rustix::io::{pread, preadv, pwrite, pwritev};
 
     let mut buf = [0_u8; 5];
 

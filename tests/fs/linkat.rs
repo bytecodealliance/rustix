@@ -1,6 +1,6 @@
 #[test]
 fn test_link() {
-    use rustix::fs::{link, open, readlink, stat, Mode, OFlags};
+    use rustix::fs::{Mode, OFlags, link, open, readlink, stat};
 
     let tmp = tempfile::tempdir().unwrap();
 
@@ -32,7 +32,7 @@ fn test_link() {
 #[cfg(not(target_os = "redox"))]
 #[test]
 fn test_linkat() {
-    use rustix::fs::{linkat, openat, readlinkat, statat, AtFlags, Mode, OFlags, CWD};
+    use rustix::fs::{AtFlags, CWD, Mode, OFlags, linkat, openat, readlinkat, statat};
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();

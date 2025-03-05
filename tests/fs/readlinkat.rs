@@ -1,6 +1,6 @@
 #[test]
 fn test_readlink() {
-    use rustix::fs::{open, readlink, symlink, Mode, OFlags};
+    use rustix::fs::{Mode, OFlags, open, readlink, symlink};
 
     let tmp = tempfile::tempdir().unwrap();
 
@@ -29,7 +29,7 @@ fn test_readlink() {
 #[cfg(not(target_os = "redox"))]
 #[test]
 fn test_readlinkat() {
-    use rustix::fs::{openat, readlinkat, symlinkat, Mode, OFlags, CWD};
+    use rustix::fs::{CWD, Mode, OFlags, openat, readlinkat, symlinkat};
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();
@@ -55,7 +55,7 @@ fn test_readlinkat() {
 #[test]
 fn test_readlinkat_raw() {
     use core::mem::MaybeUninit;
-    use rustix::fs::{openat, readlinkat_raw, symlinkat, Mode, OFlags, CWD};
+    use rustix::fs::{CWD, Mode, OFlags, openat, readlinkat_raw, symlinkat};
     use std::ffi::OsStr;
     use std::os::unix::ffi::OsStrExt as _;
 

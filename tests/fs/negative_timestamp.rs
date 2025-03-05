@@ -3,8 +3,8 @@
 #[test]
 fn negative_file_timestamp() {
     use rustix::fs::{
-        fstat, futimens, lstat, open, stat, statat, AtFlags, Mode, OFlags, Timespec, Timestamps,
-        CWD,
+        AtFlags, CWD, Mode, OFlags, Timespec, Timestamps, fstat, futimens, lstat, open, stat,
+        statat,
     };
 
     let tmp = tempfile::tempdir().unwrap();

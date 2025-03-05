@@ -105,8 +105,8 @@ pub(crate) const O_LARGEFILE: c_int = 0x2000;
     any(target_arch = "powerpc", target_arch = "powerpc64")
 ))]
 pub(crate) use {
-    termios as termios2, TCGETS as TCGETS2, TCSETS as TCSETS2, TCSETSF as TCSETSF2,
-    TCSETSW as TCSETSW2,
+    TCGETS as TCGETS2, TCSETS as TCSETS2, TCSETSF as TCSETSF2, TCSETSW as TCSETSW2,
+    termios as termios2,
 };
 
 // And PowerPC doesn't define `CIBAUD`, but it does define `IBSHIFT`, so we can
@@ -140,19 +140,19 @@ pub(super) use {blkcnt64_t as blkcnt_t, rlim64_t as rlim_t};
 // to the upstream libc crate and implement rustix's `statat` etc. with them.
 #[cfg(target_os = "aix")]
 pub(super) use {
-    blksize64_t as blksize_t, fstat64 as fstat, fstatfs64 as fstatfs, fstatvfs64 as fstatvfs,
-    ftruncate64 as ftruncate, getrlimit64 as getrlimit, ino_t, lseek64 as lseek, mmap,
-    off64_t as off_t, openat, posix_fadvise64 as posix_fadvise, preadv, pwritev,
-    rlimit64 as rlimit, setrlimit64 as setrlimit, stat64at as fstatat, statfs64 as statfs,
-    statvfs64 as statvfs, RLIM_INFINITY,
+    RLIM_INFINITY, blksize64_t as blksize_t, fstat64 as fstat, fstatfs64 as fstatfs,
+    fstatvfs64 as fstatvfs, ftruncate64 as ftruncate, getrlimit64 as getrlimit, ino_t,
+    lseek64 as lseek, mmap, off64_t as off_t, openat, posix_fadvise64 as posix_fadvise, preadv,
+    pwritev, rlimit64 as rlimit, setrlimit64 as setrlimit, stat64at as fstatat, statfs64 as statfs,
+    statvfs64 as statvfs,
 };
 #[cfg(any(linux_like, target_os = "hurd"))]
 pub(super) use {
-    fstat64 as fstat, fstatat64 as fstatat, fstatfs64 as fstatfs, fstatvfs64 as fstatvfs,
-    ftruncate64 as ftruncate, getrlimit64 as getrlimit, ino64_t as ino_t, lseek64 as lseek,
-    mmap64 as mmap, off64_t as off_t, openat64 as openat, posix_fadvise64 as posix_fadvise,
-    rlimit64 as rlimit, setrlimit64 as setrlimit, statfs64 as statfs, statvfs64 as statvfs,
-    RLIM64_INFINITY as RLIM_INFINITY,
+    RLIM64_INFINITY as RLIM_INFINITY, fstat64 as fstat, fstatat64 as fstatat, fstatfs64 as fstatfs,
+    fstatvfs64 as fstatvfs, ftruncate64 as ftruncate, getrlimit64 as getrlimit, ino64_t as ino_t,
+    lseek64 as lseek, mmap64 as mmap, off64_t as off_t, openat64 as openat,
+    posix_fadvise64 as posix_fadvise, rlimit64 as rlimit, setrlimit64 as setrlimit,
+    statfs64 as statfs, statvfs64 as statvfs,
 };
 #[cfg(apple)]
 pub(super) use {
@@ -186,17 +186,19 @@ pub(super) unsafe fn prlimit(
     new_limit: *const rlimit64,
     old_limit: *mut rlimit64,
 ) -> c_int {
-    // `prlimit64` wasn't supported in glibc until 2.13.
-    weak_or_syscall! {
-        fn prlimit64(
-            pid: pid_t,
-            resource: __rlimit_resource_t,
-            new_limit: *const rlimit64,
-            old_limit: *mut rlimit64
-        ) via SYS_prlimit64 -> c_int
-    }
+    unsafe {
+        // `prlimit64` wasn't supported in glibc until 2.13.
+        weak_or_syscall! {
+            fn prlimit64(
+                pid: pid_t,
+                resource: __rlimit_resource_t,
+                new_limit: *const rlimit64,
+                old_limit: *mut rlimit64
+            ) via SYS_prlimit64 -> c_int
+        }
 
-    prlimit64(pid, resource, new_limit, old_limit)
+        prlimit64(pid, resource, new_limit, old_limit)
+    }
 }
 
 #[cfg(all(target_os = "linux", target_env = "musl"))]
@@ -339,37 +341,39 @@ mod readwrite_pv64v2 {
         offset: off64_t,
         flags: c_int,
     ) -> ssize_t {
-        // Older glibc lacks `preadv64v2`, so use the `weak!` mechanism to
-        // test for it, and call back to `syscall`. We don't use
-        // `weak_or_syscall` here because we need to pass the 64-bit offset
-        // specially.
-        weak! {
-            fn preadv64v2(c_int, *const iovec, c_int, off64_t, c_int) -> ssize_t
-        }
-        if let Some(fun) = preadv64v2.get() {
-            fun(fd, iov, iovcnt, offset, flags)
-        } else {
-            // Unlike the plain "p" functions, the "pv" functions pass their
-            // offset in an endian-independent way, and always in two
-            // registers.
-            syscall! {
-                fn preadv2(
-                    fd: c_int,
-                    iov: *const iovec,
-                    iovcnt: c_int,
-                    offset_lo: usize,
-                    offset_hi: usize,
-                    flags: c_int
-                ) via SYS_preadv2 -> ssize_t
+        unsafe {
+            // Older glibc lacks `preadv64v2`, so use the `weak!` mechanism to
+            // test for it, and call back to `syscall`. We don't use
+            // `weak_or_syscall` here because we need to pass the 64-bit offset
+            // specially.
+            weak! {
+                fn preadv64v2(c_int, *const iovec, c_int, off64_t, c_int) -> ssize_t
             }
-            preadv2(
-                fd,
-                iov,
-                iovcnt,
-                offset as usize,
-                (offset >> 32) as usize,
-                flags,
-            )
+            if let Some(fun) = preadv64v2.get() {
+                fun(fd, iov, iovcnt, offset, flags)
+            } else {
+                // Unlike the plain "p" functions, the "pv" functions pass their
+                // offset in an endian-independent way, and always in two
+                // registers.
+                syscall! {
+                    fn preadv2(
+                        fd: c_int,
+                        iov: *const iovec,
+                        iovcnt: c_int,
+                        offset_lo: usize,
+                        offset_hi: usize,
+                        flags: c_int
+                    ) via SYS_preadv2 -> ssize_t
+                }
+                preadv2(
+                    fd,
+                    iov,
+                    iovcnt,
+                    offset as usize,
+                    (offset >> 32) as usize,
+                    flags,
+                )
+            }
         }
     }
     pub(in super::super) unsafe fn pwritev64v2(
@@ -379,34 +383,36 @@ mod readwrite_pv64v2 {
         offset: off64_t,
         flags: c_int,
     ) -> ssize_t {
-        // See the comments in `preadv64v2`.
-        weak! {
-            fn pwritev64v2(c_int, *const iovec, c_int, off64_t, c_int) -> ssize_t
-        }
-        if let Some(fun) = pwritev64v2.get() {
-            fun(fd, iov, iovcnt, offset, flags)
-        } else {
-            // Unlike the plain "p" functions, the "pv" functions pass their
-            // offset in an endian-independent way, and always in two
-            // registers.
-            syscall! {
-                fn pwritev2(
-                    fd: c_int,
-                    iov: *const iovec,
-                    iovec: c_int,
-                    offset_lo: usize,
-                    offset_hi: usize,
-                    flags: c_int
-                ) via SYS_pwritev2 -> ssize_t
+        unsafe {
+            // See the comments in `preadv64v2`.
+            weak! {
+                fn pwritev64v2(c_int, *const iovec, c_int, off64_t, c_int) -> ssize_t
             }
-            pwritev2(
-                fd,
-                iov,
-                iovcnt,
-                offset as usize,
-                (offset >> 32) as usize,
-                flags,
-            )
+            if let Some(fun) = pwritev64v2.get() {
+                fun(fd, iov, iovcnt, offset, flags)
+            } else {
+                // Unlike the plain "p" functions, the "pv" functions pass their
+                // offset in an endian-independent way, and always in two
+                // registers.
+                syscall! {
+                    fn pwritev2(
+                        fd: c_int,
+                        iov: *const iovec,
+                        iovec: c_int,
+                        offset_lo: usize,
+                        offset_hi: usize,
+                        flags: c_int
+                    ) via SYS_pwritev2 -> ssize_t
+                }
+                pwritev2(
+                    fd,
+                    iov,
+                    iovcnt,
+                    offset as usize,
+                    (offset >> 32) as usize,
+                    flags,
+                )
+            }
         }
     }
 }

@@ -22,10 +22,10 @@ use crate::net::{
 use alloc::borrow::ToOwned as _;
 #[cfg(feature = "alloc")]
 use alloc::string::String;
-use core::mem::{size_of, MaybeUninit};
+use core::mem::{MaybeUninit, size_of};
 use core::time::Duration;
 use linux_raw_sys::general::{__kernel_old_timeval, __kernel_sock_timeval};
-use linux_raw_sys::net::{IPV6_MTU, IPV6_MULTICAST_IF, IP_MTU, IP_MULTICAST_IF};
+use linux_raw_sys::net::{IP_MTU, IP_MULTICAST_IF, IPV6_MTU, IPV6_MULTICAST_IF};
 #[cfg(target_os = "linux")]
 use linux_raw_sys::xdp::{xdp_mmap_offsets, xdp_statistics, xdp_statistics_v1};
 #[cfg(target_arch = "x86")]
@@ -233,7 +233,7 @@ pub(crate) fn socket_timeout(fd: BorrowedFd<'_>, id: Timeout) -> io::Result<Opti
     };
     let time: __kernel_sock_timeval = match getsockopt(fd, c::SOL_SOCKET, optname) {
         Err(io::Errno::NOPROTOOPT) if c::SO_RCVTIMEO_NEW != c::SO_RCVTIMEO_OLD => {
-            return socket_timeout_old(fd, id)
+            return socket_timeout_old(fd, id);
         }
         otherwise => otherwise?,
     };
@@ -283,7 +283,7 @@ fn duration_to_linux_sock_timeval(timeout: Option<Duration>) -> io::Result<__ker
             // manually round up.
             let mut timeout = __kernel_sock_timeval {
                 tv_sec: timeout.as_secs().try_into().unwrap_or(i64::MAX),
-                tv_usec: ((timeout.subsec_nanos() + 999) / 1000) as _,
+                tv_usec: timeout.subsec_nanos().div_ceil(1000) as _,
             };
             if timeout.tv_sec == 0 && timeout.tv_usec == 0 {
                 timeout.tv_usec = 1;
@@ -310,7 +310,7 @@ fn duration_to_linux_old_timeval(timeout: Option<Duration>) -> io::Result<__kern
             // manually round up.
             let mut timeout = __kernel_old_timeval {
                 tv_sec: timeout.as_secs().try_into().unwrap_or(c::c_long::MAX),
-                tv_usec: ((timeout.subsec_nanos() + 999) / 1000) as _,
+                tv_usec: timeout.subsec_nanos().div_ceil(1000) as _,
             };
             if timeout.tv_sec == 0 && timeout.tv_usec == 0 {
                 timeout.tv_usec = 1;

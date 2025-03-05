@@ -4,7 +4,7 @@
 #[cfg(not(any(windows, target_os = "espidf")))]
 #[cfg(feature = "time")]
 fn main() {
-    use rustix::time::{clock_gettime, ClockId};
+    use rustix::time::{ClockId, clock_gettime};
 
     println!("Real time: {:?}", clock_gettime(ClockId::Realtime));
     println!("Monotonic time: {:?}", clock_gettime(ClockId::Monotonic));

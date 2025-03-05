@@ -3,7 +3,7 @@
 
 use crate::ffi::c_int;
 pub(crate) use linux_raw_sys::general::{
-    siginfo_t, WCONTINUED, WEXITED, WNOHANG, WNOWAIT, WSTOPPED, WUNTRACED,
+    WCONTINUED, WEXITED, WNOHANG, WNOWAIT, WSTOPPED, WUNTRACED, siginfo_t,
 };
 
 #[inline]
@@ -78,11 +78,13 @@ impl SiginfoExt for siginfo_t {
     /// `waitid` call).
     #[inline]
     unsafe fn si_status(&self) -> c_int {
-        self.__bindgen_anon_1
-            .__bindgen_anon_1
-            ._sifields
-            ._sigchld
-            ._status
+        unsafe {
+            self.__bindgen_anon_1
+                .__bindgen_anon_1
+                ._sifields
+                ._sigchld
+                ._status
+        }
     }
 }
 

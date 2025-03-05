@@ -1,5 +1,5 @@
 use core::mem::MaybeUninit;
-use rustix::rand::{getrandom, GetRandomFlags};
+use rustix::rand::{GetRandomFlags, getrandom};
 
 #[test]
 fn test_getrandom() {

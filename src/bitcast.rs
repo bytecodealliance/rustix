@@ -5,7 +5,7 @@
 // Ensure that the source and destination types are both primitive integer
 // types and the same size, and then bitcast.
 macro_rules! bitcast {
-    ($x:expr) => {{
+    ($x:expr_2021) => {{
         if false {
             // Ensure the source and destinations are primitive integer types.
             let _ = !$x;
@@ -33,7 +33,5 @@ macro_rules! bitcast {
 /// Return a [`bitcast`] of the value of `$x.bits()`, where `$x` is a
 /// `bitflags` type.
 macro_rules! bitflags_bits {
-    ($x:expr) => {{
-        bitcast!($x.bits())
-    }};
+    ($x:expr_2021) => {{ bitcast!($x.bits()) }};
 }

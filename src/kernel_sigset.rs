@@ -6,7 +6,7 @@
 use crate::backend::c;
 use crate::signal::Signal;
 use core::fmt;
-use linux_raw_sys::general::{kernel_sigset_t, _NSIG};
+use linux_raw_sys::general::{_NSIG, kernel_sigset_t};
 
 /// `kernel_sigset_t`—A set of signal numbers, as used by some syscalls.
 ///

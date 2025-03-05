@@ -1,6 +1,6 @@
 //! libc syscalls supporting `rustix::net::sockopt`.
 
-use super::ext::{in6_addr_new, in_addr_new};
+use super::ext::{in_addr_new, in6_addr_new};
 use crate::backend::c;
 use crate::backend::conv::{borrowed_fd, ret};
 use crate::fd::BorrowedFd;
@@ -13,9 +13,6 @@ use crate::fd::BorrowedFd;
 ))]
 use crate::ffi::CStr;
 use crate::io;
-use crate::net::sockopt::Timeout;
-#[cfg(target_os = "linux")]
-use crate::net::xdp::{XdpMmapOffsets, XdpOptionsFlags, XdpRingOffset, XdpStatistics, XdpUmemReg};
 #[cfg(not(any(
     apple,
     windows,
@@ -50,6 +47,9 @@ use crate::net::Protocol;
 use crate::net::RawProtocol;
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
 use crate::net::SocketAddrV4;
+use crate::net::sockopt::Timeout;
+#[cfg(target_os = "linux")]
+use crate::net::xdp::{XdpMmapOffsets, XdpOptionsFlags, XdpRingOffset, XdpStatistics, XdpUmemReg};
 use crate::net::{Ipv4Addr, Ipv6Addr, SocketType};
 #[cfg(linux_kernel)]
 use crate::net::{SocketAddrV6, UCred};
@@ -74,7 +74,7 @@ use alloc::string::String;
 use c::TCP_KEEPALIVE as TCP_KEEPIDLE;
 #[cfg(not(any(apple, target_os = "haiku", target_os = "nto", target_os = "openbsd")))]
 use c::TCP_KEEPIDLE;
-use core::mem::{size_of, MaybeUninit};
+use core::mem::{MaybeUninit, size_of};
 use core::time::Duration;
 #[cfg(target_os = "linux")]
 use linux_raw_sys::xdp::{xdp_mmap_offsets, xdp_statistics, xdp_statistics_v1};
@@ -240,7 +240,7 @@ pub(crate) fn set_socket_timeout(
             // manually round up.
             let mut timeout = c::timeval {
                 tv_sec,
-                tv_usec: ((timeout.subsec_nanos() + 999) / 1000) as _,
+                tv_usec: timeout.subsec_nanos().div_ceil(1000) as _,
             };
             if timeout.tv_sec == 0 && timeout.tv_usec == 0 {
                 timeout.tv_usec = 1;
@@ -262,7 +262,9 @@ pub(crate) fn set_socket_timeout(
 
             // `as_millis` rounds down, so we use `as_nanos` and
             // manually round up.
-            let mut timeout: u32 = ((timeout.as_nanos() + 999_999) / 1_000_000)
+            let mut timeout: u32 = timeout
+                .as_nanos()
+                .div_ceil(1_000_000)
                 .try_into()
                 .map_err(|_convert_err| io::Errno::INVAL)?;
             if timeout == 0 {

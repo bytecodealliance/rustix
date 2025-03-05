@@ -253,47 +253,49 @@ impl Vdso {
     ///
     /// The raw pointers inside `self` must be valid.
     unsafe fn match_version(&self, mut ver: u16, name: &CStr, hash: u32) -> bool {
-        // This is a helper function to check if the version indexed by
-        // ver matches name (which hashes to hash).
-        //
-        // The version definition table is a mess, and I don't know how
-        // to do this in better than linear time without allocating memory
-        // to build an index. I also don't know why the table has
-        // variable size entries in the first place.
-        //
-        // For added fun, I can't find a comprehensible specification of how
-        // to parse all the weird flags in the table.
-        //
-        // So I just parse the whole table every time.
+        unsafe {
+            // This is a helper function to check if the version indexed by
+            // ver matches name (which hashes to hash).
+            //
+            // The version definition table is a mess, and I don't know how
+            // to do this in better than linear time without allocating memory
+            // to build an index. I also don't know why the table has
+            // variable size entries in the first place.
+            //
+            // For added fun, I can't find a comprehensible specification of how
+            // to parse all the weird flags in the table.
+            //
+            // So I just parse the whole table every time.
 
-        // First step: find the version definition
-        ver &= 0x7fff; // Apparently bit 15 means "hidden"
-        let mut def = self.verdef;
-        loop {
-            if (*def).vd_version != VER_DEF_CURRENT {
-                return false; // Failed
+            // First step: find the version definition
+            ver &= 0x7fff; // Apparently bit 15 means "hidden"
+            let mut def = self.verdef;
+            loop {
+                if (*def).vd_version != VER_DEF_CURRENT {
+                    return false; // Failed
+                }
+
+                if ((*def).vd_flags & VER_FLG_BASE) == 0 && ((*def).vd_ndx & 0x7fff) == ver {
+                    break;
+                }
+
+                if (*def).vd_next == 0 {
+                    return false; // No definition.
+                }
+
+                def = def
+                    .cast::<u8>()
+                    .add((*def).vd_next as usize)
+                    .cast::<Elf_Verdef>();
             }
 
-            if ((*def).vd_flags & VER_FLG_BASE) == 0 && ((*def).vd_ndx & 0x7fff) == ver {
-                break;
-            }
-
-            if (*def).vd_next == 0 {
-                return false; // No definition.
-            }
-
-            def = def
-                .cast::<u8>()
-                .add((*def).vd_next as usize)
-                .cast::<Elf_Verdef>();
+            // Now figure out whether it matches.
+            let aux = &*(def.cast::<u8>())
+                .add((*def).vd_aux as usize)
+                .cast::<Elf_Verdaux>();
+            (*def).vd_hash == hash
+                && (name == CStr::from_ptr(self.symstrings.add(aux.vda_name as usize).cast()))
         }
-
-        // Now figure out whether it matches.
-        let aux = &*(def.cast::<u8>())
-            .add((*def).vd_aux as usize)
-            .cast::<Elf_Verdaux>();
-        (*def).vd_hash == hash
-            && (name == CStr::from_ptr(self.symstrings.add(aux.vda_name as usize).cast()))
     }
 
     /// Check to see if the symbol is the one we're looking for.
@@ -309,31 +311,33 @@ impl Vdso {
         version: &CStr,
         ver_hash: u32,
     ) -> bool {
-        // Check for a defined global or weak function w/ right name.
-        //
-        // Accept `STT_NOTYPE` in addition to `STT_FUNC` for the symbol
-        // type, for compatibility with some versions of Linux on
-        // PowerPC64. See [this commit] in Linux for more background.
-        //
-        // [this commit]: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/tools/testing/selftests/vDSO/parse_vdso.c?id=0161bd38c24312853ed5ae9a425a1c41c4ac674a
-        if ELF_ST_TYPE(sym.st_info) != STT_FUNC && ELF_ST_TYPE(sym.st_info) != STT_NOTYPE {
-            return false;
-        }
-        if ELF_ST_BIND(sym.st_info) != STB_GLOBAL && ELF_ST_BIND(sym.st_info) != STB_WEAK {
-            return false;
-        }
-        if name != CStr::from_ptr(self.symstrings.add(sym.st_name as usize).cast()) {
-            return false;
-        }
+        unsafe {
+            // Check for a defined global or weak function w/ right name.
+            //
+            // Accept `STT_NOTYPE` in addition to `STT_FUNC` for the symbol
+            // type, for compatibility with some versions of Linux on
+            // PowerPC64. See [this commit] in Linux for more background.
+            //
+            // [this commit]: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/tools/testing/selftests/vDSO/parse_vdso.c?id=0161bd38c24312853ed5ae9a425a1c41c4ac674a
+            if ELF_ST_TYPE(sym.st_info) != STT_FUNC && ELF_ST_TYPE(sym.st_info) != STT_NOTYPE {
+                return false;
+            }
+            if ELF_ST_BIND(sym.st_info) != STB_GLOBAL && ELF_ST_BIND(sym.st_info) != STB_WEAK {
+                return false;
+            }
+            if name != CStr::from_ptr(self.symstrings.add(sym.st_name as usize).cast()) {
+                return false;
+            }
 
-        // Check symbol version.
-        if !self.versym.is_null()
-            && !self.match_version(*self.versym.add(i as usize), version, ver_hash)
-        {
-            return false;
-        }
+            // Check symbol version.
+            if !self.versym.is_null()
+                && !self.match_version(*self.versym.add(i as usize), version, ver_hash)
+            {
+                return false;
+            }
 
-        true
+            true
+        }
     }
 
     /// Look up a symbol in the vDSO.
@@ -408,15 +412,17 @@ impl Vdso {
 
     /// Add the given address to the vDSO base address.
     unsafe fn base_plus(&self, offset: usize) -> Option<*const c_void> {
-        // Check for overflow.
-        let _ = (self.load_addr as usize).checked_add(offset)?;
-        // Add the offset to the base.
-        Some(self.load_addr.cast::<u8>().add(offset).cast())
+        unsafe {
+            // Check for overflow.
+            let _ = (self.load_addr as usize).checked_add(offset)?;
+            // Add the offset to the base.
+            Some(self.load_addr.cast::<u8>().add(offset).cast())
+        }
     }
 
     /// Translate an ELF-address-space address into a usable virtual address.
     unsafe fn addr_from_elf(&self, elf_addr: usize) -> Option<*const c_void> {
-        self.base_plus(elf_addr.wrapping_add(self.pv_offset))
+        unsafe { self.base_plus(elf_addr.wrapping_add(self.pv_offset)) }
     }
 }
 

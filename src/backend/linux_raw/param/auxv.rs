@@ -15,7 +15,7 @@ use crate::utils::{as_ptr, check_raw_pointer};
 #[cfg(feature = "alloc")]
 use alloc::vec::Vec;
 use core::mem::size_of;
-use core::ptr::{null_mut, read_unaligned, NonNull};
+use core::ptr::{NonNull, null_mut, read_unaligned};
 #[cfg(feature = "runtime")]
 use core::sync::atomic::AtomicU8;
 use core::sync::atomic::Ordering::Relaxed;
@@ -365,110 +365,112 @@ fn init_from_auxv_file(auxv: OwnedFd) -> Option<()> {
 #[cold]
 #[must_use]
 unsafe fn init_from_aux_iter(aux_iter: impl Iterator<Item = Elf_auxv_t>) -> Option<()> {
-    let mut pagesz = 0;
-    let mut clktck = 0;
-    let mut hwcap = 0;
-    let mut hwcap2 = 0;
-    let mut minsigstksz = 0;
-    let mut execfn = null_mut();
-    let mut sysinfo_ehdr = null_mut();
-    #[cfg(feature = "runtime")]
-    let mut secure = 0;
-    #[cfg(feature = "runtime")]
-    let mut phdr = null_mut();
-    #[cfg(feature = "runtime")]
-    let mut phnum = 0;
-    #[cfg(feature = "runtime")]
-    let mut phent = 0;
-    #[cfg(feature = "runtime")]
-    let mut entry = 0;
-    #[cfg(feature = "runtime")]
-    let mut uid = None;
-    #[cfg(feature = "runtime")]
-    let mut euid = None;
-    #[cfg(feature = "runtime")]
-    let mut gid = None;
-    #[cfg(feature = "runtime")]
-    let mut egid = None;
-    #[cfg(feature = "runtime")]
-    let mut random = null_mut();
+    unsafe {
+        let mut pagesz = 0;
+        let mut clktck = 0;
+        let mut hwcap = 0;
+        let mut hwcap2 = 0;
+        let mut minsigstksz = 0;
+        let mut execfn = null_mut();
+        let mut sysinfo_ehdr = null_mut();
+        #[cfg(feature = "runtime")]
+        let mut secure = 0;
+        #[cfg(feature = "runtime")]
+        let mut phdr = null_mut();
+        #[cfg(feature = "runtime")]
+        let mut phnum = 0;
+        #[cfg(feature = "runtime")]
+        let mut phent = 0;
+        #[cfg(feature = "runtime")]
+        let mut entry = 0;
+        #[cfg(feature = "runtime")]
+        let mut uid = None;
+        #[cfg(feature = "runtime")]
+        let mut euid = None;
+        #[cfg(feature = "runtime")]
+        let mut gid = None;
+        #[cfg(feature = "runtime")]
+        let mut egid = None;
+        #[cfg(feature = "runtime")]
+        let mut random = null_mut();
 
-    for Elf_auxv_t { a_type, a_val } in aux_iter {
-        match a_type as _ {
-            AT_PAGESZ => pagesz = a_val as usize,
-            AT_CLKTCK => clktck = a_val as usize,
-            AT_HWCAP => hwcap = a_val as usize,
-            AT_HWCAP2 => hwcap2 = a_val as usize,
-            AT_MINSIGSTKSZ => minsigstksz = a_val as usize,
-            AT_EXECFN => execfn = check_raw_pointer::<c::c_char>(a_val as *mut _)?.as_ptr(),
-            AT_SYSINFO_EHDR => sysinfo_ehdr = check_elf_base(a_val as *mut _)?.as_ptr(),
+        for Elf_auxv_t { a_type, a_val } in aux_iter {
+            match a_type as _ {
+                AT_PAGESZ => pagesz = a_val as usize,
+                AT_CLKTCK => clktck = a_val as usize,
+                AT_HWCAP => hwcap = a_val as usize,
+                AT_HWCAP2 => hwcap2 = a_val as usize,
+                AT_MINSIGSTKSZ => minsigstksz = a_val as usize,
+                AT_EXECFN => execfn = check_raw_pointer::<c::c_char>(a_val as *mut _)?.as_ptr(),
+                AT_SYSINFO_EHDR => sysinfo_ehdr = check_elf_base(a_val as *mut _)?.as_ptr(),
 
-            AT_BASE => {
-                // The `AT_BASE` value can be null in a static executable that
-                // doesn't use a dynamic linker. If so, ignore it.
-                if !a_val.is_null() {
-                    let _ = check_elf_base(a_val.cast())?;
+                AT_BASE => {
+                    // The `AT_BASE` value can be null in a static executable that
+                    // doesn't use a dynamic linker. If so, ignore it.
+                    if !a_val.is_null() {
+                        let _ = check_elf_base(a_val.cast())?;
+                    }
                 }
+
+                #[cfg(feature = "runtime")]
+                AT_SECURE => secure = (a_val as usize != 0) as u8 + 1,
+                #[cfg(feature = "runtime")]
+                AT_UID => uid = Some(a_val),
+                #[cfg(feature = "runtime")]
+                AT_EUID => euid = Some(a_val),
+                #[cfg(feature = "runtime")]
+                AT_GID => gid = Some(a_val),
+                #[cfg(feature = "runtime")]
+                AT_EGID => egid = Some(a_val),
+                #[cfg(feature = "runtime")]
+                AT_PHDR => phdr = check_raw_pointer::<Elf_Phdr>(a_val as *mut _)?.as_ptr(),
+                #[cfg(feature = "runtime")]
+                AT_PHNUM => phnum = a_val as usize,
+                #[cfg(feature = "runtime")]
+                AT_PHENT => phent = a_val as usize,
+                #[cfg(feature = "runtime")]
+                AT_ENTRY => entry = a_val as usize,
+                #[cfg(feature = "runtime")]
+                AT_RANDOM => random = check_raw_pointer::<[u8; 16]>(a_val as *mut _)?.as_ptr(),
+
+                AT_NULL => break,
+                _ => (),
             }
-
-            #[cfg(feature = "runtime")]
-            AT_SECURE => secure = (a_val as usize != 0) as u8 + 1,
-            #[cfg(feature = "runtime")]
-            AT_UID => uid = Some(a_val),
-            #[cfg(feature = "runtime")]
-            AT_EUID => euid = Some(a_val),
-            #[cfg(feature = "runtime")]
-            AT_GID => gid = Some(a_val),
-            #[cfg(feature = "runtime")]
-            AT_EGID => egid = Some(a_val),
-            #[cfg(feature = "runtime")]
-            AT_PHDR => phdr = check_raw_pointer::<Elf_Phdr>(a_val as *mut _)?.as_ptr(),
-            #[cfg(feature = "runtime")]
-            AT_PHNUM => phnum = a_val as usize,
-            #[cfg(feature = "runtime")]
-            AT_PHENT => phent = a_val as usize,
-            #[cfg(feature = "runtime")]
-            AT_ENTRY => entry = a_val as usize,
-            #[cfg(feature = "runtime")]
-            AT_RANDOM => random = check_raw_pointer::<[u8; 16]>(a_val as *mut _)?.as_ptr(),
-
-            AT_NULL => break,
-            _ => (),
         }
+
+        #[cfg(feature = "runtime")]
+        assert_eq!(phent, size_of::<Elf_Phdr>());
+
+        // If we're running set-uid or set-gid, enable “secure execution” mode,
+        // which doesn't do much, but users may be depending on the things that
+        // it does do.
+        #[cfg(feature = "runtime")]
+        if uid != euid || gid != egid {
+            secure = 2;
+        }
+
+        // The base and sysinfo_ehdr (if present) matches our platform. Accept the
+        // aux values.
+        PAGE_SIZE.store(pagesz, Relaxed);
+        CLOCK_TICKS_PER_SECOND.store(clktck, Relaxed);
+        HWCAP.store(hwcap, Relaxed);
+        HWCAP2.store(hwcap2, Relaxed);
+        MINSIGSTKSZ.store(minsigstksz, Relaxed);
+        EXECFN.store(execfn, Relaxed);
+        SYSINFO_EHDR.store(sysinfo_ehdr, Relaxed);
+        #[cfg(feature = "runtime")]
+        SECURE.store(secure, Relaxed);
+        #[cfg(feature = "runtime")]
+        PHDR.store(phdr, Relaxed);
+        #[cfg(feature = "runtime")]
+        PHNUM.store(phnum, Relaxed);
+        #[cfg(feature = "runtime")]
+        ENTRY.store(entry, Relaxed);
+        #[cfg(feature = "runtime")]
+        RANDOM.store(random, Relaxed);
+
+        Some(())
     }
-
-    #[cfg(feature = "runtime")]
-    assert_eq!(phent, size_of::<Elf_Phdr>());
-
-    // If we're running set-uid or set-gid, enable “secure execution” mode,
-    // which doesn't do much, but users may be depending on the things that
-    // it does do.
-    #[cfg(feature = "runtime")]
-    if uid != euid || gid != egid {
-        secure = 2;
-    }
-
-    // The base and sysinfo_ehdr (if present) matches our platform. Accept the
-    // aux values.
-    PAGE_SIZE.store(pagesz, Relaxed);
-    CLOCK_TICKS_PER_SECOND.store(clktck, Relaxed);
-    HWCAP.store(hwcap, Relaxed);
-    HWCAP2.store(hwcap2, Relaxed);
-    MINSIGSTKSZ.store(minsigstksz, Relaxed);
-    EXECFN.store(execfn, Relaxed);
-    SYSINFO_EHDR.store(sysinfo_ehdr, Relaxed);
-    #[cfg(feature = "runtime")]
-    SECURE.store(secure, Relaxed);
-    #[cfg(feature = "runtime")]
-    PHDR.store(phdr, Relaxed);
-    #[cfg(feature = "runtime")]
-    PHNUM.store(phnum, Relaxed);
-    #[cfg(feature = "runtime")]
-    ENTRY.store(entry, Relaxed);
-    #[cfg(feature = "runtime")]
-    RANDOM.store(random, Relaxed);
-
-    Some(())
 }
 
 /// Check that `base` is a valid pointer to the kernel-provided vDSO.
@@ -479,63 +481,65 @@ unsafe fn init_from_aux_iter(aux_iter: impl Iterator<Item = Elf_auxv_t>) -> Opti
 #[cold]
 #[must_use]
 unsafe fn check_elf_base(base: *const Elf_Ehdr) -> Option<NonNull<Elf_Ehdr>> {
-    // If we're reading a 64-bit auxv on a 32-bit platform, we'll see a zero
-    // `a_val` because `AT_*` values are never greater than `u32::MAX`. Zero is
-    // used by libc's `getauxval` to indicate errors, so it should never be a
-    // valid value.
-    if base.is_null() {
-        return None;
-    }
+    unsafe {
+        // If we're reading a 64-bit auxv on a 32-bit platform, we'll see a zero
+        // `a_val` because `AT_*` values are never greater than `u32::MAX`. Zero is
+        // used by libc's `getauxval` to indicate errors, so it should never be a
+        // valid value.
+        if base.is_null() {
+            return None;
+        }
 
-    let hdr = check_raw_pointer::<Elf_Ehdr>(base as *mut _)?;
+        let hdr = check_raw_pointer::<Elf_Ehdr>(base as *mut _)?;
 
-    let hdr = hdr.as_ref();
-    if hdr.e_ident[..SELFMAG] != ELFMAG {
-        return None; // Wrong ELF magic
-    }
-    if !matches!(hdr.e_ident[EI_OSABI], ELFOSABI_SYSV | ELFOSABI_LINUX) {
-        return None; // Unrecognized ELF OS ABI
-    }
-    if hdr.e_ident[EI_ABIVERSION] != ELFABIVERSION {
-        return None; // Unrecognized ELF ABI version
-    }
-    if hdr.e_type != ET_DYN {
-        return None; // Wrong ELF type
-    }
+        let hdr = hdr.as_ref();
+        if hdr.e_ident[..SELFMAG] != ELFMAG {
+            return None; // Wrong ELF magic
+        }
+        if !matches!(hdr.e_ident[EI_OSABI], ELFOSABI_SYSV | ELFOSABI_LINUX) {
+            return None; // Unrecognized ELF OS ABI
+        }
+        if hdr.e_ident[EI_ABIVERSION] != ELFABIVERSION {
+            return None; // Unrecognized ELF ABI version
+        }
+        if hdr.e_type != ET_DYN {
+            return None; // Wrong ELF type
+        }
 
-    // If ELF is extended, we'll need to adjust.
-    if hdr.e_ident[EI_VERSION] != EV_CURRENT
-        || hdr.e_ehsize as usize != size_of::<Elf_Ehdr>()
-        || hdr.e_phentsize as usize != size_of::<Elf_Phdr>()
-    {
-        return None;
-    }
-    // We don't currently support extra-large numbers of segments.
-    if hdr.e_phnum == PN_XNUM {
-        return None;
-    }
+        // If ELF is extended, we'll need to adjust.
+        if hdr.e_ident[EI_VERSION] != EV_CURRENT
+            || hdr.e_ehsize as usize != size_of::<Elf_Ehdr>()
+            || hdr.e_phentsize as usize != size_of::<Elf_Phdr>()
+        {
+            return None;
+        }
+        // We don't currently support extra-large numbers of segments.
+        if hdr.e_phnum == PN_XNUM {
+            return None;
+        }
 
-    // If `e_phoff` is zero, it's more likely that we're looking at memory that
-    // has been zeroed than that the kernel has somehow aliased the `Ehdr` and
-    // the `Phdr`.
-    if hdr.e_phoff < size_of::<Elf_Ehdr>() {
-        return None;
-    }
+        // If `e_phoff` is zero, it's more likely that we're looking at memory that
+        // has been zeroed than that the kernel has somehow aliased the `Ehdr` and
+        // the `Phdr`.
+        if hdr.e_phoff < size_of::<Elf_Ehdr>() {
+            return None;
+        }
 
-    // Verify that the `EI_CLASS`/`EI_DATA`/`e_machine` fields match the
-    // architecture we're running as. This helps catch cases where we're
-    // running under QEMU.
-    if hdr.e_ident[EI_CLASS] != ELFCLASS {
-        return None; // Wrong ELF class
-    }
-    if hdr.e_ident[EI_DATA] != ELFDATA {
-        return None; // Wrong ELF data
-    }
-    if hdr.e_machine != EM_CURRENT {
-        return None; // Wrong machine type
-    }
+        // Verify that the `EI_CLASS`/`EI_DATA`/`e_machine` fields match the
+        // architecture we're running as. This helps catch cases where we're
+        // running under QEMU.
+        if hdr.e_ident[EI_CLASS] != ELFCLASS {
+            return None; // Wrong ELF class
+        }
+        if hdr.e_ident[EI_DATA] != ELFDATA {
+            return None; // Wrong ELF data
+        }
+        if hdr.e_machine != EM_CURRENT {
+            return None; // Wrong machine type
+        }
 
-    Some(NonNull::new_unchecked(as_ptr(hdr) as *mut _))
+        Some(NonNull::new_unchecked(as_ptr(hdr) as *mut _))
+    }
 }
 
 // Aux reading utilities

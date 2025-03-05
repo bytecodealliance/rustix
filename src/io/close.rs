@@ -52,7 +52,7 @@ use backend::fd::RawFd;
 /// not valid after the call.
 #[inline]
 pub unsafe fn close(raw_fd: RawFd) {
-    backend::io::syscalls::close(raw_fd)
+    unsafe { backend::io::syscalls::close(raw_fd) }
 }
 
 /// `close(raw_fd)`—Closes a `RawFd` directly, and report any errors returned
@@ -67,5 +67,5 @@ pub unsafe fn close(raw_fd: RawFd) {
 /// not valid after the call, even if it fails.
 #[cfg(feature = "try_close")]
 pub unsafe fn try_close(raw_fd: RawFd) -> crate::io::Result<()> {
-    backend::io::syscalls::try_close(raw_fd)
+    unsafe { backend::io::syscalls::try_close(raw_fd) }
 }

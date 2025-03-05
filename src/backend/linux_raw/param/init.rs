@@ -9,7 +9,7 @@ use crate::backend::c;
 #[cfg(feature = "param")]
 use crate::ffi::CStr;
 use core::ffi::c_void;
-use core::ptr::{null_mut, read, NonNull};
+use core::ptr::{NonNull, null_mut, read};
 #[cfg(feature = "runtime")]
 use core::sync::atomic::AtomicBool;
 use core::sync::atomic::{AtomicPtr, AtomicUsize, Ordering};

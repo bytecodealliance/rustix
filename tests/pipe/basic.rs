@@ -30,7 +30,7 @@ fn test_basic_pipes() {
 #[test]
 fn test_basic_pipes_with() {
     use rustix::io::{read, write};
-    use rustix::pipe::{pipe_with, PipeFlags};
+    use rustix::pipe::{PipeFlags, pipe_with};
 
     let message = b"Hello, tee!";
 

@@ -47,8 +47,8 @@ use crate::backend::fs::syscalls;
 use crate::fd::{AsFd, OwnedFd};
 use crate::ffi::CStr;
 use crate::io;
-use crate::io::{read, Errno};
-use core::mem::{align_of, size_of, MaybeUninit};
+use crate::io::{Errno, read};
+use core::mem::{MaybeUninit, align_of, size_of};
 use linux_raw_sys::general::inotify_event;
 
 /// `inotify_init1(flags)`—Creates a new inotify object.

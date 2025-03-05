@@ -7,13 +7,13 @@
 
 use core::mem::size_of;
 use core::num::NonZeroI32;
-use core::ptr::{null, null_mut, NonNull};
+use core::ptr::{NonNull, null, null_mut};
 
 use bitflags::bitflags;
 
 use crate::backend::prctl::syscalls;
 use crate::fd::{AsRawFd as _, BorrowedFd, RawFd};
-use crate::ffi::{c_int, c_uint, c_void, CStr};
+use crate::ffi::{CStr, c_int, c_uint, c_void};
 use crate::io;
 use crate::prctl::*;
 use crate::process::{Pid, RawPid};
@@ -429,7 +429,7 @@ const PR_SET_ENDIAN: c_int = 20;
 #[inline]
 #[doc(alias = "PR_SET_ENDIAN")]
 pub unsafe fn set_endian_mode(mode: EndianMode) -> io::Result<()> {
-    prctl_2args(PR_SET_ENDIAN, mode as usize as *mut _).map(|_r| ())
+    unsafe { prctl_2args(PR_SET_ENDIAN, mode as usize as *mut _).map(|_r| ()) }
 }
 
 //
@@ -569,8 +569,8 @@ impl TryFrom<u32> for MachineCheckMemoryCorruptionKillPolicy {
 /// [`prctl(PR_MCE_KILL_GET,…)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
 #[doc(alias = "PR_MCE_KILL_GET")]
-pub fn machine_check_memory_corruption_kill_policy(
-) -> io::Result<MachineCheckMemoryCorruptionKillPolicy> {
+pub fn machine_check_memory_corruption_kill_policy()
+-> io::Result<MachineCheckMemoryCorruptionKillPolicy> {
     let r = unsafe { prctl_1arg(PR_MCE_KILL_GET)? } as c_uint;
     MachineCheckMemoryCorruptionKillPolicy::try_from(r)
 }
@@ -671,8 +671,10 @@ pub unsafe fn set_virtual_memory_map_address(
     option: VirtualMemoryMapAddress,
     address: Option<NonNull<c_void>>,
 ) -> io::Result<()> {
-    let address = address.map_or_else(null_mut, NonNull::as_ptr);
-    prctl_3args(PR_SET_MM, option as usize as *mut _, address).map(|_r| ())
+    unsafe {
+        let address = address.map_or_else(null_mut, NonNull::as_ptr);
+        prctl_3args(PR_SET_MM, option as usize as *mut _, address).map(|_r| ())
+    }
 }
 
 /// Supersede the `/proc/pid/exe` symbolic link with a new one pointing to a
@@ -705,14 +707,16 @@ pub fn set_executable_file(fd: BorrowedFd<'_>) -> io::Result<()> {
 #[doc(alias = "PR_SET_MM")]
 #[doc(alias = "PR_SET_MM_AUXV")]
 pub unsafe fn set_auxiliary_vector(auxv: &[*const c_void]) -> io::Result<()> {
-    syscalls::prctl(
-        PR_SET_MM,
-        PR_SET_MM_AUXV as *mut _,
-        auxv.as_ptr() as *mut _,
-        auxv.len() as *mut _,
-        null_mut(),
-    )
-    .map(|_r| ())
+    unsafe {
+        syscalls::prctl(
+            PR_SET_MM,
+            PR_SET_MM_AUXV as *mut _,
+            auxv.as_ptr() as *mut _,
+            auxv.len() as *mut _,
+            null_mut(),
+        )
+        .map(|_r| ())
+    }
 }
 
 /// Get the size of the [`PrctlMmMap`] the kernel expects.
@@ -784,14 +788,16 @@ pub struct PrctlMmMap {
 #[doc(alias = "PR_SET_MM")]
 #[doc(alias = "PR_SET_MM_MAP")]
 pub unsafe fn configure_virtual_memory_map(config: &PrctlMmMap) -> io::Result<()> {
-    syscalls::prctl(
-        PR_SET_MM,
-        PR_SET_MM_MAP as *mut _,
-        as_ptr(config) as *mut _,
-        size_of::<PrctlMmMap>() as *mut _,
-        null_mut(),
-    )
-    .map(|_r| ())
+    unsafe {
+        syscalls::prctl(
+            PR_SET_MM,
+            PR_SET_MM_MAP as *mut _,
+            as_ptr(config) as *mut _,
+            size_of::<PrctlMmMap>() as *mut _,
+            null_mut(),
+        )
+        .map(|_r| ())
+    }
 }
 
 //
@@ -1108,30 +1114,32 @@ pub unsafe fn configure_pointer_authentication_keys<
 >(
     config: Config,
 ) -> io::Result<()> {
-    let mut affected_keys: u32 = 0;
-    let mut enabled_keys: u32 = 0;
+    unsafe {
+        let mut affected_keys: u32 = 0;
+        let mut enabled_keys: u32 = 0;
 
-    for (key, enable) in config {
-        let key = key.bits();
-        affected_keys |= key;
+        for (key, enable) in config {
+            let key = key.bits();
+            affected_keys |= key;
 
-        if enable {
-            enabled_keys |= key;
-        } else {
-            enabled_keys &= !key;
+            if enable {
+                enabled_keys |= key;
+            } else {
+                enabled_keys &= !key;
+            }
         }
-    }
 
-    if affected_keys == 0 {
-        return Ok(()); // Nothing to do.
-    }
+        if affected_keys == 0 {
+            return Ok(()); // Nothing to do.
+        }
 
-    prctl_3args(
-        PR_PAC_SET_ENABLED_KEYS,
-        affected_keys as usize as *mut _,
-        enabled_keys as usize as *mut _,
-    )
-    .map(|_r| ())
+        prctl_3args(
+            PR_PAC_SET_ENABLED_KEYS,
+            affected_keys as usize as *mut _,
+            enabled_keys as usize as *mut _,
+        )
+        .map(|_r| ())
+    }
 }
 
 //

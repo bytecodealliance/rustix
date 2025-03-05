@@ -5,7 +5,7 @@
 //! [the parent module][`super`].
 
 #![allow(unsafe_code)]
-use core::mem::{size_of, MaybeUninit};
+use core::mem::{MaybeUninit, size_of};
 use core::ptr;
 
 use crate::backend::net::write_sockaddr::{encode_sockaddr_v4, encode_sockaddr_v6};
@@ -91,11 +91,13 @@ pub unsafe trait SocketAddrArg {
     /// `storage` must be valid to write up to `size_of<SocketAddrStorage>()`
     /// bytes to.
     unsafe fn write_sockaddr(&self, storage: *mut SocketAddrStorage) -> SocketAddrLen {
-        // The closure dereferences exactly `len` bytes at `ptr`.
-        self.with_sockaddr(|ptr, len| {
-            ptr::copy_nonoverlapping(ptr.cast::<u8>(), storage.cast::<u8>(), len as usize);
-            len
-        })
+        unsafe {
+            // The closure dereferences exactly `len` bytes at `ptr`.
+            self.with_sockaddr(|ptr, len| {
+                ptr::copy_nonoverlapping(ptr.cast::<u8>(), storage.cast::<u8>(), len as usize);
+                len
+            })
+        }
     }
 }
 
@@ -121,9 +123,11 @@ unsafe impl SocketAddrArg for SocketAddr {
         &self,
         f: impl FnOnce(*const SocketAddrOpaque, SocketAddrLen) -> R,
     ) -> R {
-        match self {
-            Self::V4(v4) => v4.with_sockaddr(f),
-            Self::V6(v6) => v6.with_sockaddr(f),
+        unsafe {
+            match self {
+                Self::V4(v4) => v4.with_sockaddr(f),
+                Self::V6(v6) => v6.with_sockaddr(f),
+            }
         }
     }
 }
@@ -135,7 +139,7 @@ unsafe impl SocketAddrArg for SocketAddrV4 {
         &self,
         f: impl FnOnce(*const SocketAddrOpaque, SocketAddrLen) -> R,
     ) -> R {
-        call_with_sockaddr(&encode_sockaddr_v4(self), f)
+        unsafe { call_with_sockaddr(&encode_sockaddr_v4(self), f) }
     }
 }
 
@@ -146,7 +150,7 @@ unsafe impl SocketAddrArg for SocketAddrV6 {
         &self,
         f: impl FnOnce(*const SocketAddrOpaque, SocketAddrLen) -> R,
     ) -> R {
-        call_with_sockaddr(&encode_sockaddr_v6(self), f)
+        unsafe { call_with_sockaddr(&encode_sockaddr_v6(self), f) }
     }
 }
 

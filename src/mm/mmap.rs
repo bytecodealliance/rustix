@@ -92,7 +92,7 @@ pub unsafe fn mmap<Fd: AsFd>(
     fd: Fd,
     offset: u64,
 ) -> io::Result<*mut c_void> {
-    backend::mm::syscalls::mmap(ptr, len, prot, flags, fd.as_fd(), offset)
+    unsafe { backend::mm::syscalls::mmap(ptr, len, prot, flags, fd.as_fd(), offset) }
 }
 
 /// `mmap(ptr, len, prot, MAP_ANONYMOUS | flags, -1, 0)`—Create an anonymous
@@ -135,7 +135,7 @@ pub unsafe fn mmap_anonymous(
     prot: ProtFlags,
     flags: MapFlags,
 ) -> io::Result<*mut c_void> {
-    backend::mm::syscalls::mmap_anonymous(ptr, len, prot, flags)
+    unsafe { backend::mm::syscalls::mmap_anonymous(ptr, len, prot, flags) }
 }
 
 /// `munmap(ptr, len)`—Remove a memory mapping.
@@ -169,7 +169,7 @@ pub unsafe fn mmap_anonymous(
 /// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Memory_002dmapped-I_002fO.html#index-munmap
 #[inline]
 pub unsafe fn munmap(ptr: *mut c_void, len: usize) -> io::Result<()> {
-    backend::mm::syscalls::munmap(ptr, len)
+    unsafe { backend::mm::syscalls::munmap(ptr, len) }
 }
 
 /// `mremap(old_address, old_size, new_size, flags)`—Resize, modify, and/or
@@ -202,7 +202,7 @@ pub unsafe fn mremap(
     new_size: usize,
     flags: MremapFlags,
 ) -> io::Result<*mut c_void> {
-    backend::mm::syscalls::mremap(old_address, old_size, new_size, flags)
+    unsafe { backend::mm::syscalls::mremap(old_address, old_size, new_size, flags) }
 }
 
 /// `mremap(old_address, old_size, new_size, MREMAP_FIXED | flags)`—Resize,
@@ -238,7 +238,9 @@ pub unsafe fn mremap_fixed(
     flags: MremapFlags,
     new_address: *mut c_void,
 ) -> io::Result<*mut c_void> {
-    backend::mm::syscalls::mremap_fixed(old_address, old_size, new_size, flags, new_address)
+    unsafe {
+        backend::mm::syscalls::mremap_fixed(old_address, old_size, new_size, flags, new_address)
+    }
 }
 
 /// `mprotect(ptr, len, flags)`—Change the protection flags of a region of
@@ -270,7 +272,7 @@ pub unsafe fn mremap_fixed(
 /// [illumos]: https://illumos.org/man/2/mprotect
 #[inline]
 pub unsafe fn mprotect(ptr: *mut c_void, len: usize, flags: MprotectFlags) -> io::Result<()> {
-    backend::mm::syscalls::mprotect(ptr, len, flags)
+    unsafe { backend::mm::syscalls::mprotect(ptr, len, flags) }
 }
 
 /// `mlock(ptr, len)`—Lock memory into RAM.
@@ -310,7 +312,7 @@ pub unsafe fn mprotect(ptr: *mut c_void, len: usize, flags: MprotectFlags) -> io
 /// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Page-Lock-Functions.html#index-mlock
 #[inline]
 pub unsafe fn mlock(ptr: *mut c_void, len: usize) -> io::Result<()> {
-    backend::mm::syscalls::mlock(ptr, len)
+    unsafe { backend::mm::syscalls::mlock(ptr, len) }
 }
 
 /// `mlock2(ptr, len, flags)`—Lock memory into RAM, with flags.
@@ -337,7 +339,7 @@ pub unsafe fn mlock(ptr: *mut c_void, len: usize) -> io::Result<()> {
 #[inline]
 #[doc(alias = "mlock2")]
 pub unsafe fn mlock_with(ptr: *mut c_void, len: usize, flags: MlockFlags) -> io::Result<()> {
-    backend::mm::syscalls::mlock_with(ptr, len, flags)
+    unsafe { backend::mm::syscalls::mlock_with(ptr, len, flags) }
 }
 
 /// `munlock(ptr, len)`—Unlock memory.
@@ -374,7 +376,7 @@ pub unsafe fn mlock_with(ptr: *mut c_void, len: usize, flags: MlockFlags) -> io:
 /// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Page-Lock-Functions.html#index-munlock
 #[inline]
 pub unsafe fn munlock(ptr: *mut c_void, len: usize) -> io::Result<()> {
-    backend::mm::syscalls::munlock(ptr, len)
+    unsafe { backend::mm::syscalls::munlock(ptr, len) }
 }
 
 /// Locks all pages mapped into the address space of the calling process.

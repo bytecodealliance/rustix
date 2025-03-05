@@ -1,6 +1,6 @@
 #[cfg(not(any(target_os = "fuchsia", target_os = "macos")))]
 use rustix::fs::{Mode, OFlags};
-use tempfile::{tempdir, TempDir};
+use tempfile::{TempDir, tempdir};
 
 #[allow(unused)]
 fn tmpdir() -> TempDir {

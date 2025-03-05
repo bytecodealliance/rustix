@@ -217,7 +217,7 @@ pub unsafe fn arm_set_tls(data: *mut c_void) -> io::Result<()> {
 #[cfg(target_arch = "x86_64")]
 #[inline]
 pub unsafe fn set_fs(data: *mut c_void) {
-    backend::runtime::syscalls::tls::set_fs(data)
+    unsafe { backend::runtime::syscalls::tls::set_fs(data) }
 }
 
 /// Set the x86-64 thread ID address.
@@ -228,7 +228,7 @@ pub unsafe fn set_fs(data: *mut c_void) {
 /// See the references links above.
 #[inline]
 pub unsafe fn set_tid_address(data: *mut c_void) -> Pid {
-    backend::runtime::syscalls::tls::set_tid_address(data)
+    unsafe { backend::runtime::syscalls::tls::set_tid_address(data) }
 }
 
 #[cfg(target_arch = "x86")]
@@ -417,7 +417,7 @@ pub fn random() -> *const [u8; 16] {
 /// [Linux]: https://man7.org/linux/man-pages/man2/fork.2.html
 /// [async-signal-safe]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/V2_chap02.html#tag_15_04_03
 pub unsafe fn kernel_fork() -> io::Result<Fork> {
-    backend::runtime::syscalls::kernel_fork()
+    unsafe { backend::runtime::syscalls::kernel_fork() }
 }
 
 /// Regular Unix `fork` doesn't tell the child its own PID because it assumes
@@ -460,7 +460,7 @@ pub unsafe fn execveat<Fd: AsFd>(
     envp: *const *const u8,
     flags: AtFlags,
 ) -> io::Errno {
-    backend::runtime::syscalls::execveat(dirfd.as_fd(), path, argv, envp, flags)
+    unsafe { backend::runtime::syscalls::execveat(dirfd.as_fd(), path, argv, envp, flags) }
 }
 
 /// `execve(path.as_c_str(), argv, envp)`—Execute a new command using the
@@ -482,7 +482,7 @@ pub unsafe fn execveat<Fd: AsFd>(
 #[inline]
 #[must_use]
 pub unsafe fn execve(path: &CStr, argv: *const *const u8, envp: *const *const u8) -> io::Errno {
-    backend::runtime::syscalls::execve(path, argv, envp)
+    unsafe { backend::runtime::syscalls::execve(path, argv, envp) }
 }
 
 /// `sigaction(signal, &new, &old)`—Modify and/or query a signal handler.
@@ -504,7 +504,7 @@ pub unsafe fn kernel_sigaction(
     signal: Signal,
     new: Option<KernelSigaction>,
 ) -> io::Result<KernelSigaction> {
-    backend::runtime::syscalls::kernel_sigaction(signal, new)
+    unsafe { backend::runtime::syscalls::kernel_sigaction(signal, new) }
 }
 
 /// `sigaltstack(new, old)`—Modify and/or query a signal stack.
@@ -541,7 +541,7 @@ pub unsafe fn kernel_sigaction(
 /// [Linux]: https://man7.org/linux/man-pages/man2/sigaltstack.2.html
 #[inline]
 pub unsafe fn kernel_sigaltstack(new: Option<Stack>) -> io::Result<Stack> {
-    backend::runtime::syscalls::kernel_sigaltstack(new)
+    unsafe { backend::runtime::syscalls::kernel_sigaltstack(new) }
 }
 
 /// `tkill(tid, sig)`—Send a signal to a thread.
@@ -563,7 +563,7 @@ pub unsafe fn kernel_sigaltstack(new: Option<Stack>) -> io::Result<Stack> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/tkill.2.html
 #[inline]
 pub unsafe fn tkill(tid: Pid, sig: Signal) -> io::Result<()> {
-    backend::runtime::syscalls::tkill(tid, sig)
+    unsafe { backend::runtime::syscalls::tkill(tid, sig) }
 }
 
 /// `rt_sigprocmask(how, set, oldset)`—Adjust the process signal mask.
@@ -594,7 +594,7 @@ pub unsafe fn tkill(tid: Pid, sig: Signal) -> io::Result<()> {
 #[doc(alias = "pthread_sigmask")]
 #[doc(alias = "rt_sigprocmask")]
 pub unsafe fn kernel_sigprocmask(how: How, set: Option<&KernelSigSet>) -> io::Result<KernelSigSet> {
-    backend::runtime::syscalls::kernel_sigprocmask(how, set)
+    unsafe { backend::runtime::syscalls::kernel_sigprocmask(how, set) }
 }
 
 /// `sigpending()`—Query the pending signals.
@@ -649,7 +649,7 @@ pub fn kernel_sigsuspend(set: &KernelSigSet) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man3/sigwait.3.html
 #[inline]
 pub unsafe fn kernel_sigwait(set: &KernelSigSet) -> io::Result<Signal> {
-    backend::runtime::syscalls::kernel_sigwait(set)
+    unsafe { backend::runtime::syscalls::kernel_sigwait(set) }
 }
 
 /// `sigwaitinfo(set)`—Wait for signals, returning a [`Siginfo`].
@@ -676,7 +676,7 @@ pub unsafe fn kernel_sigwait(set: &KernelSigSet) -> io::Result<Signal> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/sigwaitinfo.2.html
 #[inline]
 pub unsafe fn kernel_sigwaitinfo(set: &KernelSigSet) -> io::Result<Siginfo> {
-    backend::runtime::syscalls::kernel_sigwaitinfo(set)
+    unsafe { backend::runtime::syscalls::kernel_sigwaitinfo(set) }
 }
 
 /// `sigtimedwait(set)`—Wait for signals, optionally with a timeout.
@@ -706,7 +706,7 @@ pub unsafe fn kernel_sigtimedwait(
     set: &KernelSigSet,
     timeout: Option<&Timespec>,
 ) -> io::Result<Siginfo> {
-    backend::runtime::syscalls::kernel_sigtimedwait(set, timeout)
+    unsafe { backend::runtime::syscalls::kernel_sigtimedwait(set, timeout) }
 }
 
 /// `getauxval(AT_SECURE)`—Returns the Linux “secure execution” mode.
@@ -738,7 +738,7 @@ pub fn linux_secure() -> bool {
 /// (perhaps because you yourself are implementing a libc).
 #[inline]
 pub unsafe fn kernel_brk(addr: *mut c_void) -> io::Result<*mut c_void> {
-    backend::runtime::syscalls::kernel_brk(addr)
+    unsafe { backend::runtime::syscalls::kernel_brk(addr) }
 }
 
 /// `SIGRTMIN`—The start of the raw OS “real-time” signal range.

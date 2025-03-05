@@ -1,4 +1,4 @@
-use rustix::time::{clock_gettime, ClockId, Timespec};
+use rustix::time::{ClockId, Timespec, clock_gettime};
 
 #[test]
 fn test_wall_clock() {

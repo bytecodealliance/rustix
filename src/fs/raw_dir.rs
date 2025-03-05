@@ -6,7 +6,7 @@ use crate::ffi::CStr;
 use crate::fs::FileType;
 use crate::io;
 use core::fmt;
-use core::mem::{align_of, MaybeUninit};
+use core::mem::{MaybeUninit, align_of};
 use linux_raw_sys::general::linux_dirent64;
 
 /// A directory iterator implemented with getdents.
@@ -88,8 +88,7 @@ impl<'buf, Fd: AsFd> RawDir<'buf, Fd> {
     /// Heap allocated growing buffer for supporting directory entries with
     /// arbitrarily large file names:
     ///
-    /// ```ignore
-    /// # // The `ignore` above can be removed when we can depend on Rust 1.65.
+    /// ```
     /// # use std::mem::MaybeUninit;
     /// # use rustix::fs::{CWD, Mode, OFlags, openat, RawDir};
     /// # use rustix::io::Errno;
