@@ -24,7 +24,7 @@ use crate::process::{
 use crate::signal::Signal;
 use core::mem::MaybeUninit;
 use core::ptr::{null, null_mut};
-use linux_raw_sys::general::{rlimit64, PRIO_PGRP, PRIO_PROCESS, PRIO_USER, RLIM64_INFINITY};
+use linux_raw_sys::general::{PRIO_PGRP, PRIO_PROCESS, PRIO_USER, RLIM64_INFINITY, rlimit64};
 #[cfg(feature = "fs")]
 use {crate::backend::conv::ret_c_uint_infallible, crate::fs::Mode};
 #[cfg(feature = "alloc")]
@@ -407,18 +407,20 @@ fn _waitid_pidfd(fd: BorrowedFd<'_>, options: WaitIdOptions) -> io::Result<Optio
 /// returned successfully.
 #[inline]
 unsafe fn cvt_waitid_status(status: MaybeUninit<c::siginfo_t>) -> Option<WaitIdStatus> {
-    let status = status.assume_init();
-    if status
-        .__bindgen_anon_1
-        .__bindgen_anon_1
-        ._sifields
-        ._sigchld
-        ._pid
-        == 0
-    {
-        None
-    } else {
-        Some(WaitIdStatus(status))
+    unsafe {
+        let status = status.assume_init();
+        if status
+            .__bindgen_anon_1
+            .__bindgen_anon_1
+            ._sifields
+            ._sigchld
+            ._pid
+            == 0
+        {
+            None
+        } else {
+            Some(WaitIdStatus(status))
+        }
     }
 }
 

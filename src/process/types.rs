@@ -30,12 +30,14 @@ pub struct Flock {
 #[cfg(not(target_os = "horizon"))]
 impl Flock {
     pub(crate) const unsafe fn from_raw_unchecked(raw_fl: c::flock) -> Self {
-        Self {
-            start: raw_fl.l_start as _,
-            length: raw_fl.l_len as _,
-            pid: Pid::from_raw(raw_fl.l_pid),
-            typ: transmute::<i16, FlockType>(raw_fl.l_type),
-            offset_type: transmute::<i16, FlockOffsetType>(raw_fl.l_whence),
+        unsafe {
+            Self {
+                start: raw_fl.l_start as _,
+                length: raw_fl.l_len as _,
+                pid: Pid::from_raw(raw_fl.l_pid),
+                typ: transmute::<i16, FlockType>(raw_fl.l_type),
+                offset_type: transmute::<i16, FlockOffsetType>(raw_fl.l_whence),
+            }
         }
     }
 

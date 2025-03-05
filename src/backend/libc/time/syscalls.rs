@@ -8,6 +8,9 @@ use crate::backend::time::types::LibcItimerspec;
 #[cfg(not(target_os = "wasi"))]
 use crate::clockid::{ClockId, DynamicClockId};
 use crate::io;
+#[cfg(all(target_env = "gnu", fix_y2038))]
+use crate::timespec::LibcTimespec;
+use crate::timespec::Timespec;
 #[cfg(not(fix_y2038))]
 use crate::timespec::as_libc_timespec_mut_ptr;
 #[cfg(not(fix_y2038))]
@@ -17,9 +20,6 @@ use crate::timespec::as_libc_timespec_mut_ptr;
     all(apple, not(target_os = "macos"))
 )))]
 use crate::timespec::as_libc_timespec_ptr;
-#[cfg(all(target_env = "gnu", fix_y2038))]
-use crate::timespec::LibcTimespec;
-use crate::timespec::Timespec;
 use core::mem::MaybeUninit;
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
 use {

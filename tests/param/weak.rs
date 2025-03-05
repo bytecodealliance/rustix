@@ -99,23 +99,27 @@ impl<F> Weak<F> {
     // Cold because it should only happen during first-time initialization.
     #[cold]
     unsafe fn initialize(&self) -> Option<F> {
-        let val = fetch(self.name);
-        // This synchronizes with the acquire fence in `get`.
-        self.addr.store(val, Ordering::Release);
+        unsafe {
+            let val = fetch(self.name);
+            // This synchronizes with the acquire fence in `get`.
+            self.addr.store(val, Ordering::Release);
 
-        match val {
-            NULL => None,
-            addr => Some(mem::transmute_copy::<*mut c_void, F>(&addr)),
+            match val {
+                NULL => None,
+                addr => Some(mem::transmute_copy::<*mut c_void, F>(&addr)),
+            }
         }
     }
 }
 
 unsafe fn fetch(name: &str) -> *mut c_void {
-    let name = match CStr::from_bytes_with_nul(name.as_bytes()) {
-        Ok(c_str) => c_str,
-        Err(..) => return null_mut(),
-    };
-    libc::dlsym(libc::RTLD_DEFAULT, name.as_ptr())
+    unsafe {
+        let name = match CStr::from_bytes_with_nul(name.as_bytes()) {
+            Ok(c_str) => c_str,
+            Err(..) => return null_mut(),
+        };
+        libc::dlsym(libc::RTLD_DEFAULT, name.as_ptr())
+    }
 }
 
 #[cfg(not(linux_kernel))]

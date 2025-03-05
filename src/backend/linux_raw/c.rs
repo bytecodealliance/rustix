@@ -9,7 +9,7 @@
 pub(crate) type size_t = usize;
 pub(crate) use linux_raw_sys::ctypes::*;
 pub(crate) use linux_raw_sys::errno::{EBADF, EINVAL};
-pub(crate) use linux_raw_sys::general::{__kernel_fd_set as fd_set, __FD_SETSIZE as FD_SETSIZE};
+pub(crate) use linux_raw_sys::general::{__FD_SETSIZE as FD_SETSIZE, __kernel_fd_set as fd_set};
 pub(crate) use linux_raw_sys::ioctl::{FIONBIO, FIONREAD};
 // Import the kernel's `uid_t` and `gid_t` if they're 32-bit.
 #[cfg(feature = "thread")]
@@ -17,8 +17,8 @@ pub(crate) use linux_raw_sys::general::futex_waitv;
 #[cfg(not(any(target_arch = "arm", target_arch = "sparc", target_arch = "x86")))]
 pub(crate) use linux_raw_sys::general::{__kernel_gid_t as gid_t, __kernel_uid_t as uid_t};
 pub(crate) use linux_raw_sys::general::{
-    __kernel_pid_t as pid_t, __kernel_time64_t as time_t, __kernel_timespec as timespec, iovec,
-    O_CLOEXEC, O_NOCTTY, O_NONBLOCK, O_RDWR,
+    __kernel_pid_t as pid_t, __kernel_time64_t as time_t, __kernel_timespec as timespec, O_CLOEXEC,
+    O_NOCTTY, O_NONBLOCK, O_RDWR, iovec,
 };
 #[cfg(feature = "system")]
 pub(crate) use linux_raw_sys::system::sysinfo;
@@ -39,7 +39,7 @@ pub(crate) use linux_raw_sys::general::epoll_event;
 
 #[cfg(feature = "mm")]
 mod mm {
-    pub(crate) use linux_raw_sys::general::{MAP_HUGETLB, MAP_HUGE_SHIFT};
+    pub(crate) use linux_raw_sys::general::{MAP_HUGE_SHIFT, MAP_HUGETLB};
 }
 #[cfg(feature = "mm")]
 pub(crate) use mm::*;
@@ -64,10 +64,10 @@ pub(crate) use linux_raw_sys::general::{
 };
 
 pub(crate) use linux_raw_sys::ioctl::{BLKPBSZGET, BLKSSZGET, FICLONE};
-#[cfg(target_pointer_width = "32")]
-pub(crate) use linux_raw_sys::ioctl::{FS_IOC32_GETFLAGS, FS_IOC32_SETFLAGS};
 #[cfg(target_pointer_width = "64")]
 pub(crate) use linux_raw_sys::ioctl::{FS_IOC_GETFLAGS, FS_IOC_SETFLAGS};
+#[cfg(target_pointer_width = "32")]
+pub(crate) use linux_raw_sys::ioctl::{FS_IOC32_GETFLAGS, FS_IOC32_SETFLAGS};
 
 #[cfg(feature = "io_uring")]
 pub(crate) use linux_raw_sys::{general::open_how, io_uring::*};
@@ -79,38 +79,38 @@ pub(crate) use linux_raw_sys::{
     if_ether::*,
     net::{
         __kernel_sa_family_t as sa_family_t, __kernel_sockaddr_storage as sockaddr_storage,
-        cmsghdr, in6_addr, in_addr, ip_mreq, ip_mreq_source, ip_mreqn, ipv6_mreq, linger, mmsghdr,
-        msghdr, sockaddr, sockaddr_in, sockaddr_in6, sockaddr_un, socklen_t, AF_DECnet,
         AF_APPLETALK, AF_ASH, AF_ATMPVC, AF_ATMSVC, AF_AX25, AF_BLUETOOTH, AF_BRIDGE, AF_CAN,
-        AF_ECONET, AF_IEEE802154, AF_INET, AF_INET6, AF_IPX, AF_IRDA, AF_ISDN, AF_IUCV, AF_KEY,
-        AF_LLC, AF_NETBEUI, AF_NETLINK, AF_NETROM, AF_PACKET, AF_PHONET, AF_PPPOX, AF_RDS, AF_ROSE,
-        AF_RXRPC, AF_SECURITY, AF_SNA, AF_TIPC, AF_UNIX, AF_UNSPEC, AF_WANPIPE, AF_X25, AF_XDP,
-        IP6T_SO_ORIGINAL_DST, IPPROTO_FRAGMENT, IPPROTO_ICMPV6, IPPROTO_MH, IPPROTO_ROUTING,
-        IPV6_ADD_MEMBERSHIP, IPV6_DROP_MEMBERSHIP, IPV6_FREEBIND, IPV6_MULTICAST_HOPS,
-        IPV6_MULTICAST_LOOP, IPV6_RECVTCLASS, IPV6_TCLASS, IPV6_UNICAST_HOPS, IPV6_V6ONLY,
-        IP_ADD_MEMBERSHIP, IP_ADD_SOURCE_MEMBERSHIP, IP_DROP_MEMBERSHIP, IP_DROP_SOURCE_MEMBERSHIP,
-        IP_FREEBIND, IP_MULTICAST_LOOP, IP_MULTICAST_TTL, IP_RECVTOS, IP_TOS, IP_TTL,
-        MSG_CMSG_CLOEXEC, MSG_CONFIRM, MSG_CTRUNC, MSG_DONTROUTE, MSG_DONTWAIT, MSG_EOR,
-        MSG_ERRQUEUE, MSG_MORE, MSG_NOSIGNAL, MSG_OOB, MSG_PEEK, MSG_TRUNC, MSG_WAITALL,
-        SCM_CREDENTIALS, SCM_RIGHTS, SHUT_RD, SHUT_RDWR, SHUT_WR, SOCK_DGRAM, SOCK_RAW, SOCK_RDM,
-        SOCK_SEQPACKET, SOCK_STREAM, SOL_SOCKET, SOL_XDP, SO_ACCEPTCONN, SO_BROADCAST, SO_COOKIE,
-        SO_DOMAIN, SO_ERROR, SO_INCOMING_CPU, SO_KEEPALIVE, SO_LINGER, SO_OOBINLINE,
+        AF_DECnet, AF_ECONET, AF_IEEE802154, AF_INET, AF_INET6, AF_IPX, AF_IRDA, AF_ISDN, AF_IUCV,
+        AF_KEY, AF_LLC, AF_NETBEUI, AF_NETLINK, AF_NETROM, AF_PACKET, AF_PHONET, AF_PPPOX, AF_RDS,
+        AF_ROSE, AF_RXRPC, AF_SECURITY, AF_SNA, AF_TIPC, AF_UNIX, AF_UNSPEC, AF_WANPIPE, AF_X25,
+        AF_XDP, IP_ADD_MEMBERSHIP, IP_ADD_SOURCE_MEMBERSHIP, IP_DROP_MEMBERSHIP,
+        IP_DROP_SOURCE_MEMBERSHIP, IP_FREEBIND, IP_MULTICAST_LOOP, IP_MULTICAST_TTL, IP_RECVTOS,
+        IP_TOS, IP_TTL, IP6T_SO_ORIGINAL_DST, IPPROTO_FRAGMENT, IPPROTO_ICMPV6, IPPROTO_MH,
+        IPPROTO_ROUTING, IPV6_ADD_MEMBERSHIP, IPV6_DROP_MEMBERSHIP, IPV6_FREEBIND,
+        IPV6_MULTICAST_HOPS, IPV6_MULTICAST_LOOP, IPV6_RECVTCLASS, IPV6_TCLASS, IPV6_UNICAST_HOPS,
+        IPV6_V6ONLY, MSG_CMSG_CLOEXEC, MSG_CONFIRM, MSG_CTRUNC, MSG_DONTROUTE, MSG_DONTWAIT,
+        MSG_EOR, MSG_ERRQUEUE, MSG_MORE, MSG_NOSIGNAL, MSG_OOB, MSG_PEEK, MSG_TRUNC, MSG_WAITALL,
+        SCM_CREDENTIALS, SCM_RIGHTS, SHUT_RD, SHUT_RDWR, SHUT_WR, SO_ACCEPTCONN, SO_BROADCAST,
+        SO_COOKIE, SO_DOMAIN, SO_ERROR, SO_INCOMING_CPU, SO_KEEPALIVE, SO_LINGER, SO_OOBINLINE,
         SO_ORIGINAL_DST, SO_PASSCRED, SO_PROTOCOL, SO_RCVBUF, SO_RCVBUFFORCE, SO_RCVTIMEO_NEW,
         SO_RCVTIMEO_NEW as SO_RCVTIMEO, SO_RCVTIMEO_OLD, SO_REUSEADDR, SO_REUSEPORT, SO_SNDBUF,
         SO_SNDBUFFORCE, SO_SNDTIMEO_NEW, SO_SNDTIMEO_NEW as SO_SNDTIMEO, SO_SNDTIMEO_OLD, SO_TYPE,
+        SOCK_DGRAM, SOCK_RAW, SOCK_RDM, SOCK_SEQPACKET, SOCK_STREAM, SOL_SOCKET, SOL_XDP,
         TCP_CONGESTION, TCP_CORK, TCP_KEEPCNT, TCP_KEEPIDLE, TCP_KEEPINTVL, TCP_NODELAY,
-        TCP_QUICKACK, TCP_THIN_LINEAR_TIMEOUTS, TCP_USER_TIMEOUT,
+        TCP_QUICKACK, TCP_THIN_LINEAR_TIMEOUTS, TCP_USER_TIMEOUT, cmsghdr, in_addr, in6_addr,
+        ip_mreq, ip_mreq_source, ip_mreqn, ipv6_mreq, linger, mmsghdr, msghdr, sockaddr,
+        sockaddr_in, sockaddr_in6, sockaddr_un, socklen_t,
     },
     netlink::*,
     xdp::{
-        sockaddr_xdp, xdp_desc, xdp_mmap_offsets, xdp_mmap_offsets_v1, xdp_options,
-        xdp_ring_offset, xdp_ring_offset_v1, xdp_statistics, xdp_statistics_v1, xdp_umem_reg,
-        xdp_umem_reg_v1, XDP_COPY, XDP_MMAP_OFFSETS, XDP_OPTIONS, XDP_OPTIONS_ZEROCOPY,
-        XDP_PGOFF_RX_RING, XDP_PGOFF_TX_RING, XDP_PKT_CONTD, XDP_RING_NEED_WAKEUP, XDP_RX_RING,
-        XDP_SHARED_UMEM, XDP_STATISTICS, XDP_TX_RING, XDP_UMEM_COMPLETION_RING, XDP_UMEM_FILL_RING,
+        XDP_COPY, XDP_MMAP_OFFSETS, XDP_OPTIONS, XDP_OPTIONS_ZEROCOPY, XDP_PGOFF_RX_RING,
+        XDP_PGOFF_TX_RING, XDP_PKT_CONTD, XDP_RING_NEED_WAKEUP, XDP_RX_RING, XDP_SHARED_UMEM,
+        XDP_STATISTICS, XDP_TX_RING, XDP_UMEM_COMPLETION_RING, XDP_UMEM_FILL_RING,
         XDP_UMEM_PGOFF_COMPLETION_RING, XDP_UMEM_PGOFF_FILL_RING, XDP_UMEM_REG,
         XDP_UMEM_UNALIGNED_CHUNK_FLAG, XDP_USE_NEED_WAKEUP, XDP_USE_SG, XDP_ZEROCOPY,
-        XSK_UNALIGNED_BUF_ADDR_MASK, XSK_UNALIGNED_BUF_OFFSET_SHIFT,
+        XSK_UNALIGNED_BUF_ADDR_MASK, XSK_UNALIGNED_BUF_OFFSET_SHIFT, sockaddr_xdp, xdp_desc,
+        xdp_mmap_offsets, xdp_mmap_offsets_v1, xdp_options, xdp_ring_offset, xdp_ring_offset_v1,
+        xdp_statistics, xdp_statistics_v1, xdp_umem_reg, xdp_umem_reg_v1,
     },
 };
 
@@ -195,11 +195,11 @@ pub(crate) use linux_raw_sys::{
 
 #[cfg(feature = "process")]
 #[cfg(target_pointer_width = "32")]
-pub(crate) use linux_raw_sys::general::{flock64 as flock, F_GETLK64};
+pub(crate) use linux_raw_sys::general::{F_GETLK64, flock64 as flock};
 
 #[cfg(feature = "process")]
 #[cfg(target_pointer_width = "64")]
-pub(crate) use linux_raw_sys::general::{flock, F_GETLK};
+pub(crate) use linux_raw_sys::general::{F_GETLK, flock};
 
 #[cfg(feature = "pty")]
 pub(crate) use linux_raw_sys::ioctl::TIOCGPTPEER;
@@ -207,19 +207,19 @@ pub(crate) use linux_raw_sys::ioctl::TIOCGPTPEER;
 #[cfg(feature = "termios")]
 pub(crate) use linux_raw_sys::{
     general::{
-        cc_t, speed_t, tcflag_t, termios, termios2, winsize, B0, B1000000, B110, B115200, B1152000,
-        B1200, B134, B150, B1500000, B1800, B19200, B200, B2000000, B230400, B2400, B2500000, B300,
-        B3000000, B3500000, B38400, B4000000, B460800, B4800, B50, B500000, B57600, B576000, B600,
-        B75, B921600, B9600, BOTHER, BRKINT, BS0, BS1, BSDLY, CBAUD, CBAUDEX, CIBAUD, CLOCAL,
-        CMSPAR, CR0, CR1, CR2, CR3, CRDLY, CREAD, CRTSCTS, CS5, CS6, CS7, CS8, CSIZE, CSTOPB, ECHO,
-        ECHOCTL, ECHOE, ECHOK, ECHOKE, ECHONL, ECHOPRT, EXTA, EXTB, EXTPROC, FF0, FF1, FFDLY,
-        FLUSHO, HUPCL, IBSHIFT, ICANON, ICRNL, IEXTEN, IGNBRK, IGNCR, IGNPAR, IMAXBEL, INLCR,
-        INPCK, ISIG, ISTRIP, IUCLC, IUTF8, IXANY, IXOFF, IXON, NCCS, NL0, NL1, NLDLY, NOFLSH,
-        OCRNL, OFDEL, OFILL, OLCUC, ONLCR, ONLRET, ONOCR, OPOST, PARENB, PARMRK, PARODD, PENDIN,
-        TAB0, TAB1, TAB2, TAB3, TABDLY, TCIFLUSH, TCIOFF, TCIOFLUSH, TCION, TCOFLUSH, TCOOFF,
-        TCOON, TCSADRAIN, TCSAFLUSH, TCSANOW, TOSTOP, VDISCARD, VEOF, VEOL, VEOL2, VERASE, VINTR,
-        VKILL, VLNEXT, VMIN, VQUIT, VREPRINT, VSTART, VSTOP, VSUSP, VSWTC, VT0, VT1, VTDLY, VTIME,
-        VWERASE, XCASE, XTABS,
+        B0, B50, B75, B110, B134, B150, B200, B300, B600, B1200, B1800, B2400, B4800, B9600,
+        B19200, B38400, B57600, B115200, B230400, B460800, B500000, B576000, B921600, B1000000,
+        B1152000, B1500000, B2000000, B2500000, B3000000, B3500000, B4000000, BOTHER, BRKINT, BS0,
+        BS1, BSDLY, CBAUD, CBAUDEX, CIBAUD, CLOCAL, CMSPAR, CR0, CR1, CR2, CR3, CRDLY, CREAD,
+        CRTSCTS, CS5, CS6, CS7, CS8, CSIZE, CSTOPB, ECHO, ECHOCTL, ECHOE, ECHOK, ECHOKE, ECHONL,
+        ECHOPRT, EXTA, EXTB, EXTPROC, FF0, FF1, FFDLY, FLUSHO, HUPCL, IBSHIFT, ICANON, ICRNL,
+        IEXTEN, IGNBRK, IGNCR, IGNPAR, IMAXBEL, INLCR, INPCK, ISIG, ISTRIP, IUCLC, IUTF8, IXANY,
+        IXOFF, IXON, NCCS, NL0, NL1, NLDLY, NOFLSH, OCRNL, OFDEL, OFILL, OLCUC, ONLCR, ONLRET,
+        ONOCR, OPOST, PARENB, PARMRK, PARODD, PENDIN, TAB0, TAB1, TAB2, TAB3, TABDLY, TCIFLUSH,
+        TCIOFF, TCIOFLUSH, TCION, TCOFLUSH, TCOOFF, TCOON, TCSADRAIN, TCSAFLUSH, TCSANOW, TOSTOP,
+        VDISCARD, VEOF, VEOL, VEOL2, VERASE, VINTR, VKILL, VLNEXT, VMIN, VQUIT, VREPRINT, VSTART,
+        VSTOP, VSUSP, VSWTC, VT0, VT1, VTDLY, VTIME, VWERASE, XCASE, XTABS, cc_t, speed_t,
+        tcflag_t, termios, termios2, winsize,
     },
     ioctl::{
         TCFLSH, TCGETS, TCGETS2, TCSBRK, TCSETS, TCSETS2, TCSETSF2, TCSETSW2, TCXONC, TIOCEXCL,

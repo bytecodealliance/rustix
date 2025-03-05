@@ -116,6 +116,7 @@
 )]
 #![cfg_attr(asm_experimental_arch, feature(asm_experimental_arch))]
 #![cfg_attr(not(feature = "all-apis"), allow(dead_code))]
+#![feature(int_roundings)]
 // It is common in Linux and libc APIs for types to vary between platforms.
 #![allow(clippy::unnecessary_cast)]
 // It is common in Linux and libc APIs for types to vary between platforms.
@@ -147,15 +148,10 @@ extern crate rustc_std_workspace_alloc as alloc;
 #[cfg(all(feature = "alloc", not(feature = "rustc-dep-of-std")))]
 extern crate alloc;
 
-// Use `static_assertions` macros if we have them, or a polyfill otherwise.
-#[cfg(all(test, static_assertions))]
+#[cfg(test)]
 #[macro_use]
 #[allow(unused_imports)]
 extern crate static_assertions;
-#[cfg(all(test, not(static_assertions)))]
-#[macro_use]
-#[allow(unused_imports)]
-mod static_assertions;
 
 pub mod buffer;
 #[cfg(not(windows))]

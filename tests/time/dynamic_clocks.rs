@@ -1,5 +1,5 @@
 use rustix::fd::AsFd as _;
-use rustix::time::{clock_gettime_dynamic, ClockId, DynamicClockId};
+use rustix::time::{ClockId, DynamicClockId, clock_gettime_dynamic};
 
 #[test]
 fn test_known_clocks() {

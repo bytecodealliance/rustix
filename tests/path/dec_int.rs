@@ -1,7 +1,7 @@
 use rustix::path::DecInt;
 
 macro_rules! check {
-    ($i:expr) => {
+    ($i:expr_2021) => {
         let i = $i;
         assert_eq!(
             DecInt::new(i).as_c_str().to_bytes_with_nul(),

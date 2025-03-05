@@ -1,7 +1,7 @@
 use crate::fd::{AsFd, BorrowedFd, OwnedFd};
 use crate::ffi::{CStr, CString};
 use crate::fs::{
-    fcntl_getfl, fstat, fstatfs, fstatvfs, openat, FileType, Mode, OFlags, Stat, StatFs, StatVfs,
+    FileType, Mode, OFlags, Stat, StatFs, StatVfs, fcntl_getfl, fstat, fstatfs, fstatvfs, openat,
 };
 use crate::io;
 #[cfg(feature = "process")]
@@ -11,7 +11,7 @@ use alloc::borrow::ToOwned as _;
 use alloc::vec::Vec;
 use core::fmt;
 use core::mem::size_of;
-use linux_raw_sys::general::{linux_dirent64, SEEK_SET};
+use linux_raw_sys::general::{SEEK_SET, linux_dirent64};
 
 /// `DIR*`
 pub struct Dir {
@@ -251,11 +251,7 @@ impl Dir {
         };
         self.buf.resize(nread, 0);
         self.pos = 0;
-        if nread == 0 {
-            None
-        } else {
-            Some(Ok(()))
-        }
+        if nread == 0 { None } else { Some(Ok(())) }
     }
 
     /// `fstat(self)`

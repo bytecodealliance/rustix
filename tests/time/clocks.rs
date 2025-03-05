@@ -3,7 +3,7 @@
 #![cfg(not(any(apple, target_os = "wasi")))]
 
 #[cfg(not(any(solarish, target_os = "netbsd", target_os = "redox")))]
-use rustix::time::{clock_gettime, ClockId};
+use rustix::time::{ClockId, clock_gettime};
 
 /// Attempt to test that the boot clock is monotonic. Time may or may not
 /// advance, but it shouldn't regress.
@@ -15,7 +15,7 @@ use rustix::time::{clock_gettime, ClockId};
 ))]
 #[test]
 fn test_boottime_clock() {
-    use rustix::time::{clock_gettime_dynamic, DynamicClockId};
+    use rustix::time::{DynamicClockId, clock_gettime_dynamic};
 
     let monotonic = clock_gettime(ClockId::Monotonic);
 
@@ -61,7 +61,7 @@ fn test_boottime_clock() {
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
 #[test]
 fn test_boottime_alarm_clock() {
-    use rustix::time::{clock_gettime_dynamic, DynamicClockId};
+    use rustix::time::{DynamicClockId, clock_gettime_dynamic};
 
     let monotonic = clock_gettime(ClockId::Monotonic);
 
@@ -156,7 +156,7 @@ fn test_realtime_coarse_clock() {
 #[cfg(linux_kernel)]
 #[test]
 fn test_realtime_alarm_clock() {
-    use rustix::time::{clock_gettime_dynamic, DynamicClockId};
+    use rustix::time::{DynamicClockId, clock_gettime_dynamic};
 
     if let Ok(a) = clock_gettime_dynamic(DynamicClockId::RealtimeAlarm) {
         // Test that the timespec is valid; there's not much else we can say.
@@ -177,7 +177,7 @@ fn test_realtime_alarm_clock() {
 #[cfg(linux_kernel)]
 #[test]
 fn test_tai_clock() {
-    use rustix::time::{clock_gettime_dynamic, DynamicClockId};
+    use rustix::time::{DynamicClockId, clock_gettime_dynamic};
 
     let realtime = clock_gettime(ClockId::Realtime);
 

@@ -5,7 +5,7 @@
 
 use core::ffi::c_void;
 use core::mem::{align_of, size_of};
-use core::ptr::{null, null_mut, NonNull};
+use core::ptr::{NonNull, null, null_mut};
 
 /// Convert a `&T` into a `*const T` without using an `as`.
 #[inline]

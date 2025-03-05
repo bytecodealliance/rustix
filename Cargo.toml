@@ -9,11 +9,11 @@ description = "Safe Rust bindings to POSIX/Unix/Linux/Winsock-like syscalls"
 documentation = "https://docs.rs/rustix"
 license = "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
 repository = "https://github.com/bytecodealliance/rustix"
-edition = "2021"
+edition = "2024"
 keywords = ["api", "file", "network", "safe", "syscall"]
 categories = ["os::unix-apis", "date-and-time", "filesystem", "network-programming"]
 include = ["src", "build.rs", "Cargo.toml", "COPYRIGHT", "LICENSE*", "/*.md", "benches"]
-rust-version = "1.63"
+rust-version = "1.85"
 
 [dependencies]
 bitflags = { version = "2.4.0", default-features = false }
@@ -73,10 +73,6 @@ memoffset = "0.9.0"
 flate2 = "1.0"
 static_assertions = "1.1.0"
 
-# With Rust 1.70 this can be removed in favor of `std::sync::OnceLock`.
-[target.'cfg(windows)'.dev-dependencies]
-once_cell = "1.20.3"
-
 [target.'cfg(all(criterion, not(any(target_os = "emscripten", target_os = "wasi"))))'.dev-dependencies]
 criterion = "0.4"
 
@@ -109,8 +105,7 @@ targets = [
 # By default, use `std`.
 default = ["std"]
 
-# This enables use of std. Disabling this enables `#![no_std]`, and requires
-# Rust 1.77 or newer.
+# This enables use of std. Disabling this enables `#![no_std]`.
 std = ["bitflags/std", "alloc", "libc?/std", "libc_errno?/std"]
 
 # Enable this to request the libc backend.

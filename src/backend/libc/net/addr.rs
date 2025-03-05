@@ -158,14 +158,16 @@ impl SocketAddrUnix {
     #[cfg(feature = "alloc")]
     #[cold]
     unsafe fn path_with_termination(bytes: &[u8]) -> Option<Cow<'_, CStr>> {
-        let mut owned = Vec::with_capacity(bytes.len() + 1);
-        owned.extend_from_slice(bytes);
-        owned.push(b'\0');
-        // SAFETY: `from_vec_with_nul_unchecked` since the string is
-        // NUL-terminated and `bytes` does not contain any NULs.
-        Some(Cow::Owned(
-            CString::from_vec_with_nul_unchecked(owned).into(),
-        ))
+        unsafe {
+            let mut owned = Vec::with_capacity(bytes.len() + 1);
+            owned.extend_from_slice(bytes);
+            owned.push(b'\0');
+            // SAFETY: `from_vec_with_nul_unchecked` since the string is
+            // NUL-terminated and `bytes` does not contain any NULs.
+            Some(Cow::Owned(
+                CString::from_vec_with_nul_unchecked(owned).into(),
+            ))
+        }
     }
 
     /// For a filesystem path address, return the path as a byte sequence,

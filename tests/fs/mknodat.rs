@@ -2,7 +2,7 @@
 #[test]
 fn test_mknodat() {
     use rustix::fs::{
-        accessat, mknodat, openat, statat, unlinkat, Access, AtFlags, FileType, Mode, OFlags, CWD,
+        Access, AtFlags, CWD, FileType, Mode, OFlags, accessat, mknodat, openat, statat, unlinkat,
     };
 
     let tmp = tempfile::tempdir().unwrap();

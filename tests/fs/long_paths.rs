@@ -1,7 +1,7 @@
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 #[test]
 fn test_long_paths() {
-    use rustix::fs::{mkdirat, openat, Mode, OFlags, CWD};
+    use rustix::fs::{CWD, Mode, OFlags, mkdirat, openat};
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();

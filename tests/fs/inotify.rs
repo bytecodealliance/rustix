@@ -1,7 +1,7 @@
 use rustix::fs::inotify::{self, CreateFlags, WatchFlags};
 use rustix::io::Errno;
 use std::fmt::Write as _;
-use std::fs::{create_dir_all, remove_file, rename, File};
+use std::fs::{File, create_dir_all, remove_file, rename};
 use std::mem::MaybeUninit;
 
 #[test]

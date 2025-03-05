@@ -33,14 +33,18 @@ bitflags! {
 
 #[inline]
 pub(crate) unsafe fn prctl_1arg(option: c_int) -> io::Result<c_int> {
-    const NULL: *mut c_void = null_mut();
-    syscalls::prctl(option, NULL, NULL, NULL, NULL)
+    unsafe {
+        const NULL: *mut c_void = null_mut();
+        syscalls::prctl(option, NULL, NULL, NULL, NULL)
+    }
 }
 
 #[inline]
 pub(crate) unsafe fn prctl_2args(option: c_int, arg2: *mut c_void) -> io::Result<c_int> {
-    const NULL: *mut c_void = null_mut();
-    syscalls::prctl(option, arg2, NULL, NULL, NULL)
+    unsafe {
+        const NULL: *mut c_void = null_mut();
+        syscalls::prctl(option, arg2, NULL, NULL, NULL)
+    }
 }
 
 #[inline]
@@ -49,14 +53,16 @@ pub(crate) unsafe fn prctl_3args(
     arg2: *mut c_void,
     arg3: *mut c_void,
 ) -> io::Result<c_int> {
-    syscalls::prctl(option, arg2, arg3, null_mut(), null_mut())
+    unsafe { syscalls::prctl(option, arg2, arg3, null_mut(), null_mut()) }
 }
 
 #[inline]
 pub(crate) unsafe fn prctl_get_at_arg2_optional<P>(option: i32) -> io::Result<P> {
-    let mut value: MaybeUninit<P> = MaybeUninit::uninit();
-    prctl_2args(option, value.as_mut_ptr().cast())?;
-    Ok(value.assume_init())
+    unsafe {
+        let mut value: MaybeUninit<P> = MaybeUninit::uninit();
+        prctl_2args(option, value.as_mut_ptr().cast())?;
+        Ok(value.assume_init())
+    }
 }
 
 #[inline]
@@ -65,7 +71,9 @@ where
     P: Default,
     T: TryFrom<P, Error = io::Errno>,
 {
-    let mut value: P = Default::default();
-    prctl_2args(option, as_mut_ptr(&mut value).cast())?;
-    TryFrom::try_from(value)
+    unsafe {
+        let mut value: P = Default::default();
+        prctl_2args(option, as_mut_ptr(&mut value).cast())?;
+        TryFrom::try_from(value)
+    }
 }

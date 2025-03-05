@@ -2,9 +2,9 @@
 #[cfg(not(target_os = "redox"))]
 #[test]
 fn test_mmap() {
-    use rustix::fs::{openat, Mode, OFlags, CWD};
+    use rustix::fs::{CWD, Mode, OFlags, openat};
     use rustix::io::write;
-    use rustix::mm::{mmap, munmap, MapFlags, ProtFlags};
+    use rustix::mm::{MapFlags, ProtFlags, mmap, munmap};
     use std::ptr::null_mut;
     use std::slice;
 
@@ -58,7 +58,7 @@ fn test_mmap() {
 
 #[test]
 fn test_mmap_anonymous() {
-    use rustix::mm::{mmap_anonymous, munmap, MapFlags, ProtFlags};
+    use rustix::mm::{MapFlags, ProtFlags, mmap_anonymous, munmap};
     use std::ptr::null_mut;
     use std::slice;
 
@@ -73,7 +73,7 @@ fn test_mmap_anonymous() {
 
 #[test]
 fn test_mprotect() {
-    use rustix::mm::{mmap_anonymous, mprotect, munmap, MapFlags, MprotectFlags, ProtFlags};
+    use rustix::mm::{MapFlags, MprotectFlags, ProtFlags, mmap_anonymous, mprotect, munmap};
     use std::ptr::null_mut;
     use std::slice;
 
@@ -92,9 +92,9 @@ fn test_mprotect() {
 
 #[test]
 fn test_mlock() {
-    use rustix::mm::{mlock, mmap_anonymous, munlock, munmap, MapFlags, ProtFlags};
+    use rustix::mm::{MapFlags, ProtFlags, mlock, mmap_anonymous, munlock, munmap};
     #[cfg(linux_kernel)]
-    use rustix::mm::{mlock_with, MlockFlags};
+    use rustix::mm::{MlockFlags, mlock_with};
     use std::ptr::null_mut;
 
     unsafe {
@@ -135,7 +135,7 @@ fn test_mlock() {
 #[cfg(not(target_os = "redox"))]
 #[test]
 fn test_madvise() {
-    use rustix::mm::{madvise, mmap_anonymous, munmap, Advice, MapFlags, ProtFlags};
+    use rustix::mm::{Advice, MapFlags, ProtFlags, madvise, mmap_anonymous, munmap};
     use std::ptr::null_mut;
 
     unsafe {
@@ -153,7 +153,7 @@ fn test_madvise() {
 
 #[test]
 fn test_msync() {
-    use rustix::mm::{mmap_anonymous, msync, munmap, MapFlags, MsyncFlags, ProtFlags};
+    use rustix::mm::{MapFlags, MsyncFlags, ProtFlags, mmap_anonymous, msync, munmap};
     use std::ptr::null_mut;
 
     unsafe {
@@ -169,7 +169,7 @@ fn test_msync() {
 #[cfg(any(target_os = "emscripten", target_os = "linux"))]
 #[test]
 fn test_mremap() {
-    use rustix::mm::{mmap_anonymous, mremap, munmap, MapFlags, MremapFlags, ProtFlags};
+    use rustix::mm::{MapFlags, MremapFlags, ProtFlags, mmap_anonymous, mremap, munmap};
     use std::ptr::null_mut;
 
     unsafe {

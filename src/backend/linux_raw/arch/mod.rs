@@ -79,14 +79,14 @@ macro_rules! syscall {
         ))
     };
 
-    ($nr:ident, $a0:expr) => {
+    ($nr:ident, $a0:expr_2021) => {
         $crate::backend::arch::choose::syscall1(
             $crate::backend::reg::nr(linux_raw_sys::general::$nr),
             $a0.into(),
         )
     };
 
-    ($nr:ident, $a0:expr, $a1:expr) => {
+    ($nr:ident, $a0:expr_2021, $a1:expr_2021) => {
         $crate::backend::arch::choose::syscall2(
             $crate::backend::reg::nr(linux_raw_sys::general::$nr),
             $a0.into(),
@@ -94,7 +94,7 @@ macro_rules! syscall {
         )
     };
 
-    ($nr:ident, $a0:expr, $a1:expr, $a2:expr) => {
+    ($nr:ident, $a0:expr_2021, $a1:expr_2021, $a2:expr_2021) => {
         $crate::backend::arch::choose::syscall3(
             $crate::backend::reg::nr(linux_raw_sys::general::$nr),
             $a0.into(),
@@ -103,7 +103,7 @@ macro_rules! syscall {
         )
     };
 
-    ($nr:ident, $a0:expr, $a1:expr, $a2:expr, $a3:expr) => {
+    ($nr:ident, $a0:expr_2021, $a1:expr_2021, $a2:expr_2021, $a3:expr_2021) => {
         $crate::backend::arch::choose::syscall4(
             $crate::backend::reg::nr(linux_raw_sys::general::$nr),
             $a0.into(),
@@ -113,7 +113,7 @@ macro_rules! syscall {
         )
     };
 
-    ($nr:ident, $a0:expr, $a1:expr, $a2:expr, $a3:expr, $a4:expr) => {
+    ($nr:ident, $a0:expr_2021, $a1:expr_2021, $a2:expr_2021, $a3:expr_2021, $a4:expr_2021) => {
         $crate::backend::arch::choose::syscall5(
             $crate::backend::reg::nr(linux_raw_sys::general::$nr),
             $a0.into(),
@@ -124,7 +124,7 @@ macro_rules! syscall {
         )
     };
 
-    ($nr:ident, $a0:expr, $a1:expr, $a2:expr, $a3:expr, $a4:expr, $a5:expr) => {
+    ($nr:ident, $a0:expr_2021, $a1:expr_2021, $a2:expr_2021, $a3:expr_2021, $a4:expr_2021, $a5:expr_2021) => {
         $crate::backend::arch::choose::syscall6(
             $crate::backend::reg::nr(linux_raw_sys::general::$nr),
             $a0.into(),
@@ -136,7 +136,7 @@ macro_rules! syscall {
         )
     };
 
-    ($nr:ident, $a0:expr, $a1:expr, $a2:expr, $a3:expr, $a4:expr, $a5:expr, $a6:expr) => {
+    ($nr:ident, $a0:expr_2021, $a1:expr_2021, $a2:expr_2021, $a3:expr_2021, $a4:expr_2021, $a5:expr_2021, $a6:expr_2021) => {
         $crate::backend::arch::choose::syscall7(
             $crate::backend::reg::nr(linux_raw_sys::general::$nr),
             $a0.into(),
@@ -158,14 +158,14 @@ macro_rules! syscall_always_asm {
         $crate::backend::arch::asm::syscall0($crate::backend::reg::nr(linux_raw_sys::general::$nr))
     };
 
-    ($nr:ident, $a0:expr) => {
+    ($nr:ident, $a0:expr_2021) => {
         $crate::backend::arch::asm::syscall1(
             $crate::backend::reg::nr(linux_raw_sys::general::$nr),
             $a0.into(),
         )
     };
 
-    ($nr:ident, $a0:expr, $a1:expr) => {
+    ($nr:ident, $a0:expr_2021, $a1:expr_2021) => {
         $crate::backend::arch::asm::syscall2(
             $crate::backend::reg::nr(linux_raw_sys::general::$nr),
             $a0.into(),
@@ -173,7 +173,7 @@ macro_rules! syscall_always_asm {
         )
     };
 
-    ($nr:ident, $a0:expr, $a1:expr, $a2:expr) => {
+    ($nr:ident, $a0:expr_2021, $a1:expr_2021, $a2:expr_2021) => {
         $crate::backend::arch::asm::syscall3(
             $crate::backend::reg::nr(linux_raw_sys::general::$nr),
             $a0.into(),
@@ -182,7 +182,7 @@ macro_rules! syscall_always_asm {
         )
     };
 
-    ($nr:ident, $a0:expr, $a1:expr, $a2:expr, $a3:expr) => {
+    ($nr:ident, $a0:expr_2021, $a1:expr_2021, $a2:expr_2021, $a3:expr_2021) => {
         $crate::backend::arch::asm::syscall4(
             $crate::backend::reg::nr(linux_raw_sys::general::$nr),
             $a0.into(),
@@ -192,7 +192,7 @@ macro_rules! syscall_always_asm {
         )
     };
 
-    ($nr:ident, $a0:expr, $a1:expr, $a2:expr, $a3:expr, $a4:expr) => {
+    ($nr:ident, $a0:expr_2021, $a1:expr_2021, $a2:expr_2021, $a3:expr_2021, $a4:expr_2021) => {
         $crate::backend::arch::asm::syscall5(
             $crate::backend::reg::nr(linux_raw_sys::general::$nr),
             $a0.into(),
@@ -203,7 +203,7 @@ macro_rules! syscall_always_asm {
         )
     };
 
-    ($nr:ident, $a0:expr, $a1:expr, $a2:expr, $a3:expr, $a4:expr, $a5:expr) => {
+    ($nr:ident, $a0:expr_2021, $a1:expr_2021, $a2:expr_2021, $a3:expr_2021, $a4:expr_2021, $a5:expr_2021) => {
         $crate::backend::arch::asm::syscall6(
             $crate::backend::reg::nr(linux_raw_sys::general::$nr),
             $a0.into(),
@@ -215,7 +215,7 @@ macro_rules! syscall_always_asm {
         )
     };
 
-    ($nr:ident, $a0:expr, $a1:expr, $a2:expr, $a3:expr, $a4:expr, $a5:expr, $a6:expr) => {
+    ($nr:ident, $a0:expr_2021, $a1:expr_2021, $a2:expr_2021, $a3:expr_2021, $a4:expr_2021, $a5:expr_2021, $a6:expr_2021) => {
         $crate::backend::arch::asm::syscall7(
             $crate::backend::reg::nr(linux_raw_sys::general::$nr),
             $a0.into(),
@@ -238,14 +238,14 @@ macro_rules! syscall_readonly {
         ))
     };
 
-    ($nr:ident, $a0:expr) => {
+    ($nr:ident, $a0:expr_2021) => {
         $crate::backend::arch::choose::syscall1_readonly(
             $crate::backend::reg::nr(linux_raw_sys::general::$nr),
             $a0.into(),
         )
     };
 
-    ($nr:ident, $a0:expr, $a1:expr) => {
+    ($nr:ident, $a0:expr_2021, $a1:expr_2021) => {
         $crate::backend::arch::choose::syscall2_readonly(
             $crate::backend::reg::nr(linux_raw_sys::general::$nr),
             $a0.into(),
@@ -253,7 +253,7 @@ macro_rules! syscall_readonly {
         )
     };
 
-    ($nr:ident, $a0:expr, $a1:expr, $a2:expr) => {
+    ($nr:ident, $a0:expr_2021, $a1:expr_2021, $a2:expr_2021) => {
         $crate::backend::arch::choose::syscall3_readonly(
             $crate::backend::reg::nr(linux_raw_sys::general::$nr),
             $a0.into(),
@@ -262,7 +262,7 @@ macro_rules! syscall_readonly {
         )
     };
 
-    ($nr:ident, $a0:expr, $a1:expr, $a2:expr, $a3:expr) => {
+    ($nr:ident, $a0:expr_2021, $a1:expr_2021, $a2:expr_2021, $a3:expr_2021) => {
         $crate::backend::arch::choose::syscall4_readonly(
             $crate::backend::reg::nr(linux_raw_sys::general::$nr),
             $a0.into(),
@@ -272,7 +272,7 @@ macro_rules! syscall_readonly {
         )
     };
 
-    ($nr:ident, $a0:expr, $a1:expr, $a2:expr, $a3:expr, $a4:expr) => {
+    ($nr:ident, $a0:expr_2021, $a1:expr_2021, $a2:expr_2021, $a3:expr_2021, $a4:expr_2021) => {
         $crate::backend::arch::choose::syscall5_readonly(
             $crate::backend::reg::nr(linux_raw_sys::general::$nr),
             $a0.into(),
@@ -283,7 +283,7 @@ macro_rules! syscall_readonly {
         )
     };
 
-    ($nr:ident, $a0:expr, $a1:expr, $a2:expr, $a3:expr, $a4:expr, $a5:expr) => {
+    ($nr:ident, $a0:expr_2021, $a1:expr_2021, $a2:expr_2021, $a3:expr_2021, $a4:expr_2021, $a5:expr_2021) => {
         $crate::backend::arch::choose::syscall6_readonly(
             $crate::backend::reg::nr(linux_raw_sys::general::$nr),
             $a0.into(),
@@ -295,7 +295,7 @@ macro_rules! syscall_readonly {
         )
     };
 
-    ($nr:ident, $a0:expr, $a1:expr, $a2:expr, $a3:expr, $a4:expr, $a5:expr, $a6:expr) => {
+    ($nr:ident, $a0:expr_2021, $a1:expr_2021, $a2:expr_2021, $a3:expr_2021, $a4:expr_2021, $a5:expr_2021, $a6:expr_2021) => {
         $crate::backend::arch::choose::syscall7_readonly(
             $crate::backend::reg::nr(linux_raw_sys::general::$nr),
             $a0.into(),
@@ -312,7 +312,7 @@ macro_rules! syscall_readonly {
 /// Like `syscall`, but indicates that the syscall does not return.
 #[cfg(feature = "runtime")]
 macro_rules! syscall_noreturn {
-    ($nr:ident, $a0:expr) => {
+    ($nr:ident, $a0:expr_2021) => {
         $crate::backend::arch::choose::syscall1_noreturn(
             $crate::backend::reg::nr(linux_raw_sys::general::$nr),
             $a0.into(),

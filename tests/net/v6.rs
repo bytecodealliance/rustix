@@ -7,8 +7,8 @@
 #[cfg(not(any(windows, target_os = "espidf", target_os = "redox", target_os = "wasi")))]
 use rustix::net::ReturnFlags;
 use rustix::net::{
-    accept, bind, connect, getsockname, listen, recv, send, socket, AddressFamily, Ipv6Addr,
-    RecvFlags, SendFlags, SocketAddrV6, SocketType,
+    AddressFamily, Ipv6Addr, RecvFlags, SendFlags, SocketAddrV6, SocketType, accept, bind, connect,
+    getsockname, listen, recv, send, socket,
 };
 use std::sync::{Arc, Condvar, Mutex};
 use std::thread;
@@ -205,7 +205,7 @@ fn test_v6_sendmmsg() {
 
     use rustix::io::IoSlice;
     use rustix::net::addr::SocketAddrArg as _;
-    use rustix::net::{sendmmsg, MMsgHdr};
+    use rustix::net::{MMsgHdr, sendmmsg};
 
     fn server(ready: Arc<(Mutex<u16>, Condvar)>) {
         let connection_socket = socket(AddressFamily::INET6, SocketType::STREAM, None).unwrap();

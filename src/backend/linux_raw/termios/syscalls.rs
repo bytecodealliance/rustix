@@ -13,8 +13,8 @@ use crate::ffi::CStr;
 use crate::io;
 use crate::pid::Pid;
 use crate::termios::{
-    speed, Action, ControlModes, InputModes, LocalModes, OptionalActions, OutputModes,
-    QueueSelector, SpecialCodeIndex, Termios, Winsize,
+    Action, ControlModes, InputModes, LocalModes, OptionalActions, OutputModes, QueueSelector,
+    SpecialCodeIndex, Termios, Winsize, speed,
 };
 #[cfg(feature = "alloc")]
 #[cfg(feature = "fs")]

@@ -14,10 +14,12 @@ fn test_ttyname_ok() {
         let name = ttyname(&file, Vec::new()).unwrap().into_string().unwrap();
         assert!(name.starts_with("/dev/"));
         assert!(!name.ends_with('/'));
-        assert!(std::fs::metadata(&name)
-            .unwrap()
-            .file_type()
-            .is_char_device());
+        assert!(
+            std::fs::metadata(&name)
+                .unwrap()
+                .file_type()
+                .is_char_device()
+        );
     }
 }
 

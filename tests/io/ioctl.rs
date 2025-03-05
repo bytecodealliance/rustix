@@ -13,8 +13,8 @@ fn test_ioctls() {
 #[cfg(all(target_os = "linux", feature = "fs"))]
 #[test]
 fn test_int_setter() {
-    use rustix::fs::{open, Mode, OFlags};
-    use rustix::ioctl::{ioctl, IntegerSetter, Opcode};
+    use rustix::fs::{Mode, OFlags, open};
+    use rustix::ioctl::{IntegerSetter, Opcode, ioctl};
 
     const TUNSETOFFLOAD: Opcode = 0x4004_54D0;
 

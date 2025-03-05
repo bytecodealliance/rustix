@@ -11,7 +11,7 @@
 #![allow(clippy::missing_transmute_annotations)]
 
 #[cfg(target_arch = "x86")]
-use super::reg::{ArgReg, RetReg, SyscallNumber, A0, A1, A2, A3, A4, A5, R0};
+use super::reg::{A0, A1, A2, A3, A4, A5, ArgReg, R0, RetReg, SyscallNumber};
 use super::vdso;
 #[cfg(target_arch = "x86")]
 use core::arch::global_asm;
@@ -145,7 +145,7 @@ pub(crate) fn sched_getcpu() -> usize {
 
 #[cfg(target_arch = "x86")]
 pub(super) mod x86_via_vdso {
-    use super::{transmute, ArgReg, Relaxed, RetReg, SyscallNumber, A0, A1, A2, A3, A4, A5, R0};
+    use super::{A0, A1, A2, A3, A4, A5, ArgReg, R0, Relaxed, RetReg, SyscallNumber, transmute};
     use crate::backend::arch::asm;
 
     #[inline]
@@ -346,9 +346,11 @@ static SYSCALL: AtomicPtr<Function> = AtomicPtr::new(null_mut());
 #[cfg(feature = "time")]
 #[must_use]
 unsafe extern "C" fn clock_gettime_via_syscall(clockid: c::c_int, res: *mut Timespec) -> c::c_int {
-    match _clock_gettime_via_syscall(clockid, res) {
-        Ok(()) => 0,
-        Err(err) => err.raw_os_error().wrapping_neg(),
+    unsafe {
+        match _clock_gettime_via_syscall(clockid, res) {
+            Ok(()) => 0,
+            Err(err) => err.raw_os_error().wrapping_neg(),
+        }
     }
 }
 
@@ -387,7 +389,7 @@ unsafe fn _clock_gettime_via_syscall_old(clockid: c::c_int, res: *mut Timespec) 
 #[cfg(feature = "time")]
 #[cfg(target_pointer_width = "64")]
 unsafe fn _clock_gettime_via_syscall(clockid: c::c_int, res: *mut Timespec) -> io::Result<()> {
-    ret(syscall!(__NR_clock_gettime, c_int(clockid), res))
+    unsafe { ret(syscall!(__NR_clock_gettime, c_int(clockid), res)) }
 }
 
 #[cfg(feature = "thread")]
@@ -404,9 +406,11 @@ unsafe extern "C" fn getcpu_via_syscall(
     node: *mut u32,
     unused: *mut c_void,
 ) -> c::c_int {
-    match ret(syscall!(__NR_getcpu, cpu, node, unused)) {
-        Ok(()) => 0,
-        Err(err) => err.raw_os_error().wrapping_neg(),
+    unsafe {
+        match ret(syscall!(__NR_getcpu, cpu, node, unused)) {
+            Ok(()) => 0,
+            Err(err) => err.raw_os_error().wrapping_neg(),
+        }
     }
 }
 

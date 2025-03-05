@@ -74,11 +74,6 @@ fn main() {
         use_feature_or_nothing("error_in_core");
     }
 
-    // Feature needed for testing.
-    if use_static_assertions() {
-        use_feature("static_assertions");
-    }
-
     // WASI support can utilize wasi_ext if present.
     if os == "wasi" {
         use_feature_or_nothing("wasi_ext");
@@ -175,11 +170,6 @@ fn main() {
     println!("cargo:rerun-if-env-changed=CARGO_FEATURE_USE_LIBC");
     println!("cargo:rerun-if-env-changed=CARGO_FEATURE_RUSTC_DEP_OF_STD");
     println!("cargo:rerun-if-env-changed=CARGO_CFG_MIRI");
-}
-
-fn use_static_assertions() -> bool {
-    // `offset_from` was made const in Rust 1.65.
-    can_compile("const unsafe fn foo(p: *const u8) -> isize { p.offset_from(p) }")
 }
 
 fn use_thumb_mode() -> bool {

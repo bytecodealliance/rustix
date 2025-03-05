@@ -26,9 +26,9 @@ pub use crate::timespec::{Nsecs, Secs, Timespec};
     target_os = "illumos",
     target_os = "espidf"
 ))]
-pub use eventfd::{eventfd, EventfdFlags};
+pub use eventfd::{EventfdFlags, eventfd};
 #[cfg(not(any(windows, target_os = "redox", target_os = "wasi")))]
 pub use pause::*;
-pub use poll::{poll, PollFd, PollFlags};
+pub use poll::{PollFd, PollFlags, poll};
 #[cfg(any(bsd, linux_kernel, windows, target_os = "wasi"))]
 pub use select::*;

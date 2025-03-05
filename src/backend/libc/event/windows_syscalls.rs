@@ -60,7 +60,7 @@ pub(crate) fn select(
                     .tv_sec
                     .try_into()
                     .map_err(|_| io::Errno::OPNOTSUPP)?,
-                tv_usec: ((timeout.tv_nsec + 999) / 1000) as _,
+                tv_usec: timeout.tv_nsec.div_ceil(1000) as _,
             };
             &timeout_data
         }

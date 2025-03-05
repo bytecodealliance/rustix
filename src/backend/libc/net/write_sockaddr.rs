@@ -1,7 +1,7 @@
 //! The BSD sockets API requires us to read the `sa_family` field before we can
 //! interpret the rest of a `sockaddr` produced by the kernel.
 
-use super::ext::{in6_addr_new, in_addr_new, sockaddr_in6_new};
+use super::ext::{in_addr_new, in6_addr_new, sockaddr_in6_new};
 use crate::backend::c;
 use crate::net::{SocketAddrV4, SocketAddrV6};
 

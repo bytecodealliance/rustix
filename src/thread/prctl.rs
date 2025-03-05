@@ -19,11 +19,11 @@ use bitflags::bitflags;
 use crate::backend::prctl::syscalls;
 #[cfg(feature = "alloc")]
 use crate::ffi::CString;
-use crate::ffi::{c_int, c_uint, c_void, CStr};
+use crate::ffi::{CStr, c_int, c_uint, c_void};
 use crate::io;
 use crate::pid::Pid;
 use crate::prctl::{
-    prctl_1arg, prctl_2args, prctl_3args, prctl_get_at_arg2_optional, PointerAuthenticationKeys,
+    PointerAuthenticationKeys, prctl_1arg, prctl_2args, prctl_3args, prctl_get_at_arg2_optional,
 };
 use crate::utils::as_ptr;
 
@@ -701,20 +701,22 @@ pub unsafe fn set_sve_vector_length_configuration(
     vector_length_inherited_across_execve: bool,
     defer_change_to_next_execve: bool,
 ) -> io::Result<()> {
-    let vector_length_in_bytes =
-        u32::try_from(vector_length_in_bytes).map_err(|_r| io::Errno::RANGE)?;
+    unsafe {
+        let vector_length_in_bytes =
+            u32::try_from(vector_length_in_bytes).map_err(|_r| io::Errno::RANGE)?;
 
-    let mut bits = vector_length_in_bytes & PR_SVE_VL_LEN_MASK;
+        let mut bits = vector_length_in_bytes & PR_SVE_VL_LEN_MASK;
 
-    if vector_length_inherited_across_execve {
-        bits |= PR_SVE_VL_INHERIT;
+        if vector_length_inherited_across_execve {
+            bits |= PR_SVE_VL_INHERIT;
+        }
+
+        if defer_change_to_next_execve {
+            bits |= PR_SVE_SET_VL_ONEXEC;
+        }
+
+        prctl_2args(PR_SVE_SET_VL, bits as usize as *mut _).map(|_r| ())
     }
-
-    if defer_change_to_next_execve {
-        bits |= PR_SVE_SET_VL_ONEXEC;
-    }
-
-    prctl_2args(PR_SVE_SET_VL, bits as usize as *mut _).map(|_r| ())
 }
 
 //
@@ -739,8 +741,10 @@ const PR_PAC_RESET_KEYS: c_int = 54;
 pub unsafe fn reset_pointer_authentication_keys(
     keys: Option<PointerAuthenticationKeys>,
 ) -> io::Result<()> {
-    let keys = keys.as_ref().map_or(0_u32, PointerAuthenticationKeys::bits);
-    prctl_2args(PR_PAC_RESET_KEYS, keys as usize as *mut _).map(|_r| ())
+    unsafe {
+        let keys = keys.as_ref().map_or(0_u32, PointerAuthenticationKeys::bits);
+        prctl_2args(PR_PAC_RESET_KEYS, keys as usize as *mut _).map(|_r| ())
+    }
 }
 
 //
@@ -803,9 +807,11 @@ pub unsafe fn set_current_tagged_address_mode(
     mode: Option<TaggedAddressMode>,
     mte_tag: u32,
 ) -> io::Result<()> {
-    let config = mode.as_ref().map_or(0_u32, TaggedAddressMode::bits)
-        | ((mte_tag << PR_MTE_TAG_SHIFT) & PR_MTE_TAG_MASK);
-    prctl_2args(PR_SET_TAGGED_ADDR_CTRL, config as usize as *mut _).map(|_r| ())
+    unsafe {
+        let config = mode.as_ref().map_or(0_u32, TaggedAddressMode::bits)
+            | ((mte_tag << PR_MTE_TAG_SHIFT) & PR_MTE_TAG_MASK);
+        prctl_2args(PR_SET_TAGGED_ADDR_CTRL, config as usize as *mut _).map(|_r| ())
+    }
 }
 
 //
@@ -829,7 +835,7 @@ const PR_SYS_DISPATCH_OFF: usize = 0;
 /// [`prctl(PR_SET_SYSCALL_USER_DISPATCH,PR_SYS_DISPATCH_OFF,…)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
 pub unsafe fn disable_syscall_user_dispatch() -> io::Result<()> {
-    prctl_2args(PR_SET_SYSCALL_USER_DISPATCH, PR_SYS_DISPATCH_OFF as *mut _).map(|_r| ())
+    unsafe { prctl_2args(PR_SET_SYSCALL_USER_DISPATCH, PR_SYS_DISPATCH_OFF as *mut _).map(|_r| ()) }
 }
 
 const PR_SYS_DISPATCH_ON: usize = 1;
@@ -878,14 +884,16 @@ pub unsafe fn enable_syscall_user_dispatch(
     always_allowed_region: &[u8],
     fast_switch_flag: &AtomicU8,
 ) -> io::Result<()> {
-    syscalls::prctl(
-        PR_SET_SYSCALL_USER_DISPATCH,
-        PR_SYS_DISPATCH_ON as *mut _,
-        always_allowed_region.as_ptr() as *mut _,
-        always_allowed_region.len() as *mut _,
-        as_ptr(fast_switch_flag) as *mut _,
-    )
-    .map(|_r| ())
+    unsafe {
+        syscalls::prctl(
+            PR_SET_SYSCALL_USER_DISPATCH,
+            PR_SYS_DISPATCH_ON as *mut _,
+            always_allowed_region.as_ptr() as *mut _,
+            always_allowed_region.len() as *mut _,
+            as_ptr(fast_switch_flag) as *mut _,
+        )
+        .map(|_r| ())
+    }
 }
 
 //

@@ -1,7 +1,7 @@
 #[cfg(linux_kernel)]
 #[test]
 fn test_statfs_abi() {
-    use rustix::fs::{FsWord, StatFs, NFS_SUPER_MAGIC, PROC_SUPER_MAGIC};
+    use rustix::fs::{FsWord, NFS_SUPER_MAGIC, PROC_SUPER_MAGIC, StatFs};
 
     // Ensure these all have consistent types.
     let t: StatFs = unsafe { std::mem::zeroed() };

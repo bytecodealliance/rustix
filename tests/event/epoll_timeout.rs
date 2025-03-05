@@ -1,5 +1,5 @@
 use rustix::buffer::spare_capacity;
-use rustix::event::{epoll, Timespec};
+use rustix::event::{Timespec, epoll};
 use std::time::Instant;
 
 #[test]

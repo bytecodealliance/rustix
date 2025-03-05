@@ -24,7 +24,7 @@ use crate::backend::conv::{
 };
 #[cfg(target_pointer_width = "32")]
 use crate::backend::conv::{hi, lo};
-use crate::backend::{c, MAX_IOV};
+use crate::backend::{MAX_IOV, c};
 use crate::fd::{AsFd as _, BorrowedFd, OwnedFd, RawFd};
 use crate::io::{self, DupFlags, FdFlags, IoSlice, IoSliceMut, ReadWriteFlags};
 use crate::ioctl::{IoctlOutput, Opcode};
@@ -33,7 +33,7 @@ use linux_raw_sys::general::{F_DUPFD_CLOEXEC, F_GETFD, F_SETFD};
 
 #[inline]
 pub(crate) unsafe fn read(fd: BorrowedFd<'_>, buf: (*mut u8, usize)) -> io::Result<usize> {
-    ret_usize(syscall!(__NR_read, fd, buf.0, pass_usize(buf.1)))
+    unsafe { ret_usize(syscall!(__NR_read, fd, buf.0, pass_usize(buf.1))) }
 }
 
 #[inline]
@@ -42,54 +42,56 @@ pub(crate) unsafe fn pread(
     buf: (*mut u8, usize),
     pos: u64,
 ) -> io::Result<usize> {
-    // <https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/arch/arm64/kernel/sys32.c?h=v6.13#n70>
-    #[cfg(all(
-        target_pointer_width = "32",
-        any(
-            target_arch = "arm",
-            target_arch = "mips",
-            target_arch = "mips32r6",
-            target_arch = "powerpc"
-        ),
-    ))]
-    {
+    unsafe {
+        // <https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/arch/arm64/kernel/sys32.c?h=v6.13#n70>
+        #[cfg(all(
+            target_pointer_width = "32",
+            any(
+                target_arch = "arm",
+                target_arch = "mips",
+                target_arch = "mips32r6",
+                target_arch = "powerpc"
+            ),
+        ))]
+        {
+            ret_usize(syscall!(
+                __NR_pread64,
+                fd,
+                buf.0,
+                pass_usize(buf.1),
+                zero(),
+                hi(pos),
+                lo(pos)
+            ))
+        }
+        #[cfg(all(
+            target_pointer_width = "32",
+            not(any(
+                target_arch = "arm",
+                target_arch = "mips",
+                target_arch = "mips32r6",
+                target_arch = "powerpc"
+            )),
+        ))]
+        {
+            ret_usize(syscall!(
+                __NR_pread64,
+                fd,
+                buf.0,
+                pass_usize(buf.1),
+                hi(pos),
+                lo(pos)
+            ))
+        }
+        #[cfg(target_pointer_width = "64")]
         ret_usize(syscall!(
             __NR_pread64,
             fd,
             buf.0,
             pass_usize(buf.1),
-            zero(),
-            hi(pos),
-            lo(pos)
+            loff_t_from_u64(pos)
         ))
     }
-    #[cfg(all(
-        target_pointer_width = "32",
-        not(any(
-            target_arch = "arm",
-            target_arch = "mips",
-            target_arch = "mips32r6",
-            target_arch = "powerpc"
-        )),
-    ))]
-    {
-        ret_usize(syscall!(
-            __NR_pread64,
-            fd,
-            buf.0,
-            pass_usize(buf.1),
-            hi(pos),
-            lo(pos)
-        ))
-    }
-    #[cfg(target_pointer_width = "64")]
-    ret_usize(syscall!(
-        __NR_pread64,
-        fd,
-        buf.0,
-        pass_usize(buf.1),
-        loff_t_from_u64(pos)
-    ))
 }
 
 #[inline]
@@ -259,14 +261,16 @@ pub(crate) fn pwritev2(
 
 #[inline]
 pub(crate) unsafe fn close(fd: RawFd) {
-    // See the documentation for [`io::close`] for why errors are ignored.
-    syscall_readonly!(__NR_close, raw_fd(fd)).decode_void();
+    unsafe {
+        // See the documentation for [`io::close`] for why errors are ignored.
+        syscall_readonly!(__NR_close, raw_fd(fd)).decode_void();
+    }
 }
 
 #[cfg(feature = "try_close")]
 #[inline]
 pub(crate) unsafe fn try_close(fd: RawFd) -> io::Result<()> {
-    ret(syscall_readonly!(__NR_close, raw_fd(fd)))
+    unsafe { ret(syscall_readonly!(__NR_close, raw_fd(fd))) }
 }
 
 #[inline]
@@ -275,7 +279,7 @@ pub(crate) unsafe fn ioctl(
     request: Opcode,
     arg: *mut c::c_void,
 ) -> io::Result<IoctlOutput> {
-    ret_c_int(syscall!(__NR_ioctl, fd, c_uint(request), arg))
+    unsafe { ret_c_int(syscall!(__NR_ioctl, fd, c_uint(request), arg)) }
 }
 
 #[inline]
@@ -284,7 +288,7 @@ pub(crate) unsafe fn ioctl_readonly(
     request: Opcode,
     arg: *mut c::c_void,
 ) -> io::Result<IoctlOutput> {
-    ret_c_int(syscall_readonly!(__NR_ioctl, fd, c_uint(request), arg))
+    unsafe { ret_c_int(syscall_readonly!(__NR_ioctl, fd, c_uint(request), arg)) }
 }
 
 #[inline]
