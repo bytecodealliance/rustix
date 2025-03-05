@@ -307,6 +307,12 @@ impl WaitIdStatus {
     }
 }
 
+#[cfg(not(any(
+    target_os = "horizon",
+    target_os = "openbsd",
+    target_os = "redox",
+    target_os = "wasi"
+)))]
 impl fmt::Debug for WaitIdStatus {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut s = f.debug_struct("WaitIdStatus");
