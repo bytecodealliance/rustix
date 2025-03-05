@@ -23,7 +23,7 @@ pub use clock::*;
 #[cfg(linux_kernel)]
 pub use id::*;
 #[cfg(linux_kernel)]
-pub use libcap::{capabilities, set_capabilities, CapabilityFlags, CapabilitySets};
+pub use libcap::{CapabilityFlags, CapabilitySets, capabilities, set_capabilities};
 #[cfg(linux_kernel)]
 pub use membarrier::*;
 #[cfg(linux_kernel)]

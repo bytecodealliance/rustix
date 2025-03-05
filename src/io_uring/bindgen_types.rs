@@ -28,12 +28,12 @@ impl<T> IncompleteArrayField<T> {
 
     #[inline]
     pub unsafe fn as_slice(&self, len: usize) -> &[T] {
-        ::core::slice::from_raw_parts(self.as_ptr(), len)
+        unsafe { ::core::slice::from_raw_parts(self.as_ptr(), len) }
     }
 
     #[inline]
     pub unsafe fn as_mut_slice(&mut self, len: usize) -> &mut [T] {
-        ::core::slice::from_raw_parts_mut(self.as_mut_ptr(), len)
+        unsafe { ::core::slice::from_raw_parts_mut(self.as_mut_ptr(), len) }
     }
 }
 
@@ -57,12 +57,12 @@ impl<T> UnionField<T> {
 
     #[inline]
     pub unsafe fn as_ref(&self) -> &T {
-        ::core::mem::transmute(self)
+        unsafe { ::core::mem::transmute(self) }
     }
 
     #[inline]
     pub unsafe fn as_mut(&mut self) -> &mut T {
-        ::core::mem::transmute(self)
+        unsafe { ::core::mem::transmute(self) }
     }
 }
 

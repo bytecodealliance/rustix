@@ -53,7 +53,7 @@ mod suite {
     use criterion::Criterion;
 
     pub(super) fn simple_statat(c: &mut Criterion) {
-        use rustix::fs::{statat, AtFlags, CWD};
+        use rustix::fs::{AtFlags, CWD, statat};
 
         c.bench_function("simple statat", |b| {
             b.iter(|| {
@@ -101,7 +101,7 @@ mod suite {
     }
 
     pub(super) fn simple_statat_cstr(c: &mut Criterion) {
-        use rustix::fs::{statat, AtFlags, CWD};
+        use rustix::fs::{AtFlags, CWD, statat};
 
         c.bench_function("simple statat cstr", |b| {
             b.iter(|| {
@@ -133,7 +133,7 @@ mod suite {
 
     #[cfg(not(target_os = "wasi"))]
     pub(super) fn simple_clock_gettime(c: &mut Criterion) {
-        use rustix::time::{clock_gettime, ClockId};
+        use rustix::time::{ClockId, clock_gettime};
 
         c.bench_function("simple clock_gettime", |b| {
             b.iter(|| {

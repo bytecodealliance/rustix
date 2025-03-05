@@ -129,10 +129,12 @@ pub(super) fn ret_pid_t(raw: c::pid_t) -> io::Result<c::pid_t> {
 /// which returns an owned file descriptor.
 #[inline]
 pub(super) unsafe fn ret_owned_fd(raw: LibcFd) -> io::Result<OwnedFd> {
-    if raw == !0 {
-        Err(io::Errno::last_os_error())
-    } else {
-        Ok(OwnedFd::from_raw_fd(raw as RawFd))
+    unsafe {
+        if raw == !0 {
+            Err(io::Errno::last_os_error())
+        } else {
+            Ok(OwnedFd::from_raw_fd(raw as RawFd))
+        }
     }
 }
 

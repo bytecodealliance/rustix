@@ -20,7 +20,7 @@ weak!(fn getauxval(c::c_ulong) -> *mut c::c_void);
 // With the "runtime" feature, go ahead and depend on `getauxval` existing so
 // that we never fail.
 #[cfg(feature = "runtime")]
-extern "C" {
+unsafe extern "C" {
     fn getauxval(type_: c::c_ulong) -> *mut c::c_void;
 }
 
@@ -43,7 +43,7 @@ const AT_MINSIGSTKSZ: c::c_ulong = 51;
 
 // Declare `sysconf` ourselves so that we don't depend on all of libc just for
 // this.
-extern "C" {
+unsafe extern "C" {
     fn sysconf(name: c::c_int) -> c::c_long;
 }
 

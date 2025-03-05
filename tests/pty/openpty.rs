@@ -2,7 +2,7 @@
 
 #![allow(unused_mut, unused_imports)]
 
-use rustix::fs::{openat, Mode, OFlags, CWD};
+use rustix::fs::{CWD, Mode, OFlags, openat};
 use rustix::pty::*;
 use std::fs::File;
 use std::io::{Read as _, Write as _};

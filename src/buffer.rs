@@ -162,12 +162,14 @@ impl<'a, T> private::Sealed<T> for &'a mut [MaybeUninit<T>] {
 
     #[inline]
     unsafe fn assume_init(self, len: usize) -> Self::Output {
-        let (init, uninit) = self.split_at_mut(len);
+        unsafe {
+            let (init, uninit) = self.split_at_mut(len);
 
-        // SAFETY: The user asserts that the slice is now initialized.
-        let init = slice::from_raw_parts_mut(init.as_mut_ptr().cast::<T>(), init.len());
+            // SAFETY: The user asserts that the slice is now initialized.
+            let init = slice::from_raw_parts_mut(init.as_mut_ptr().cast::<T>(), init.len());
 
-        (init, uninit)
+            (init, uninit)
+        }
     }
 }
 
@@ -181,12 +183,14 @@ impl<'a, T, const N: usize> private::Sealed<T> for &'a mut [MaybeUninit<T>; N] {
 
     #[inline]
     unsafe fn assume_init(self, len: usize) -> Self::Output {
-        let (init, uninit) = self.split_at_mut(len);
+        unsafe {
+            let (init, uninit) = self.split_at_mut(len);
 
-        // SAFETY: The user asserts that the slice is now initialized.
-        let init = slice::from_raw_parts_mut(init.as_mut_ptr().cast::<T>(), init.len());
+            // SAFETY: The user asserts that the slice is now initialized.
+            let init = slice::from_raw_parts_mut(init.as_mut_ptr().cast::<T>(), init.len());
 
-        (init, uninit)
+            (init, uninit)
+        }
     }
 }
 
@@ -201,12 +205,14 @@ impl<'a, T> private::Sealed<T> for &'a mut Vec<MaybeUninit<T>> {
 
     #[inline]
     unsafe fn assume_init(self, len: usize) -> Self::Output {
-        let (init, uninit) = self.split_at_mut(len);
+        unsafe {
+            let (init, uninit) = self.split_at_mut(len);
 
-        // SAFETY: The user asserts that the slice is now initialized.
-        let init = slice::from_raw_parts_mut(init.as_mut_ptr().cast::<T>(), init.len());
+            // SAFETY: The user asserts that the slice is now initialized.
+            let init = slice::from_raw_parts_mut(init.as_mut_ptr().cast::<T>(), init.len());
 
-        (init, uninit)
+            (init, uninit)
+        }
     }
 }
 
@@ -278,9 +284,11 @@ impl<'a, T> private::Sealed<T> for SpareCapacity<'a, T> {
 
     #[inline]
     unsafe fn assume_init(self, len: usize) -> Self::Output {
-        // We initialized `len` elements; extend the `Vec` to include them.
-        self.0.set_len(self.0.len() + len);
-        len
+        unsafe {
+            // We initialized `len` elements; extend the `Vec` to include them.
+            self.0.set_len(self.0.len() + len);
+            len
+        }
     }
 }
 

@@ -2,10 +2,10 @@
 
 #![cfg(not(target_os = "wasi"))]
 
-use rustix::event::{poll, PollFd, PollFlags};
+use rustix::event::{PollFd, PollFlags, poll};
 use rustix::net::{
-    accept, bind, connect, getsockname, listen, recv, send, socket, AddressFamily, Ipv6Addr,
-    RecvFlags, SendFlags, SocketAddrV6, SocketType,
+    AddressFamily, Ipv6Addr, RecvFlags, SendFlags, SocketAddrV6, SocketType, accept, bind, connect,
+    getsockname, listen, recv, send, socket,
 };
 use std::sync::{Arc, Condvar, Mutex};
 use std::thread;

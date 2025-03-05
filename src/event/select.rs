@@ -119,7 +119,7 @@ pub unsafe fn select(
     exceptfds: Option<&mut [FdSetElement]>,
     timeout: Option<&Timespec>,
 ) -> io::Result<i32> {
-    backend::event::syscalls::select(nfds, readfds, writefds, exceptfds, timeout)
+    unsafe { backend::event::syscalls::select(nfds, readfds, writefds, exceptfds, timeout) }
 }
 
 #[cfg(not(any(windows, target_os = "wasi")))]
@@ -257,11 +257,7 @@ pub(crate) fn fd_set_num_elements_for_bitvector(nfds: RawFd) -> usize {
 fn div_ceil(lhs: usize, rhs: usize) -> usize {
     let d = lhs / rhs;
     let r = lhs % rhs;
-    if r > 0 {
-        d + 1
-    } else {
-        d
-    }
+    if r > 0 { d + 1 } else { d }
 }
 
 /// An iterator over the fds in a set.

@@ -10,5 +10,5 @@ pub(crate) unsafe fn prctl(
     arg4: *mut c::c_void,
     arg5: *mut c::c_void,
 ) -> io::Result<c::c_int> {
-    ret_c_int(c::prctl(option, arg2, arg3, arg4, arg5))
+    unsafe { ret_c_int(c::prctl(option, arg2, arg3, arg4, arg5)) }
 }

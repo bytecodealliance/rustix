@@ -8,8 +8,8 @@ mod msync;
 mod userfaultfd;
 
 #[cfg(not(target_os = "redox"))]
-pub use madvise::{madvise, Advice};
+pub use madvise::{Advice, madvise};
 pub use mmap::*;
-pub use msync::{msync, MsyncFlags};
+pub use msync::{MsyncFlags, msync};
 #[cfg(linux_kernel)]
-pub use userfaultfd::{userfaultfd, UserfaultfdFlags};
+pub use userfaultfd::{UserfaultfdFlags, userfaultfd};

@@ -11,7 +11,7 @@
 //! explicit call of R6-only or R2-only instructions exist here.
 
 use crate::backend::reg::{
-    ArgReg, FromAsm, RetReg, SyscallNumber, ToAsm as _, A0, A1, A2, A3, A4, A5, R0,
+    A0, A1, A2, A3, A4, A5, ArgReg, FromAsm, R0, RetReg, SyscallNumber, ToAsm as _,
 };
 use core::arch::asm;
 

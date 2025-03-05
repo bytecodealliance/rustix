@@ -51,8 +51,10 @@ impl Pid {
     /// The caller must guarantee `raw` is positive.
     #[inline]
     pub const unsafe fn from_raw_unchecked(raw: RawPid) -> Self {
-        debug_assert!(raw > 0);
-        Self(NonZeroI32::new_unchecked(raw))
+        unsafe {
+            debug_assert!(raw > 0);
+            Self(NonZeroI32::new_unchecked(raw))
+        }
     }
 
     /// Creates a `Pid` holding the ID of the given child process.

@@ -2,7 +2,7 @@
 #[cfg(any(apple, freebsdlike, linux_kernel, solarish))]
 #[test]
 fn test_seek_holes() {
-    use rustix::fs::{fstat, openat, seek, Mode, OFlags, SeekFrom, CWD};
+    use rustix::fs::{CWD, Mode, OFlags, SeekFrom, fstat, openat, seek};
     use std::io::Write as _;
 
     let tmp = tempfile::tempdir().unwrap();
@@ -58,7 +58,7 @@ fn test_seek_holes() {
 
 #[test]
 fn test_seek_offsets() {
-    use rustix::fs::{open, seek, Mode, OFlags, SeekFrom};
+    use rustix::fs::{Mode, OFlags, SeekFrom, open, seek};
 
     let f = open("Cargo.toml", OFlags::RDONLY, Mode::empty()).unwrap();
 

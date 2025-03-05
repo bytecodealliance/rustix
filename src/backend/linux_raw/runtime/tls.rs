@@ -9,7 +9,7 @@
 use crate::backend::c;
 use crate::backend::param::auxv::exe_phdrs;
 use core::arch::global_asm;
-use core::ptr::{null, NonNull};
+use core::ptr::{NonNull, null};
 use linux_raw_sys::elf::*;
 
 /// For use with [`set_thread_area`].
@@ -72,7 +72,7 @@ pub(crate) fn startup_tls_info() -> StartupTlsInfo {
     }
 }
 
-extern "C" {
+unsafe extern "C" {
     /// Declare the `_DYNAMIC` symbol so that we can compare its address with
     /// the static address in the `PT_DYNAMIC` header to learn our offset. Use
     /// a weak symbol because `_DYNAMIC` is not always present.

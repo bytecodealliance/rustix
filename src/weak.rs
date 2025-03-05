@@ -102,13 +102,15 @@ impl<F> Weak<F> {
     // Cold because it should only happen during first-time initialization.
     #[cold]
     unsafe fn initialize(&self) -> Option<F> {
-        let val = fetch(self.name);
-        // This synchronizes with the acquire fence in `get`.
-        self.addr.store(val, Ordering::Release);
+        unsafe {
+            let val = fetch(self.name);
+            // This synchronizes with the acquire fence in `get`.
+            self.addr.store(val, Ordering::Release);
 
-        match val {
-            NULL => None,
-            addr => Some(mem::transmute_copy::<*mut c_void, F>(&addr)),
+            match val {
+                NULL => None,
+                addr => Some(mem::transmute_copy::<*mut c_void, F>(&addr)),
+            }
         }
     }
 }
@@ -126,7 +128,7 @@ mod libc {
     #[cfg(not(all(target_os = "android", target_pointer_width = "32")))]
     pub(super) const RTLD_DEFAULT: *mut c_void = ptr::null_mut();
 
-    extern "C" {
+    unsafe extern "C" {
         pub(super) fn dlsym(handle: *mut c_void, symbol: *const c_char) -> *mut c_void;
     }
 
@@ -137,11 +139,13 @@ mod libc {
 }
 
 unsafe fn fetch(name: &str) -> *mut c_void {
-    let name = match CStr::from_bytes_with_nul(name.as_bytes()) {
-        Ok(c_str) => c_str,
-        Err(..) => return null_mut(),
-    };
-    libc::dlsym(libc::RTLD_DEFAULT, name.as_ptr().cast())
+    unsafe {
+        let name = match CStr::from_bytes_with_nul(name.as_bytes()) {
+            Ok(c_str) => c_str,
+            Err(..) => return null_mut(),
+        };
+        libc::dlsym(libc::RTLD_DEFAULT, name.as_ptr().cast())
+    }
 }
 
 #[cfg(not(linux_kernel))]
@@ -163,7 +167,7 @@ macro_rules! syscall {
 #[cfg(linux_kernel)]
 macro_rules! syscall {
     (fn $name:ident($($arg_name:ident: $t:ty),*) via $sys_name:ident -> $ret:ty) => (
-        unsafe fn $name($($arg_name:$t),*) -> $ret {
+        unsafe fn $name($($arg_name:$t),*) -> $ret { unsafe {
             // This looks like a hack, but `concat_idents` only accepts idents
             // (not paths).
             use libc::*;
@@ -247,7 +251,7 @@ macro_rules! syscall {
             */
 
             syscall($sys_name, $($arg_name.into_syscall_arg()),*) as $ret
-        }
+        }}
     )
 }
 
@@ -272,7 +276,7 @@ macro_rules! weakcall {
 /// available, and fall back to `libc::syscall` otherwise.
 macro_rules! weak_or_syscall {
     ($vis:vis fn $name:ident($($arg_name:ident: $t:ty),*) via $sys_name:ident -> $ret:ty) => (
-        $vis unsafe fn $name($($arg_name: $t),*) -> $ret {
+        $vis unsafe fn $name($($arg_name: $t),*) -> $ret { unsafe {
             weak! { fn $name($($t),*) -> $ret }
 
             // Use a weak symbol from libc when possible, allowing `LD_PRELOAD`
@@ -283,6 +287,6 @@ macro_rules! weak_or_syscall {
                 syscall! { fn $name($($arg_name: $t),*) via $sys_name -> $ret }
                 $name($($arg_name),*)
             }
-        }
+        }}
     )
 }

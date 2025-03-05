@@ -50,10 +50,12 @@ fn test_unix_addr() {
 
     #[cfg(linux_kernel)]
     {
-        assert!(SocketAddrUnix::new("foo")
-            .unwrap()
-            .abstract_name()
-            .is_none());
+        assert!(
+            SocketAddrUnix::new("foo")
+                .unwrap()
+                .abstract_name()
+                .is_none()
+        );
 
         assert_eq!(
             SocketAddrUnix::new_abstract_name(b"test")
@@ -77,9 +79,11 @@ fn test_unix_addr() {
             b"this\0that"
         );
         SocketAddrUnix::new_abstract_name(&[b'a'; 500]).unwrap_err();
-        assert!(SocketAddrUnix::new_abstract_name(b"test")
-            .unwrap()
-            .path()
-            .is_none());
+        assert!(
+            SocketAddrUnix::new_abstract_name(b"test")
+                .unwrap()
+                .path()
+                .is_none()
+        );
     }
 }

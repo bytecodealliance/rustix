@@ -19,7 +19,7 @@ fn test_fcntl_dupfd_cloexec() {
 #[cfg(apple)]
 #[test]
 fn test_fcntl_apple() {
-    use rustix::fs::{openat, Mode, OFlags, CWD};
+    use rustix::fs::{CWD, Mode, OFlags, openat};
 
     let tmp = tempfile::tempdir().unwrap();
     let dir = openat(CWD, tmp.path(), OFlags::RDONLY, Mode::empty()).unwrap();

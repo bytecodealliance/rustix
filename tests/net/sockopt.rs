@@ -9,16 +9,18 @@ use rustix::io;
     target_env = "newlib"
 ))]
 use rustix::net::ipproto;
-use rustix::net::{sockopt, AddressFamily, SocketType};
+use rustix::net::{AddressFamily, SocketType, sockopt};
 use std::net::Ipv4Addr;
 use std::time::Duration;
 
 // Test `socket` socket options.
 fn test_sockopts_socket(s: &OwnedFd) {
     // On a new socket we shouldn't have a timeout yet.
-    assert!(sockopt::socket_timeout(s, sockopt::Timeout::Recv)
-        .unwrap()
-        .is_none());
+    assert!(
+        sockopt::socket_timeout(s, sockopt::Timeout::Recv)
+            .unwrap()
+            .is_none()
+    );
     assert_eq!(sockopt::socket_type(s).unwrap(), SocketType::STREAM);
     #[cfg(any(
         linux_kernel,

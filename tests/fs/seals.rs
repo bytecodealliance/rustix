@@ -1,7 +1,7 @@
 #[test]
 fn test_seals() {
     use rustix::fs::{
-        fcntl_add_seals, fcntl_get_seals, ftruncate, memfd_create, MemfdFlags, SealFlags,
+        MemfdFlags, SealFlags, fcntl_add_seals, fcntl_get_seals, ftruncate, memfd_create,
     };
     use std::fs::File;
     use std::io::Write as _;

@@ -3,7 +3,7 @@
 
 #[cfg(unix)]
 use super::addr::SocketAddrUnix;
-use super::ext::{in6_addr_s6_addr, in_addr_s_addr, sockaddr_in6_sin6_scope_id};
+use super::ext::{in_addr_s_addr, in6_addr_s6_addr, sockaddr_in6_sin6_scope_id};
 use crate::backend::c;
 #[cfg(not(windows))]
 use crate::ffi::CStr;
@@ -55,47 +55,49 @@ pub(crate) struct sockaddr_header {
 /// `storage` must point to a valid socket address returned from the OS.
 #[inline]
 pub(crate) unsafe fn read_sa_family(storage: *const c::sockaddr) -> u16 {
-    // Assert that we know the layout of `sockaddr`.
-    let _ = c::sockaddr {
-        #[cfg(any(
-            bsd,
-            target_os = "aix",
-            target_os = "espidf",
-            target_os = "haiku",
-            target_os = "hurd",
-            target_os = "nto",
-            target_os = "vita"
-        ))]
-        sa_len: 0_u8,
-        #[cfg(any(
-            bsd,
-            target_os = "aix",
-            target_os = "espidf",
-            target_os = "haiku",
-            target_os = "hurd",
-            target_os = "nto",
-            target_os = "vita"
-        ))]
-        sa_family: 0_u8,
-        #[cfg(not(any(
-            bsd,
-            target_os = "aix",
-            target_os = "espidf",
-            target_os = "haiku",
-            target_os = "hurd",
-            target_os = "nto",
-            target_os = "vita"
-        )))]
-        sa_family: 0_u16,
-        #[cfg(not(any(target_os = "haiku", target_os = "horizon")))]
-        sa_data: [0; 14],
-        #[cfg(target_os = "horizon")]
-        sa_data: [0; 26],
-        #[cfg(target_os = "haiku")]
-        sa_data: [0; 30],
-    };
+    unsafe {
+        // Assert that we know the layout of `sockaddr`.
+        let _ = c::sockaddr {
+            #[cfg(any(
+                bsd,
+                target_os = "aix",
+                target_os = "espidf",
+                target_os = "haiku",
+                target_os = "hurd",
+                target_os = "nto",
+                target_os = "vita"
+            ))]
+            sa_len: 0_u8,
+            #[cfg(any(
+                bsd,
+                target_os = "aix",
+                target_os = "espidf",
+                target_os = "haiku",
+                target_os = "hurd",
+                target_os = "nto",
+                target_os = "vita"
+            ))]
+            sa_family: 0_u8,
+            #[cfg(not(any(
+                bsd,
+                target_os = "aix",
+                target_os = "espidf",
+                target_os = "haiku",
+                target_os = "hurd",
+                target_os = "nto",
+                target_os = "vita"
+            )))]
+            sa_family: 0_u16,
+            #[cfg(not(any(target_os = "haiku", target_os = "horizon")))]
+            sa_data: [0; 14],
+            #[cfg(target_os = "horizon")]
+            sa_data: [0; 26],
+            #[cfg(target_os = "haiku")]
+            sa_data: [0; 30],
+        };
 
-    (*storage.cast::<sockaddr_header>()).sa_family.into()
+        (*storage.cast::<sockaddr_header>()).sa_family.into()
+    }
 }
 
 /// Read the first byte of the `sun_path` field, assuming we have an `AF_UNIX`
@@ -117,24 +119,26 @@ unsafe fn read_sun_path0(storage: *const c::sockaddr) -> u8 {
 /// `storage` must point to a least an initialized `sockaddr_header`.
 #[inline]
 pub(crate) unsafe fn sockaddr_nonempty(storage: *const c::sockaddr, len: SocketAddrLen) -> bool {
-    if len == 0 {
-        return false;
-    }
+    unsafe {
+        if len == 0 {
+            return false;
+        }
 
-    assert!(len as usize >= size_of::<c::sa_family_t>());
-    let family: c::c_int = read_sa_family(storage.cast::<c::sockaddr>()).into();
-    if family == c::AF_UNSPEC {
-        return false;
-    }
+        assert!(len as usize >= size_of::<c::sa_family_t>());
+        let family: c::c_int = read_sa_family(storage.cast::<c::sockaddr>()).into();
+        if family == c::AF_UNSPEC {
+            return false;
+        }
 
-    // On macOS, if we get an `AF_UNIX` with an empty path, treat it as an
-    // absent address.
-    #[cfg(apple)]
-    if family == c::AF_UNIX && read_sun_path0(storage) == 0 {
-        return false;
-    }
+        // On macOS, if we get an `AF_UNIX` with an empty path, treat it as an
+        // absent address.
+        #[cfg(apple)]
+        if family == c::AF_UNIX && read_sun_path0(storage) == 0 {
+            return false;
+        }
 
-    true
+        true
+    }
 }
 
 /// Set the `sa_family` field of a socket address to `AF_UNSPEC`, so that we
@@ -144,7 +148,9 @@ pub(crate) unsafe fn sockaddr_nonempty(storage: *const c::sockaddr, len: SocketA
 ///
 /// `storage` must point to a least an initialized `sockaddr_header`.
 pub(crate) unsafe fn initialize_family_to_unspec(storage: *mut c::sockaddr) {
-    (*storage.cast::<sockaddr_header>()).sa_family = c::AF_UNSPEC as _;
+    unsafe {
+        (*storage.cast::<sockaddr_header>()).sa_family = c::AF_UNSPEC as _;
+    }
 }
 
 #[inline]

@@ -2,8 +2,8 @@
 #[test]
 fn negative_file_timetamp() {
     use rustix::fs::{
-        fstat, futimens, lstat, open, stat, statat, AtFlags, Mode, OFlags, Timespec, Timestamps,
-        CWD,
+        AtFlags, CWD, Mode, OFlags, Timespec, Timestamps, fstat, futimens, lstat, open, stat,
+        statat,
     };
 
     let tmp = tempfile::tempdir().unwrap();

@@ -1,5 +1,5 @@
 use rustix::io;
-use rustix::time::{clock_settime, ClockId, Timespec};
+use rustix::time::{ClockId, Timespec, clock_settime};
 
 #[test]
 fn test_settime() {

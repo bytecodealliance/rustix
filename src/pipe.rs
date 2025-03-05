@@ -173,7 +173,7 @@ pub unsafe fn vmsplice<PipeFd: AsFd>(
     bufs: &[IoSliceRaw<'_>],
     flags: SpliceFlags,
 ) -> io::Result<usize> {
-    backend::pipe::syscalls::vmsplice(fd.as_fd(), bufs, flags)
+    unsafe { backend::pipe::syscalls::vmsplice(fd.as_fd(), bufs, flags) }
 }
 
 /// `tee(fd_in, fd_out, len, flags)`—Copy data between pipes without

@@ -38,8 +38,8 @@ fn test_y2038() {
 #[test]
 fn test_y2038_with_timerfd() {
     use rustix::time::{
-        timerfd_create, timerfd_gettime, timerfd_settime, Itimerspec, TimerfdClockId, TimerfdFlags,
-        TimerfdTimerFlags, Timespec,
+        Itimerspec, TimerfdClockId, TimerfdFlags, TimerfdTimerFlags, Timespec, timerfd_create,
+        timerfd_gettime, timerfd_settime,
     };
 
     let fd = timerfd_create(TimerfdClockId::Monotonic, TimerfdFlags::CLOEXEC).unwrap();

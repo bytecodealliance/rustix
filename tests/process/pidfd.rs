@@ -1,6 +1,6 @@
 //! Tests for the `pidfd` type.
 
-use libc::{kill, SIGCONT, SIGINT, SIGSTOP};
+use libc::{SIGCONT, SIGINT, SIGSTOP, kill};
 #[cfg(feature = "event")]
 use rustix::event;
 use rustix::fd::AsFd as _;

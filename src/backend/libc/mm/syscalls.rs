@@ -53,13 +53,15 @@ pub(crate) fn madvise(addr: *mut c::c_void, len: usize, advice: Advice) -> io::R
 }
 
 pub(crate) unsafe fn msync(addr: *mut c::c_void, len: usize, flags: MsyncFlags) -> io::Result<()> {
-    let err = c::msync(addr, len, bitflags_bits!(flags));
+    unsafe {
+        let err = c::msync(addr, len, bitflags_bits!(flags));
 
-    // `msync` returns its error status rather than using `errno`.
-    if err == 0 {
-        Ok(())
-    } else {
-        Err(io::Errno(err))
+        // `msync` returns its error status rather than using `errno`.
+        if err == 0 {
+            Ok(())
+        } else {
+            Err(io::Errno(err))
+        }
     }
 }
 
@@ -75,18 +77,20 @@ pub(crate) unsafe fn mmap(
     fd: BorrowedFd<'_>,
     offset: u64,
 ) -> io::Result<*mut c::c_void> {
-    let res = c::mmap(
-        ptr,
-        len,
-        bitflags_bits!(prot),
-        bitflags_bits!(flags),
-        borrowed_fd(fd),
-        offset as i64,
-    );
-    if res == c::MAP_FAILED {
-        Err(io::Errno::last_os_error())
-    } else {
-        Ok(res)
+    unsafe {
+        let res = c::mmap(
+            ptr,
+            len,
+            bitflags_bits!(prot),
+            bitflags_bits!(flags),
+            borrowed_fd(fd),
+            offset as i64,
+        );
+        if res == c::MAP_FAILED {
+            Err(io::Errno::last_os_error())
+        } else {
+            Ok(res)
+        }
     }
 }
 
@@ -100,18 +104,20 @@ pub(crate) unsafe fn mmap_anonymous(
     prot: ProtFlags,
     flags: MapFlags,
 ) -> io::Result<*mut c::c_void> {
-    let res = c::mmap(
-        ptr,
-        len,
-        bitflags_bits!(prot),
-        bitflags_bits!(flags | MapFlags::from_bits_retain(bitcast!(c::MAP_ANONYMOUS))),
-        no_fd(),
-        0,
-    );
-    if res == c::MAP_FAILED {
-        Err(io::Errno::last_os_error())
-    } else {
-        Ok(res)
+    unsafe {
+        let res = c::mmap(
+            ptr,
+            len,
+            bitflags_bits!(prot),
+            bitflags_bits!(flags | MapFlags::from_bits_retain(bitcast!(c::MAP_ANONYMOUS))),
+            no_fd(),
+            0,
+        );
+        if res == c::MAP_FAILED {
+            Err(io::Errno::last_os_error())
+        } else {
+            Ok(res)
+        }
     }
 }
 
@@ -120,11 +126,11 @@ pub(crate) unsafe fn mprotect(
     len: usize,
     flags: MprotectFlags,
 ) -> io::Result<()> {
-    ret(c::mprotect(ptr, len, bitflags_bits!(flags)))
+    unsafe { ret(c::mprotect(ptr, len, bitflags_bits!(flags))) }
 }
 
 pub(crate) unsafe fn munmap(ptr: *mut c::c_void, len: usize) -> io::Result<()> {
-    ret(c::munmap(ptr, len))
+    unsafe { ret(c::munmap(ptr, len)) }
 }
 
 /// # Safety
@@ -138,11 +144,13 @@ pub(crate) unsafe fn mremap(
     new_size: usize,
     flags: MremapFlags,
 ) -> io::Result<*mut c::c_void> {
-    let res = c::mremap(old_address, old_size, new_size, bitflags_bits!(flags));
-    if res == c::MAP_FAILED {
-        Err(io::Errno::last_os_error())
-    } else {
-        Ok(res)
+    unsafe {
+        let res = c::mremap(old_address, old_size, new_size, bitflags_bits!(flags));
+        if res == c::MAP_FAILED {
+            Err(io::Errno::last_os_error())
+        } else {
+            Ok(res)
+        }
     }
 }
 
@@ -159,17 +167,19 @@ pub(crate) unsafe fn mremap_fixed(
     flags: MremapFlags,
     new_address: *mut c::c_void,
 ) -> io::Result<*mut c::c_void> {
-    let res = c::mremap(
-        old_address,
-        old_size,
-        new_size,
-        bitflags_bits!(flags | MremapFlags::from_bits_retain(bitcast!(c::MAP_FIXED))),
-        new_address,
-    );
-    if res == c::MAP_FAILED {
-        Err(io::Errno::last_os_error())
-    } else {
-        Ok(res)
+    unsafe {
+        let res = c::mremap(
+            old_address,
+            old_size,
+            new_size,
+            bitflags_bits!(flags | MremapFlags::from_bits_retain(bitcast!(c::MAP_FIXED))),
+            new_address,
+        );
+        if res == c::MAP_FAILED {
+            Err(io::Errno::last_os_error())
+        } else {
+            Ok(res)
+        }
     }
 }
 
@@ -179,7 +189,7 @@ pub(crate) unsafe fn mremap_fixed(
 /// boundaries.
 #[inline]
 pub(crate) unsafe fn mlock(addr: *mut c::c_void, length: usize) -> io::Result<()> {
-    ret(c::mlock(addr, length))
+    unsafe { ret(c::mlock(addr, length)) }
 }
 
 /// # Safety
@@ -193,15 +203,17 @@ pub(crate) unsafe fn mlock_with(
     length: usize,
     flags: MlockFlags,
 ) -> io::Result<()> {
-    weak_or_syscall! {
-        fn mlock2(
-            addr: *const c::c_void,
-            len: c::size_t,
-            flags: c::c_int
-        ) via SYS_mlock2 -> c::c_int
-    }
+    unsafe {
+        weak_or_syscall! {
+            fn mlock2(
+                addr: *const c::c_void,
+                len: c::size_t,
+                flags: c::c_int
+            ) via SYS_mlock2 -> c::c_int
+        }
 
-    ret(mlock2(addr, length, bitflags_bits!(flags)))
+        ret(mlock2(addr, length, bitflags_bits!(flags)))
+    }
 }
 
 /// # Safety
@@ -210,17 +222,19 @@ pub(crate) unsafe fn mlock_with(
 /// boundaries.
 #[inline]
 pub(crate) unsafe fn munlock(addr: *mut c::c_void, length: usize) -> io::Result<()> {
-    ret(c::munlock(addr, length))
+    unsafe { ret(c::munlock(addr, length)) }
 }
 
 #[cfg(linux_kernel)]
 pub(crate) unsafe fn userfaultfd(flags: UserfaultfdFlags) -> io::Result<OwnedFd> {
-    syscall! {
-        fn userfaultfd(
-            flags: c::c_int
-        ) via SYS_userfaultfd -> c::c_int
+    unsafe {
+        syscall! {
+            fn userfaultfd(
+                flags: c::c_int
+            ) via SYS_userfaultfd -> c::c_int
+        }
+        ret_owned_fd(userfaultfd(bitflags_bits!(flags)))
     }
-    ret_owned_fd(userfaultfd(bitflags_bits!(flags)))
 }
 
 /// Locks all pages mapped into the address space of the calling process.

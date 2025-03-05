@@ -1,6 +1,6 @@
 #[test]
 fn test_fcntl_lock() {
-    use rustix::fs::{fcntl_lock, FlockOperation};
+    use rustix::fs::{FlockOperation, fcntl_lock};
 
     let f = tempfile::tempfile().unwrap();
     fcntl_lock(&f, FlockOperation::LockExclusive).unwrap();

@@ -42,5 +42,5 @@ pub use backend::mm::types::MsyncFlags;
 /// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Memory_002dmapped-I_002fO.html#index-msync
 #[inline]
 pub unsafe fn msync(addr: *mut c_void, len: usize, flags: MsyncFlags) -> io::Result<()> {
-    backend::mm::syscalls::msync(addr, len, flags)
+    unsafe { backend::mm::syscalls::msync(addr, len, flags) }
 }

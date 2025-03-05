@@ -17,7 +17,7 @@ mod read_write;
 pub use close::*;
 #[cfg(not(windows))]
 pub use dup::*;
-pub use errno::{retry_on_intr, Errno, Result};
+pub use errno::{Errno, Result, retry_on_intr};
 #[cfg(not(windows))]
 pub use fcntl::*;
 pub use ioctl::*;
