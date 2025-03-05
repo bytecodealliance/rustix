@@ -30,7 +30,7 @@ use super::io::errno::{
 use super::reg::{raw_arg, ArgNumber, ArgReg, RetReg, R0};
 #[cfg(feature = "time")]
 use super::time::types::TimerfdClockId;
-#[cfg(any(feature = "thread", feature = "time", target_arch = "x86"))]
+#[cfg(any(feature = "thread", feature = "time"))]
 use crate::clockid::ClockId;
 use crate::fd::OwnedFd;
 use crate::ffi::CStr;
@@ -44,7 +44,7 @@ use crate::signal::Signal;
 use crate::utils::{as_mut_ptr, as_ptr};
 use core::mem::MaybeUninit;
 use core::ptr::null_mut;
-#[cfg(any(feature = "thread", feature = "time", target_arch = "x86"))]
+#[cfg(any(feature = "thread", feature = "time"))]
 use linux_raw_sys::general::__kernel_clockid_t;
 #[cfg(target_pointer_width = "64")]
 use linux_raw_sys::general::__kernel_loff_t;
@@ -270,7 +270,7 @@ pub(super) fn loff_t_from_u64<'a, Num: ArgNumber>(i: u64) -> ArgReg<'a, Num> {
     pass_usize(i as usize)
 }
 
-#[cfg(any(feature = "thread", feature = "time", target_arch = "x86"))]
+#[cfg(any(feature = "thread", feature = "time"))]
 impl<'a, Num: ArgNumber> From<ClockId> for ArgReg<'a, Num> {
     #[inline]
     fn from(i: ClockId) -> Self {

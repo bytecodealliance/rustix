@@ -347,7 +347,7 @@ pub(crate) mod path;
 
 // Private modules used by multiple public modules.
 #[cfg(not(any(windows, target_os = "espidf")))]
-#[cfg(any(feature = "thread", feature = "time", target_arch = "x86"))]
+#[cfg(any(feature = "thread", feature = "time"))]
 mod clockid;
 #[cfg(linux_kernel)]
 #[cfg(any(feature = "io_uring", feature = "runtime"))]
