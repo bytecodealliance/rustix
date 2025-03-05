@@ -61,7 +61,7 @@ unsafe impl ioctl::Ioctl for Tiocsctty {
     }
 
     fn as_ptr(&mut self) -> *mut c::c_void {
-        (&0_u32) as *const u32 as *mut c::c_void
+        crate::utils::as_ptr(&0_u32) as *mut c::c_void
     }
 
     unsafe fn output_from_ptr(

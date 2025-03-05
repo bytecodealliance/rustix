@@ -27,7 +27,7 @@ pub(crate) mod fd {
     pub trait AsRawFd {
         /// A version of [`as_raw_fd`] for use with Winsock API.
         ///
-        /// [`as_raw_fd`]: https://doc.rust-lang.org/stable/std/os/fd/trait.FromRawFd.html#tymethod.as_raw_fd
+        /// [`as_raw_fd`]: https://doc.rust-lang.org/stable/std/os/fd/trait.AsRawFd.html#tymethod.as_raw_fd
         fn as_raw_fd(&self) -> RawFd;
     }
     impl<T: AsRawSocket> AsRawFd for T {
@@ -43,7 +43,7 @@ pub(crate) mod fd {
     pub trait IntoRawFd {
         /// A version of [`into_raw_fd`] for use with Winsock API.
         ///
-        /// [`into_raw_fd`]: https://doc.rust-lang.org/stable/std/os/fd/trait.FromRawFd.html#tymethod.into_raw_fd
+        /// [`into_raw_fd`]: https://doc.rust-lang.org/stable/std/os/fd/trait.IntoRawFd.html#tymethod.into_raw_fd
         fn into_raw_fd(self) -> RawFd;
     }
     impl<T: IntoRawSocket> IntoRawFd for T {

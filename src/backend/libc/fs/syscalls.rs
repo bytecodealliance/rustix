@@ -1287,7 +1287,7 @@ pub(crate) fn fadvise(
     // also avoid exposing this artifact of casting an unsigned value to the
     // signed type. To do this, we use a no-op call in this case.
     //
-    // [Rust convention]: https://doc.rust-lang.org/stable/std/io/enum.SeekFrom.html#variant.Start
+    // [Rust convention]: std::io::SeekFrom::Start
     #[cfg(target_os = "freebsd")]
     if offset < 0 {
         if len < 0 {

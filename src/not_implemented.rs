@@ -25,7 +25,7 @@ macro_rules! not_implemented {
 ///
 /// [dlmalloc]: https://crates.io/crates/dlmalloc
 /// [talc]: https://crates.io/crates/talc
-/// [rustix-dlmalloc]: https://github.com/sunfishcode/rustix-dlmalloc
+/// [rustix-dlmalloc]: https://crates.io/crates/rustix-dlmalloc
 pub mod memory_allocation {
     not_implemented!(malloc);
     not_implemented!(realloc);
@@ -223,15 +223,15 @@ pub mod higher_level {
     not_implemented!(execvpe);
     not_implemented!(wordexp);
 
-    /// See [rustix-openpty](https://github.com/sunfishcode/rustix-openpty).
+    /// See [rustix-openpty](https://crates.io/crates/rustix-openpty).
     pub fn closefrom() {
         unimplemented!()
     }
-    /// See [rustix-openpty](https://github.com/sunfishcode/rustix-openpty).
+    /// See [rustix-openpty](https://crates.io/crates/rustix-openpty).
     pub fn login_tty() {
         unimplemented!()
     }
-    /// See [rustix-openpty](https://github.com/sunfishcode/rustix-openpty).
+    /// See [rustix-openpty](https://crates.io/crates/rustix-openpty).
     pub fn openpty() {
         unimplemented!()
     }
@@ -241,9 +241,9 @@ pub mod higher_level {
     /// For Rust < 1.70, see [is-terminal]. For a rustix-based implementation,
     /// see [rustix-is-terminal].
     ///
-    /// [`std::io::IsTerminal`]: https://doc.rust-lang.org/stable/std/io/trait.IsTerminal.html
+    /// [`std::io::IsTerminal`]: std::io::IsTerminal
     /// [is-terminal]: https://crates.io/crates/is-terminal
-    /// [rustix-is-terminal]: https://github.com/sunfishcode/rustix-is-terminal
+    /// [rustix-is-terminal]: https://crates.io/crates/rustix-is-terminal
     pub fn isatty() {
         unimplemented!()
     }
