@@ -218,7 +218,7 @@ impl WaitIdStatus {
     #[cfg(not(any(target_os = "emscripten", target_os = "fuchsia", target_os = "netbsd")))]
     pub fn stopping_signal(&self) -> Option<i32> {
         if self.stopped() {
-            Some(self.si_status() as _)
+            Some(self.si_status())
         } else {
             None
         }
@@ -230,7 +230,7 @@ impl WaitIdStatus {
     #[cfg(not(any(target_os = "emscripten", target_os = "fuchsia", target_os = "netbsd")))]
     pub fn trapping_signal(&self) -> Option<i32> {
         if self.trapped() {
-            Some(self.si_status() as _)
+            Some(self.si_status())
         } else {
             None
         }
@@ -254,7 +254,7 @@ impl WaitIdStatus {
     #[cfg(not(any(target_os = "emscripten", target_os = "fuchsia", target_os = "netbsd")))]
     pub fn terminating_signal(&self) -> Option<i32> {
         if self.killed() || self.dumped() {
-            Some(self.si_status() as _)
+            Some(self.si_status())
         } else {
             None
         }
