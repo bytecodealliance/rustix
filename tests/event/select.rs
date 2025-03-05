@@ -104,8 +104,8 @@ fn test_select_with_great_fds() {
     }
     setrlimit(Resource::Nofile, rlimit).unwrap();
 
-    // Create a fd at `FD_SETSIZE + 1` out of thin air. Use `libc` instead of
-    // `OwnedFd::from_raw_fd` because grabbing a fd out of thin air violates
+    // Create an fd at `FD_SETSIZE + 1` out of thin air. Use `libc` instead of
+    // `OwnedFd::from_raw_fd` because grabbing an fd out of thin air violates
     // Rust's concept of I/O safety (and wouldn't make sense to do in anything
     // other than a test like this).
     let great_fd = unsafe { libc::dup2(reader.as_raw_fd(), libc::FD_SETSIZE as RawFd + 1) };
