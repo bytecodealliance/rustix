@@ -13,8 +13,6 @@ use crate::{backend, io};
 #[cfg(any(windows, target_os = "wasi"))]
 use core::mem::align_of;
 use core::mem::size_of;
-#[cfg(any(windows, target_os = "wasi"))]
-use core::slice;
 
 /// wasi-libc's `fd_set` type. The libc bindings for it have private fields, so
 /// we redeclare it for ourselves so that we can access the fields. They're
@@ -32,12 +30,9 @@ struct FD_SET {
 use windows_sys::Win32::Networking::WinSock::FD_SET;
 
 /// Storage element type for use with [`select`].
-#[cfg(any(
-    windows,
-    all(
-        target_pointer_width = "64",
-        any(target_os = "freebsd", target_os = "dragonfly")
-    )
+#[cfg(all(
+    target_pointer_width = "64",
+    any(windows, target_os = "freebsd", target_os = "dragonfly")
 ))]
 #[repr(transparent)]
 #[derive(Copy, Clone, Default)]
@@ -52,11 +47,10 @@ pub struct FdSetElement(pub(crate) c::c_ulong);
 /// Storage element type for use with [`select`].
 #[cfg(not(any(
     linux_like,
-    windows,
     target_os = "wasi",
     all(
         target_pointer_width = "64",
-        any(target_os = "freebsd", target_os = "dragonfly")
+        any(windows, target_os = "freebsd", target_os = "dragonfly")
     )
 )))]
 #[repr(transparent)]
@@ -145,12 +139,10 @@ pub fn fd_set_insert(fds: &mut [FdSetElement], fd: RawFd) {
     {
         let set = unsafe { &mut *fds.as_mut_ptr().cast::<FD_SET>() };
         let fd_count = set.fd_count;
-        let fd_array = unsafe { slice::from_raw_parts(set.fd_array.as_ptr(), fd_count as usize) };
+        let fd_array = &set.fd_array[..fd_count as usize];
 
-        if !fd_array.iter().any(|p| *p as RawFd == fd) {
-            let fd_array = unsafe {
-                slice::from_raw_parts_mut(set.fd_array.as_mut_ptr(), fd_count as usize + 1)
-            };
+        if !fd_array.contains(&(fd as _)) {
+            let fd_array = &mut set.fd_array[..fd_count as usize + 1];
             set.fd_count = fd_count + 1;
             fd_array[fd_count as usize] = fd as _;
         }
@@ -171,7 +163,7 @@ pub fn fd_set_remove(fds: &mut [FdSetElement], fd: RawFd) {
     {
         let set = unsafe { &mut *fds.as_mut_ptr().cast::<FD_SET>() };
         let fd_count = set.fd_count;
-        let fd_array = unsafe { slice::from_raw_parts(set.fd_array.as_ptr(), fd_count as usize) };
+        let fd_array = &set.fd_array[..fd_count as usize];
 
         if let Some(pos) = fd_array.iter().position(|p| *p as RawFd == fd) {
             set.fd_count = fd_count - 1;
@@ -197,7 +189,7 @@ pub fn fd_set_bound(fds: &[FdSetElement]) -> RawFd {
     {
         let set = unsafe { &*fds.as_ptr().cast::<FD_SET>() };
         let fd_count = set.fd_count;
-        let fd_array = unsafe { slice::from_raw_parts(set.fd_array.as_ptr(), fd_count as usize) };
+        let fd_array = &set.fd_array[..fd_count as usize];
         let mut max = 0;
         for fd in fd_array {
             if *fd >= max {
@@ -334,7 +326,7 @@ impl<'a> Iterator for FdSetIter<'a> {
 
         let set = unsafe { &*self.fds.as_ptr().cast::<FD_SET>() };
         let fd_count = set.fd_count;
-        let fd_array = unsafe { slice::from_raw_parts(set.fd_array.as_ptr(), fd_count as usize) };
+        let fd_array = &set.fd_array[..fd_count as usize];
 
         if current == fd_count as usize {
             return None;

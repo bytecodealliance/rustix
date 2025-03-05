@@ -79,11 +79,11 @@ pub(crate) mod fd {
     /// [`AsFd`]: https://doc.rust-lang.org/stable/std/os/fd/trait.AsFd.html
     pub trait AsFd {
         /// An `as_fd` function for Winsock, where an `Fd` is a `Socket`.
-        fn as_fd(&self) -> BorrowedFd;
+        fn as_fd(&self) -> BorrowedFd<'_>;
     }
     impl<T: AsSocket> AsFd for T {
         #[inline]
-        fn as_fd(&self) -> BorrowedFd {
+        fn as_fd(&self) -> BorrowedFd<'_> {
             self.as_socket()
         }
     }

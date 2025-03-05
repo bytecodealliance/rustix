@@ -21,7 +21,8 @@ mod select;
 
 #[cfg(windows)]
 mod windows {
-    use std::sync::OnceLock;
+    // With Rust 1.70 this can be `std::sync::OnceLock`.
+    use once_cell::sync::OnceCell as OnceLock;
 
     pub struct Thing;
 

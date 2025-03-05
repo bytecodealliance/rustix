@@ -809,7 +809,7 @@ pub(crate) fn tcp_congestion(fd: BorrowedFd<'_>) -> io::Result<String> {
     unsafe {
         let value = value.assume_init();
         let slice: &[u8] = core::mem::transmute(&value[..optlen as usize]);
-        assert!(slice.iter().any(|b| *b == b'\0'));
+        assert!(slice.contains(&b'\0'));
         Ok(
             core::str::from_utf8(CStr::from_ptr(slice.as_ptr().cast()).to_bytes())
                 .unwrap()
