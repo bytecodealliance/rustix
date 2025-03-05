@@ -1,6 +1,7 @@
 #[cfg(feature = "thread")]
 use rustix::thread::nanosleep;
-use rustix::time::{clock_gettime, rustix::time::Timespec, ClockId};
+use rustix::time::rustix::time::Timespec;
+use rustix::time::{clock_gettime, ClockId};
 
 /// Attempt to test that the monotonic clock is monotonic. Time may or may not
 /// advance, but it shouldn't regress.
