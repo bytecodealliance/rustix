@@ -78,6 +78,15 @@ pub mod libc_internals {
     not_implemented!(tkill);
     not_implemented!(sched_setscheduler);
     not_implemented!(rseq);
+    not_implemented!(setuid);
+    not_implemented!(setgid);
+    not_implemented!(seteuid);
+    not_implemented!(setegid);
+    not_implemented!(setreuid);
+    not_implemented!(setregid);
+    not_implemented!(setresuid);
+    not_implemented!(setresgid);
+    not_implemented!(setgroups);
 
     not_implemented!(pthread_atfork);
     not_implemented!(pthread_attr_destroy);
