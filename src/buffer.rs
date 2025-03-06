@@ -15,7 +15,7 @@ use core::slice;
 /// | If you pass a…           | You get back a… |
 /// | ------------------------ | --------------- |
 /// | `&mut [u8]`              | `usize`, indicating the number of elements initialized. |
-/// | `&mut [MaybeUninit<u8>]` | `(&mut [u8], &[mut MaybeUninit<u8>])`, holding the initialized and uninitialized subslices. |
+/// | `&mut [MaybeUninit<u8>]` | `(&mut [u8], &mut [MaybeUninit<u8>])`, holding the initialized and uninitialized subslices. |
 /// | [`SpareCapacity`]        | `usize`, indicating the number of elements initialized. And the `Vec` is extended. |
 ///
 /// # Examples
