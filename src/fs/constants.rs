@@ -42,11 +42,6 @@ impl FileType {
     pub fn is_block_device(self) -> bool {
         self == Self::BlockDevice
     }
-
-    /// Returns `true` if this `FileType` is unknown.
-    pub fn is_unknown(self) -> bool {
-        self == Self::Unknown
-    }
 }
 
 #[cfg(test)]
