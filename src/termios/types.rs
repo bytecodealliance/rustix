@@ -1159,6 +1159,9 @@ impl core::fmt::Debug for SpecialCode {
             write!(f, "^{}", (self.0 + 0x40) as char)
         } else if self.0 == 0x7f {
             write!(f, "^?")
+        } else if self.0 >= 0x80 {
+            write!(f, "M-")?;
+            (self.0 - 0x80).fmt(f)
         } else {
             write!(f, "{}", (self.0 as char))
         }
