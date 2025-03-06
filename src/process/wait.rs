@@ -72,7 +72,7 @@ bitflags! {
 }
 
 /// The status of a child process after calling [`wait`]/[`waitpid`].
-#[derive(Debug, Clone, Copy)]
+#[derive(Clone, Copy)]
 #[repr(transparent)]
 pub struct WaitStatus(i32);
 
@@ -91,24 +91,28 @@ impl WaitStatus {
 
     /// Returns whether the process is currently stopped.
     #[inline]
+    #[doc(alias = "WIFSTOPPED")]
     pub fn stopped(self) -> bool {
         backend::process::wait::WIFSTOPPED(self.0)
     }
 
     /// Returns whether the process has exited normally.
     #[inline]
+    #[doc(alias = "WIFEXITED")]
     pub fn exited(self) -> bool {
         backend::process::wait::WIFEXITED(self.0)
     }
 
     /// Returns whether the process was terminated by a signal.
     #[inline]
+    #[doc(alias = "WIFSIGNALED")]
     pub fn signaled(self) -> bool {
         backend::process::wait::WIFSIGNALED(self.0)
     }
 
     /// Returns whether the process has continued from a job control stop.
     #[inline]
+    #[doc(alias = "WIFCONTINUED")]
     pub fn continued(self) -> bool {
         backend::process::wait::WIFCONTINUED(self.0)
     }
@@ -116,6 +120,7 @@ impl WaitStatus {
     /// Returns the number of the signal that stopped the process, if the
     /// process was stopped by a signal.
     #[inline]
+    #[doc(alias = "WSTOPSIG")]
     pub fn stopping_signal(self) -> Option<i32> {
         if self.stopped() {
             Some(backend::process::wait::WSTOPSIG(self.0))
@@ -127,6 +132,7 @@ impl WaitStatus {
     /// Returns the exit status number returned by the process, if it exited
     /// normally.
     #[inline]
+    #[doc(alias = "WEXITSTATUS")]
     pub fn exit_status(self) -> Option<i32> {
         if self.exited() {
             Some(backend::process::wait::WEXITSTATUS(self.0))
@@ -138,12 +144,33 @@ impl WaitStatus {
     /// Returns the number of the signal that terminated the process, if the
     /// process was terminated by a signal.
     #[inline]
+    #[doc(alias = "WTERMSIG")]
     pub fn terminating_signal(self) -> Option<i32> {
         if self.signaled() {
             Some(backend::process::wait::WTERMSIG(self.0))
         } else {
             None
         }
+    }
+}
+
+impl fmt::Debug for WaitStatus {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut s = f.debug_struct("WaitStatus");
+        s.field("stopped", &self.stopped());
+        s.field("exited", &self.exited());
+        s.field("signaled", &self.signaled());
+        s.field("continued", &self.continued());
+        if let Some(stopping_signal) = self.stopping_signal() {
+            s.field("stopping_signal", &stopping_signal);
+        }
+        if let Some(exit_status) = self.exit_status() {
+            s.field("exit_status", &exit_status);
+        }
+        if let Some(terminating_signal) = self.terminating_signal() {
+            s.field("terminating_signal", &terminating_signal);
+        }
+        s.finish()
     }
 }
 

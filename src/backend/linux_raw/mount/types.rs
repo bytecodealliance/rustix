@@ -304,8 +304,8 @@ bitflags! {
         /// Mount and unmount events propagate from the upstream peer group
         /// into the downstream.
         ///
-        /// In Linux documentation, this flag is named <code>MS_SLAVE</code>,
-        /// and the concepts of “upstream” and “downstream” are called
+        /// In Linux documentation, this flag is named `MS_SLAVE`, and the
+        /// concepts of “upstream” and “downstream” are called
         /// “master” and “slave”.
         #[doc(alias = "SLAVE")]
         const DOWNSTREAM = linux_raw_sys::general::MS_SLAVE;

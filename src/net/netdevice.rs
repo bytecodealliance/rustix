@@ -34,7 +34,7 @@ use alloc::string::String;
 #[inline]
 #[doc(alias = "SIOCGIFINDEX")]
 pub fn name_to_index<Fd: AsFd>(fd: Fd, if_name: &str) -> io::Result<u32> {
-    crate::backend::net::netdevice::name_to_index(fd, if_name)
+    crate::backend::net::netdevice::name_to_index(fd.as_fd(), if_name)
 }
 
 /// `ioctl(fd, SIOCGIFNAME, ifreq)`—Returns the interface name for a given
@@ -52,7 +52,7 @@ pub fn name_to_index<Fd: AsFd>(fd: Fd, if_name: &str) -> io::Result<u32> {
 #[cfg(feature = "alloc")]
 #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
 pub fn index_to_name<Fd: AsFd>(fd: Fd, index: u32) -> io::Result<String> {
-    crate::backend::net::netdevice::index_to_name(fd, index)
+    crate::backend::net::netdevice::index_to_name(fd.as_fd(), index)
 }
 
 #[cfg(test)]
