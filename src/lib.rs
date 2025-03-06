@@ -89,13 +89,12 @@
 //! [`cap-std`]: https://crates.io/crates/cap-std
 //! [`system-interface`]: https://crates.io/crates/system-interface
 //! [`io-streams`]: https://crates.io/crates/io-streams
-//! [`getrandom`]: https://crates.io/crates/getrandom
-//! [`bitflags`]: https://crates.io/crates/bitflags
-//! [`AsFd`]: https://doc.rust-lang.org/stable/std/os/fd/trait.AsFd.html
-//! [`OwnedFd`]: https://doc.rust-lang.org/stable/std/os/fd/struct.OwnedFd.html
+//! [`bitflags`]: bitflags
+//! [`AsFd`]: crate::fd::AsFd
+//! [`OwnedFd`]: crate::fd::OwnedFd
 //! [I/O-safe]: https://github.com/rust-lang/rfcs/blob/master/text/3128-io-safety.md
 //! [`Arg`]: path::Arg
-//! [support for externally defined flags]: https://docs.rs/bitflags/*/bitflags/#externally-defined-flags
+//! [support for externally defined flags]: bitflags#externally-defined-flags
 
 #![deny(missing_docs)]
 #![allow(stable_features)]

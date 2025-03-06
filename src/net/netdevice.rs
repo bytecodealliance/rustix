@@ -34,7 +34,7 @@ use alloc::string::String;
 #[inline]
 #[doc(alias = "SIOCGIFINDEX")]
 pub fn name_to_index<Fd: AsFd>(fd: Fd, if_name: &str) -> io::Result<u32> {
-    crate::backend::net::netdevice::name_to_index(fd, if_name)
+    crate::backend::net::netdevice::name_to_index(fd.as_fd(), if_name)
 }
 
 /// `ioctl(fd, SIOCGIFNAME, ifreq)`—Returns the interface name for a given
@@ -52,12 +52,13 @@ pub fn name_to_index<Fd: AsFd>(fd: Fd, if_name: &str) -> io::Result<u32> {
 #[cfg(feature = "alloc")]
 #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
 pub fn index_to_name<Fd: AsFd>(fd: Fd, index: u32) -> io::Result<String> {
-    crate::backend::net::netdevice::index_to_name(fd, index)
+    crate::backend::net::netdevice::index_to_name(fd.as_fd(), index)
 }
 
 #[cfg(test)]
 mod tests {
     use crate::backend::net::netdevice::{index_to_name, name_to_index};
+    use crate::fd::AsFd;
     use crate::net::{AddressFamily, SocketFlags, SocketType};
 
     #[test]
@@ -77,7 +78,7 @@ mod tests {
             .0
             .parse::<u32>()
             .unwrap();
-        assert_eq!(Ok(loopback_index), name_to_index(fd, "lo"));
+        assert_eq!(Ok(loopback_index), name_to_index(fd.as_fd(), "lo"));
     }
 
     #[test]
@@ -98,6 +99,9 @@ mod tests {
             .0
             .parse::<u32>()
             .unwrap();
-        assert_eq!(Ok("lo".to_owned()), index_to_name(fd, loopback_index));
+        assert_eq!(
+            Ok("lo".to_owned()),
+            index_to_name(fd.as_fd(), loopback_index)
+        );
     }
 }

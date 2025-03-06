@@ -215,7 +215,15 @@ impl core::fmt::Debug for Termios {
         let mut d = f.debug_struct("Termios");
         d.field("input_modes", &self.input_modes);
         d.field("output_modes", &self.output_modes);
+
+        // This includes any bits set in the `CBAUD` and `CIBAUD` ranges, which
+        // is a little ugly, because we also decode those bits for the speeds
+        // below. However, it seems better to print them here than to hide
+        // them, because hiding them would make the `Termios` debug output
+        // appear to disagree with the `ControlModes` debug output for the same
+        // value, which could be confusing.
         d.field("control_modes", &self.control_modes);
+
         d.field("local_modes", &self.local_modes);
         #[cfg(any(
             linux_like,
@@ -225,7 +233,7 @@ impl core::fmt::Debug for Termios {
             target_os = "redox"
         ))]
         {
-            d.field("line_discipline", &self.line_discipline);
+            d.field("line_discipline", &SpecialCode(self.line_discipline));
         }
         d.field("special_codes", &self.special_codes);
         d.field("input_speed", &self.input_speed());
@@ -520,9 +528,11 @@ bitflags! {
 bitflags! {
     /// Flags controlling special terminal modes.
     ///
-    /// `CBAUD`, `CBAUDEX`, `CIBAUD`, and `CIBAUDEX` are not defined here,
-    /// because they're handled automatically by [`Termios::set_speed`] and
-    /// related functions.
+    /// `CBAUD`, `CBAUDEX`, `CIBAUD`, `CIBAUDEX`, and various `B*` speed
+    /// constants are often included in the control modes, however rustix
+    /// handles them separately, in [`Termios::set_speed`] and related
+    /// functions. If you see extra bits in the `Debug` output, they're
+    /// probably these flags.
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct ControlModes: types::tcflag_t {
@@ -1100,7 +1110,7 @@ pub mod speed {
 /// An array indexed by [`SpecialCodeIndex`] indicating the current values of
 /// various special control codes.
 #[repr(transparent)]
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct SpecialCodes(pub(crate) [c::cc_t; c::NCCS as usize]);
 
 impl core::ops::Index<SpecialCodeIndex> for SpecialCodes {
@@ -1114,6 +1124,47 @@ impl core::ops::Index<SpecialCodeIndex> for SpecialCodes {
 impl core::ops::IndexMut<SpecialCodeIndex> for SpecialCodes {
     fn index_mut(&mut self, index: SpecialCodeIndex) -> &mut Self::Output {
         &mut self.0[index.0]
+    }
+}
+
+impl core::fmt::Debug for SpecialCodes {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "SpecialCodes {{")?;
+        let mut first = true;
+        for i in 0..self.0.len() {
+            if first {
+                write!(f, " ")?;
+            } else {
+                write!(f, ", ")?;
+            }
+            first = false;
+            let index = SpecialCodeIndex(i);
+            write!(f, "{:?}: {:?}", index, SpecialCode(self[index]))?;
+        }
+        if !first {
+            write!(f, " ")?;
+        }
+        write!(f, "}}")
+    }
+}
+
+/// A newtype for pretty printing.
+struct SpecialCode(u8);
+
+impl core::fmt::Debug for SpecialCode {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        if self.0 == 0 {
+            write!(f, "<undef>")
+        } else if self.0 < 0x20 {
+            write!(f, "^{}", (self.0 + 0x40) as char)
+        } else if self.0 == 0x7f {
+            write!(f, "^?")
+        } else if self.0 >= 0x80 {
+            write!(f, "M-")?;
+            SpecialCode(self.0 - 0x80).fmt(f)
+        } else {
+            write!(f, "{}", (self.0 as char))
+        }
     }
 }
 

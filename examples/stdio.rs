@@ -348,6 +348,8 @@ fn key(b: u8) -> String {
         format!("^{}", (b + 0x40) as char)
     } else if b == 0x7f {
         "^?".to_string()
+    } else if b >= 0x80 {
+        format!("M-{}", key(b - 0x80))
     } else {
         format!("{}", b as char)
     }

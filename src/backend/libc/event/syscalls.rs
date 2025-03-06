@@ -421,7 +421,7 @@ pub(crate) unsafe fn port_getn(
     };
 
     // `port_getn` special-cases a max value of 0 to be a query that returns
-    // the number of events, so so bail out early if needed.
+    // the number of events, so bail out early if needed.
     if events.1 == 0 {
         return Ok(0);
     }

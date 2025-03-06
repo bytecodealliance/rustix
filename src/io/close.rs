@@ -10,7 +10,7 @@ use backend::fd::RawFd;
 
 /// `close(raw_fd)`—Closes a `RawFd` directly.
 ///
-/// Most users won't need to use this, as `OwnedFd` automatically closes its
+/// Most users won't need to use this, as [`OwnedFd`] automatically closes its
 /// file descriptor on `Drop`.
 ///
 /// This function does not return a `Result`, as it is the [responsibility] of
@@ -33,6 +33,7 @@ use backend::fd::RawFd;
 ///  - [illumos]
 ///  - [glibc]
 ///
+/// [`OwnedFd`]: crate::fd::OwnedFd
 /// [Beej's Guide to Network Programming]: https://beej.us/guide/bgnet/html/split/system-calls-or-bust.html#close-and-shutdownget-outta-my-face
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/close.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/close.2.html

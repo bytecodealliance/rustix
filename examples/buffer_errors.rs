@@ -70,7 +70,7 @@ fn error_retry_closure_uninit() {
 
     let mut event_buf = [MaybeUninit::<u8>::uninit(); 4];
 
-    // Ideally we'd write this, but it gets:
+    // It's tempting to write this, but it gets:
     // "captured variable cannot escape `FnMut` closure body".
     /*
     rustix::io::retry_on_intr(|| b(&mut event_buf)).unwrap();
