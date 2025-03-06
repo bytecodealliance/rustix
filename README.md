@@ -53,8 +53,8 @@ building.
 ## Cargo features
 
 The modules [`rustix::io`], [`rustix::fd`], [`rustix::ffi`], and
-[`rustix::ioctl`] are enabled by default. The rest of the API is conditional
-with cargo feature flags:
+[`rustix::ioctl`] are enabled by default. The rest of the API modules are
+conditional with cargo feature flags.
 
 | Name       | Description                                                    |
 | ---------- | -------------------------------------------------------------- |
@@ -77,6 +77,16 @@ with cargo feature flags:
 | `time`     | [`rustix::time`]—Time-related operations.                      |
 |            |                                                                |
 | `use-libc` | Enable the libc backend.                                       |
+|            |                                                                |
+| `linux_4_11`    | Enable optimizations that assume Linux ≥ 4.11             |
+| `linux_5_1`     | Enable optimizations that assume Linux ≥ 5.1              |
+| `linux_5_11`    | Enable optimizations that assume Linux ≥ 5.11             |
+| `linux_latest`  | Enable optimizations that assume the latest Linux release |
+|                 |                                                           |
+| `use-libc-auxv` | Use `getauxval` instead of `PR_GET_AUXV` or "/proc/self/auxv". |
+|                 |                                                           |
+| `std`      | On by default; disable to activate `#![no_std]`.               |
+| `alloc`    | On by default; enables features that depend on [`alloc`].      |
 
 [`rustix::event`]: https://docs.rs/rustix/*/rustix/event/index.html
 [`rustix::fs`]: https://docs.rs/rustix/*/rustix/fs/index.html
@@ -194,3 +204,4 @@ always reflect “very old” Linux versions.
 [`OwnedFd`]: https://doc.rust-lang.org/stable/std/os/fd/struct.OwnedFd.html
 [`AsFd`]: https://doc.rust-lang.org/stable/std/os/fd/trait.AsFd.html
 [`NOSYS`]: https://docs.rs/rustix/*/rustix/io/struct.Errno.html#associatedconstant.NOSYS
+[`alloc`]: https://doc.rust-lang.org/alloc/alloc/index.html

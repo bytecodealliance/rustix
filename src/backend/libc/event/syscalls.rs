@@ -379,7 +379,7 @@ pub(crate) fn port_get(port: BorrowedFd<'_>, timeout: Option<&Timespec>) -> io::
 
     let mut event = MaybeUninit::<c::port_event>::uninit();
 
-    // In Rust >= 1.65, the `as _` can be `.cast_mut()`.
+    // In Rust ≥ 1.65, the `as _` can be `.cast_mut()`.
     unsafe {
         ret(c::port_get(
             borrowed_fd(port),
@@ -426,7 +426,7 @@ pub(crate) unsafe fn port_getn(
         return Ok(0);
     }
 
-    // In Rust >= 1.65, the `as _` can be `.cast_mut()`.
+    // In Rust ≥ 1.65, the `as _` can be `.cast_mut()`.
     ret(c::port_getn(
         borrowed_fd(port),
         events.0.cast(),
@@ -538,7 +538,7 @@ pub(crate) unsafe fn epoll_wait(
     events: (*mut crate::event::epoll::Event, usize),
     timeout: Option<&Timespec>,
 ) -> io::Result<usize> {
-    // If we're on Linux >= 5.11 and a libc that has an `epoll_pwait2`
+    // If we're on Linux ≥ 5.11 and a libc that has an `epoll_pwait2`
     // function, and it's y2038-safe, use it.
     #[cfg(all(
         linux_kernel,
@@ -569,7 +569,7 @@ pub(crate) unsafe fn epoll_wait(
         }
     }
 
-    // If we're on Linux >= 5.11, use `epoll_pwait2` via `libc::syscall`.
+    // If we're on Linux ≥ 5.11, use `epoll_pwait2` via `libc::syscall`.
     #[cfg(all(linux_kernel, feature = "linux_5_11"))]
     {
         syscall! {

@@ -204,11 +204,13 @@ static RANDOM: AtomicPtr<[u8; 16]> = AtomicPtr::new(null_mut());
 
 const PR_GET_AUXV: c::c_int = 0x4155_5856;
 
-/// Use Linux ≥ 6.4's `PR_GET_AUXV` to read the aux records, into a provided
+/// Use Linux ≥ 6.4's [`PR_GET_AUXV`] to read the aux records, into a provided
 /// statically-sized buffer. Return:
 ///  - `Ok(…)` if the buffer is big enough.
 ///  - `Err(Ok(len))` if we need a buffer of length `len`.
 ///  - `Err(Err(err))` if we failed with `err`.
+///
+///  [`PR_GET_AUXV`]: https://www.man7.org/linux/man-pages/man2/PR_GET_AUXV.2const.html
 #[cold]
 fn pr_get_auxv_static(buffer: &mut [u8; 512]) -> Result<&mut [u8], crate::io::Result<usize>> {
     let len = unsafe {
@@ -228,11 +230,13 @@ fn pr_get_auxv_static(buffer: &mut [u8; 512]) -> Result<&mut [u8], crate::io::Re
     Err(Ok(len))
 }
 
-/// Use Linux ≥ 6.4's `PR_GET_AUXV` to read the aux records, using a provided
-/// statically-sized buffer if possible, or a dynamically allocated buffer
-/// otherwise. Return:
+/// Use Linux ≥ 6.4's [`PR_GET_AUXV`] to read the aux records, using a
+/// provided statically-sized buffer if possible, or a dynamically allocated
+/// buffer otherwise. Return:
 ///  - Ok(…) on success.
 ///  - Err(err) on failure.
+///
+///  [`PR_GET_AUXV`]: https://www.man7.org/linux/man-pages/man2/PR_GET_AUXV.2const.html
 #[cfg(feature = "alloc")]
 #[cold]
 fn pr_get_auxv_dynamic(buffer: &mut [u8; 512]) -> crate::io::Result<Cow<'_, [u8]>> {
@@ -278,6 +282,7 @@ fn maybe_init_auxv() {
 /// /proc/self/auxv for kernels that don't support `PR_GET_AUXV`.
 #[cold]
 fn init_auxv_impl() -> Result<(), ()> {
+    // 512 AUX elements ought to be enough for anybody…
     let mut buffer = [0_u8; 512];
 
     // If we don't have "alloc", just try to read into our statically-sized

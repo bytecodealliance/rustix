@@ -556,7 +556,7 @@ impl Default for Wait {
 /// `futex_waitv(waiters.as_ptr(), waiters.len(), flags, timeout, clockd)`—
 /// Wait on an array of futexes, wake on any.
 ///
-/// This requires Linux >= 5.16.
+/// This requires Linux ≥ 5.16.
 ///
 /// # References
 ///  - [Linux]
