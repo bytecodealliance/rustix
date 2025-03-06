@@ -487,10 +487,7 @@ unsafe fn check_elf_base(base: *const Elf_Ehdr) -> Option<NonNull<Elf_Ehdr>> {
         return None;
     }
 
-    let hdr = match check_raw_pointer::<Elf_Ehdr>(base as *mut _) {
-        Some(hdr) => hdr,
-        None => return None,
-    };
+    let hdr = check_raw_pointer::<Elf_Ehdr>(base as *mut _)?;
 
     let hdr = hdr.as_ref();
     if hdr.e_ident[..SELFMAG] != ELFMAG {
