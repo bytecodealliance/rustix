@@ -9,6 +9,8 @@ use crate::fd::{AsFd, BorrowedFd, OwnedFd};
 use crate::io::{self, IoSlice, IoSliceMut};
 use crate::net::addr::SocketAddrArg;
 #[cfg(linux_kernel)]
+use crate::net::Ipv6PktInfo;
+#[cfg(linux_kernel)]
 use crate::net::UCred;
 use core::iter::FusedIterator;
 use core::marker::PhantomData;
@@ -66,6 +68,11 @@ macro_rules! cmsg_space {
             $len * ::core::mem::size_of::<$crate::net::UCred>(),
         )
     };
+    (Ipv6PktInfo) => {
+        $crate::net::__cmsg_space(
+            ::core::mem::size_of::<$crate::net::Ipv6PktInfo>(),
+        )
+    };
 
     // Combo Rules
     ($firstid:ident($firstex:expr), $($restid:ident($restex:expr)),*) => {{
@@ -92,6 +99,11 @@ macro_rules! cmsg_aligned_space {
     (ScmCredentials($len:expr)) => {
         $crate::net::__cmsg_aligned_space(
             $len * ::core::mem::size_of::<$crate::net::UCred>(),
+        )
+    };
+    (Ipv6PktInfo) => {
+        $crate::net::__cmsg_aligned_space(
+            ::core::mem::size_of::<$crate::net::Ipv6PktInfo>(),
         )
     };
 
@@ -138,6 +150,10 @@ pub enum SendAncillaryMessage<'slice, 'fd> {
     #[cfg(linux_kernel)]
     #[doc(alias = "SCM_CREDENTIAL")]
     ScmCredentials(UCred),
+    /// IPv6 option to specify source address and outgoing interface index
+    #[cfg(linux_kernel)]
+    #[doc(alias = "IPV6_PKTINFO")]
+    Ipv6PktInfo(Ipv6PktInfo),
 }
 
 impl SendAncillaryMessage<'_, '_> {
@@ -149,6 +165,8 @@ impl SendAncillaryMessage<'_, '_> {
             Self::ScmRights(slice) => cmsg_space!(ScmRights(slice.len())),
             #[cfg(linux_kernel)]
             Self::ScmCredentials(_) => cmsg_space!(ScmCredentials(1)),
+            #[cfg(linux_kernel)]
+            Self::Ipv6PktInfo(_) => cmsg_space!(Ipv6PktInfo),
         }
     }
 }
@@ -289,6 +307,20 @@ impl<'buf, 'slice, 'fd> SendAncillaryBuffer<'buf, 'slice, 'fd> {
                     slice::from_raw_parts(addr_of!(ucred).cast::<u8>(), size_of_val(&ucred))
                 };
                 self.push_ancillary(ucred_bytes, c::SOL_SOCKET as _, c::SCM_CREDENTIALS as _)
+            }
+            #[cfg(linux_kernel)]
+            SendAncillaryMessage::Ipv6PktInfo(ipv6_pktinfo) => {
+                let ipv6_pktinfo_bytes = unsafe {
+                    slice::from_raw_parts(
+                        addr_of!(ipv6_pktinfo).cast::<u8>(),
+                        size_of_val(&ipv6_pktinfo),
+                    )
+                };
+                self.push_ancillary(
+                    ipv6_pktinfo_bytes,
+                    c::IPPROTO_IPV6 as _,
+                    linux_raw_sys::net::IPV6_PKTINFO as _,
+                )
             }
         }
     }
