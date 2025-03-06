@@ -58,6 +58,7 @@ pub fn index_to_name<Fd: AsFd>(fd: Fd, index: u32) -> io::Result<String> {
 #[cfg(test)]
 mod tests {
     use crate::backend::net::netdevice::{index_to_name, name_to_index};
+    use crate::fd::AsFd;
     use crate::net::{AddressFamily, SocketFlags, SocketType};
 
     #[test]
@@ -77,7 +78,7 @@ mod tests {
             .0
             .parse::<u32>()
             .unwrap();
-        assert_eq!(Ok(loopback_index), name_to_index(fd, "lo"));
+        assert_eq!(Ok(loopback_index), name_to_index(fd.as_fd(), "lo"));
     }
 
     #[test]
@@ -98,6 +99,9 @@ mod tests {
             .0
             .parse::<u32>()
             .unwrap();
-        assert_eq!(Ok("lo".to_owned()), index_to_name(fd, loopback_index));
+        assert_eq!(
+            Ok("lo".to_owned()),
+            index_to_name(fd.as_fd(), loopback_index)
+        );
     }
 }
