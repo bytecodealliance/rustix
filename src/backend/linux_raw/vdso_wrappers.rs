@@ -410,29 +410,34 @@ unsafe extern "C" fn getcpu_via_syscall(
 
 #[cfg(target_arch = "x86")]
 extern "C" {
-    /// A symbol pointing to an `int 0x80` instruction. This “function” is only
-    /// called from assembly, and only with the x86 syscall calling convention,
-    /// so its signature here is not its true signature.
+    /// A symbol pointing to an x86 `int 0x80` instruction. This “function”
+    /// is only called from assembly, and only with the x86 syscall calling
+    /// convention, so its signature here is not its true signature.
     ///
     /// This extern block and the `global_asm!` below can be replaced with
     /// `#[naked]` if it's stabilized.
-    fn rustix_int_0x80();
+    fn rustix_x86_int_0x80();
 }
 
+// This uses `.weak` so that it doesn't conflict if multiple versions of rustix
+// are linked in in non-lto builds, and `.ifndef` so that it doesn't conflict
+// if multiple versions of rustix are linked in in lto builds.
 #[cfg(target_arch = "x86")]
 global_asm!(
     r#"
-    .section    .text.rustix_int_0x80,"ax",@progbits
+    .ifndef     rustix_x86_int_0x80
+    .section    .text.rustix_x86_int_0x80,"ax",@progbits
     .p2align    4
-    .weak       rustix_int_0x80
-    .hidden     rustix_int_0x80
-    .type       rustix_int_0x80, @function
-rustix_int_0x80:
+    .weak       rustix_x86_int_0x80
+    .hidden     rustix_x86_int_0x80
+    .type       rustix_x86_int_0x80, @function
+rustix_x86_int_0x80:
     .cfi_startproc
     int    0x80
     ret
     .cfi_endproc
-    .size rustix_int_0x80, .-rustix_int_0x80
+    .size rustix_x86_int_0x80, .-rustix_x86_int_0x80
+    .endif
 "#
 );
 
@@ -478,7 +483,7 @@ fn minimal_init() {
         SYSCALL
             .compare_exchange(
                 null_mut(),
-                rustix_int_0x80 as *mut Function,
+                rustix_x86_int_0x80 as *mut Function,
                 Relaxed,
                 Relaxed,
             )
