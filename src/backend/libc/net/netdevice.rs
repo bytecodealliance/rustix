@@ -43,7 +43,7 @@ pub(crate) fn index_to_name(fd: BorrowedFd<'_>, index: u32) -> io::Result<(usize
             buf[idx] = *c as u8;
         });
 
-        Ok((nul_byte, ifreq.ifr_name))
+        Ok((nul_byte, buf))
     } else {
         Err(io::Errno::INVAL)
     }
