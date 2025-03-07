@@ -37,7 +37,10 @@ fn test_port_timeout_assumption() {
         assert_eq!(libc_errno::errno().0, libc::ETIME);
         assert_eq!(r, -1);
 
-        assert_eq!(timeout, orig_timeout);
+        assert_eq!(
+            (timeout.tv_sec, timeout.tv_nsec),
+            (orig_timeout.tv_sec, orig_timeout.tv_nsec)
+        );
     }
 }
 
@@ -72,7 +75,10 @@ fn test_port_event_assumption() {
         let r = libc::port_get(port, &mut event, &mut timeout);
         assert_ne!(r, -1);
 
-        assert_eq!(timeout, orig_timeout);
+        assert_eq!(
+            (timeout.tv_sec, timeout.tv_nsec),
+            (orig_timeout.tv_sec, orig_timeout.tv_nsec)
+        );
         assert_eq!(event.portev_user, 7 as *mut c_void);
     }
 }
@@ -154,7 +160,10 @@ fn test_port_delay_assumption() {
             let r = libc::port_get(port, &mut event, &mut timeout);
             assert_ne!(r, -1, "port_get: {:?}", std::io::Error::last_os_error());
 
-            assert_eq!(timeout, orig_timeout);
+            assert_eq!(
+                (timeout.tv_sec, timeout.tv_nsec),
+                (orig_timeout.tv_sec, orig_timeout.tv_nsec)
+            );
             assert_eq!(event.portev_user, (9 + i) as *mut c_void);
 
             let mut buf = [0_u8; 1];
