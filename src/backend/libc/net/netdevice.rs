@@ -40,6 +40,11 @@ pub(crate) fn index_to_name(fd: BorrowedFd<'_>, index: u32) -> io::Result<(usize
     unsafe { ioctl(fd, SIOCGIFNAME as _, &mut ifreq as *mut ifreq as _) }?;
 
     if let Some(nul_byte) = ifreq.ifr_name.iter().position(|char| *char == 0) {
+        let mut buf = [0u8; 16];
+        ifreq.ifr_name.iter().enumerate().for_each(|(idx, c)| {
+            buf[idx] = *c as u8;
+        });
+
         Ok((nul_byte, ifreq.ifr_name))
     } else {
         Err(io::Errno::INVAL)
