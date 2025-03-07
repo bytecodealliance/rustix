@@ -6,9 +6,7 @@ use crate::backend::c;
 use crate::backend::io::syscalls::ioctl;
 use crate::fd::BorrowedFd;
 use crate::io;
-#[cfg(feature = "alloc")]
-use c::SIOCGIFNAME;
-use c::{__c_anonymous_ifr_ifru, c_char, ifreq, IFNAMSIZ, SIOCGIFINDEX};
+use c::{__c_anonymous_ifr_ifru, c_char, ifreq, IFNAMSIZ, SIOCGIFINDEX, SIOCGIFNAME};
 
 pub(crate) fn name_to_index(fd: BorrowedFd<'_>, if_name: &str) -> io::Result<u32> {
     let if_name_bytes = if_name.as_bytes();
