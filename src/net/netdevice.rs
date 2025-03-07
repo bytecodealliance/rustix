@@ -113,7 +113,7 @@ impl AsRef<[u8]> for InlinedName {
 impl AsRef<str> for InlinedName {
     fn as_ref(&self) -> &str {
         // SAFETY: `InlinedName` is constructed with valid UTF-8.
-        unsafe { core::str::from_utf8_unchecked(&self.name[..self.len]) }
+        core::str::from_utf8(&self.name[..self.len]).unwrap()
     }
 }
 

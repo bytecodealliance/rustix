@@ -8,9 +8,7 @@ use crate::io;
 use core::ptr::addr_of_mut;
 use core::{slice, str};
 use linux_raw_sys::ctypes::c_char;
-use linux_raw_sys::ioctl::SIOCGIFINDEX;
-#[cfg(feature = "alloc")]
-use linux_raw_sys::ioctl::SIOCGIFNAME;
+use linux_raw_sys::ioctl::{SIOCGIFINDEX, SIOCGIFNAME};
 use linux_raw_sys::net::{ifreq, ifreq__bindgen_ty_1, ifreq__bindgen_ty_2, IFNAMSIZ};
 
 pub(crate) fn name_to_index(fd: BorrowedFd<'_>, if_name: &str) -> io::Result<u32> {
@@ -61,7 +59,7 @@ pub(crate) fn index_to_name(fd: BorrowedFd<'_>, index: u32) -> io::Result<(usize
         let mut name_buf = [0; 16];
         name_buf[..ifrn_name.len()].copy_from_slice(ifrn_name);
 
-        Ok(nul_byte, name_buf)
+        Ok((nul_byte, name_buf))
     } else {
         Err(io::Errno::INVAL)
     }
