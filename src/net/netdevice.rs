@@ -19,7 +19,7 @@
 use crate::fd::AsFd;
 use crate::io;
 #[cfg(feature = "alloc")]
-use alloc::string::String;
+use alloc::{borrow::ToOwned, string::String};
 
 /// `ioctl(fd, SIOCGIFINDEX, ifreq)`—Returns the interface index for a given
 /// name.
