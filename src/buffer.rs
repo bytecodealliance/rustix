@@ -318,7 +318,8 @@ mod tests {
         use crate::io::read;
         use core::mem::MaybeUninit;
 
-        let input = std::fs::File::open("Cargo.toml").unwrap();
+        // We need to obtain input stream, so open our own source file.
+        let input = std::fs::File::open("src/buffer.rs").unwrap();
 
         let mut buf = vec![0_u8; 3];
         buf.reserve(32);
@@ -357,12 +358,14 @@ mod tests {
         use crate::io::read;
         use std::io::{Seek, SeekFrom};
 
-        let mut input = std::fs::File::open("Cargo.toml").unwrap();
+        // We need to obtain input stream with contents that we can compare
+        // against, so open our own source file.
+        let mut input = std::fs::File::open("src/buffer.rs").unwrap();
 
         let mut buf = [0_u8; 64];
         let nread = read(&input, &mut buf).unwrap();
         assert_eq!(nread, buf.len());
-        assert_eq!(&buf[..9], b"[package]");
+        assert_eq!(&buf[..38], b"//! Utilities to help with buffering.\n");
         input.seek(SeekFrom::End(-1)).unwrap();
         let nread = read(&input, &mut buf).unwrap();
         assert_eq!(nread, 1);
@@ -378,16 +381,18 @@ mod tests {
         use core::mem::MaybeUninit;
         use std::io::{Seek, SeekFrom};
 
-        let mut input = std::fs::File::open("Cargo.toml").unwrap();
+        // We need to obtain input stream with contents that we can compare
+        // against, so open our own source file.
+        let mut input = std::fs::File::open("src/buffer.rs").unwrap();
 
         let mut buf = [MaybeUninit::<u8>::uninit(); 64];
         let (init, uninit) = read(&input, &mut buf).unwrap();
         assert_eq!(uninit.len(), 0);
-        assert_eq!(&init[..9], b"[package]");
+        assert_eq!(&init[..38], b"//! Utilities to help with buffering.\n");
         assert_eq!(init.len(), buf.len());
         assert_eq!(
-            unsafe { core::mem::transmute::<&mut [MaybeUninit<u8>], &mut [u8]>(&mut buf[..9]) },
-            b"[package]"
+            unsafe { core::mem::transmute::<&mut [MaybeUninit<u8>], &mut [u8]>(&mut buf[..38]) },
+            b"//! Utilities to help with buffering.\n"
         );
         input.seek(SeekFrom::End(-1)).unwrap();
         let (init, uninit) = read(&input, &mut buf).unwrap();
@@ -405,13 +410,15 @@ mod tests {
         use crate::io::read;
         use std::io::{Seek, SeekFrom};
 
-        let mut input = std::fs::File::open("Cargo.toml").unwrap();
+        // We need to obtain input stream with contents that we can compare
+        // against, so open our own source file.
+        let mut input = std::fs::File::open("src/buffer.rs").unwrap();
 
         let mut buf = Vec::with_capacity(64);
         let nread = read(&input, spare_capacity(&mut buf)).unwrap();
         assert_eq!(nread, buf.capacity());
         assert_eq!(nread, buf.len());
-        assert_eq!(&buf[..9], b"[package]");
+        assert_eq!(&buf[..38], b"//! Utilities to help with buffering.\n");
         buf.clear();
         input.seek(SeekFrom::End(-1)).unwrap();
         let nread = read(&input, spare_capacity(&mut buf)).unwrap();
