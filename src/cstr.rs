@@ -54,24 +54,30 @@ macro_rules! cstr {
     }};
 }
 
-#[test]
-fn test_cstr() {
-    use crate::ffi::CString;
-    use alloc::borrow::ToOwned as _;
-    assert_eq!(cstr!(""), &*CString::new("").unwrap());
-    assert_eq!(cstr!("").to_owned(), CString::new("").unwrap());
-    assert_eq!(cstr!("hello"), &*CString::new("hello").unwrap());
-    assert_eq!(cstr!("hello").to_owned(), CString::new("hello").unwrap());
-}
+#[cfg(test)]
+mod tests {
+    #[allow(unused_imports)]
+    use super::*;
 
-#[test]
-#[should_panic]
-fn test_invalid_cstr() {
-    let _ = cstr!("hello\0world");
-}
+    #[test]
+    fn test_cstr() {
+        use crate::ffi::CString;
+        use alloc::borrow::ToOwned as _;
+        assert_eq!(cstr!(""), &*CString::new("").unwrap());
+        assert_eq!(cstr!("").to_owned(), CString::new("").unwrap());
+        assert_eq!(cstr!("hello"), &*CString::new("hello").unwrap());
+        assert_eq!(cstr!("hello").to_owned(), CString::new("hello").unwrap());
+    }
 
-#[test]
-#[should_panic]
-fn test_invalid_empty_cstr() {
-    let _ = cstr!("\0");
+    #[test]
+    #[should_panic]
+    fn test_invalid_cstr() {
+        let _ = cstr!("hello\0world");
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_invalid_empty_cstr() {
+        let _ = cstr!("\0");
+    }
 }
