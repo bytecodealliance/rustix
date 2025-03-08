@@ -38,31 +38,23 @@
 //! serious problems.
 #![allow(unsafe_code)]
 
-use crate::backend;
-#[cfg(linux_raw)]
 use crate::ffi::CStr;
-#[cfg(linux_raw)]
 #[cfg(feature = "fs")]
 use crate::fs::AtFlags;
-#[cfg(linux_raw)]
-use crate::io;
-#[cfg(linux_raw)]
 use crate::pid::Pid;
-#[cfg(linux_raw)]
+use crate::{backend, io};
 #[cfg(feature = "fs")]
 use backend::fd::AsFd;
-#[cfg(linux_raw)]
 use core::ffi::c_void;
 
-#[cfg(linux_raw)]
-pub use crate::{kernel_sigset::KernelSigSet, signal::Signal};
+pub use crate::kernel_sigset::KernelSigSet;
+pub use crate::signal::Signal;
 
 /// `kernel_sigaction`
 ///
 /// On some architectures, the `sa_restorer` field is omitted.
 ///
 /// This type does not have the same layout as `libc::sigaction`.
-#[cfg(linux_raw)]
 #[allow(missing_docs)]
 #[derive(Debug, Default, Clone)]
 #[repr(C)]
@@ -172,7 +164,6 @@ pub const KERNEL_SIG_DFL: KernelSighandler = linux_raw_sys::signal_macros::SIG_D
 ///
 /// If we want to expose this in public APIs, we should encapsulate the
 /// `linux_raw_sys` type.
-#[cfg(linux_raw)]
 pub use linux_raw_sys::general::stack_t as Stack;
 
 /// `siginfo_t`
@@ -181,13 +172,11 @@ pub use linux_raw_sys::general::stack_t as Stack;
 ///
 /// If we want to expose this in public APIs, we should encapsulate the
 /// `linux_raw_sys` type.
-#[cfg(linux_raw)]
 pub use linux_raw_sys::general::siginfo_t as Siginfo;
 
 pub use crate::timespec::{Nsecs, Secs, Timespec};
 
 /// `SIG_*` constants for use with [`kernel_sigprocmask`].
-#[cfg(linux_raw)]
 #[repr(u32)]
 pub enum How {
     /// `SIG_BLOCK`
@@ -235,7 +224,6 @@ pub unsafe fn set_tid_address(data: *mut c_void) -> Pid {
     backend::runtime::syscalls::tls::set_tid_address(data)
 }
 
-#[cfg(linux_raw)]
 #[cfg(target_arch = "x86")]
 pub use backend::runtime::tls::UserDesc;
 
@@ -291,17 +279,6 @@ pub const EXIT_SUCCESS: i32 = backend::c::EXIT_SUCCESS;
 /// [Linux]: https://man7.org/linux/man-pages/man3/exit.3.html
 pub const EXIT_FAILURE: i32 = backend::c::EXIT_FAILURE;
 
-/// Return fields from the main executable segment headers ("phdrs") relevant
-/// to initializing TLS provided to the program at startup.
-///
-/// `addr` will always be non-null, even when the TLS data is absent, so that
-/// the `addr` and `file_size` parameters are suitable for creating a slice
-/// with `slice::from_raw_parts`.
-#[inline]
-pub fn startup_tls_info() -> StartupTlsInfo {
-    backend::runtime::tls::startup_tls_info()
-}
-
 /// `(getauxval(AT_PHDR), getauxval(AT_PHENT), getauxval(AT_PHNUM))`—Returns
 /// the address, ELF segment header size, and number of ELF segment headers for
 /// the main executable.
@@ -347,9 +324,6 @@ pub fn entry() -> usize {
 pub fn random() -> *const [u8; 16] {
     backend::param::auxv::random()
 }
-
-#[cfg(linux_raw)]
-pub use backend::runtime::tls::StartupTlsInfo;
 
 /// `fork()`—Creates a new process by duplicating the calling process.
 ///
@@ -471,6 +445,7 @@ pub enum Fork {
 #[inline]
 #[cfg(feature = "fs")]
 #[cfg_attr(docsrs, doc(cfg(feature = "fs")))]
+#[must_use]
 pub unsafe fn execveat<Fd: AsFd>(
     dirfd: Fd,
     path: &CStr,
@@ -498,6 +473,7 @@ pub unsafe fn execveat<Fd: AsFd>(
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/execve.2.html
 #[inline]
+#[must_use]
 pub unsafe fn execve(path: &CStr, argv: *const *const u8, envp: *const *const u8) -> io::Errno {
     backend::runtime::syscalls::execve(path, argv, envp)
 }
@@ -740,13 +716,6 @@ pub unsafe fn kernel_sigtimedwait(
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man3/getauxval.3.html
-#[cfg(any(
-    linux_raw,
-    any(
-        all(target_os = "android", target_pointer_width = "64"),
-        target_os = "linux",
-    )
-))]
 #[inline]
 pub fn linux_secure() -> bool {
     backend::param::auxv::linux_secure()
@@ -760,7 +729,6 @@ pub fn linux_secure() -> bool {
 /// that needs to be kept up to date that this doesn't keep up to date, so
 /// don't use it unless you know your code won't share a process with a libc
 /// (perhaps because you yourself are implementing a libc).
-#[cfg(linux_raw)]
 #[inline]
 pub unsafe fn kernel_brk(addr: *mut c_void) -> io::Result<*mut c_void> {
     backend::runtime::syscalls::kernel_brk(addr)
@@ -772,7 +740,6 @@ pub unsafe fn kernel_brk(addr: *mut c_void) -> io::Result<*mut c_void> {
 /// `SIGRTMIN` macro provided by libc. Don't use this unless you know your code
 /// won't share a process with a libc (perhaps because you yourself are
 /// implementing a libc).
-#[cfg(linux_raw)]
 pub const KERNEL_SIGRTMIN: i32 = linux_raw_sys::general::SIGRTMIN as i32;
 
 /// `SIGRTMAX`—The last of the raw OS “real-time” signal range.
@@ -781,7 +748,6 @@ pub const KERNEL_SIGRTMIN: i32 = linux_raw_sys::general::SIGRTMIN as i32;
 /// `SIGRTMAX` macro provided by libc. Don't use this unless you know your code
 /// won't share a process with a libc (perhaps because you yourself are
 /// implementing a libc).
-#[cfg(linux_raw)]
 pub const KERNEL_SIGRTMAX: i32 = {
     // Use the actual `SIGRTMAX` value on platforms which define it.
     #[cfg(not(any(

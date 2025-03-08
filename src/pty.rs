@@ -133,6 +133,7 @@ pub fn openpt(flags: OpenptFlags) -> io::Result<OwnedFd> {
 ))]
 #[inline]
 #[doc(alias = "ptsname_r")]
+#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
 pub fn ptsname<Fd: AsFd, B: Into<Vec<u8>>>(fd: Fd, reuse: B) -> io::Result<CString> {
     backend::pty::syscalls::ptsname(fd.as_fd(), reuse.into())
 }

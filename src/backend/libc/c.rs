@@ -518,3 +518,15 @@ pub(crate) use __fsid_t as fsid_t;
 #[cfg(feature = "mm")]
 #[cfg(target_os = "android")]
 pub(crate) const MAP_DROPPABLE: c_int = bitcast!(linux_raw_sys::general::MAP_DROPPABLE);
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_flags() {
+        // libc may publicly define `O_LARGEFILE` to 0, but we want the real
+        // non-zero value.
+        assert_ne!(O_LARGEFILE, 0);
+    }
+}

@@ -27,6 +27,7 @@ use core::slice;
 /// # fn example(fd: rustix::fd::BorrowedFd) -> rustix::io::Result<()> {
 /// let mut buf = [0_u8; 64];
 /// let nread = read(fd, &mut buf)?;
+/// // `nread` is the number of bytes read.
 /// # Ok(())
 /// # }
 /// ```
@@ -53,7 +54,8 @@ use core::slice;
 /// # fn example(fd: rustix::fd::BorrowedFd) -> rustix::io::Result<()> {
 /// let mut buf = Vec::with_capacity(64);
 /// let nread = read(fd, spare_capacity(&mut buf))?;
-/// // Also, `buf.len()` is now `nread` elements greater.
+/// // `nread` is the number of bytes read.
+/// // Also, `buf.len()` is now `nread` elements longer than it was before.
 /// # Ok(())
 /// # }
 /// ```
@@ -303,6 +305,7 @@ mod private {
         /// # Safety
         ///
         /// At least `len` bytes of the buffer must now be initialized.
+        #[must_use]
         unsafe fn assume_init(self, len: usize) -> Self::Output;
     }
 }

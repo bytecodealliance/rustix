@@ -1283,7 +1283,7 @@ pub(crate) fn fadvise(
     // turn a very large value into a negative value.
     //
     // On FreeBSD, this could cause `posix_fadvise` to fail with
-    // `Errrno::INVAL`. Because we don't expose the signed type in our API, we
+    // `Errno::INVAL`. Because we don't expose the signed type in our API, we
     // also avoid exposing this artifact of casting an unsigned value to the
     // signed type. To do this, we use a no-op call in this case.
     //
@@ -1298,7 +1298,7 @@ pub(crate) fn fadvise(
 
         #[cold]
         fn fadvise_noop(fd: BorrowedFd<'_>) -> io::Result<()> {
-            // Us an `fcntl` to report `Errno::EBADF` if needed, but otherwise
+            // Use an `fcntl` to report `Errno::BADF` if needed, but otherwise
             // do nothing.
             fcntl_getfl(fd).map(|_| ())
         }
