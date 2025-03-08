@@ -1,7 +1,8 @@
 use bitflags::bitflags;
 use linux_raw_sys::general::{
-    CLONE_FILES, CLONE_FS, CLONE_NEWCGROUP, CLONE_NEWIPC, CLONE_NEWNET, CLONE_NEWNS, CLONE_NEWPID,
-    CLONE_NEWTIME, CLONE_NEWUSER, CLONE_NEWUTS, CLONE_SYSVSEM,
+    ANON_INODE_FS_MAGIC, CLONE_FILES, CLONE_FS, CLONE_NEWCGROUP, CLONE_NEWIPC, CLONE_NEWNET,
+    CLONE_NEWNS, CLONE_NEWPID, CLONE_NEWTIME, CLONE_NEWUSER, CLONE_NEWUTS, CLONE_SYSVSEM,
+    NSFS_MAGIC, PID_FS_MAGIC,
 };
 
 use crate::backend::c::c_int;
@@ -106,6 +107,9 @@ pub fn move_into_link_name_space(
     fd: BorrowedFd<'_>,
     allowed_type: Option<LinkNameSpaceType>,
 ) -> io::Result<()> {
+    if crate::fs::fstatfs(fd)?.f_type != NSFS_MAGIC as _ {
+        return Err(io::Errno::BADF);
+    }
     let allowed_type = allowed_type.map_or(0, |t| t as c_int);
     syscalls::setns(fd, allowed_type).map(|_r| ())
 }
@@ -124,6 +128,13 @@ pub fn move_into_thread_name_spaces(
     fd: BorrowedFd<'_>,
     allowed_types: ThreadNameSpaceType,
 ) -> io::Result<()> {
+    // When PIDFDs were added to the Linux kernel in version 5.1 they were implemented
+    // with anonymous inodes. Later in Linux 6.9 the implementation was upgraded to use
+    // a new "PID FS".
+    let f_type = crate::fs::fstatfs(fd)?.f_type;
+    if f_type != PID_FS_MAGIC as _ && f_type != ANON_INODE_FS_MAGIC as _ {
+        return Err(io::Errno::BADF);
+    }
     syscalls::setns(fd, allowed_types.bits() as c_int).map(|_r| ())
 }
 
