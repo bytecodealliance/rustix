@@ -165,9 +165,15 @@ pub enum TimerfdClockId {
     BoottimeAlarm = bitcast!(c::CLOCK_BOOTTIME_ALARM),
 }
 
-#[cfg(any(linux_kernel, target_os = "fuchsia"))]
-#[test]
-fn test_types() {
-    assert_eq_size!(TimerfdFlags, c::c_int);
-    assert_eq_size!(TimerfdTimerFlags, c::c_int);
+#[cfg(test)]
+mod tests {
+    #[allow(unused_imports)]
+    use super::*;
+
+    #[cfg(any(linux_kernel, target_os = "fuchsia"))]
+    #[test]
+    fn test_types() {
+        assert_eq_size!(TimerfdFlags, c::c_int);
+        assert_eq_size!(TimerfdTimerFlags, c::c_int);
+    }
 }
