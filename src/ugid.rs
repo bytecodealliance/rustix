@@ -27,7 +27,7 @@ impl Uid {
     /// `raw` must be the value of a valid Unix user ID, and not `-1`.
     #[inline]
     pub fn from_raw(raw: RawUid) -> Self {
-        debug_assert_ne!(raw, -1 as _);
+        debug_assert_ne!(raw, !0);
         Self(raw)
     }
 
@@ -61,7 +61,7 @@ impl Gid {
     /// `raw` must be the value of a valid Unix group ID, and not `-1`.
     #[inline]
     pub fn from_raw(raw: RawGid) -> Self {
-        debug_assert_ne!(raw, -1 as _);
+        debug_assert_ne!(raw, !0);
         Self(raw)
     }
 
