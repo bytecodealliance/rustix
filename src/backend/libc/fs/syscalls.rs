@@ -2654,12 +2654,12 @@ pub(crate) fn fremovexattr(fd: BorrowedFd<'_>, name: &CStr) -> io::Result<()> {
 /// See [`crate::timespec::fix_negative_nsec`] for details.
 #[cfg(apple)]
 fn fix_negative_stat_nsecs(mut stat: Stat) -> Stat {
-    stat.st_atime_nsec =
-        crate::timespec::fix_negative_nsecs(&mut stat.st_atime, stat.st_atime_nsec as _) as _;
-    stat.st_mtime_nsec =
-        crate::timespec::fix_negative_nsecs(&mut stat.st_mtime, stat.st_mtime_nsec as _) as _;
-    stat.st_ctime_nsec =
-        crate::timespec::fix_negative_nsecs(&mut stat.st_ctime, stat.st_ctime_nsec as _) as _;
+    (stat.st_atime, stat.st_atime_nsec) =
+        crate::timespec::fix_negative_nsecs(stat.st_atime, stat.st_atime_nsec);
+    (stat.st_mtime, stat.st_mtime_nsec) =
+        crate::timespec::fix_negative_nsecs(stat.st_mtime, stat.st_mtime_nsec);
+    (stat.st_ctime, stat.st_ctime_nsec) =
+        crate::timespec::fix_negative_nsecs(stat.st_ctime, stat.st_ctime_nsec);
     stat
 }
 

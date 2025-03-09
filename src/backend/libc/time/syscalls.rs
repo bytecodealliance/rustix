@@ -475,7 +475,10 @@ fn timerfd_gettime_old(fd: BorrowedFd<'_>) -> io::Result<Itimerspec> {
 
 /// See [`crate::timespec::fix_negative_nsecs`] for details.
 #[cfg(apple)]
+#[cfg(not(fix_y2038))]
 fn fix_negative_timespec_nsecs(mut ts: Timespec) -> Timespec {
-    ts.tv_nsec = crate::timespec::fix_negative_nsecs(&mut ts.tv_sec, ts.tv_nsec as _) as _;
+    let (sec, nsec) = crate::timespec::fix_negative_nsecs(ts.tv_sec as _, ts.tv_nsec as _);
+    ts.tv_sec = sec as _;
+    ts.tv_nsec = nsec as _;
     ts
 }
