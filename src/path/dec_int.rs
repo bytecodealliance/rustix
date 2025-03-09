@@ -232,7 +232,7 @@ impl DecInt {
             unsafe { unreachable_unchecked() };
         }
         let init = &self.buf[(self.buf.len() - len)..];
-        // SAFETY: we're guaranteed to have initialized len+1 bytes.
+        // SAFETY: We're guaranteed to have initialized `len + 1` bytes.
         unsafe { mem::transmute::<&[MaybeUninit<u8>], &[u8]>(init) }
     }
 

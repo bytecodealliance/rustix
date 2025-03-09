@@ -192,6 +192,7 @@ unsafe fn nanosleep_old(req: &Timespec, rem: &mut MaybeUninit<Timespec>) -> io::
 }
 
 #[inline]
+#[must_use]
 pub(crate) fn gettid() -> Pid {
     unsafe {
         let tid = ret_c_int_infallible(syscall_readonly!(__NR_gettid));

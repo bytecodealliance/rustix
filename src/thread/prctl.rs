@@ -196,15 +196,15 @@ pub enum Capability {
     DACReadSearch = linux_raw_sys::general::CAP_DAC_READ_SEARCH,
     /// Overrides all restrictions about allowed operations on files, where
     /// file owner ID must be equal to the user ID, except where
-    /// [`Capability::FileSetID`] is applicable. It doesn't override MAC
-    /// and DAC restrictions.
+    /// [`Capability::FileSetID`] is applicable. It doesn't override MAC and
+    /// DAC restrictions.
     FileOwner = linux_raw_sys::general::CAP_FOWNER,
     /// Overrides the following restrictions that the effective user ID shall
-    /// match the file owner ID when setting the `S_ISUID` and `S_ISGID`
-    /// bits on that file; that the effective group ID (or one of the
-    /// supplementary group IDs) shall match the file owner ID when setting the
-    /// `S_ISGID` bit on that file; that the `S_ISUID` and `S_ISGID` bits are
-    /// cleared on successful return from `chown` (not implemented).
+    /// match the file owner ID when setting the `S_ISUID` and `S_ISGID` bits
+    /// on that file; that the effective group ID (or one of the supplementary
+    /// group IDs) shall match the file owner ID when setting the `S_ISGID` bit
+    /// on that file; that the `S_ISUID` and `S_ISGID` bits are cleared on
+    /// successful return from `chown` (not implemented).
     FileSetID = linux_raw_sys::general::CAP_FSETID,
     /// Overrides the restriction that the real or effective user ID of a
     /// process sending a signal must match the real or effective user ID of
@@ -325,14 +325,14 @@ pub enum Capability {
     SetFileCapabilities = linux_raw_sys::general::CAP_SETFCAP,
     /// Override MAC access. The base kernel enforces no MAC policy. An LSM may
     /// enforce a MAC policy, and if it does and it chooses to implement
-    /// capability based overrides of that policy, this is the capability
-    /// it should use to do so.
+    /// capability based overrides of that policy, this is the capability it
+    /// should use to do so.
     MACOverride = linux_raw_sys::general::CAP_MAC_OVERRIDE,
     /// Allow MAC configuration or state changes. The base kernel requires no
-    /// MAC configuration. An LSM may enforce a MAC policy, and if it does
-    /// and it chooses to implement capability based
-    /// checks on modifications to that policy or the data required to maintain
-    /// it, this is the capability it should use to do so.
+    /// MAC configuration. An LSM may enforce a MAC policy, and if it does and
+    /// it chooses to implement capability based checks on modifications to
+    /// that policy or the data required to maintain it, this is the capability
+    /// it should use to do so.
     MACAdmin = linux_raw_sys::general::CAP_MAC_ADMIN,
     /// Allow configuring the kernel's `syslog` (`printk` behaviour).
     SystemLog = linux_raw_sys::general::CAP_SYSLOG,

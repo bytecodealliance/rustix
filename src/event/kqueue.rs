@@ -330,6 +330,7 @@ bitflags::bitflags! {
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct UserFlags: u32 {
         /// Ignore the user input flags.
+        #[doc(alias = "NOP")]
         const NOINPUT = c::NOTE_FFNOP;
 
         /// Bitwise AND `fflags`.

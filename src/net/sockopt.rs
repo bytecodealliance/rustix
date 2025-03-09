@@ -3,7 +3,7 @@
 //! In the rustix API, there is a separate function for each option, so that it
 //! can be given an option-specific type signature.
 //!
-//! # References for all `get_*` functions:
+//! # References for all getter functions:
 //!
 //!  - [POSIX `getsockopt`]
 //!  - [Linux `getsockopt`]
@@ -53,7 +53,7 @@
 //!
 //! # References for `get_socket_*` and `set_socket_*` functions:
 //!
-//!  - [References for all `get_*` functions]
+//!  - [References for all getter functions]
 //!  - [References for all `set_*` functions]
 //!  - [POSIX `sys/socket.h`]
 //!  - [Linux `socket`]
@@ -67,7 +67,7 @@
 //!
 //! # References for `get_ip_*` and `set_ip_*` functions:
 //!
-//!  - [References for all `get_*` functions]
+//!  - [References for all getter functions]
 //!  - [References for all `set_*` functions]
 //!  - [POSIX `netinet/in.h`]
 //!  - [Linux `ip`]
@@ -91,7 +91,7 @@
 //!
 //! # References for `get_ipv6_*` and `set_ipv6_*` functions:
 //!
-//!  - [References for all `get_*` functions]
+//!  - [References for all getter functions]
 //!  - [References for all `set_*` functions]
 //!  - [POSIX `netinet/in.h`]
 //!  - [Linux `ipv6`]
@@ -115,7 +115,7 @@
 //!
 //! # References for `get_tcp_*` and `set_tcp_*` functions:
 //!
-//!  - [References for all `get_*` functions]
+//!  - [References for all getter functions]
 //!  - [References for all `set_*` functions]
 //!  - [POSIX `netinet/tcp.h`]
 //!  - [Linux `tcp`]
@@ -137,7 +137,7 @@
 //! [DragonFly BSD `tcp`]: https://man.dragonflybsd.org/?command=tcp&section=4
 //! [illumos `tcp`]: https://illumos.org/man/4P/tcp
 //!
-//! [References for all `get_*` functions]: #references-for-all-get_-functions
+//! [References for all getter functions]: #references-for-all-getter-functions
 //! [References for all `set_*` functions]: #references-for-all-set_-functions
 
 #![doc(alias = "getsockopt")]
@@ -1456,6 +1456,7 @@ pub fn set_tcp_congestion<Fd: AsFd>(fd: Fd, value: &str) -> io::Result<()> {
 ))]
 #[inline]
 #[doc(alias = "TCP_CONGESTION")]
+#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
 pub fn tcp_congestion<Fd: AsFd>(fd: Fd) -> io::Result<String> {
     backend::net::sockopt::tcp_congestion(fd.as_fd())
 }

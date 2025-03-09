@@ -54,13 +54,13 @@ pub fn uname() -> Uname {
 pub struct Uname(backend::system::types::RawUname);
 
 impl Uname {
-    /// `sysname`—Operating system release name
+    /// `sysname`—Operating system release name.
     #[inline]
     pub fn sysname(&self) -> &CStr {
         Self::to_cstr(self.0.sysname.as_ptr().cast())
     }
 
-    /// `nodename`—Name with vague meaning
+    /// `nodename`—Name with vague meaning.
     ///
     /// This is intended to be a network name, however it's unable to convey
     /// information about hosts that have multiple names, or any information
@@ -72,25 +72,25 @@ impl Uname {
         Self::to_cstr(self.0.nodename.as_ptr().cast())
     }
 
-    /// `release`—Operating system release version string
+    /// `release`—Operating system release version string.
     #[inline]
     pub fn release(&self) -> &CStr {
         Self::to_cstr(self.0.release.as_ptr().cast())
     }
 
-    /// `version`—Operating system build identifiers
+    /// `version`—Operating system build identifiers.
     #[inline]
     pub fn version(&self) -> &CStr {
         Self::to_cstr(self.0.version.as_ptr().cast())
     }
 
-    /// `machine`—Hardware architecture identifier
+    /// `machine`—Hardware architecture identifier.
     #[inline]
     pub fn machine(&self) -> &CStr {
         Self::to_cstr(self.0.machine.as_ptr().cast())
     }
 
-    /// `domainname`—NIS or YP domain identifier
+    /// `domainname`—NIS or YP domain identifier.
     #[cfg(linux_kernel)]
     #[inline]
     pub fn domainname(&self) -> &CStr {

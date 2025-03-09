@@ -58,6 +58,7 @@ pub(crate) fn getcwd(buf: &mut [MaybeUninit<u8>]) -> io::Result<usize> {
 }
 
 #[inline]
+#[must_use]
 pub(crate) fn getppid() -> Option<Pid> {
     unsafe {
         let ppid = ret_c_int_infallible(syscall_readonly!(__NR_getppid));
@@ -86,6 +87,7 @@ pub(crate) fn setpgid(pid: Option<Pid>, pgid: Option<Pid>) -> io::Result<()> {
 }
 
 #[inline]
+#[must_use]
 pub(crate) fn getpgrp() -> Pid {
     // Use the `getpgrp` syscall if available.
     #[cfg(not(any(target_arch = "aarch64", target_arch = "riscv64")))]

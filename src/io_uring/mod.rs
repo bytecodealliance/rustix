@@ -1981,6 +1981,7 @@ impl Default for register_or_sqe_op_or_sqe_flags_union {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::fd::AsRawFd as _;
 
     /// Check that our custom structs and unions have the same layout as the
     /// kernel's versions.
@@ -2193,5 +2194,14 @@ mod tests {
             msg_controllen,
             msg_flags
         );
+    }
+
+    #[test]
+    fn test_io_uring_register_files_skip() {
+        use crate::backend::c;
+        assert!(IORING_REGISTER_FILES_SKIP.as_raw_fd() != -1);
+        assert!(IORING_REGISTER_FILES_SKIP.as_raw_fd() != c::STDIN_FILENO);
+        assert!(IORING_REGISTER_FILES_SKIP.as_raw_fd() != c::STDOUT_FILENO);
+        assert!(IORING_REGISTER_FILES_SKIP.as_raw_fd() != c::STDERR_FILENO);
     }
 }

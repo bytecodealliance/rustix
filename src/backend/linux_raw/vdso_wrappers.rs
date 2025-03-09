@@ -58,7 +58,8 @@ use {
 
 #[cfg(feature = "time")]
 #[inline]
-pub(crate) fn clock_gettime(which_clock: ClockId) -> Timespec {
+#[must_use]
+pub(crate) fn clock_gettime(id: ClockId) -> Timespec {
     // SAFETY: `CLOCK_GETTIME` contains either null or the address of a
     // function with an ABI like libc `clock_gettime`, and calling it has the
     // side effect of writing to the result buffer, and no others.
@@ -68,7 +69,7 @@ pub(crate) fn clock_gettime(which_clock: ClockId) -> Timespec {
             Some(callee) => callee,
             None => init_clock_gettime(),
         };
-        let r0 = callee(which_clock as c::c_int, result.as_mut_ptr());
+        let r0 = callee(id as c::c_int, result.as_mut_ptr());
         // The `ClockId` enum only contains clocks which never fail. It may be
         // tempting to change this to `debug_assert_eq`, however they can still
         // fail on uncommon kernel configs, so we leave this in place to ensure
@@ -80,8 +81,8 @@ pub(crate) fn clock_gettime(which_clock: ClockId) -> Timespec {
 
 #[cfg(feature = "time")]
 #[inline]
-pub(crate) fn clock_gettime_dynamic(which_clock: DynamicClockId<'_>) -> io::Result<Timespec> {
-    let id = match which_clock {
+pub(crate) fn clock_gettime_dynamic(id: DynamicClockId<'_>) -> io::Result<Timespec> {
+    let id = match id {
         DynamicClockId::Known(id) => id as __kernel_clockid_t,
 
         DynamicClockId::Dynamic(fd) => {
@@ -343,6 +344,7 @@ static GETCPU: AtomicPtr<Function> = AtomicPtr::new(null_mut());
 static SYSCALL: AtomicPtr<Function> = AtomicPtr::new(null_mut());
 
 #[cfg(feature = "time")]
+#[must_use]
 unsafe extern "C" fn clock_gettime_via_syscall(clockid: c::c_int, res: *mut Timespec) -> c::c_int {
     match _clock_gettime_via_syscall(clockid, res) {
         Ok(()) => 0,

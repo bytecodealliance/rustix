@@ -66,6 +66,8 @@ pub mod memory_allocation {
 pub mod libc_internals {
     not_implemented!(exit);
     not_implemented!(fork);
+    not_implemented!(clone);
+    not_implemented!(clone3);
     not_implemented!(brk);
     not_implemented!(sigaction);
     not_implemented!(sigaltstack);
@@ -231,6 +233,16 @@ pub mod higher_level {
     not_implemented!(execvp);
     not_implemented!(execvpe);
     not_implemented!(wordexp);
+    not_implemented!(localtime);
+    not_implemented!(localtime_r);
+    not_implemented!(gmtime);
+    not_implemented!(gmtime_r);
+    not_implemented!(ctime);
+    not_implemented!(ctime_r);
+    not_implemented!(asctime);
+    not_implemented!(asctime_r);
+    not_implemented!(mktime);
+    not_implemented!(getifaddrs);
 
     /// See [rustix-openpty](https://crates.io/crates/rustix-openpty).
     pub fn closefrom() {
@@ -256,6 +268,17 @@ pub mod higher_level {
     pub fn isatty() {
         unimplemented!()
     }
+}
+
+/// Functions which don't seem possible to even call from Rust with current
+/// language features, even with `unsafe`.
+pub mod impossible {
+    not_implemented!(vfork);
+    not_implemented!(sigreturn);
+    not_implemented!(setjmp);
+    not_implemented!(longjmp);
+    not_implemented!(sigsetjmp);
+    not_implemented!(siglongjmp);
 }
 
 /// These functions are not yet implemented in rustix, but probably could be.

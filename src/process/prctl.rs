@@ -987,7 +987,7 @@ bitflags! {
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct SpeculationFeatureState: u32 {
         /// Mitigation can be controlled per thread by
-        /// `PR_SET_SPECULATION_CTRL`.
+        /// [`control_speculative_feature`].
         const PRCTL = 1_u32 << 0;
         /// The speculation feature is enabled, mitigation is disabled.
         const ENABLE = 1_u32 << 1;
