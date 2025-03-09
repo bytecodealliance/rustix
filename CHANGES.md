@@ -322,7 +322,7 @@ renamed to [`SocketAddrXdpFlags`].
 [`SocketAddrXdpFlags`]: https://docs.rs/rustix/1.0.0/rustix/net/xdp/struct.SocketAddrXdpFlags.html
 
 [`rustix::io_uring::io_uring_setup`] is now unsafe, due its `io_uring_params`
-argument optionallly containing a raw file descriptor.
+argument optionally containing a raw file descriptor.
 
 [`rustix::io_uring::io_uring_setup`]: https://docs.rs/rustix/1.0.0/rustix/io_uring/fn.io_uring_setup.html
 
