@@ -529,7 +529,10 @@ mod tests {
         assert_eq!(Signal::from_named_raw(c::SIGHUP), Some(Signal::HUP));
         assert_eq!(Signal::from_named_raw(c::SIGSEGV), Some(Signal::SEGV));
         assert_eq!(Signal::from_named_raw(c::SIGSYS), Some(Signal::SYS));
-        assert_eq!(Signal::from_named_raw(libc::SIGRTMIN()), None);
-        assert_eq!(Signal::from_named_raw(libc::SIGRTMAX()), None);
+        #[cfg(any(linux_like, solarish, target_os = "hurd"))]
+        {
+            assert_eq!(Signal::from_named_raw(libc::SIGRTMIN()), None);
+            assert_eq!(Signal::from_named_raw(libc::SIGRTMAX()), None);
+        }
     }
 }
