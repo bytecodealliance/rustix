@@ -29,7 +29,14 @@
 //! program or what they're doing, but the features in this module generally
 //! can only be used by one entity within a process.
 //!
+//! All that said, there are some functions in this module would could
+//! potentially be stabilized and moved to other modules. See also the
+//! documentation for specific functions in the [`not_implemented`] module, and
+//! the discussion in [#1314].
+//!
 //! [Origin]: https://github.com/sunfishcode/origin#readme
+//! [`not_implemented`]: crate::not_implemented
+//! [#1314]: https://github.com/bytecodealliance/rustix/issues/1314
 //!
 //! # Safety
 //!
