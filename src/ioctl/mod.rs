@@ -65,6 +65,10 @@ use bsd as platform;
 /// drivers in the kernel, and safety depends on both sides agreeing and
 /// upholding the expectations of the other.
 ///
+/// And, `ioctl` calls can read and write arbitrary memory and have arbitrary
+/// side effects. Callers must ensure that any memory accesses and side effects
+/// are compatible with Rust language invariants.
+///
 /// # References
 ///  - [Linux]
 ///  - [Winsock]
