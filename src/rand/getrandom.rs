@@ -12,8 +12,13 @@ pub use backend::rand::types::GetRandomFlags;
 /// This is a very low-level API which may be difficult to use correctly. Most
 /// users should prefer to use [`getrandom`] or [`rand`] APIs instead.
 ///
+/// This function is implemented using a system call, and not the
+/// [vDSO mechanism] introduced in Linux 6.11. See [#1185] for details.
+///
 /// [`getrandom`]: https://crates.io/crates/getrandom
 /// [`rand`]: https://crates.io/crates/rand
+/// [vDSO mechanism]: https://lwn.net/Articles/983186/
+/// [#1185]: https://github.com/bytecodealliance/rustix/issues/1185
 ///
 /// # References
 ///  - [Linux]
