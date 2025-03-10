@@ -16,7 +16,9 @@ use backend::fd::AsFd;
 ///
 /// This is similar to `fcntl(fd, F_SETFD, FD_CLOEXEC)`, except that it avoids
 /// clearing any other flags that might be set.
-#[cfg(apple)]
+///
+/// Linux: Note that `ioctl` can not be used on `O_PATH` file descriptors.
+#[cfg(any(apple, linux_kernel))]
 #[inline]
 #[doc(alias = "FIOCLEX")]
 #[doc(alias = "FD_CLOEXEC")]
@@ -24,6 +26,23 @@ pub fn ioctl_fioclex<Fd: AsFd>(fd: Fd) -> io::Result<()> {
     // SAFETY: `FIOCLEX` is a no-argument setter opcode.
     unsafe {
         let ctl = ioctl::NoArg::<{ c::FIOCLEX }>::new();
+        ioctl::ioctl(fd, ctl)
+    }
+}
+
+/// `ioctl(fd, FIONCLEX, NULL)`—Remove the close-on-exec flag.
+///
+/// This is similar to `fcntl(fd, F_SETFD, 0)`, except that it avoids
+/// clearing any other flags that might be set.
+///
+/// Linux: Note that `ioctl` can not be used on `O_PATH` file descriptors.
+#[cfg(any(apple, linux_kernel))]
+#[inline]
+#[doc(alias = "FIONCLEX")]
+pub fn ioctl_fionclex<Fd: AsFd>(fd: Fd) -> io::Result<()> {
+    // SAFETY: `FIONCLEX` is a no-argument setter opcode.
+    unsafe {
+        let ctl = ioctl::NoArg::<{ c::FIONCLEX }>::new();
         ioctl::ioctl(fd, ctl)
     }
 }
