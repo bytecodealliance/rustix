@@ -735,6 +735,9 @@ bitflags! {
         /// `F_SEAL_FUTURE_WRITE` (since Linux 5.1)
         #[cfg(linux_kernel)]
         const FUTURE_WRITE = bitcast!(c::F_SEAL_FUTURE_WRITE);
+        /// `F_SEAL_EXEC` (since Linux 6.3)
+        #[cfg(linux_kernel)]
+        const EXEC = bitcast!(c::F_SEAL_EXEC);
 
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
