@@ -286,3 +286,41 @@ fn test_v6_sendmmsg() {
     client.join().unwrap();
     server.join().unwrap();
 }
+
+#[test]
+#[cfg(all(target_os = "linux", feature = "time"))]
+fn test_v6_txtime() {
+    crate::init();
+
+    use std::mem::MaybeUninit;
+    use std::time;
+
+    use rustix::io::IoSlice;
+    use rustix::net::{sendmsg, sockopt, SendAncillaryBuffer, SendAncillaryMessage, TxTimeFlags};
+    use rustix::time::ClockId;
+
+    let data_socket = socket(AddressFamily::INET6, SocketType::DGRAM, None).unwrap();
+    let addr = SocketAddrV6::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1), 12345, 0, 0);
+    connect(&data_socket, &addr).unwrap();
+
+    match sockopt::set_txtime(&data_socket, ClockId::Monotonic, TxTimeFlags::empty()) {
+        Ok(_) => (),
+        // Skip on unsupported platforms.
+        Err(e) if e.to_string().contains("Protocol not available") => return,
+        Err(e) => panic!("{e}"),
+    }
+
+    let mut space = [MaybeUninit::uninit(); rustix::cmsg_space!(TxTime(1))];
+    let mut cmsg_buffer = SendAncillaryBuffer::new(&mut space);
+
+    let t = time::UNIX_EPOCH.elapsed().unwrap() + time::Duration::from_millis(100);
+    cmsg_buffer.push(SendAncillaryMessage::TxTime(t.as_nanos() as u64));
+
+    sendmsg(
+        &data_socket,
+        &[IoSlice::new(b"hello, world")],
+        &mut cmsg_buffer,
+        SendFlags::empty(),
+    )
+    .unwrap();
+}
