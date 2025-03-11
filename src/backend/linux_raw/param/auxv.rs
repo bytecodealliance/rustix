@@ -282,7 +282,7 @@ fn maybe_init_auxv() {
 /// /proc/self/auxv for kernels that don't support `PR_GET_AUXV`.
 #[cold]
 fn init_auxv_impl() -> Result<(), ()> {
-    // 512 AUX elements ought to be enough for anybody…
+    // 512 bytes of AUX elements ought to be enough for anybody…
     let mut buffer = [0_u8; 512];
 
     // If we don't have "alloc", just try to read into our statically-sized

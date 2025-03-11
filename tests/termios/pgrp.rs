@@ -44,7 +44,7 @@ fn pgrp_pseudoterminal() {
     #[cfg(not(linux_kernel))]
     assert!(matches!(tcgetpgrp(&pty), Ok(_)));
 
-    // We shouldn't be able to set the process group to pid 1.
+    // We shouldn't be able to set the process group to [`Pid::INIT`].
     match tcsetpgrp(&pty, rustix::termios::Pid::INIT).unwrap_err() {
         #[cfg(freebsdlike)]
         rustix::io::Errno::PERM => {}

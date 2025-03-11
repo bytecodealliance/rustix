@@ -241,7 +241,7 @@ bitflags! {
     pub struct ReaperStatusFlags: c_uint {
         /// The process has acquired reaper status.
         const OWNED = 1;
-        /// The process is the root of the reaper tree (pid 1).
+        /// The process is the root of the reaper tree ([`Pid::INIT`]).
         const REALINIT = 2;
 
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>

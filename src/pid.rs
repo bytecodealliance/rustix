@@ -80,7 +80,7 @@ impl Pid {
         }
     }
 
-    /// Test whether this pid represents the init process (pid 1).
+    /// Test whether this pid represents the init process ([`Pid::INIT`]).
     #[inline]
     pub const fn is_init(self) -> bool {
         self.0.get() == Self::INIT.0.get()
