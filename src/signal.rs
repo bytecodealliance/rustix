@@ -105,7 +105,8 @@ impl Signal {
                 target_arch = "sparc",
                 target_arch = "sparc64"
             ),
-        )
+        ),
+        target_os = "cygwin",
     )))]
     pub const STKFLT: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGSTKFLT) });
     /// `SIGCHLD`
@@ -295,7 +296,8 @@ impl fmt::Debug for Signal {
                         target_arch = "sparc",
                         target_arch = "sparc64"
                     ),
-                )
+                ),
+                target_os = "cygwin",
             )))]
             Self::STKFLT => "Signal::STKFLT".fmt(f),
             #[cfg(not(target_os = "vita"))]

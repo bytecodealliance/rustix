@@ -381,6 +381,7 @@ bitflags! {
             target_os = "horizon",
             target_os = "wasi",
             target_os = "vita",
+            target_os = "cygwin",
             solarish
         )))]
         const ASYNC = bitcast!(c::O_ASYNC);
@@ -788,6 +789,7 @@ bitflags! {
             target_os = "l4re",
             target_os = "linux",
             target_os = "wasi",
+            target_os = "cygwin",
         )))]
         const NO_HIDE_STALE = bitcast!(c::FALLOC_FL_NO_HIDE_STALE);
         /// `FALLOC_FL_COLLAPSE_RANGE`
@@ -1063,7 +1065,8 @@ pub type StatFs = c::statfs64;
     target_os = "nto",
     target_os = "redox",
     target_os = "vita",
-    target_os = "wasi"
+    target_os = "wasi",
+    target_os = "cygwin"
 )))]
 pub type Fsid = c::fsid_t;
 

@@ -69,7 +69,8 @@ use crate::process::{Resource, Rlimit};
     target_os = "openbsd",
     target_os = "redox",
     target_os = "vita",
-    target_os = "wasi"
+    target_os = "wasi",
+    target_os = "cygwin"
 )))]
 use crate::process::{WaitId, WaitIdOptions, WaitIdStatus};
 use core::mem::MaybeUninit;
@@ -389,7 +390,8 @@ pub(crate) fn _waitpid(
     target_os = "openbsd",
     target_os = "redox",
     target_os = "vita",
-    target_os = "wasi"
+    target_os = "wasi",
+    target_os = "cygwin"
 )))]
 #[inline]
 pub(crate) fn waitid(id: WaitId<'_>, options: WaitIdOptions) -> io::Result<Option<WaitIdStatus>> {
@@ -411,7 +413,8 @@ pub(crate) fn waitid(id: WaitId<'_>, options: WaitIdOptions) -> io::Result<Optio
     target_os = "openbsd",
     target_os = "redox",
     target_os = "vita",
-    target_os = "wasi"
+    target_os = "wasi",
+    target_os = "cygwin"
 )))]
 #[inline]
 fn _waitid_all(options: WaitIdOptions) -> io::Result<Option<WaitIdStatus>> {
@@ -436,7 +439,8 @@ fn _waitid_all(options: WaitIdOptions) -> io::Result<Option<WaitIdStatus>> {
     target_os = "openbsd",
     target_os = "redox",
     target_os = "vita",
-    target_os = "wasi"
+    target_os = "wasi",
+    target_os = "cygwin"
 )))]
 #[inline]
 fn _waitid_pid(pid: Pid, options: WaitIdOptions) -> io::Result<Option<WaitIdStatus>> {
@@ -461,7 +465,8 @@ fn _waitid_pid(pid: Pid, options: WaitIdOptions) -> io::Result<Option<WaitIdStat
     target_os = "openbsd",
     target_os = "redox",
     target_os = "vita",
-    target_os = "wasi"
+    target_os = "wasi",
+    target_os = "cygwin"
 )))]
 #[inline]
 fn _waitid_pgid(pgid: Option<Pid>, options: WaitIdOptions) -> io::Result<Option<WaitIdStatus>> {
@@ -510,7 +515,8 @@ fn _waitid_pidfd(fd: BorrowedFd<'_>, options: WaitIdOptions) -> io::Result<Optio
     target_os = "openbsd",
     target_os = "redox",
     target_os = "vita",
-    target_os = "wasi"
+    target_os = "wasi",
+    target_os = "cygwin"
 )))]
 #[inline]
 unsafe fn cvt_waitid_status(status: MaybeUninit<c::siginfo_t>) -> Option<WaitIdStatus> {

@@ -220,7 +220,8 @@ pub fn writev<Fd: AsFd>(fd: Fd, bufs: &[IoSlice<'_>]) -> io::Result<usize> {
     target_os = "nto",
     target_os = "redox",
     target_os = "solaris",
-    target_os = "vita"
+    target_os = "vita",
+    target_os = "cygwin"
 )))]
 #[inline]
 pub fn preadv<Fd: AsFd>(fd: Fd, bufs: &mut [IoSliceMut<'_>], offset: u64) -> io::Result<usize> {
@@ -258,7 +259,8 @@ pub fn preadv<Fd: AsFd>(fd: Fd, bufs: &mut [IoSliceMut<'_>], offset: u64) -> io:
     target_os = "nto",
     target_os = "redox",
     target_os = "solaris",
-    target_os = "vita"
+    target_os = "vita",
+    target_os = "cygwin"
 )))]
 #[inline]
 pub fn pwritev<Fd: AsFd>(fd: Fd, bufs: &[IoSlice<'_>], offset: u64) -> io::Result<usize> {

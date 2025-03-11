@@ -101,7 +101,8 @@ pub(crate) fn writev(fd: BorrowedFd<'_>, bufs: &[IoSlice<'_>]) -> io::Result<usi
     target_os = "nto",
     target_os = "redox",
     target_os = "solaris",
-    target_os = "vita"
+    target_os = "vita",
+    target_os = "cygwin",
 )))]
 pub(crate) fn preadv(
     fd: BorrowedFd<'_>,
@@ -127,7 +128,8 @@ pub(crate) fn preadv(
     target_os = "horizon",
     target_os = "redox",
     target_os = "solaris",
-    target_os = "vita"
+    target_os = "vita",
+    target_os = "cygwin",
 )))]
 pub(crate) fn pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice<'_>], offset: u64) -> io::Result<usize> {
     // Silently cast; we'll get `EINVAL` if the value is negative.
