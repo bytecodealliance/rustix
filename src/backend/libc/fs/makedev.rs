@@ -1,3 +1,9 @@
+// TODO: Remove the unsafe blocks. libc 0.2.171 removed `unsafe` from several
+// of these functions. Eventually we should depend on that version and remove
+// the `unsafe` blocks in the code, but for now, disable that warning so that
+// we're compatible with older libc versions.
+#![allow(unused_unsafe)]
+
 #[cfg(not(all(target_os = "android", target_pointer_width = "32")))]
 use crate::backend::c;
 use crate::fs::Dev;
