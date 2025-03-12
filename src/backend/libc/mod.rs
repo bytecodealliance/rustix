@@ -15,6 +15,9 @@ mod conv;
 
 #[cfg(windows)]
 pub(crate) mod fd {
+    // Re-export `AsSocket` etc. too, as users can't implement `AsFd` etc. on
+    // Windows due to them having blanket impls on Windows, so users must
+    // implement `AsSocket` etc.
     pub use crate::maybe_polyfill::os::windows::io::{
         AsRawSocket, AsSocket, BorrowedSocket as BorrowedFd, FromRawSocket, IntoRawSocket,
         OwnedSocket as OwnedFd, RawSocket as RawFd,
@@ -90,9 +93,7 @@ pub(crate) mod fd {
 }
 #[cfg(not(windows))]
 pub(crate) mod fd {
-    pub use crate::maybe_polyfill::os::fd::{
-        AsFd, AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, OwnedFd, RawFd,
-    };
+    pub use crate::maybe_polyfill::os::fd::*;
     #[allow(unused_imports)]
     pub(crate) use RawFd as LibcFd;
 }
