@@ -293,6 +293,8 @@ mod private {
 
         /// Return a pointer and length for this buffer.
         ///
+        /// The length is the number of elements of type `T`, not a number of bytes.
+        ///
         /// It's tempting to have this return `&mut [MaybeUninit<T>]` instead,
         /// however that would require this function to be `unsafe`, because
         /// callers could use the `&mut [MaybeUninit<T>]` slice to set elements
@@ -304,7 +306,7 @@ mod private {
         ///
         /// # Safety
         ///
-        /// At least `len` bytes of the buffer must now be initialized.
+        /// At least `len` elements of the buffer must now be initialized.
         #[must_use]
         unsafe fn assume_init(self, len: usize) -> Self::Output;
     }
