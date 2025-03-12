@@ -304,7 +304,7 @@ mod private {
         ///
         /// # Safety
         ///
-        /// At least `len` bytes of the buffer must now be initialized.
+        /// At least `len` elements of the buffer must now be initialized.
         #[must_use]
         unsafe fn assume_init(self, len: usize) -> Self::Output;
     }
