@@ -116,13 +116,7 @@ fn _readlinkat(dirfd: BorrowedFd<'_>, path: &CStr, mut buffer: Vec<u8>) -> io::R
         let buf = buffer.spare_capacity_mut();
 
         // SAFETY: `readlinkat` behaves.
-        let nread = unsafe {
-            backend::fs::syscalls::readlinkat(
-                dirfd.as_fd(),
-                path,
-                (buf.as_mut_ptr().cast(), buf.len()),
-            )?
-        };
+        let nread = unsafe { backend::fs::syscalls::readlinkat(dirfd.as_fd(), path, buf)? };
 
         debug_assert!(nread <= buffer.capacity());
         if nread < buffer.capacity() {
@@ -178,7 +172,7 @@ pub fn readlinkat_raw<P: path::Arg, Fd: AsFd, Buf: Buffer<u8>>(
 ) -> io::Result<Buf::Output> {
     // SAFETY: `readlinkat` behaves.
     let len = path.into_with_c_str(|path| unsafe {
-        backend::fs::syscalls::readlinkat(dirfd.as_fd(), path, buf.parts_mut())
+        backend::fs::syscalls::readlinkat(dirfd.as_fd(), path, buf.as_mut_ptr())
     })?;
     // SAFETY: `readlinkat` behaves.
     unsafe { Ok(buf.assume_init(len)) }

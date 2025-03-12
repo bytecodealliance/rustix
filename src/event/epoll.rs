@@ -210,7 +210,7 @@ pub fn wait<EpollFd: AsFd, Buf: Buffer<Event>>(
     timeout: Option<&Timespec>,
 ) -> io::Result<Buf::Output> {
     // SAFETY: `epoll_wait` behaves.
-    let nfds = unsafe { syscalls::epoll_wait(epoll.as_fd(), event_list.parts_mut(), timeout)? };
+    let nfds = unsafe { syscalls::epoll_wait(epoll.as_fd(), event_list.as_mut_ptr(), timeout)? };
     // SAFETY: `epoll_wait` behaves.
     unsafe { Ok(event_list.assume_init(nfds)) }
 }

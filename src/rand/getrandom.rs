@@ -27,7 +27,7 @@ pub use backend::rand::types::GetRandomFlags;
 #[inline]
 pub fn getrandom<Buf: Buffer<u8>>(mut buf: Buf, flags: GetRandomFlags) -> io::Result<Buf::Output> {
     // SAFETY: `getrandom` behaves.
-    let len = unsafe { backend::rand::syscalls::getrandom(buf.parts_mut(), flags)? };
+    let len = unsafe { backend::rand::syscalls::getrandom(buf.as_mut_ptr(), flags)? };
     // SAFETY: `getrandom` behaves.
     unsafe { Ok(buf.assume_init(len)) }
 }

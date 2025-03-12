@@ -38,7 +38,7 @@ pub use backend::io::types::ReadWriteFlags;
 #[inline]
 pub fn read<Fd: AsFd, Buf: Buffer<u8>>(fd: Fd, mut buf: Buf) -> io::Result<Buf::Output> {
     // SAFETY: `read` behaves.
-    let len = unsafe { backend::io::syscalls::read(fd.as_fd(), buf.parts_mut())? };
+    let len = unsafe { backend::io::syscalls::read(fd.as_fd(), buf.as_mut_ptr())? };
     // SAFETY: `read` behaves.
     unsafe { Ok(buf.assume_init(len)) }
 }
@@ -100,7 +100,7 @@ pub fn pread<Fd: AsFd, Buf: Buffer<u8>>(
     offset: u64,
 ) -> io::Result<Buf::Output> {
     // SAFETY: `pread` behaves.
-    let len = unsafe { backend::io::syscalls::pread(fd.as_fd(), buf.parts_mut(), offset)? };
+    let len = unsafe { backend::io::syscalls::pread(fd.as_fd(), buf.as_mut_ptr(), offset)? };
     // SAFETY: `pread` behaves.
     unsafe { Ok(buf.assume_init(len)) }
 }

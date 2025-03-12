@@ -8,13 +8,14 @@ use crate::backend::fd::LibcFd;
 use crate::fd::{BorrowedFd, RawFd};
 use crate::io;
 use crate::ioctl::{IoctlOutput, Opcode};
+use core::mem::MaybeUninit;
 
-pub(crate) unsafe fn read(fd: BorrowedFd<'_>, buf: (*mut u8, usize)) -> io::Result<usize> {
+pub(crate) unsafe fn read(fd: BorrowedFd<'_>, buf: *mut [MaybeUninit<u8>]) -> io::Result<usize> {
     // `read` on a socket is equivalent to `recv` with no flags.
     ret_send_recv(c::recv(
         borrowed_fd(fd),
-        buf.0.cast(),
-        send_recv_len(buf.1),
+        buf.cast::<u8>(),
+        send_recv_len(buf.len()),
         0,
     ))
 }

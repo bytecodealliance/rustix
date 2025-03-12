@@ -12,8 +12,8 @@ use crate::backend::c;
 #[cfg(target_os = "linux")]
 use crate::backend::conv::slice_mut;
 use crate::backend::conv::{
-    by_mut, by_ref, c_int, c_uint, pass_usize, ret, ret_owned_fd, ret_usize, size_of, slice,
-    socklen_t, zero,
+    buffer_len, buffer_ptr, by_mut, by_ref, c_int, c_uint, ret, ret_owned_fd, ret_usize, size_of,
+    slice, socklen_t, zero,
 };
 use crate::backend::reg::raw_arg;
 use crate::fd::{BorrowedFd, OwnedFd};
@@ -477,7 +477,7 @@ pub(crate) fn sendto(
 #[inline]
 pub(crate) unsafe fn recv(
     fd: BorrowedFd<'_>,
-    buf: (*mut u8, usize),
+    buf: *mut [MaybeUninit<u8>],
     flags: RecvFlags,
 ) -> io::Result<usize> {
     #[cfg(not(any(
@@ -490,7 +490,13 @@ pub(crate) unsafe fn recv(
         target_arch = "x86_64",
     )))]
     {
-        ret_usize(syscall!(__NR_recv, fd, buf.0, pass_usize(buf.1), flags))
+        ret_usize(syscall!(
+            __NR_recv,
+            fd,
+            buffer_ptr(buf),
+            buffer_len(buf),
+            flags
+        ))
     }
     #[cfg(any(
         target_arch = "aarch64",
@@ -504,8 +510,8 @@ pub(crate) unsafe fn recv(
         ret_usize(syscall!(
             __NR_recvfrom,
             fd,
-            buf.0,
-            pass_usize(buf.1),
+            buffer_ptr(buf),
+            buffer_len(buf),
             flags,
             zero(),
             zero()
@@ -518,8 +524,8 @@ pub(crate) unsafe fn recv(
             x86_sys(SYS_RECV),
             slice_just_addr::<ArgReg<'_, SocketArg>, _>(&[
                 fd.into(),
-                buf.0.into(),
-                pass_usize(buf.1),
+                buffer_ptr(buf),
+                buffer_len(buf),
                 flags.into(),
             ])
         ))
@@ -529,7 +535,7 @@ pub(crate) unsafe fn recv(
 #[inline]
 pub(crate) unsafe fn recvfrom(
     fd: BorrowedFd<'_>,
-    buf: (*mut u8, usize),
+    buf: *mut [MaybeUninit<u8>],
     flags: RecvFlags,
 ) -> io::Result<(usize, Option<SocketAddrAny>)> {
     let mut addr = SocketAddrBuf::new();
@@ -543,8 +549,8 @@ pub(crate) unsafe fn recvfrom(
     let nread = ret_usize(syscall!(
         __NR_recvfrom,
         fd,
-        buf.0,
-        pass_usize(buf.1),
+        buffer_ptr(buf),
+        buffer_len(buf),
         flags,
         &mut addr.storage,
         by_mut(&mut addr.len)
@@ -555,8 +561,8 @@ pub(crate) unsafe fn recvfrom(
         x86_sys(SYS_RECVFROM),
         slice_just_addr::<ArgReg<'_, SocketArg>, _>(&[
             fd.into(),
-            buf.0.into(),
-            pass_usize(buf.1),
+            buffer_ptr(buf),
+            buffer_len(buf),
             flags.into(),
             (&mut addr.storage).into(),
             by_mut(&mut addr.len),

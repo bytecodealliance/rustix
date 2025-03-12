@@ -6,12 +6,13 @@
 #![allow(unsafe_code, clippy::undocumented_unsafe_blocks)]
 
 use crate::backend::conv::{
-    by_ref, c_int, c_uint, opt_mut, opt_ref, pass_usize, ret, ret_c_int, ret_error, ret_owned_fd,
-    ret_usize, size_of, slice_mut, zero,
+    buffer_len, buffer_ptr, by_ref, c_int, c_uint, opt_mut, opt_ref, ret, ret_c_int, ret_error,
+    ret_owned_fd, ret_usize, size_of, slice_mut, zero,
 };
 use crate::event::{epoll, EventfdFlags, FdSetElement, PollFd, Timespec};
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::io;
+use core::mem::MaybeUninit;
 use core::ptr::null_mut;
 use linux_raw_sys::general::{kernel_sigset_t, EPOLL_CTL_ADD, EPOLL_CTL_DEL, EPOLL_CTL_MOD};
 
@@ -109,7 +110,7 @@ pub(crate) unsafe fn select(
     readfds: Option<&mut [FdSetElement]>,
     writefds: Option<&mut [FdSetElement]>,
     exceptfds: Option<&mut [FdSetElement]>,
-    timeout: Option<&crate::timespec::Timespec>,
+    timeout: Option<&Timespec>,
 ) -> io::Result<i32> {
     let len = crate::event::fd_set_num_elements_for_bitvector(nfds);
 
@@ -285,7 +286,7 @@ pub(crate) fn epoll_del(epfd: BorrowedFd<'_>, fd: BorrowedFd<'_>) -> io::Result<
 #[inline]
 pub(crate) unsafe fn epoll_wait(
     epfd: BorrowedFd<'_>,
-    events: (*mut crate::event::epoll::Event, usize),
+    events: *mut [MaybeUninit<epoll::Event>],
     timeout: Option<&Timespec>,
 ) -> io::Result<usize> {
     // If we don't have Linux 5.1, and the timeout fits in an `i32`, use plain
@@ -310,8 +311,8 @@ pub(crate) unsafe fn epoll_wait(
             return ret_usize(syscall!(
                 __NR_epoll_pwait,
                 epfd,
-                events.0,
-                pass_usize(events.1),
+                buffer_ptr(events),
+                buffer_len(events),
                 c_int(old_timeout),
                 zero()
             ));
@@ -326,8 +327,8 @@ pub(crate) unsafe fn epoll_wait(
     ret_usize(syscall!(
         __NR_epoll_pwait2,
         epfd,
-        events.0,
-        pass_usize(events.1),
+        buffer_ptr(events),
+        buffer_len(events),
         opt_ref(timeout),
         zero()
     ))

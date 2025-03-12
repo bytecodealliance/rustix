@@ -156,7 +156,7 @@ pub fn getn<Fd: AsFd, Buf: Buffer<Event>>(
 ) -> io::Result<Buf::Output> {
     // SAFETY: `port_getn` behaves.
     let nevents =
-        unsafe { syscalls::port_getn(port.as_fd(), events.parts_mut(), min_events, timeout)? };
+        unsafe { syscalls::port_getn(port.as_fd(), events.as_mut_ptr(), min_events, timeout)? };
     // SAFETY: `port_getn` behaves.
     unsafe { Ok(events.assume_init(nevents)) }
 }

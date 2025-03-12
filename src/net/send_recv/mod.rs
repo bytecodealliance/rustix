@@ -66,12 +66,12 @@ pub fn recv<Fd: AsFd, Buf: Buffer<u8>>(
     mut buf: Buf,
     flags: RecvFlags,
 ) -> io::Result<(Buf::Output, usize)> {
-    let (ptr, len) = buf.parts_mut();
+    let raw_buf = buf.as_mut_ptr();
     // SAFETY: `recv` behaves.
-    let recv_len = unsafe { backend::net::syscalls::recv(fd.as_fd(), (ptr, len), flags)? };
+    let recv_len = unsafe { backend::net::syscalls::recv(fd.as_fd(), raw_buf, flags)? };
     // If the `TRUNC` flag is set, the returned `length` may be longer than the
     // buffer length.
-    let min_len = min(len, recv_len);
+    let min_len = min(raw_buf.len(), recv_len);
     // SAFETY: `recv` behaves.
     unsafe { Ok((buf.assume_init(min_len), recv_len)) }
 }
@@ -144,13 +144,12 @@ pub fn recvfrom<Fd: AsFd, Buf: Buffer<u8>>(
     mut buf: Buf,
     flags: RecvFlags,
 ) -> io::Result<(Buf::Output, usize, Option<SocketAddrAny>)> {
-    let (ptr, len) = buf.parts_mut();
+    let raw_buf = buf.as_mut_ptr();
     // SAFETY: `recvfrom` behaves.
-    let (recv_len, addr) =
-        unsafe { backend::net::syscalls::recvfrom(fd.as_fd(), (ptr, len), flags)? };
+    let (recv_len, addr) = unsafe { backend::net::syscalls::recvfrom(fd.as_fd(), raw_buf, flags)? };
     // If the `TRUNC` flag is set, the returned `length` may be longer than the
     // buffer length.
-    let min_len = min(len, recv_len);
+    let min_len = min(raw_buf.len(), recv_len);
     // SAFETY: `recvfrom` behaves.
     unsafe { Ok((buf.assume_init(min_len), recv_len, addr)) }
 }

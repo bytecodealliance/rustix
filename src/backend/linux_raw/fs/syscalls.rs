@@ -17,8 +17,8 @@ use crate::backend::conv::fs::oflags_for_open_how;
 ))]
 use crate::backend::conv::zero;
 use crate::backend::conv::{
-    by_ref, c_int, c_uint, dev_t, opt_mut, pass_usize, raw_fd, ret, ret_c_int, ret_c_uint,
-    ret_infallible, ret_owned_fd, ret_usize, size_of, slice, slice_mut,
+    buffer_len, buffer_ptr, by_ref, c_int, c_uint, dev_t, opt_mut, pass_usize, raw_fd, ret,
+    ret_c_int, ret_c_uint, ret_infallible, ret_owned_fd, ret_usize, size_of, slice, slice_mut,
 };
 #[cfg(target_pointer_width = "64")]
 use crate::backend::conv::{loff_t, loff_t_from_u64, ret_u64};
@@ -971,14 +971,14 @@ pub(crate) fn readlink(path: &CStr, buf: &mut [u8]) -> io::Result<usize> {
 pub(crate) unsafe fn readlinkat(
     dirfd: BorrowedFd<'_>,
     path: &CStr,
-    buf: (*mut u8, usize),
+    buf: *mut [MaybeUninit<u8>],
 ) -> io::Result<usize> {
     ret_usize(syscall!(
         __NR_readlinkat,
         dirfd,
         path,
-        buf.0,
-        pass_usize(buf.1)
+        buffer_ptr(buf),
+        buffer_len(buf)
     ))
 }
 
@@ -1526,14 +1526,14 @@ pub(crate) fn inotify_rm_watch(infd: BorrowedFd<'_>, wfd: i32) -> io::Result<()>
 pub(crate) unsafe fn getxattr(
     path: &CStr,
     name: &CStr,
-    value: (*mut u8, usize),
+    value: *mut [MaybeUninit<u8>],
 ) -> io::Result<usize> {
     ret_usize(syscall!(
         __NR_getxattr,
         path,
         name,
-        value.0,
-        pass_usize(value.1)
+        buffer_ptr(value),
+        buffer_len(value)
     ))
 }
 
@@ -1541,14 +1541,14 @@ pub(crate) unsafe fn getxattr(
 pub(crate) unsafe fn lgetxattr(
     path: &CStr,
     name: &CStr,
-    value: (*mut u8, usize),
+    value: *mut [MaybeUninit<u8>],
 ) -> io::Result<usize> {
     ret_usize(syscall!(
         __NR_lgetxattr,
         path,
         name,
-        value.0,
-        pass_usize(value.1)
+        buffer_ptr(value),
+        buffer_len(value)
     ))
 }
 
@@ -1556,14 +1556,14 @@ pub(crate) unsafe fn lgetxattr(
 pub(crate) unsafe fn fgetxattr(
     fd: BorrowedFd<'_>,
     name: &CStr,
-    value: (*mut u8, usize),
+    value: *mut [MaybeUninit<u8>],
 ) -> io::Result<usize> {
     ret_usize(syscall!(
         __NR_fgetxattr,
         fd,
         name,
-        value.0,
-        pass_usize(value.1)
+        buffer_ptr(value),
+        buffer_len(value)
     ))
 }
 
@@ -1628,18 +1628,36 @@ pub(crate) fn fsetxattr(
 }
 
 #[inline]
-pub(crate) unsafe fn listxattr(path: &CStr, list: (*mut u8, usize)) -> io::Result<usize> {
-    ret_usize(syscall!(__NR_listxattr, path, list.0, pass_usize(list.1)))
+pub(crate) unsafe fn listxattr(path: &CStr, list: *mut [MaybeUninit<u8>]) -> io::Result<usize> {
+    ret_usize(syscall!(
+        __NR_listxattr,
+        path,
+        buffer_ptr(list),
+        buffer_len(list)
+    ))
 }
 
 #[inline]
-pub(crate) unsafe fn llistxattr(path: &CStr, list: (*mut u8, usize)) -> io::Result<usize> {
-    ret_usize(syscall!(__NR_llistxattr, path, list.0, pass_usize(list.1)))
+pub(crate) unsafe fn llistxattr(path: &CStr, list: *mut [MaybeUninit<u8>]) -> io::Result<usize> {
+    ret_usize(syscall!(
+        __NR_llistxattr,
+        path,
+        buffer_ptr(list),
+        buffer_len(list)
+    ))
 }
 
 #[inline]
-pub(crate) unsafe fn flistxattr(fd: BorrowedFd<'_>, list: (*mut u8, usize)) -> io::Result<usize> {
-    ret_usize(syscall!(__NR_flistxattr, fd, list.0, pass_usize(list.1)))
+pub(crate) unsafe fn flistxattr(
+    fd: BorrowedFd<'_>,
+    list: *mut [MaybeUninit<u8>],
+) -> io::Result<usize> {
+    ret_usize(syscall!(
+        __NR_flistxattr,
+        fd,
+        buffer_ptr(list),
+        buffer_len(list)
+    ))
 }
 
 #[inline]

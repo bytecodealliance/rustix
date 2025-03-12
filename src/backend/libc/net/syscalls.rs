@@ -33,13 +33,13 @@ use {
 
 pub(crate) unsafe fn recv(
     fd: BorrowedFd<'_>,
-    buf: (*mut u8, usize),
+    buf: *mut [MaybeUninit<u8>],
     flags: RecvFlags,
 ) -> io::Result<usize> {
     ret_send_recv(c::recv(
         borrowed_fd(fd),
-        buf.0.cast(),
-        send_recv_len(buf.1),
+        buf.cast(),
+        send_recv_len(buf.len()),
         bitflags_bits!(flags),
     ))
 }
@@ -57,7 +57,7 @@ pub(crate) fn send(fd: BorrowedFd<'_>, buf: &[u8], flags: SendFlags) -> io::Resu
 
 pub(crate) unsafe fn recvfrom(
     fd: BorrowedFd<'_>,
-    buf: (*mut u8, usize),
+    buf: *mut [MaybeUninit<u8>],
     flags: RecvFlags,
 ) -> io::Result<(usize, Option<SocketAddrAny>)> {
     let mut addr = SocketAddrBuf::new();
@@ -69,8 +69,8 @@ pub(crate) unsafe fn recvfrom(
 
     let nread = ret_send_recv(c::recvfrom(
         borrowed_fd(fd),
-        buf.0.cast(),
-        send_recv_len(buf.1),
+        buf.cast(),
+        send_recv_len(buf.len()),
         bitflags_bits!(flags),
         addr.storage.as_mut_ptr().cast::<c::sockaddr>(),
         &mut addr.len,

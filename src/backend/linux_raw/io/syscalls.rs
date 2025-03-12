@@ -19,8 +19,8 @@ use crate::backend::conv::loff_t_from_u64;
 ))]
 use crate::backend::conv::zero;
 use crate::backend::conv::{
-    c_uint, pass_usize, raw_fd, ret, ret_c_int, ret_c_uint, ret_discarded_fd, ret_owned_fd,
-    ret_usize, slice,
+    buffer_len, buffer_ptr, c_uint, pass_usize, raw_fd, ret, ret_c_int, ret_c_uint,
+    ret_discarded_fd, ret_owned_fd, ret_usize, slice,
 };
 #[cfg(target_pointer_width = "32")]
 use crate::backend::conv::{hi, lo};
@@ -29,17 +29,18 @@ use crate::fd::{AsFd as _, BorrowedFd, OwnedFd, RawFd};
 use crate::io::{self, DupFlags, FdFlags, IoSlice, IoSliceMut, ReadWriteFlags};
 use crate::ioctl::{IoctlOutput, Opcode};
 use core::cmp;
+use core::mem::MaybeUninit;
 use linux_raw_sys::general::{F_DUPFD_CLOEXEC, F_GETFD, F_SETFD};
 
 #[inline]
-pub(crate) unsafe fn read(fd: BorrowedFd<'_>, buf: (*mut u8, usize)) -> io::Result<usize> {
-    ret_usize(syscall!(__NR_read, fd, buf.0, pass_usize(buf.1)))
+pub(crate) unsafe fn read(fd: BorrowedFd<'_>, buf: *mut [MaybeUninit<u8>]) -> io::Result<usize> {
+    ret_usize(syscall!(__NR_read, fd, buffer_ptr(buf), buffer_len(buf)))
 }
 
 #[inline]
 pub(crate) unsafe fn pread(
     fd: BorrowedFd<'_>,
-    buf: (*mut u8, usize),
+    buf: *mut [MaybeUninit<u8>],
     pos: u64,
 ) -> io::Result<usize> {
     // <https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/arch/arm64/kernel/sys32.c?h=v6.13#n70>
@@ -56,8 +57,8 @@ pub(crate) unsafe fn pread(
         ret_usize(syscall!(
             __NR_pread64,
             fd,
-            buf.0,
-            pass_usize(buf.1),
+            buffer_ptr(buf),
+            buffer_len(buf),
             zero(),
             hi(pos),
             lo(pos)
@@ -76,8 +77,8 @@ pub(crate) unsafe fn pread(
         ret_usize(syscall!(
             __NR_pread64,
             fd,
-            buf.0,
-            pass_usize(buf.1),
+            buffer_ptr(buf),
+            buffer_len(buf),
             hi(pos),
             lo(pos)
         ))
@@ -86,8 +87,8 @@ pub(crate) unsafe fn pread(
     ret_usize(syscall!(
         __NR_pread64,
         fd,
-        buf.0,
-        pass_usize(buf.1),
+        buffer_ptr(buf),
+        buffer_len(buf),
         loff_t_from_u64(pos)
     ))
 }
