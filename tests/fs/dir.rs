@@ -227,7 +227,7 @@ fn dir_iterator_handles_dir_removal() {
 
 // Like `dir_iterator_handles_dir_removal`, but close the directory after
 // `Dir::read_from`.
-#[cfg_attr(any(apple, freebsdlike), ignore)]
+#[cfg_attr(any(apple, freebsdlike, target_os = "cygwin"), ignore)]
 #[test]
 fn dir_iterator_handles_dir_removal_after_open() {
     // create a dir, keep the FD, then delete the dir

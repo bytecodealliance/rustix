@@ -64,6 +64,7 @@ fn invalid_offset_fallocate() {
     target_os = "dragonfly",
     target_os = "haiku",
     target_os = "redox",
+    target_os = "cygwin",
 )))]
 #[test]
 fn invalid_offset_fadvise() {
@@ -158,7 +159,7 @@ fn invalid_offset_pread() {
     pread(&file, &mut buf, i64::MAX as u64 + 1).unwrap_err();
 }
 
-#[cfg(not(apple))]
+#[cfg(not(any(apple, target_os = "cygwin")))]
 #[test]
 fn invalid_offset_pwrite() {
     use rustix::fs::{openat, Mode, OFlags, CWD};

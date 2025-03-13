@@ -1,4 +1,5 @@
 #[cfg(not(target_os = "redox"))]
+#[cfg(not(target_os = "cygwin"))]
 #[test]
 fn negative_file_timestamp() {
     use rustix::fs::{

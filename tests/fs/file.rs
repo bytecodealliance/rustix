@@ -102,6 +102,7 @@ fn test_file() {
     )))]
     rustix::fs::fadvise(&file, 0, NonZeroU64::new(10), rustix::fs::Advice::Normal).unwrap();
 
+    #[cfg(not(target_os = "cygwin"))]
     rustix::fs::fsync(&file).unwrap();
 
     #[cfg(not(any(
@@ -109,6 +110,7 @@ fn test_file() {
         target_os = "dragonfly",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "cygwin",
     )))]
     rustix::fs::fdatasync(&file).unwrap();
 
@@ -156,6 +158,7 @@ fn test_file() {
         assert!(statvfs.f_frsize > 0);
     }
 
+    #[cfg(not(target_os = "cygwin"))]
     assert_ne!(rustix::io::ioctl_fionread(&file).unwrap(), 0);
 }
 
