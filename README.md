@@ -88,6 +88,7 @@ API modules are conditional with cargo feature flags.
 | `std`      | On by default; disable to activate `#![no_std]`.               |
 | `alloc`    | On by default; enables features that depend on [`alloc`].      |
 
+[`rustix::buffer`]: https://docs.rs/rustix/*/rustix/buffer/index.html
 [`rustix::event`]: https://docs.rs/rustix/*/rustix/event/index.html
 [`rustix::fs`]: https://docs.rs/rustix/*/rustix/fs/index.html
 [`rustix::io_uring`]: https://docs.rs/rustix/*/rustix/io_uring/index.html
