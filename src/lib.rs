@@ -193,18 +193,19 @@ mod backend;
 
 /// Export the `*Fd` types and traits that are used in rustix's public API.
 ///
-/// Users can use this to avoid needing to import anything else to use the same
-/// versions of these types and traits.
+/// This module exports the types and traits from [`std::os::fd`], or polyills
+/// on Rust < 1.66 or on Windows.
+///
+/// On Windows, the polyfill consists of aliases of the socket types and
+/// traits, For example, [`OwnedSocket`] is aliased to `OwnedFd`, and so on,
+/// and there are blanket impls for `AsFd` etc. that map to `AsSocket` impls.
+/// These blanket impls suffice for using the traits, however not for
+/// implementing them, so this module also exports `AsSocket` and the other
+/// traits as-is so that users can implement them if needed.
+///
+/// [`OwnedSocket`]: https://doc.rust-lang.org/stable/std/os/windows/io/struct.OwnedSocket.html
 pub mod fd {
-    use super::backend;
-
-    // Re-export `AsSocket` etc. too, as users can't implement `AsFd` etc. on
-    // Windows due to them having blanket impls on Windows, so users must
-    // implement `AsSocket` etc.
-    #[cfg(windows)]
-    pub use backend::fd::{AsRawSocket, AsSocket, FromRawSocket, IntoRawSocket};
-
-    pub use backend::fd::{AsFd, AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, OwnedFd, RawFd};
+    pub use super::backend::fd::*;
 }
 
 // The public API modules.

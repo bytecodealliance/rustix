@@ -4,7 +4,6 @@ use crate::backend::c;
 #[cfg(feature = "try_close")]
 use crate::backend::conv::ret;
 use crate::backend::conv::{borrowed_fd, ret_c_int, ret_send_recv, send_recv_len};
-use crate::backend::fd::LibcFd;
 use crate::fd::{BorrowedFd, RawFd};
 use crate::io;
 use crate::ioctl::{IoctlOutput, Opcode};
@@ -32,12 +31,12 @@ pub(crate) fn write(fd: BorrowedFd<'_>, buf: &[u8]) -> io::Result<usize> {
 }
 
 pub(crate) unsafe fn close(raw_fd: RawFd) {
-    let _ = c::close(raw_fd as LibcFd);
+    let _ = c::closesocket(raw_fd as c::SOCKET);
 }
 
 #[cfg(feature = "try_close")]
 pub(crate) unsafe fn try_close(raw_fd: RawFd) -> io::Result<()> {
-    ret(c::close(raw_fd as LibcFd))
+    ret(c::closesocket(raw_fd as c::SOCKET))
 }
 
 #[inline]
