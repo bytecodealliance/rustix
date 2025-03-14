@@ -60,11 +60,11 @@ fn invalid_offset_fallocate() {
 #[cfg(not(any(
     apple,
     netbsdlike,
-    target_os = "solaris",
+    target_os = "cygwin",
     target_os = "dragonfly",
     target_os = "haiku",
     target_os = "redox",
-    target_os = "cygwin",
+    target_os = "solaris",
 )))]
 #[test]
 fn invalid_offset_fadvise() {

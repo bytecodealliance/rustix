@@ -10,10 +10,10 @@
 //! not supported by the platform or the device.
 
 #[cfg(not(any(
+    target_os = "cygwin"
     target_os = "espidf",
     target_os = "haiku",
     target_os = "wasi",
-    target_os = "cygwin"
 )))]
 mod ioctl;
 #[cfg(not(target_os = "wasi"))]
@@ -24,10 +24,10 @@ mod tty;
 mod types;
 
 #[cfg(not(any(
+    target_os = "cygwin"
     target_os = "espidf",
     target_os = "haiku",
     target_os = "wasi",
-    target_os = "cygwin"
 )))]
 pub use ioctl::*;
 #[cfg(not(target_os = "wasi"))]

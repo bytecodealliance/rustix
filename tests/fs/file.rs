@@ -1,11 +1,11 @@
 #[cfg(not(any(
     apple,
     netbsdlike,
-    target_os = "solaris",
     target_os = "dragonfly",
     target_os = "espidf",
     target_os = "haiku",
     target_os = "redox",
+    target_os = "solaris",
 )))]
 use core::num::NonZeroU64;
 
@@ -22,7 +22,7 @@ fn test_file() {
 
     rustix::fs::chown("Cargo.toml", None, None).unwrap();
 
-    #[cfg(not(any(target_os = "emscripten", target_os = "android")))]
+    #[cfg(not(any(target_os = "android", target_os = "emscripten")))]
     #[allow(unreachable_patterns)]
     match rustix::fs::accessat(
         rustix::fs::CWD,
@@ -95,10 +95,10 @@ fn test_file() {
     #[cfg(not(any(
         apple,
         netbsdlike,
-        target_os = "solaris",
         target_os = "dragonfly",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "solaris",
     )))]
     rustix::fs::fadvise(&file, 0, NonZeroU64::new(10), rustix::fs::Advice::Normal).unwrap();
 
@@ -107,10 +107,10 @@ fn test_file() {
 
     #[cfg(not(any(
         apple,
+        target_os = "cygwin",
         target_os = "dragonfly",
         target_os = "espidf",
         target_os = "haiku",
-        target_os = "cygwin",
     )))]
     rustix::fs::fdatasync(&file).unwrap();
 

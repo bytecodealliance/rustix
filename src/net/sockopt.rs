@@ -149,6 +149,7 @@ use crate::net::xdp::{XdpMmapOffsets, XdpOptionsFlags, XdpStatistics, XdpUmemReg
     apple,
     windows,
     target_os = "aix",
+    target_os = "cygwin",
     target_os = "dragonfly",
     target_os = "emscripten",
     target_os = "espidf",
@@ -156,7 +157,6 @@ use crate::net::xdp::{XdpMmapOffsets, XdpOptionsFlags, XdpStatistics, XdpUmemReg
     target_os = "netbsd",
     target_os = "nto",
     target_os = "vita",
-    target_os = "cygwin",
 )))]
 use crate::net::AddressFamily;
 #[cfg(any(
@@ -463,6 +463,7 @@ pub fn socket_send_buffer_size<Fd: AsFd>(fd: Fd) -> io::Result<usize> {
     apple,
     windows,
     target_os = "aix",
+    target_os = "cygwin",
     target_os = "dragonfly",
     target_os = "emscripten",
     target_os = "espidf",
@@ -472,7 +473,6 @@ pub fn socket_send_buffer_size<Fd: AsFd>(fd: Fd) -> io::Result<usize> {
     target_os = "netbsd",
     target_os = "nto",
     target_os = "vita",
-    target_os = "cygwin",
 )))]
 #[inline]
 #[doc(alias = "SO_DOMAIN")]

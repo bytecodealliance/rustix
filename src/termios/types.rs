@@ -605,7 +605,7 @@ bitflags! {
         const ECHOCTL = c::ECHOCTL;
 
         /// `ECHOPRT`
-        #[cfg(not(any(target_os = "nto", target_os = "redox", target_os = "cygwin")))]
+        #[cfg(not(any(target_os = "cygwin", target_os = "nto", target_os = "redox")))]
         const ECHOPRT = c::ECHOPRT;
 
         /// `ECHOKE`
@@ -617,16 +617,16 @@ bitflags! {
         const FLUSHO = c::FLUSHO;
 
         /// `PENDIN`
-        #[cfg(not(any(target_os = "nto", target_os = "redox", target_os = "cygwin")))]
+        #[cfg(not(any(target_os = "cygwin", target_os = "nto", target_os = "redox")))]
         const PENDIN = c::PENDIN;
 
         /// `EXTPROC`
         #[cfg(not(any(
             target_os = "aix",
+            target_os = "cygwin",
             target_os = "haiku",
             target_os = "nto",
             target_os = "redox",
-            target_os = "cygwin",
         )))]
         const EXTPROC = c::EXTPROC;
 
@@ -956,10 +956,10 @@ pub mod speed {
                 target_arch = "sparc64",
                 bsd,
                 target_os = "aix",
+                target_os = "cygwin",
                 target_os = "haiku",
                 target_os = "nto",
                 target_os = "solaris",
-                target_os = "cygwin",
             )))]
             c::B3500000 => Some(3_500_000),
             #[cfg(not(any(
@@ -967,10 +967,10 @@ pub mod speed {
                 target_arch = "sparc64",
                 bsd,
                 target_os = "aix",
+                target_os = "cygwin",
                 target_os = "haiku",
                 target_os = "nto",
                 target_os = "solaris",
-                target_os = "cygwin",
             )))]
             c::B4000000 => Some(4_000_000),
             _ => None,
@@ -1095,10 +1095,10 @@ pub mod speed {
                 target_arch = "sparc64",
                 bsd,
                 target_os = "aix",
+                target_os = "cygwin",
                 target_os = "haiku",
                 target_os = "nto",
                 target_os = "solaris",
-                target_os = "cygwin",
             )))]
             3_500_000 => Some(c::B3500000),
             #[cfg(not(any(
@@ -1106,10 +1106,10 @@ pub mod speed {
                 target_arch = "sparc64",
                 bsd,
                 target_os = "aix",
+                target_os = "cygwin",
                 target_os = "haiku",
                 target_os = "nto",
                 target_os = "solaris",
-                target_os = "cygwin",
             )))]
             4_000_000 => Some(c::B4000000),
             _ => None,
