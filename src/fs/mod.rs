@@ -11,12 +11,12 @@ mod dir;
 #[cfg(not(any(
     apple,
     netbsdlike,
-    target_os = "solaris",
     target_os = "dragonfly",
     target_os = "espidf",
     target_os = "haiku",
     target_os = "horizon",
     target_os = "redox",
+    target_os = "solaris",
     target_os = "vita",
 )))]
 mod fadvise;
@@ -78,12 +78,12 @@ pub use dir::{Dir, DirEntry};
 #[cfg(not(any(
     apple,
     netbsdlike,
-    target_os = "solaris",
     target_os = "dragonfly",
     target_os = "espidf",
     target_os = "haiku",
     target_os = "horizon",
     target_os = "redox",
+    target_os = "solaris",
     target_os = "vita",
 )))]
 pub use fadvise::fadvise;

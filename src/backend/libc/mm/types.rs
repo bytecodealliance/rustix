@@ -82,13 +82,13 @@ bitflags! {
             solarish,
             target_os = "aix",
             target_os = "android",
+            target_os = "cygwin",
             target_os = "emscripten",
             target_os = "fuchsia",
             target_os = "haiku",
             target_os = "hurd",
             target_os = "nto",
             target_os = "redox",
-            target_os = "cygwin",
         )))]
         const SHARED_VALIDATE = bitcast!(c::MAP_SHARED_VALIDATE);
         /// `MAP_PRIVATE`
@@ -98,11 +98,11 @@ bitflags! {
             bsd,
             solarish,
             target_os = "aix",
+            target_os = "cygwin",
             target_os = "haiku",
             target_os = "hurd",
             target_os = "nto",
             target_os = "redox",
-            target_os = "cygwin",
         )))]
         const DENYWRITE = bitcast!(c::MAP_DENYWRITE);
         /// `MAP_FIXED`
@@ -113,13 +113,13 @@ bitflags! {
             solarish,
             target_os = "aix",
             target_os = "android",
+            target_os = "cygwin",
             target_os = "emscripten",
             target_os = "fuchsia",
             target_os = "haiku",
             target_os = "hurd",
             target_os = "nto",
             target_os = "redox",
-            target_os = "cygwin",
         )))]
         const FIXED_NOREPLACE = bitcast!(c::MAP_FIXED_NOREPLACE);
         /// `MAP_GROWSDOWN`
@@ -127,11 +127,11 @@ bitflags! {
             bsd,
             solarish,
             target_os = "aix",
+            target_os = "cygwin",
             target_os = "haiku",
             target_os = "hurd",
             target_os = "nto",
             target_os = "redox",
-            target_os = "cygwin",
         )))]
         const GROWSDOWN = bitcast!(c::MAP_GROWSDOWN);
         /// `MAP_HUGETLB`
@@ -139,11 +139,11 @@ bitflags! {
             bsd,
             solarish,
             target_os = "aix",
+            target_os = "cygwin",
             target_os = "haiku",
             target_os = "hurd",
             target_os = "nto",
             target_os = "redox",
-            target_os = "cygwin",
         )))]
         const HUGETLB = bitcast!(c::MAP_HUGETLB);
         /// `MAP_HUGE_2MB`
@@ -152,13 +152,13 @@ bitflags! {
             solarish,
             target_os = "aix",
             target_os = "android",
+            target_os = "cygwin",
             target_os = "emscripten",
             target_os = "fuchsia",
             target_os = "haiku",
             target_os = "hurd",
             target_os = "nto",
             target_os = "redox",
-            target_os = "cygwin",
         )))]
         const HUGE_2MB = bitcast!(c::MAP_HUGE_2MB);
         /// `MAP_HUGE_1GB`
@@ -167,13 +167,13 @@ bitflags! {
             solarish,
             target_os = "aix",
             target_os = "android",
+            target_os = "cygwin",
             target_os = "emscripten",
             target_os = "fuchsia",
             target_os = "haiku",
             target_os = "hurd",
             target_os = "nto",
             target_os = "redox",
-            target_os = "cygwin",
         )))]
         const HUGE_1GB = bitcast!(c::MAP_HUGE_1GB);
         /// `MAP_LOCKED`
@@ -181,11 +181,11 @@ bitflags! {
             bsd,
             solarish,
             target_os = "aix",
+            target_os = "cygwin",
             target_os = "haiku",
             target_os = "hurd",
             target_os = "nto",
             target_os = "redox",
-            target_os = "cygwin",
         )))]
         const LOCKED = bitcast!(c::MAP_LOCKED);
         /// `MAP_NOCORE`
@@ -208,11 +208,11 @@ bitflags! {
             bsd,
             solarish,
             target_os = "aix",
+            target_os = "cygwin",
             target_os = "haiku",
             target_os = "hurd",
             target_os = "nto",
             target_os = "redox",
-            target_os = "cygwin",
         )))]
         const POPULATE = bitcast!(c::MAP_POPULATE);
         /// `MAP_STACK`
@@ -220,10 +220,10 @@ bitflags! {
             apple,
             solarish,
             target_os = "aix",
+            target_os = "cygwin",
             target_os = "haiku",
             target_os = "hurd",
             target_os = "redox",
-            target_os = "cygwin",
         )))]
         const STACK = bitcast!(c::MAP_STACK);
         /// `MAP_PREFAULT_READ`
@@ -235,6 +235,7 @@ bitflags! {
             solarish,
             target_os = "aix",
             target_os = "android",
+            target_os = "cygwin",
             target_os = "emscripten",
             target_os = "fuchsia",
             target_os = "haiku",
@@ -245,7 +246,6 @@ bitflags! {
                 linux_kernel,
                 any(target_arch = "mips", target_arch = "mips32r6", target_arch = "mips64", target_arch = "mips64r6"),
             ),
-            target_os = "cygwin",
         )))]
         const SYNC = bitcast!(c::MAP_SYNC);
         /// `MAP_UNINITIALIZED`

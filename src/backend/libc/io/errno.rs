@@ -276,6 +276,7 @@ impl Errno {
         windows,
         target_os = "aix",
         target_os = "android",
+        target_os = "cygwin",
         target_os = "espidf",
         target_os = "haiku",
         target_os = "horizon",
@@ -285,7 +286,6 @@ impl Errno {
         target_os = "redox",
         target_os = "vita",
         target_os = "wasi",
-        target_os = "cygwin",
     )))]
     pub const HWPOISON: Self = Self(c::EHWPOISON);
     /// `EIDRM`
@@ -327,6 +327,7 @@ impl Errno {
         solarish,
         windows,
         target_os = "aix",
+        target_os = "cygwin",
         target_os = "espidf",
         target_os = "haiku",
         target_os = "horizon",
@@ -335,7 +336,6 @@ impl Errno {
         target_os = "nto",
         target_os = "vita",
         target_os = "wasi",
-        target_os = "cygwin",
     )))]
     pub const ISNAM: Self = Self(c::EISNAM);
     /// `EKEYEXPIRED`
@@ -344,6 +344,7 @@ impl Errno {
         solarish,
         windows,
         target_os = "aix",
+        target_os = "cygwin",
         target_os = "espidf",
         target_os = "haiku",
         target_os = "horizon",
@@ -352,7 +353,6 @@ impl Errno {
         target_os = "nto",
         target_os = "vita",
         target_os = "wasi",
-        target_os = "cygwin",
     )))]
     pub const KEYEXPIRED: Self = Self(c::EKEYEXPIRED);
     /// `EKEYREJECTED`
@@ -361,6 +361,7 @@ impl Errno {
         solarish,
         windows,
         target_os = "aix",
+        target_os = "cygwin",
         target_os = "espidf",
         target_os = "haiku",
         target_os = "horizon",
@@ -369,7 +370,6 @@ impl Errno {
         target_os = "nto",
         target_os = "vita",
         target_os = "wasi",
-        target_os = "cygwin",
     )))]
     pub const KEYREJECTED: Self = Self(c::EKEYREJECTED);
     /// `EKEYREVOKED`
@@ -378,6 +378,7 @@ impl Errno {
         solarish,
         windows,
         target_os = "aix",
+        target_os = "cygwin",
         target_os = "espidf",
         target_os = "haiku",
         target_os = "horizon",
@@ -386,7 +387,6 @@ impl Errno {
         target_os = "nto",
         target_os = "vita",
         target_os = "wasi",
-        target_os = "cygwin",
     )))]
     pub const KEYREVOKED: Self = Self(c::EKEYREVOKED);
     /// `EL2HLT`
@@ -531,6 +531,7 @@ impl Errno {
         solarish,
         windows,
         target_os = "aix",
+        target_os = "cygwin",
         target_os = "espidf",
         target_os = "haiku",
         target_os = "horizon",
@@ -539,7 +540,6 @@ impl Errno {
         target_os = "nto",
         target_os = "vita",
         target_os = "wasi",
-        target_os = "cygwin",
     )))]
     pub const MEDIUMTYPE: Self = Self(c::EMEDIUMTYPE);
     /// `EMFILE`
@@ -561,6 +561,7 @@ impl Errno {
         solarish,
         windows,
         target_os = "aix",
+        target_os = "cygwin",
         target_os = "espidf",
         target_os = "haiku",
         target_os = "horizon",
@@ -569,7 +570,6 @@ impl Errno {
         target_os = "nto",
         target_os = "vita",
         target_os = "wasi",
-        target_os = "cygwin",
     )))]
     pub const NAVAIL: Self = Self(c::ENAVAIL);
     /// `ENEEDAUTH`
@@ -642,6 +642,7 @@ impl Errno {
         bsd,
         windows,
         target_os = "aix",
+        target_os = "cygwin",
         target_os = "espidf",
         target_os = "haiku",
         target_os = "horizon",
@@ -650,7 +651,6 @@ impl Errno {
         target_os = "nto",
         target_os = "vita",
         target_os = "wasi",
-        target_os = "cygwin",
     )))]
     pub const NOKEY: Self = Self(c::ENOKEY);
     /// `ENOLCK`
@@ -767,6 +767,7 @@ impl Errno {
         solarish,
         windows,
         target_os = "aix",
+        target_os = "cygwin",
         target_os = "espidf",
         target_os = "haiku",
         target_os = "horizon",
@@ -775,7 +776,6 @@ impl Errno {
         target_os = "nto",
         target_os = "vita",
         target_os = "wasi",
-        target_os = "cygwin",
     )))]
     pub const NOTNAM: Self = Self(c::ENOTNAM);
     /// `ENOTRECOVERABLE`
@@ -896,6 +896,7 @@ impl Errno {
         solarish,
         windows,
         target_os = "aix",
+        target_os = "cygwin",
         target_os = "espidf",
         target_os = "haiku",
         target_os = "horizon",
@@ -904,13 +905,13 @@ impl Errno {
         target_os = "nto",
         target_os = "vita",
         target_os = "wasi",
-        target_os = "cygwin",
     )))]
     pub const REMOTEIO: Self = Self(c::EREMOTEIO);
     /// `ERESTART`
     #[cfg(not(any(
         bsd,
         windows,
+        target_os = "cygwin",
         target_os = "espidf",
         target_os = "haiku",
         target_os = "horizon",
@@ -918,7 +919,6 @@ impl Errno {
         target_os = "l4re",
         target_os = "vita",
         target_os = "wasi",
-        target_os = "cygwin",
     )))]
     pub const RESTART: Self = Self(c::ERESTART);
     /// `ERFKILL`
@@ -928,6 +928,7 @@ impl Errno {
         windows,
         target_os = "aix",
         target_os = "android",
+        target_os = "cygwin",
         target_os = "espidf",
         target_os = "haiku",
         target_os = "horizon",
@@ -937,7 +938,6 @@ impl Errno {
         target_os = "redox",
         target_os = "vita",
         target_os = "wasi",
-        target_os = "cygwin",
     )))]
     pub const RFKILL: Self = Self(c::ERFKILL);
     /// `EROFS`
@@ -1028,6 +1028,7 @@ impl Errno {
         solarish,
         windows,
         target_os = "aix",
+        target_os = "cygwin",
         target_os = "espidf",
         target_os = "haiku",
         target_os = "horizon",
@@ -1036,7 +1037,6 @@ impl Errno {
         target_os = "nto",
         target_os = "vita",
         target_os = "wasi",
-        target_os = "cygwin",
     )))]
     pub const UCLEAN: Self = Self(c::EUCLEAN);
     /// `EUNATCH`

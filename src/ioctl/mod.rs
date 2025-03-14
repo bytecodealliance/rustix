@@ -328,11 +328,11 @@ type _Opcode = c::c_ulong;
 #[cfg(any(
     solarish,
     target_os = "aix",
+    target_os = "cygwin",
     target_os = "fuchsia",
     target_os = "emscripten",
     target_os = "nto",
     target_os = "wasi",
-    target_os = "cygwin"
 ))]
 type _Opcode = c::c_int;
 

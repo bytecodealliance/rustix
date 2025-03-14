@@ -174,6 +174,7 @@ pub fn sethostname(name: &[u8]) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/setdomainname.2.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=setdomainname&sektion=3
 #[cfg(not(any(
+    target_os = "cygwin",
     target_os = "emscripten",
     target_os = "espidf",
     target_os = "haiku",
@@ -183,7 +184,6 @@ pub fn sethostname(name: &[u8]) -> io::Result<()> {
     target_os = "solaris",
     target_os = "vita",
     target_os = "wasi",
-    target_os = "cygwin"
 )))]
 #[inline]
 pub fn setdomainname(name: &[u8]) -> io::Result<()> {

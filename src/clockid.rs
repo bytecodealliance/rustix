@@ -12,10 +12,10 @@ use crate::fd::BorrowedFd;
 #[cfg(not(any(apple, target_os = "wasi")))]
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 #[cfg_attr(
-    not(any(target_os = "aix", target_os = "dragonfly", target_os = "cygwin")),
+    not(any(target_os = "aix", target_os = "cygwin", target_os = "dragonfly")),
     repr(i32)
 )]
-#[cfg_attr(any(target_os = "dragonfly", target_os = "cygwin"), repr(u64))]
+#[cfg_attr(any(target_os = "cygwin", target_os = "dragonfly"), repr(u64))]
 #[cfg_attr(target_os = "aix", repr(i64))]
 #[non_exhaustive]
 pub enum ClockId {

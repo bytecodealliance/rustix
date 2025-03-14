@@ -57,12 +57,12 @@ fn msg_iov_len(len: usize) -> c::c_int {
     solarish,
     target_env = "musl",
     target_os = "aix",
+    target_os = "cygwin",
     target_os = "emscripten",
     target_os = "fuchsia",
     target_os = "haiku",
     target_os = "hurd",
     target_os = "nto",
-    target_os = "cygwin",
 ))]
 #[inline]
 fn msg_control_len(len: usize) -> c::socklen_t {
@@ -76,6 +76,7 @@ fn msg_control_len(len: usize) -> c::socklen_t {
     windows,
     target_env = "musl",
     target_os = "aix",
+    target_os = "cygwin",
     target_os = "emscripten",
     target_os = "espidf",
     target_os = "fuchsia",
@@ -85,7 +86,6 @@ fn msg_control_len(len: usize) -> c::socklen_t {
     target_os = "redox",
     target_os = "vita",
     target_os = "wasi",
-    target_os = "cygwin",
 )))]
 #[inline]
 fn msg_control_len(len: usize) -> c::size_t {

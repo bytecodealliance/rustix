@@ -42,18 +42,18 @@ pub enum Resource {
     #[cfg(not(any(
         apple,
         solarish,
+        target_os = "cygwin",
         target_os = "haiku",
         target_os = "nto",
-        target_os = "cygwin",
     )))]
     Rss = bitcast!(c::RLIMIT_RSS),
     /// `RLIMIT_NPROC`
-    #[cfg(not(any(solarish, target_os = "haiku", target_os = "cygwin")))]
+    #[cfg(not(any(solarish, target_os = "cygwin", target_os = "haiku")))]
     Nproc = bitcast!(c::RLIMIT_NPROC),
     /// `RLIMIT_NOFILE`
     Nofile = bitcast!(c::RLIMIT_NOFILE),
     /// `RLIMIT_MEMLOCK`
-    #[cfg(not(any(solarish, target_os = "aix", target_os = "haiku", target_os = "cygwin")))]
+    #[cfg(not(any(solarish, target_os = "aix", target_os = "cygwin", target_os = "haiku")))]
     Memlock = bitcast!(c::RLIMIT_MEMLOCK),
     /// `RLIMIT_AS`
     #[cfg(not(target_os = "openbsd"))]
@@ -63,10 +63,10 @@ pub enum Resource {
         bsd,
         solarish,
         target_os = "aix",
+        target_os = "cygwin",
         target_os = "haiku",
         target_os = "hurd",
         target_os = "nto",
-        target_os = "cygwin"
     )))]
     Locks = bitcast!(c::RLIMIT_LOCKS),
     /// `RLIMIT_SIGPENDING`
@@ -74,10 +74,10 @@ pub enum Resource {
         bsd,
         solarish,
         target_os = "aix",
+        target_os = "cygwin",
         target_os = "haiku",
         target_os = "hurd",
         target_os = "nto",
-        target_os = "cygwin"
     )))]
     Sigpending = bitcast!(c::RLIMIT_SIGPENDING),
     /// `RLIMIT_MSGQUEUE`
@@ -85,10 +85,10 @@ pub enum Resource {
         bsd,
         solarish,
         target_os = "aix",
+        target_os = "cygwin",
         target_os = "haiku",
         target_os = "hurd",
         target_os = "nto",
-        target_os = "cygwin"
     )))]
     Msgqueue = bitcast!(c::RLIMIT_MSGQUEUE),
     /// `RLIMIT_NICE`
@@ -96,10 +96,10 @@ pub enum Resource {
         bsd,
         solarish,
         target_os = "aix",
+        target_os = "cygwin",
         target_os = "haiku",
         target_os = "hurd",
         target_os = "nto",
-        target_os = "cygwin"
     )))]
     Nice = bitcast!(c::RLIMIT_NICE),
     /// `RLIMIT_RTPRIO`
@@ -107,10 +107,10 @@ pub enum Resource {
         bsd,
         solarish,
         target_os = "aix",
+        target_os = "cygwin",
         target_os = "haiku",
         target_os = "hurd",
         target_os = "nto",
-        target_os = "cygwin"
     )))]
     Rtprio = bitcast!(c::RLIMIT_RTPRIO),
     /// `RLIMIT_RTTIME`
@@ -119,11 +119,11 @@ pub enum Resource {
         solarish,
         target_os = "aix",
         target_os = "android",
+        target_os = "cygwin",
         target_os = "emscripten",
         target_os = "haiku",
         target_os = "hurd",
         target_os = "nto",
-        target_os = "cygwin",
     )))]
     Rttime = bitcast!(c::RLIMIT_RTTIME),
 }

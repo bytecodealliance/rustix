@@ -78,12 +78,12 @@ use {
 #[cfg(not(any(
     apple,
     netbsdlike,
-    target_os = "solaris",
     target_os = "dragonfly",
     target_os = "espidf",
     target_os = "haiku",
     target_os = "horizon",
     target_os = "redox",
+    target_os = "solaris",
     target_os = "vita",
 )))]
 use {crate::fs::Advice, core::num::NonZeroU64};
@@ -1258,12 +1258,12 @@ pub(crate) fn copy_file_range(
 #[cfg(not(any(
     apple,
     netbsdlike,
-    target_os = "solaris",
     target_os = "dragonfly",
     target_os = "espidf",
     target_os = "haiku",
     target_os = "horizon",
     target_os = "redox",
+    target_os = "solaris",
     target_os = "vita",
 )))]
 pub(crate) fn fadvise(

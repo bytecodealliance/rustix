@@ -66,6 +66,7 @@ pub(crate) fn sethostname(name: &[u8]) -> io::Result<()> {
 
 #[cfg(not(any(
     target_os = "android",
+    target_os = "cygwin",
     target_os = "emscripten",
     target_os = "espidf",
     target_os = "illumos",
@@ -75,7 +76,6 @@ pub(crate) fn sethostname(name: &[u8]) -> io::Result<()> {
     target_os = "solaris",
     target_os = "vita",
     target_os = "wasi",
-    target_os = "cygwin"
 )))]
 pub(crate) fn setdomainname(name: &[u8]) -> io::Result<()> {
     unsafe {

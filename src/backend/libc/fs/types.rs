@@ -376,12 +376,12 @@ bitflags! {
         /// functions, use [`rustix::fs::fcntl_setfl`] instead.
         #[cfg(not(any(
             target_os = "aix",
+            target_os = "cygwin",
             target_os = "espidf",
             target_os = "haiku",
             target_os = "horizon",
             target_os = "wasi",
             target_os = "vita",
-            target_os = "cygwin",
             solarish
         )))]
         const ASYNC = bitcast!(c::O_ASYNC);
@@ -631,12 +631,12 @@ impl FileType {
 #[cfg(not(any(
     apple,
     netbsdlike,
-    target_os = "solaris",
     target_os = "dragonfly",
     target_os = "espidf",
     target_os = "horizon",
     target_os = "haiku",
     target_os = "redox",
+    target_os = "solaris",
     target_os = "vita",
 )))]
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
@@ -782,6 +782,7 @@ bitflags! {
             bsd,
             solarish,
             target_os = "aix",
+            target_os = "cygwin",
             target_os = "emscripten",
             target_os = "fuchsia",
             target_os = "haiku",
@@ -789,7 +790,6 @@ bitflags! {
             target_os = "l4re",
             target_os = "linux",
             target_os = "wasi",
-            target_os = "cygwin",
         )))]
         const NO_HIDE_STALE = bitcast!(c::FALLOC_FL_NO_HIDE_STALE);
         /// `FALLOC_FL_COLLAPSE_RANGE`
@@ -1059,6 +1059,7 @@ pub type StatFs = c::statfs64;
 /// `fsid_t` for use with [`StatFs`].
 #[cfg(not(any(
     solarish,
+    target_os = "cygwin",
     target_os = "espidf",
     target_os = "haiku",
     target_os = "horizon",
@@ -1066,7 +1067,6 @@ pub type StatFs = c::statfs64;
     target_os = "redox",
     target_os = "vita",
     target_os = "wasi",
-    target_os = "cygwin"
 )))]
 pub type Fsid = c::fsid_t;
 

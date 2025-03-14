@@ -269,11 +269,11 @@ mod tests {
 
         #[cfg(not(any(
             solarish,
+            target_os = "cygwin",
             target_os = "haiku",
             target_os = "nto",
             target_os = "redox",
             target_os = "wasi",
-            target_os = "cygwin"
         )))]
         {
             check_renamed_type!(Fsid, fsid_t);

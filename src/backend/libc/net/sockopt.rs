@@ -20,6 +20,7 @@ use crate::net::xdp::{XdpMmapOffsets, XdpOptionsFlags, XdpRingOffset, XdpStatist
     apple,
     windows,
     target_os = "aix",
+    target_os = "cygwin",
     target_os = "dragonfly",
     target_os = "emscripten",
     target_os = "espidf",
@@ -27,7 +28,6 @@ use crate::net::xdp::{XdpMmapOffsets, XdpOptionsFlags, XdpRingOffset, XdpStatist
     target_os = "netbsd",
     target_os = "nto",
     target_os = "vita",
-    target_os = "cygwin",
 )))]
 use crate::net::AddressFamily;
 #[cfg(any(
@@ -380,6 +380,7 @@ pub(crate) fn socket_send_buffer_size(fd: BorrowedFd<'_>) -> io::Result<usize> {
     apple,
     windows,
     target_os = "aix",
+    target_os = "cygwin",
     target_os = "dragonfly",
     target_os = "emscripten",
     target_os = "espidf",
@@ -389,7 +390,6 @@ pub(crate) fn socket_send_buffer_size(fd: BorrowedFd<'_>) -> io::Result<usize> {
     target_os = "netbsd",
     target_os = "nto",
     target_os = "vita",
-    target_os = "cygwin",
 )))]
 pub(crate) fn socket_domain(fd: BorrowedFd<'_>) -> io::Result<AddressFamily> {
     let domain: c::c_int = getsockopt(fd, c::SOL_SOCKET, c::SO_DOMAIN)?;

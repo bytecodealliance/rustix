@@ -16,6 +16,7 @@ bitflags! {
             solarish,
             windows,
             target_os = "aix",
+            target_os = "cygwin",
             target_os = "espidf",
             target_os = "nto",
             target_os = "haiku",
@@ -23,7 +24,6 @@ bitflags! {
             target_os = "hurd",
             target_os = "redox",
             target_os = "vita",
-            target_os = "cygwin",
         )))]
         const CONFIRM = bitcast!(c::MSG_CONFIRM);
         /// `MSG_DONTROUTE`
@@ -40,12 +40,12 @@ bitflags! {
             solarish,
             windows,
             target_os = "aix",
+            target_os = "cygwin",
             target_os = "haiku",
             target_os = "hurd",
             target_os = "nto",
             target_os = "redox",
             target_os = "vita",
-            target_os = "cygwin",
         )))]
         const MORE = bitcast!(c::MSG_MORE);
         #[cfg(not(any(apple, windows, target_os = "redox", target_os = "vita")))]
@@ -91,6 +91,7 @@ bitflags! {
             solarish,
             windows,
             target_os = "aix",
+            target_os = "cygwin",
             target_os = "espidf",
             target_os = "haiku",
             target_os = "horizon",
@@ -98,7 +99,6 @@ bitflags! {
             target_os = "nto",
             target_os = "redox",
             target_os = "vita",
-            target_os = "cygwin",
         )))]
         const ERRQUEUE = bitcast!(c::MSG_ERRQUEUE);
         /// `MSG_OOB`
