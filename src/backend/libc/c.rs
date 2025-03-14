@@ -519,6 +519,25 @@ pub(crate) use __fsid_t as fsid_t;
 #[cfg(target_os = "android")]
 pub(crate) const MAP_DROPPABLE: c_int = bitcast!(linux_raw_sys::general::MAP_DROPPABLE);
 
+// FreeBSD added `timer_*` in FreeBSD 14.
+#[cfg(all(feature = "time", target_os = "freebsd"))]
+syscall!(pub(crate) fn timerfd_create(
+    clockid: c_int,
+    flags: c_int
+) via SYS_timerfd_create -> c_int);
+#[cfg(all(feature = "time", target_os = "freebsd"))]
+syscall!(pub(crate) fn timerfd_gettime(
+    fd: c_int,
+    curr_value: *mut itimerspec
+) via SYS_timerfd_gettime -> c_int);
+#[cfg(all(feature = "time", target_os = "freebsd"))]
+syscall!(pub(crate) fn timerfd_settime(
+    fd: c_int,
+    flags: c_int,
+    new_value: *const itimerspec,
+    old_value: *mut itimerspec
+) via SYS_timerfd_settime -> c_int);
+
 #[cfg(test)]
 mod tests {
     use super::*;
