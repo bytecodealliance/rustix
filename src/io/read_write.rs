@@ -214,7 +214,7 @@ pub fn writev<Fd: AsFd>(fd: Fd, bufs: &[IoSlice<'_>]) -> io::Result<usize> {
 /// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/Scatter_002dGather.html#index-preadv64
 #[cfg(not(any(
     windows,
-    target_os = "cygwin"
+    target_os = "cygwin",
     target_os = "espidf",
     target_os = "haiku",
     target_os = "horizon",
@@ -253,7 +253,7 @@ pub fn preadv<Fd: AsFd>(fd: Fd, bufs: &mut [IoSliceMut<'_>], offset: u64) -> io:
 /// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/I_002fO-Primitives.html#index-pwrite64
 #[cfg(not(any(
     windows,
-    target_os = "cygwin"
+    target_os = "cygwin",
     target_os = "espidf",
     target_os = "haiku",
     target_os = "horizon",
