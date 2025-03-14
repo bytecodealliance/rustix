@@ -1059,7 +1059,7 @@ pub type StatFs = c::statfs64;
 /// `fsid_t` for use with [`StatFs`].
 #[cfg(not(any(
     solarish,
-    target_os = "cygwin"
+    target_os = "cygwin",
     target_os = "espidf",
     target_os = "haiku",
     target_os = "horizon",

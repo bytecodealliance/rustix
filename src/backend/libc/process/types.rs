@@ -63,7 +63,7 @@ pub enum Resource {
         bsd,
         solarish,
         target_os = "aix",
-        target_os = "cygwin"
+        target_os = "cygwin",
         target_os = "haiku",
         target_os = "hurd",
         target_os = "nto",
@@ -74,7 +74,7 @@ pub enum Resource {
         bsd,
         solarish,
         target_os = "aix",
-        target_os = "cygwin"
+        target_os = "cygwin",
         target_os = "haiku",
         target_os = "hurd",
         target_os = "nto",
@@ -85,7 +85,7 @@ pub enum Resource {
         bsd,
         solarish,
         target_os = "aix",
-        target_os = "cygwin"
+        target_os = "cygwin",
         target_os = "haiku",
         target_os = "hurd",
         target_os = "nto",
@@ -96,7 +96,7 @@ pub enum Resource {
         bsd,
         solarish,
         target_os = "aix",
-        target_os = "cygwin"
+        target_os = "cygwin",
         target_os = "haiku",
         target_os = "hurd",
         target_os = "nto",
@@ -107,7 +107,7 @@ pub enum Resource {
         bsd,
         solarish,
         target_os = "aix",
-        target_os = "cygwin"
+        target_os = "cygwin",
         target_os = "haiku",
         target_os = "hurd",
         target_os = "nto",

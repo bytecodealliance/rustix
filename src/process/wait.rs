@@ -485,7 +485,7 @@ pub fn wait(waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
 /// `waitid(_, _, _, opts)`—Wait for the specified child process to change
 /// state.
 #[cfg(not(any(
-    target_os = "cygwin"
+    target_os = "cygwin",
     target_os = "horizon",
     target_os = "openbsd",
     target_os = "redox",

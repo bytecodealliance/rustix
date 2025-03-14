@@ -66,7 +66,7 @@ pub(crate) fn sethostname(name: &[u8]) -> io::Result<()> {
 
 #[cfg(not(any(
     target_os = "android",
-    target_os = "cygwin"
+    target_os = "cygwin",
     target_os = "emscripten",
     target_os = "espidf",
     target_os = "illumos",

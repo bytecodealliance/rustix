@@ -64,7 +64,7 @@ use crate::process::{RawPid, WaitOptions, WaitStatus};
 )))]
 use crate::process::{Resource, Rlimit};
 #[cfg(not(any(
-    target_os = "cygwin"
+    target_os = "cygwin",
     target_os = "espidf",
     target_os = "horizon",
     target_os = "openbsd",
@@ -385,7 +385,7 @@ pub(crate) fn _waitpid(
 }
 
 #[cfg(not(any(
-    target_os = "cygwin"
+    target_os = "cygwin",
     target_os = "espidf",
     target_os = "horizon",
     target_os = "openbsd",
@@ -408,7 +408,7 @@ pub(crate) fn waitid(id: WaitId<'_>, options: WaitIdOptions) -> io::Result<Optio
 }
 
 #[cfg(not(any(
-    target_os = "cygwin"
+    target_os = "cygwin",
     target_os = "espidf",
     target_os = "horizon",
     target_os = "openbsd",
@@ -434,7 +434,7 @@ fn _waitid_all(options: WaitIdOptions) -> io::Result<Option<WaitIdStatus>> {
 }
 
 #[cfg(not(any(
-    target_os = "cygwin"
+    target_os = "cygwin",
     target_os = "espidf",
     target_os = "horizon",
     target_os = "openbsd",
@@ -460,7 +460,7 @@ fn _waitid_pid(pid: Pid, options: WaitIdOptions) -> io::Result<Option<WaitIdStat
 }
 
 #[cfg(not(any(
-    target_os = "cygwin"
+    target_os = "cygwin",
     target_os = "espidf",
     target_os = "horizon",
     target_os = "openbsd",
@@ -510,7 +510,7 @@ fn _waitid_pidfd(fd: BorrowedFd<'_>, options: WaitIdOptions) -> io::Result<Optio
 /// The caller must ensure that `status` is initialized and that `waitid`
 /// returned successfully.
 #[cfg(not(any(
-    target_os = "cygwin"
+    target_os = "cygwin",
     target_os = "espidf",
     target_os = "horizon",
     target_os = "openbsd",
