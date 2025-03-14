@@ -40,7 +40,7 @@ pub fn getxattr<P: path::Arg, Name: path::Arg, Buf: Buffer<u8>>(
     path.into_with_c_str(|path| {
         name.into_with_c_str(|name| {
             // SAFETY: `getxattr` behaves.
-            let len = unsafe { backend::fs::syscalls::getxattr(path, name, value.parts_mut())? };
+            let len = unsafe { backend::fs::syscalls::getxattr(path, name, value.as_mut_ptr())? };
             // SAFETY: `getxattr` behaves.
             unsafe { Ok(value.assume_init(len)) }
         })
@@ -64,7 +64,7 @@ pub fn lgetxattr<P: path::Arg, Name: path::Arg, Buf: Buffer<u8>>(
     path.into_with_c_str(|path| {
         name.into_with_c_str(|name| {
             // SAFETY: `lgetxattr` behaves.
-            let len = unsafe { backend::fs::syscalls::lgetxattr(path, name, value.parts_mut())? };
+            let len = unsafe { backend::fs::syscalls::lgetxattr(path, name, value.as_mut_ptr())? };
             // SAFETY: `lgetxattr` behaves.
             unsafe { Ok(value.assume_init(len)) }
         })
@@ -86,7 +86,8 @@ pub fn fgetxattr<Fd: AsFd, Name: path::Arg, Buf: Buffer<u8>>(
 ) -> io::Result<Buf::Output> {
     name.into_with_c_str(|name| {
         // SAFETY: `fgetxattr` behaves.
-        let len = unsafe { backend::fs::syscalls::fgetxattr(fd.as_fd(), name, value.parts_mut())? };
+        let len =
+            unsafe { backend::fs::syscalls::fgetxattr(fd.as_fd(), name, value.as_mut_ptr())? };
         // SAFETY: `fgetxattr` behaves.
         unsafe { Ok(value.assume_init(len)) }
     })
@@ -159,7 +160,7 @@ pub fn fsetxattr<Fd: AsFd, Name: path::Arg>(
 pub fn listxattr<P: path::Arg, Buf: Buffer<u8>>(path: P, mut list: Buf) -> io::Result<Buf::Output> {
     path.into_with_c_str(|path| {
         // SAFETY: `listxattr` behaves.
-        let len = unsafe { backend::fs::syscalls::listxattr(path, list.parts_mut())? };
+        let len = unsafe { backend::fs::syscalls::listxattr(path, list.as_mut_ptr())? };
         // SAFETY: `listxattr` behaves.
         unsafe { Ok(list.assume_init(len)) }
     })
@@ -179,7 +180,7 @@ pub fn llistxattr<P: path::Arg, Buf: Buffer<u8>>(
 ) -> io::Result<Buf::Output> {
     path.into_with_c_str(|path| {
         // SAFETY: `flistxattr` behaves.
-        let len = unsafe { backend::fs::syscalls::llistxattr(path, list.parts_mut())? };
+        let len = unsafe { backend::fs::syscalls::llistxattr(path, list.as_mut_ptr())? };
         // SAFETY: `flistxattr` behaves.
         unsafe { Ok(list.assume_init(len)) }
     })
@@ -195,7 +196,7 @@ pub fn llistxattr<P: path::Arg, Buf: Buffer<u8>>(
 #[inline]
 pub fn flistxattr<Fd: AsFd, Buf: Buffer<u8>>(fd: Fd, mut list: Buf) -> io::Result<Buf::Output> {
     // SAFETY: `flistxattr` behaves.
-    let len = unsafe { backend::fs::syscalls::flistxattr(fd.as_fd(), list.parts_mut())? };
+    let len = unsafe { backend::fs::syscalls::flistxattr(fd.as_fd(), list.as_mut_ptr())? };
     // SAFETY: `flistxattr` behaves.
     unsafe { Ok(list.assume_init(len)) }
 }

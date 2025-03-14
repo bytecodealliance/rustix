@@ -112,8 +112,9 @@ impl<T> private::Sealed<T> for &mut [T] {
     type Output = usize;
 
     #[inline]
-    fn parts_mut(&mut self) -> (*mut T, usize) {
-        (self.as_mut_ptr(), self.len())
+    fn as_mut_ptr(&mut self) -> *mut [MaybeUninit<T>] {
+        let ptr: *mut [T] = *self;
+        ptr as *mut [MaybeUninit<T>]
     }
 
     #[inline]
@@ -126,8 +127,9 @@ impl<T, const N: usize> private::Sealed<T> for &mut [T; N] {
     type Output = usize;
 
     #[inline]
-    fn parts_mut(&mut self) -> (*mut T, usize) {
-        (self.as_mut_ptr(), N)
+    fn as_mut_ptr(&mut self) -> *mut [MaybeUninit<T>] {
+        let ptr: *mut [T] = *self;
+        ptr as *mut [MaybeUninit<T>]
     }
 
     #[inline]
@@ -144,8 +146,9 @@ impl<T> private::Sealed<T> for &mut Vec<T> {
     type Output = usize;
 
     #[inline]
-    fn parts_mut(&mut self) -> (*mut T, usize) {
-        (self.as_mut_ptr(), self.len())
+    fn as_mut_ptr(&mut self) -> *mut [MaybeUninit<T>] {
+        let ptr: *mut [T] = &mut ***self;
+        ptr as *mut [MaybeUninit<T>]
     }
 
     #[inline]
@@ -158,8 +161,8 @@ impl<'a, T> private::Sealed<T> for &'a mut [MaybeUninit<T>] {
     type Output = (&'a mut [T], &'a mut [MaybeUninit<T>]);
 
     #[inline]
-    fn parts_mut(&mut self) -> (*mut T, usize) {
-        (self.as_mut_ptr().cast(), self.len())
+    fn as_mut_ptr(&mut self) -> *mut [MaybeUninit<T>] {
+        *self
     }
 
     #[inline]
@@ -177,8 +180,8 @@ impl<'a, T, const N: usize> private::Sealed<T> for &'a mut [MaybeUninit<T>; N] {
     type Output = (&'a mut [T], &'a mut [MaybeUninit<T>]);
 
     #[inline]
-    fn parts_mut(&mut self) -> (*mut T, usize) {
-        (self.as_mut_ptr().cast(), self.len())
+    fn as_mut_ptr(&mut self) -> *mut [MaybeUninit<T>] {
+        *self
     }
 
     #[inline]
@@ -197,8 +200,8 @@ impl<'a, T> private::Sealed<T> for &'a mut Vec<MaybeUninit<T>> {
     type Output = (&'a mut [T], &'a mut [MaybeUninit<T>]);
 
     #[inline]
-    fn parts_mut(&mut self) -> (*mut T, usize) {
-        (self.as_mut_ptr().cast(), self.len())
+    fn as_mut_ptr(&mut self) -> *mut [MaybeUninit<T>] {
+        &mut ***self
     }
 
     #[inline]
@@ -273,9 +276,8 @@ impl<'a, T> private::Sealed<T> for SpareCapacity<'a, T> {
     type Output = usize;
 
     #[inline]
-    fn parts_mut(&mut self) -> (*mut T, usize) {
-        let spare = self.0.spare_capacity_mut();
-        (spare.as_mut_ptr().cast(), spare.len())
+    fn as_mut_ptr(&mut self) -> *mut [MaybeUninit<T>] {
+        self.0.spare_capacity_mut()
     }
 
     #[inline]
@@ -287,11 +289,13 @@ impl<'a, T> private::Sealed<T> for SpareCapacity<'a, T> {
 }
 
 mod private {
+    use super::*;
+
     pub trait Sealed<T> {
         /// The result of the process operation.
         type Output;
 
-        /// Return a pointer and length for this buffer.
+        /// Return a slice pointer for this buffer.
         ///
         /// The length is the number of elements of type `T`, not a number of bytes.
         ///
@@ -300,7 +304,7 @@ mod private {
         /// callers could use the `&mut [MaybeUninit<T>]` slice to set elements
         /// to `MaybeUninit::<T>::uninit()`, which would be a problem if `Self`
         /// is `&mut [T]` or similar.
-        fn parts_mut(&mut self) -> (*mut T, usize);
+        fn as_mut_ptr(&mut self) -> *mut [MaybeUninit<T>];
 
         /// Convert a finished buffer pointer into its result.
         ///

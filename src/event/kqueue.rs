@@ -430,7 +430,7 @@ pub unsafe fn kevent<Fd: AsFd, Buf: Buffer<Event>>(
     let len = syscalls::kevent(
         kqueue.as_fd(),
         changelist,
-        eventlist.parts_mut(),
+        eventlist.as_mut_ptr(),
         timeout.as_ref(),
     )
     .map(|res| res as _)?;
