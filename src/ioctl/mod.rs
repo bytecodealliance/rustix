@@ -331,7 +331,8 @@ type _Opcode = c::c_ulong;
     target_os = "fuchsia",
     target_os = "emscripten",
     target_os = "nto",
-    target_os = "wasi"
+    target_os = "wasi",
+    target_os = "cygwin"
 ))]
 type _Opcode = c::c_int;
 

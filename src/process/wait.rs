@@ -60,10 +60,13 @@ bitflags! {
         /// [`Signal::Cont`]: crate::process::Signal::Cont
         const CONTINUED = bitcast!(backend::process::wait::WCONTINUED);
         /// Wait for processed that have exited.
+        #[cfg(not(target_os = "cygwin"))]
         const EXITED = bitcast!(backend::process::wait::WEXITED);
         /// Keep processed in a waitable state.
+        #[cfg(not(target_os = "cygwin"))]
         const NOWAIT = bitcast!(backend::process::wait::WNOWAIT);
         /// Wait for processes that have been stopped.
+        #[cfg(not(target_os = "cygwin"))]
         const STOPPED = bitcast!(backend::process::wait::WSTOPPED);
 
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
@@ -485,7 +488,8 @@ pub fn wait(waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
     target_os = "horizon",
     target_os = "openbsd",
     target_os = "redox",
-    target_os = "wasi"
+    target_os = "wasi",
+    target_os = "cygwin"
 )))]
 #[inline]
 pub fn waitid<'a, Id: Into<WaitId<'a>>>(

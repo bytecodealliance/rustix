@@ -10,7 +10,9 @@ fn makedev_roundtrip() {
     let (maj, min) = (0x0000_0026, 0x0064_6361);
     #[cfg(target_os = "netbsd")]
     let (maj, min) = (0x0000_0026, 0x0000_0061);
-    #[cfg(not(any(apple, freebsdlike, target_os = "netbsd")))]
+    #[cfg(target_os = "cygwin")]
+    let (maj, min) = (0x0000_2526, 0x0000_6361);
+    #[cfg(not(any(apple, freebsdlike, target_os = "netbsd", target_os = "cygwin")))]
     let (maj, min) = (0x2324_2526, 0x6564_6361);
 
     let dev = makedev(maj, min);

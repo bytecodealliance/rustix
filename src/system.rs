@@ -182,7 +182,8 @@ pub fn sethostname(name: &[u8]) -> io::Result<()> {
     target_os = "redox",
     target_os = "solaris",
     target_os = "vita",
-    target_os = "wasi"
+    target_os = "wasi",
+    target_os = "cygwin"
 )))]
 #[inline]
 pub fn setdomainname(name: &[u8]) -> io::Result<()> {

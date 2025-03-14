@@ -23,6 +23,7 @@ bitflags! {
             target_os = "hurd",
             target_os = "redox",
             target_os = "vita",
+            target_os = "cygwin",
         )))]
         const CONFIRM = bitcast!(c::MSG_CONFIRM);
         /// `MSG_DONTROUTE`
@@ -44,6 +45,7 @@ bitflags! {
             target_os = "nto",
             target_os = "redox",
             target_os = "vita",
+            target_os = "cygwin",
         )))]
         const MORE = bitcast!(c::MSG_MORE);
         #[cfg(not(any(apple, windows, target_os = "redox", target_os = "vita")))]
@@ -96,6 +98,7 @@ bitflags! {
             target_os = "nto",
             target_os = "redox",
             target_os = "vita",
+            target_os = "cygwin",
         )))]
         const ERRQUEUE = bitcast!(c::MSG_ERRQUEUE);
         /// `MSG_OOB`

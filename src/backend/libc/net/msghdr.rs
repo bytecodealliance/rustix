@@ -62,6 +62,7 @@ fn msg_iov_len(len: usize) -> c::c_int {
     target_os = "haiku",
     target_os = "hurd",
     target_os = "nto",
+    target_os = "cygwin",
 ))]
 #[inline]
 fn msg_control_len(len: usize) -> c::socklen_t {
@@ -84,6 +85,7 @@ fn msg_control_len(len: usize) -> c::socklen_t {
     target_os = "redox",
     target_os = "vita",
     target_os = "wasi",
+    target_os = "cygwin",
 )))]
 #[inline]
 fn msg_control_len(len: usize) -> c::size_t {

@@ -156,6 +156,7 @@ use crate::net::xdp::{XdpMmapOffsets, XdpOptionsFlags, XdpStatistics, XdpUmemReg
     target_os = "netbsd",
     target_os = "nto",
     target_os = "vita",
+    target_os = "cygwin",
 )))]
 use crate::net::AddressFamily;
 #[cfg(any(
@@ -471,6 +472,7 @@ pub fn socket_send_buffer_size<Fd: AsFd>(fd: Fd) -> io::Result<usize> {
     target_os = "netbsd",
     target_os = "nto",
     target_os = "vita",
+    target_os = "cygwin",
 )))]
 #[inline]
 #[doc(alias = "SO_DOMAIN")]
@@ -517,7 +519,7 @@ pub fn socket_oobinline<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
 /// See the [module-level documentation] for more.
 ///
 /// [module-level documentation]: self#references-for-get_socket_-and-set_socket_-functions
-#[cfg(not(any(solarish, windows)))]
+#[cfg(not(any(solarish, windows, target_os = "cygwin")))]
 #[cfg(not(windows))]
 #[inline]
 #[doc(alias = "SO_REUSEPORT")]
@@ -530,7 +532,7 @@ pub fn set_socket_reuseport<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
 /// See the [module-level documentation] for more.
 ///
 /// [module-level documentation]: self#references-for-get_socket_-and-set_socket_-functions
-#[cfg(not(any(solarish, windows)))]
+#[cfg(not(any(solarish, windows, target_os = "cygwin")))]
 #[inline]
 #[doc(alias = "SO_REUSEPORT")]
 pub fn socket_reuseport<Fd: AsFd>(fd: Fd) -> io::Result<bool> {

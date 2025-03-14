@@ -11,6 +11,7 @@ pub(crate) use c::{WCONTINUED, WUNTRACED};
     target_os = "horizon",
     target_os = "openbsd",
     target_os = "redox",
-    target_os = "wasi"
+    target_os = "wasi",
+    target_os = "cygwin"
 )))]
 pub(crate) use c::{WEXITED, WNOWAIT, WSTOPPED};

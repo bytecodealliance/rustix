@@ -27,6 +27,7 @@ use crate::net::xdp::{XdpMmapOffsets, XdpOptionsFlags, XdpRingOffset, XdpStatist
     target_os = "netbsd",
     target_os = "nto",
     target_os = "vita",
+    target_os = "cygwin",
 )))]
 use crate::net::AddressFamily;
 #[cfg(any(
@@ -388,6 +389,7 @@ pub(crate) fn socket_send_buffer_size(fd: BorrowedFd<'_>) -> io::Result<usize> {
     target_os = "netbsd",
     target_os = "nto",
     target_os = "vita",
+    target_os = "cygwin",
 )))]
 pub(crate) fn socket_domain(fd: BorrowedFd<'_>) -> io::Result<AddressFamily> {
     let domain: c::c_int = getsockopt(fd, c::SOL_SOCKET, c::SO_DOMAIN)?;
@@ -412,13 +414,13 @@ pub(crate) fn socket_oobinline(fd: BorrowedFd<'_>) -> io::Result<bool> {
     getsockopt(fd, c::SOL_SOCKET, c::SO_OOBINLINE).map(to_bool)
 }
 
-#[cfg(not(any(solarish, windows)))]
+#[cfg(not(any(solarish, windows, target_os = "cygwin")))]
 #[inline]
 pub(crate) fn set_socket_reuseport(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
     setsockopt(fd, c::SOL_SOCKET, c::SO_REUSEPORT, from_bool(value))
 }
 
-#[cfg(not(any(solarish, windows)))]
+#[cfg(not(any(solarish, windows, target_os = "cygwin")))]
 #[inline]
 pub(crate) fn socket_reuseport(fd: BorrowedFd<'_>) -> io::Result<bool> {
     getsockopt(fd, c::SOL_SOCKET, c::SO_REUSEPORT).map(to_bool)

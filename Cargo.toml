@@ -269,4 +269,5 @@ check-cfg = [
     'cfg(wasi_ext)',
     'cfg(wasip2)',
     'cfg(target_arch, values("xtensa"))',
+    'cfg(target_os, values("cygwin"))',
 ]

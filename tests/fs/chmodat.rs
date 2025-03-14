@@ -1,4 +1,4 @@
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "wasi", target_os = "cygwin")))]
 #[test]
 fn test_chmod() {
     use rustix::fs::{chmod, open, stat, symlink, Mode, OFlags};
