@@ -7,6 +7,8 @@
 
 use crate::backend::c;
 use crate::backend::conv::{by_mut, c_uint, ret, socklen_t};
+#[cfg(all(target_os = "linux", feature = "time"))]
+use crate::clockid::ClockId;
 use crate::fd::BorrowedFd;
 #[cfg(feature = "alloc")]
 use crate::ffi::CStr;
@@ -14,6 +16,8 @@ use crate::io;
 use crate::net::sockopt::Timeout;
 #[cfg(target_os = "linux")]
 use crate::net::xdp::{XdpMmapOffsets, XdpOptionsFlags, XdpRingOffset, XdpStatistics, XdpUmemReg};
+#[cfg(all(target_os = "linux", feature = "time"))]
+use crate::net::TxTimeFlags;
 use crate::net::{
     AddressFamily, Ipv4Addr, Ipv6Addr, Protocol, RawProtocol, SocketAddrBuf, SocketAddrV4,
     SocketAddrV6, SocketType, UCred,
@@ -846,6 +850,35 @@ pub(crate) fn tcp_cork(fd: BorrowedFd<'_>) -> io::Result<bool> {
 #[inline]
 pub(crate) fn socket_peercred(fd: BorrowedFd<'_>) -> io::Result<UCred> {
     getsockopt(fd, c::SOL_SOCKET, linux_raw_sys::net::SO_PEERCRED)
+}
+
+#[cfg(all(target_os = "linux", feature = "time"))]
+#[inline]
+pub(crate) fn set_txtime(
+    fd: BorrowedFd<'_>,
+    clockid: ClockId,
+    flags: TxTimeFlags,
+) -> io::Result<()> {
+    setsockopt(
+        fd,
+        c::SOL_SOCKET,
+        c::SO_TXTIME,
+        c::sock_txtime {
+            clockid: clockid as _,
+            flags: flags.bits(),
+        },
+    )
+}
+
+#[cfg(all(target_os = "linux", feature = "time"))]
+#[inline]
+pub(crate) fn get_txtime(fd: BorrowedFd<'_>) -> io::Result<(ClockId, TxTimeFlags)> {
+    let txtime: c::sock_txtime = getsockopt(fd, c::SOL_SOCKET, c::SO_TXTIME)?;
+
+    Ok((
+        txtime.clockid.try_into().map_err(|_| io::Errno::RANGE)?,
+        TxTimeFlags::from_bits(txtime.flags).ok_or(io::Errno::RANGE)?,
+    ))
 }
 
 #[cfg(target_os = "linux")]
