@@ -2,7 +2,13 @@
 
 use crate::backend::c;
 use crate::backend::conv::ret;
-#[cfg(any(linux_kernel, target_os = "freebsd", target_os = "fuchsia"))]
+#[cfg(any(
+    linux_kernel,
+    target_os = "freebsd",
+    target_os = "fuchsia",
+    target_os = "illumos",
+    target_os = "netbsd"
+))]
 #[cfg(any(all(target_env = "gnu", fix_y2038), not(fix_y2038)))]
 use crate::backend::time::types::LibcItimerspec;
 #[cfg(not(target_os = "wasi"))]
@@ -21,7 +27,13 @@ use crate::timespec::as_libc_timespec_ptr;
 use crate::timespec::LibcTimespec;
 use crate::timespec::Timespec;
 use core::mem::MaybeUninit;
-#[cfg(any(linux_kernel, target_os = "freebsd", target_os = "fuchsia"))]
+#[cfg(any(
+    linux_kernel,
+    target_os = "freebsd",
+    target_os = "fuchsia",
+    target_os = "illumos",
+    target_os = "netbsd"
+))]
 use {
     crate::backend::conv::{borrowed_fd, ret_owned_fd},
     crate::fd::{BorrowedFd, OwnedFd},
@@ -298,12 +310,24 @@ fn clock_settime_old(id: ClockId, timespec: Timespec) -> io::Result<()> {
     unsafe { ret(c::clock_settime(id as c::clockid_t, &old_timespec)) }
 }
 
-#[cfg(any(linux_kernel, target_os = "freebsd", target_os = "fuchsia"))]
+#[cfg(any(
+    linux_kernel,
+    target_os = "freebsd",
+    target_os = "fuchsia",
+    target_os = "illumos",
+    target_os = "netbsd"
+))]
 pub(crate) fn timerfd_create(id: TimerfdClockId, flags: TimerfdFlags) -> io::Result<OwnedFd> {
     unsafe { ret_owned_fd(c::timerfd_create(id as c::clockid_t, bitflags_bits!(flags))) }
 }
 
-#[cfg(any(linux_kernel, target_os = "freebsd", target_os = "fuchsia"))]
+#[cfg(any(
+    linux_kernel,
+    target_os = "freebsd",
+    target_os = "fuchsia",
+    target_os = "illumos",
+    target_os = "netbsd"
+))]
 pub(crate) fn timerfd_settime(
     fd: BorrowedFd<'_>,
     flags: TimerfdTimerFlags,
@@ -345,7 +369,13 @@ pub(crate) fn timerfd_settime(
     }
 }
 
-#[cfg(any(linux_kernel, target_os = "freebsd", target_os = "fuchsia"))]
+#[cfg(any(
+    linux_kernel,
+    target_os = "freebsd",
+    target_os = "fuchsia",
+    target_os = "illumos",
+    target_os = "netbsd"
+))]
 #[cfg(fix_y2038)]
 fn timerfd_settime_old(
     fd: BorrowedFd<'_>,
@@ -412,7 +442,13 @@ fn timerfd_settime_old(
     })
 }
 
-#[cfg(any(linux_kernel, target_os = "freebsd", target_os = "fuchsia"))]
+#[cfg(any(
+    linux_kernel,
+    target_os = "freebsd",
+    target_os = "fuchsia",
+    target_os = "illumos",
+    target_os = "netbsd"
+))]
 pub(crate) fn timerfd_gettime(fd: BorrowedFd<'_>) -> io::Result<Itimerspec> {
     // Old 32-bit version: libc has `timerfd_gettime` but it is not y2038 safe
     // by default. But there may be a `__timerfd_gettime64` we can use.
@@ -443,7 +479,13 @@ pub(crate) fn timerfd_gettime(fd: BorrowedFd<'_>) -> io::Result<Itimerspec> {
     }
 }
 
-#[cfg(any(linux_kernel, target_os = "freebsd", target_os = "fuchsia"))]
+#[cfg(any(
+    linux_kernel,
+    target_os = "freebsd",
+    target_os = "fuchsia",
+    target_os = "illumos",
+    target_os = "netbsd"
+))]
 #[cfg(fix_y2038)]
 fn timerfd_gettime_old(fd: BorrowedFd<'_>) -> io::Result<Itimerspec> {
     let mut old_result = MaybeUninit::<c::itimerspec>::uninit();
