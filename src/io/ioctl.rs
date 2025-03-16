@@ -17,7 +17,8 @@ use backend::fd::AsFd;
 /// This is similar to `fcntl(fd, F_SETFD, FD_CLOEXEC)`, except that it avoids
 /// clearing any other flags that might be set.
 ///
-/// Linux: Note that `ioctl` can not be used on `O_PATH` file descriptors.
+/// Linux: Note that `ioctl` can not be used on `OFlags::PATH` file
+descriptors.
 #[cfg(any(apple, linux_kernel))]
 #[inline]
 #[doc(alias = "FIOCLEX")]
@@ -32,10 +33,11 @@ pub fn ioctl_fioclex<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 
 /// `ioctl(fd, FIONCLEX, NULL)`—Remove the close-on-exec flag.
 ///
-/// This is similar to `fcntl(fd, F_SETFD, 0)`, except that it avoids
+/// This is similar to `fcntl_setfd(fd, FdFlags::empty())`, except that it avoids
 /// clearing any other flags that might be set.
 ///
-/// Linux: Note that `ioctl` can not be used on `O_PATH` file descriptors.
+/// Linux: Note that `ioctl` can not be used on `OFlags::PATH` file
+descriptors.
 #[cfg(any(apple, linux_kernel))]
 #[inline]
 #[doc(alias = "FIONCLEX")]
