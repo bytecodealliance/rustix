@@ -210,6 +210,10 @@ directly convertible to `i32`; use [`Signal::as_raw`] instead.
 [`Signal::INT`]: https://docs.rs/rustix/1.0.0/rustix/process/struct.Signal.html#variant.Int
 [`Signal::as_raw`]: https://docs.rs/rustix/1.0.0/rustix/process/struct.Signal.html#method.as_raw
 
+`Signal::from_raw` is renamed to [`Signal::from_named_raw`].
+
+[`Signal::from_named_raw`]: https://docs.rs/rustix/1.0.0/rustix/process/struct.Signal.html#method.from_named_raw
+
 The associated constant `rustix::ioctl::Ioctl::OPCODE` is now replaced with an
 associated method [`rustix::ioctl::Ioctl::opcode`], to support ioctls where the
 opcode is computed rather than a constant.
