@@ -41,10 +41,14 @@ fn test_timerfd() {
 fn test_timerfd_with_interval() {
     let fd = timerfd_create(TimerfdClockId::Monotonic, TimerfdFlags::CLOEXEC).unwrap();
 
+    // An `Itimerspec` with an initial value and an interval.
+    //
+    // For the interval, use a value of more than 200000 nanoseconds, as
+    // illumos appears not to support values smaller than that.
     let set = Itimerspec {
         it_interval: Timespec {
             tv_sec: 0,
-            tv_nsec: 6,
+            tv_nsec: 200001,
         },
         it_value: Timespec {
             tv_sec: 1,
