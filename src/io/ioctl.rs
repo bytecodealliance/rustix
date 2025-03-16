@@ -18,7 +18,7 @@ use backend::fd::AsFd;
 /// clearing any other flags that might be set.
 ///
 /// Linux: Note that `ioctl` can not be used on `OFlags::PATH` file
-descriptors.
+/// descriptors.
 #[cfg(any(apple, linux_kernel))]
 #[inline]
 #[doc(alias = "FIOCLEX")]
@@ -37,7 +37,7 @@ pub fn ioctl_fioclex<Fd: AsFd>(fd: Fd) -> io::Result<()> {
 /// clearing any other flags that might be set.
 ///
 /// Linux: Note that `ioctl` can not be used on `OFlags::PATH` file
-descriptors.
+/// descriptors.
 #[cfg(any(apple, linux_kernel))]
 #[inline]
 #[doc(alias = "FIONCLEX")]
