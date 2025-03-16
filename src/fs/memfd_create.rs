@@ -4,6 +4,10 @@ use backend::fs::types::MemfdFlags;
 
 /// `memfd_create(name, flags)`—Create an anonymous file.
 ///
+/// For a higher-level API to this functionality, see the [memfd] crate.
+///
+/// [memfd]: https://crates.io/crates/memfd
+///
 /// # References
 ///  - [Linux]
 ///  - [glibc]

@@ -1,4 +1,4 @@
-//! Utilities to help with buffering.
+//! Utilities for functions that return data via buffers.
 
 #![allow(unsafe_code)]
 
@@ -22,7 +22,7 @@ use core::slice;
 ///
 /// Passing a `&mut [u8]`:
 ///
-/// ```rust
+/// ```
 /// # use rustix::io::read;
 /// # fn example(fd: rustix::fd::BorrowedFd) -> rustix::io::Result<()> {
 /// let mut buf = [0_u8; 64];
@@ -34,7 +34,7 @@ use core::slice;
 ///
 /// Passing a `&mut [MaybeUninit<u8>]`:
 ///
-/// ```rust
+/// ```
 /// # use rustix::io::read;
 /// # use std::mem::MaybeUninit;
 /// # fn example(fd: rustix::fd::BorrowedFd) -> rustix::io::Result<()> {
@@ -48,7 +48,7 @@ use core::slice;
 ///
 /// Passing a [`SpareCapacity`], via the [`spare_capacity`] helper function:
 ///
-/// ```rust
+/// ```
 /// # use rustix::io::read;
 /// # use rustix::buffer::spare_capacity;
 /// # fn example(fd: rustix::fd::BorrowedFd) -> rustix::io::Result<()> {
@@ -293,7 +293,8 @@ mod private {
 
         /// Return a pointer and length for this buffer.
         ///
-        /// The length is the number of elements of type `T`, not a number of bytes.
+        /// The length is the number of elements of type `T`, not a number of
+        /// bytes.
         ///
         /// It's tempting to have this return `&mut [MaybeUninit<T>]` instead,
         /// however that would require this function to be `unsafe`, because
@@ -370,7 +371,10 @@ mod tests {
         let mut buf = [0_u8; 64];
         let nread = read(&input, &mut buf).unwrap();
         assert_eq!(nread, buf.len());
-        assert_eq!(&buf[..38], b"//! Utilities to help with buffering.\n");
+        assert_eq!(
+            &buf[..58],
+            b"//! Utilities for functions that return data via buffers.\n"
+        );
         input.seek(SeekFrom::End(-1)).unwrap();
         let nread = read(&input, &mut buf).unwrap();
         assert_eq!(nread, 1);
@@ -393,11 +397,14 @@ mod tests {
         let mut buf = [MaybeUninit::<u8>::uninit(); 64];
         let (init, uninit) = read(&input, &mut buf).unwrap();
         assert_eq!(uninit.len(), 0);
-        assert_eq!(&init[..38], b"//! Utilities to help with buffering.\n");
+        assert_eq!(
+            &init[..58],
+            b"//! Utilities for functions that return data via buffers.\n"
+        );
         assert_eq!(init.len(), buf.len());
         assert_eq!(
-            unsafe { core::mem::transmute::<&mut [MaybeUninit<u8>], &mut [u8]>(&mut buf[..38]) },
-            b"//! Utilities to help with buffering.\n"
+            unsafe { core::mem::transmute::<&mut [MaybeUninit<u8>], &mut [u8]>(&mut buf[..58]) },
+            b"//! Utilities for functions that return data via buffers.\n"
         );
         input.seek(SeekFrom::End(-1)).unwrap();
         let (init, uninit) = read(&input, &mut buf).unwrap();
@@ -423,7 +430,10 @@ mod tests {
         let nread = read(&input, spare_capacity(&mut buf)).unwrap();
         assert_eq!(nread, buf.capacity());
         assert_eq!(nread, buf.len());
-        assert_eq!(&buf[..38], b"//! Utilities to help with buffering.\n");
+        assert_eq!(
+            &buf[..58],
+            b"//! Utilities for functions that return data via buffers.\n"
+        );
         buf.clear();
         input.seek(SeekFrom::End(-1)).unwrap();
         let nread = read(&input, spare_capacity(&mut buf)).unwrap();

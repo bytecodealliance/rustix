@@ -407,24 +407,17 @@ pub enum WaitId<'a> {
 /// `waitpid(pid, waitopts)`—Wait for a specific process to change state.
 ///
 /// If the pid is `None`, the call will wait for any child process whose
-/// process group id matches that of the calling process.
-///
-/// Otherwise, the call will wait for the child process with the given pid.
+/// process group id matches that of the calling process. Otherwise, the call
+/// will wait for the child process with the given pid.
 ///
 /// On Success, returns the status of the selected process.
 ///
 /// If `NOHANG` was specified in the options, and the selected child process
 /// didn't change state, returns `None`.
 ///
-/// # Bugs
-///
-/// This function does not currently support waiting for given process group
-/// (the `< -1` case of `waitpid`); to do that, currently the [`waitpgid`] or
-/// [`waitid`] function must be used.
-///
-/// This function does not currently support waiting for any process (the
-/// `-1` case of `waitpid`); to do that, currently the [`wait`] function must
-/// be used.
+/// To wait for a given process group (the `< -1` case of `waitpid`), use
+/// [`waitpgid`] or [`waitid`]. To wait for any process (the `-1` case of
+/// `waitpid`), use [`wait`].
 ///
 /// # References
 ///  - [POSIX]

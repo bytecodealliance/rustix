@@ -41,7 +41,14 @@ impl Cpuid {
 /// `gettid()`—Returns the thread ID.
 ///
 /// This returns the OS thread ID, which is not necessarily the same as the
-/// `rust::thread::Thread::id` or the pthread ID.
+/// Rust's `std::thread::Thread::id` or the pthread ID.
+///
+/// This function always does a system call. To avoid this overhead, ask the
+/// thread runtime for the ID instead, for example using [`libc::gettid`] or
+/// [`origin::thread::current_id`].
+///
+/// [`libc::gettid`]: https://docs.rs/libc/*/libc/fn.gettid.html
+/// [`origin::thread::current_id`]: https://docs.rs/origin/*/origin/thread/fn.current_id.html
 ///
 /// # References
 ///  - [Linux]

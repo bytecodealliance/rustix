@@ -56,8 +56,8 @@ pub(in crate::backend) mod asm;
 pub(in crate::backend) use self::asm as choose;
 
 // On 32-bit x86, use vDSO wrappers for all syscalls. We could use the
-// architecture syscall instruction (`int 0x80`), but the vDSO kernel_vsyscall
-// mechanism is much faster.
+// architecture syscall instruction (`int 0x80`), but the vDSO
+// `__kernel_vsyscall` mechanism is much faster.
 #[cfg(target_arch = "x86")]
 pub(in crate::backend) use super::vdso_wrappers::x86_via_vdso as choose;
 

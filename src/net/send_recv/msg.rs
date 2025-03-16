@@ -143,7 +143,8 @@ pub enum SendAncillaryMessage<'slice, 'fd> {
 impl SendAncillaryMessage<'_, '_> {
     /// Get the maximum size of an ancillary message.
     ///
-    /// This can be helpful in determining the size of the buffer you allocate.
+    /// This can be used to determine the size of the buffer to allocate for a
+    /// [`SendAncillaryBuffer::new`] with one message.
     pub const fn size(&self) -> usize {
         match self {
             Self::ScmRights(slice) => cmsg_space!(ScmRights(slice.len())),
