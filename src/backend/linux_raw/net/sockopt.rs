@@ -261,7 +261,7 @@ fn duration_from_linux_sock_timeval(time: __kernel_sock_timeval) -> Option<Durat
     }
 }
 
-/// Like `duration_from_linux` but uses Linux's old 32-bit
+/// Like `duration_from_linux_sock_timeval` but uses Linux's old 32-bit
 /// `__kernel_old_timeval`.
 fn duration_from_linux_old_timeval(time: __kernel_old_timeval) -> Option<Duration> {
     if time.tv_sec == 0 && time.tv_usec == 0 {
@@ -297,7 +297,7 @@ fn duration_to_linux_sock_timeval(timeout: Option<Duration>) -> io::Result<__ker
     })
 }
 
-/// Like `duration_to_linux` but uses Linux's old 32-bit
+/// Like `duration_to_linux_sock_timeval` but uses Linux's old 32-bit
 /// `__kernel_old_timeval`.
 fn duration_to_linux_old_timeval(timeout: Option<Duration>) -> io::Result<__kernel_old_timeval> {
     Ok(match timeout {

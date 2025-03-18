@@ -423,7 +423,7 @@ bitflags! {
     pub struct CapabilitiesSecureBits: u32 {
         /// If this bit is set, then the kernel does not grant capabilities
         /// when a `set-user-ID-root` program is executed, or when a process
-        /// with an effective or real UID of 0 calls `execve`.
+        /// with an effective or real UID of [`Uid::ROOT`] calls `execve`.
         const NO_ROOT = 1_u32 << 0;
         /// Set [`NO_ROOT`] irreversibly.
         ///

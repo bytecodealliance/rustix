@@ -2012,7 +2012,7 @@ mod tests {
         assert_eq_align!(io_uring_user_data, u64);
 
         // Test that `u64`s and pointers are properly stored in
-        // io_uring_user_data`.
+        // `io_uring_user_data`.
         unsafe {
             const MAGIC: u64 = !0x0123_4567_89ab_cdef;
             let user_data = io_uring_user_data::from_u64(MAGIC);

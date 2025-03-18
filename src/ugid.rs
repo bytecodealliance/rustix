@@ -45,7 +45,7 @@ impl Uid {
         self.0
     }
 
-    /// Test whether this uid represents the root user (uid 0).
+    /// Test whether this uid represents the root user ([`Uid::ROOT`]).
     #[inline]
     pub const fn is_root(self) -> bool {
         self.0 == Self::ROOT.0
@@ -79,7 +79,7 @@ impl Gid {
         self.0
     }
 
-    /// Test whether this gid represents the root group (gid 0).
+    /// Test whether this gid represents the root group ([`Gid::ROOT`]).
     #[inline]
     pub const fn is_root(self) -> bool {
         self.0 == Self::ROOT.0

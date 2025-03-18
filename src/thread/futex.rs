@@ -1,7 +1,8 @@
 //! Linux `futex`.
 //!
 //! Futex is a very low-level mechanism for implementing concurrency primitives
-//! such as mutexes, rwlocks, and condvars.
+//! such as mutexes, rwlocks, and condvars. For a higher-level API that
+//! provides those abstractions, see [rustix-futex-syntax].
 //!
 //! # Examples
 //!
@@ -22,6 +23,7 @@
 //!
 //! [Linux `futex` system call]: https://man7.org/linux/man-pages/man2/futex.2.html
 //! [Linux `futex` feature]: https://man7.org/linux/man-pages/man7/futex.7.html
+//! [rustix-futex-sync]: https://crates.io/crates/rustix-futex-sync
 #![allow(unsafe_code)]
 
 use core::ffi::c_void;

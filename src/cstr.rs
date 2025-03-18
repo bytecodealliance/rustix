@@ -5,7 +5,10 @@
 /// strings, and passing strings to rustix as `CStr`s means that rustix doesn't
 /// need to copy them into a separate buffer to NUL-terminate them.
 ///
+/// In Rust ≥ 1.77, users can use [C-string literals] instead of this macro.
+///
 /// [`CStr`]: crate::ffi::CStr
+/// [C-string literals]: https://blog.rust-lang.org/2024/03/21/Rust-1.77.0.html#c-string-literals
 ///
 /// # Examples
 ///

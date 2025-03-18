@@ -13,7 +13,7 @@ use crate::ffi;
 #[cfg(not(fix_y2038))]
 use core::ptr::null;
 
-/// `struct timespec`
+/// `struct timespec`—A quantity of time in seconds plus nanoseconds.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord)]
 #[repr(C)]
 pub struct Timespec {

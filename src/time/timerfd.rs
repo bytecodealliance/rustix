@@ -19,6 +19,10 @@ pub struct Itimerspec {
 
 /// `timerfd_create(clockid, flags)`—Create a timer.
 ///
+/// For a higher-level API to timerfd functionality, see the [timerfd] crate.
+///
+/// [timerfd]: https://crates.io/crates/timerfd
+///
 /// # References
 ///  - [Linux]
 ///

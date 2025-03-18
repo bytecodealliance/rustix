@@ -27,10 +27,16 @@ bitflags! {
 
 /// `getxattr(path, name, value)`—Get extended filesystem attributes.
 ///
+/// For a higher-level API to xattr functionality, see the [xattr] crate.
+///
+/// [xattr]: https://crates.io/crates/xattr
+///
 /// # References
 ///  - [Linux]
+///  - [Apple]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/getxattr.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/getxattr.2.html
 #[inline]
 pub fn getxattr<P: path::Arg, Name: path::Arg, Buf: Buffer<u8>>(
     path: P,
@@ -76,8 +82,10 @@ pub fn lgetxattr<P: path::Arg, Name: path::Arg, Buf: Buffer<u8>>(
 ///
 /// # References
 ///  - [Linux]
+///  - [Apple]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/fgetxattr.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/fgetxattr.2.html
 #[inline]
 pub fn fgetxattr<Fd: AsFd, Name: path::Arg, Buf: Buffer<u8>>(
     fd: Fd,
@@ -97,8 +105,10 @@ pub fn fgetxattr<Fd: AsFd, Name: path::Arg, Buf: Buffer<u8>>(
 ///
 /// # References
 ///  - [Linux]
+///  - [Apple]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/setxattr.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/setxattr.2.html
 #[inline]
 pub fn setxattr<P: path::Arg, Name: path::Arg>(
     path: P,
@@ -136,8 +146,10 @@ pub fn lsetxattr<P: path::Arg, Name: path::Arg>(
 ///
 /// # References
 ///  - [Linux]
+///  - [Apple]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/fsetxattr.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/fsetxattr.2.html
 #[inline]
 pub fn fsetxattr<Fd: AsFd, Name: path::Arg>(
     fd: Fd,
@@ -155,6 +167,7 @@ pub fn fsetxattr<Fd: AsFd, Name: path::Arg>(
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/listxattr.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/listxattr.2.html
 #[inline]
 pub fn listxattr<P: path::Arg, Buf: Buffer<u8>>(path: P, mut list: Buf) -> io::Result<Buf::Output> {
     path.into_with_c_str(|path| {
@@ -190,8 +203,10 @@ pub fn llistxattr<P: path::Arg, Buf: Buffer<u8>>(
 ///
 /// # References
 ///  - [Linux]
+///  - [Apple]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/flistxattr.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/flistxattr.2.html
 #[inline]
 pub fn flistxattr<Fd: AsFd, Buf: Buffer<u8>>(fd: Fd, mut list: Buf) -> io::Result<Buf::Output> {
     // SAFETY: `flistxattr` behaves.
@@ -204,8 +219,10 @@ pub fn flistxattr<Fd: AsFd, Buf: Buffer<u8>>(fd: Fd, mut list: Buf) -> io::Resul
 ///
 /// # References
 ///  - [Linux]
+///  - [Apple]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/removexattr.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/removexattr.2.html
 pub fn removexattr<P: path::Arg, Name: path::Arg>(path: P, name: Name) -> io::Result<()> {
     path.into_with_c_str(|path| {
         name.into_with_c_str(|name| backend::fs::syscalls::removexattr(path, name))
@@ -230,8 +247,10 @@ pub fn lremovexattr<P: path::Arg, Name: path::Arg>(path: P, name: Name) -> io::R
 ///
 /// # References
 ///  - [Linux]
+///  - [Apple]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/fremovexattr.2.html
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/fremovexattr.2.html
 pub fn fremovexattr<Fd: AsFd, Name: path::Arg>(fd: Fd, name: Name) -> io::Result<()> {
     name.into_with_c_str(|name| backend::fs::syscalls::fremovexattr(fd.as_fd(), name))
 }

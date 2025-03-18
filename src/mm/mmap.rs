@@ -411,7 +411,7 @@ pub fn mlockall(flags: MlockAllFlags) -> io::Result<()> {
 
 /// Unlocks all pages mapped into the address space of the calling process.
 ///
-/// # Warnings
+/// # Warning
 ///
 /// This function is aware of all the memory pages in the process, as if it
 /// were a debugger. It unlocks all the pages, which could potentially
