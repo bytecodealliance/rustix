@@ -20,32 +20,62 @@ fn test_backends() {
             ),
             "use-default does not depend on linux-raw-sys"
         );
+        assert!(
+            !has_dependency("test-crates/use-default", &[], &[], &["RUSTFLAGS"], "libc"),
+            "use-default depends on libc"
+        );
+        // If the libc backend is explicitly requested (by a cfg), check that
+        // it's used.
+        assert!(
+            has_dependency(
+                "test-crates/use-default",
+                &[],
+                &[("RUSTFLAGS", "--cfg=rustix_use_libc")],
+                &[],
+                "libc"
+            ),
+            "use-default with `RUSTFLAGS=--cfg=use-libc` doesn't depend on libc"
+        );
+        // If the libc backend is explicitly requested (by a feature flag),
+        // check that it's used.
+        assert!(
+            has_dependency(
+                "test-crates/use-default",
+                &["--features=rustix/use-libc"],
+                &[],
+                &[],
+                "libc"
+            ),
+            "use-default with `--features=use-libc` doesn't depend on libc"
+        );
     }
 
-    // Pick an arbitrary platform where linux_raw is enabled by default and
-    // ensure that the use-rustix-auxv crate uses it, and does not use libc.
+    // Rustix's use-libc-auxv feature calls into libc, but does not use the
+    // libc crate to do so. Pick an arbitrary platform where linux_raw is
+    // enabled by default and ensure that the use-libc-auxv crate uses it,
+    // and does not use the libc crate.
     #[cfg(all(target_os = "linux", target_arch = "aarch64"))]
     {
         assert!(
             !has_dependency(
-                "test-crates/use-rustix-auxv",
+                "test-crates/use-libc-auxv",
                 &[],
                 &[],
                 &["RUSTFLAGS"],
                 "libc"
             ),
-            "use-rustix-auxv depends on libc"
+            "use-libc-auxv depends on libc"
         );
 
         assert!(
             has_dependency(
-                "test-crates/use-rustix-auxv",
+                "test-crates/use-libc-auxv",
                 &[],
                 &[],
                 &["RUSTFLAGS"],
                 "linux-raw-sys"
             ),
-            "use-rustix-auxv does not depend on linux-raw-sys"
+            "use-libc-auxv does not depend on linux-raw-sys"
         );
     }
 
