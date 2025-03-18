@@ -18,17 +18,18 @@ use crate::io::ReadWriteFlags;
 use crate::io::{self, FdFlags};
 use crate::ioctl::{IoctlOutput, Opcode};
 use core::cmp::min;
+use core::mem::MaybeUninit;
 #[cfg(not(any(target_os = "espidf", target_os = "horizon")))]
 use {
     crate::backend::MAX_IOV,
     crate::io::{IoSlice, IoSliceMut},
 };
 
-pub(crate) unsafe fn read(fd: BorrowedFd<'_>, buf: (*mut u8, usize)) -> io::Result<usize> {
+pub(crate) unsafe fn read(fd: BorrowedFd<'_>, buf: *mut [MaybeUninit<u8>]) -> io::Result<usize> {
     ret_usize(c::read(
         borrowed_fd(fd),
-        buf.0.cast(),
-        min(buf.1, READ_LIMIT),
+        buf.cast(),
+        min(buf.len(), READ_LIMIT),
     ))
 }
 
@@ -44,10 +45,10 @@ pub(crate) fn write(fd: BorrowedFd<'_>, buf: &[u8]) -> io::Result<usize> {
 
 pub(crate) unsafe fn pread(
     fd: BorrowedFd<'_>,
-    buf: (*mut u8, usize),
+    buf: *mut [MaybeUninit<u8>],
     offset: u64,
 ) -> io::Result<usize> {
-    let len = min(buf.1, READ_LIMIT);
+    let len = min(buf.len(), READ_LIMIT);
 
     // Silently cast; we'll get `EINVAL` if the value is negative.
     let offset = offset as i64;
@@ -56,7 +57,7 @@ pub(crate) unsafe fn pread(
     #[cfg(any(target_os = "espidf", target_os = "vita"))]
     let offset: i32 = offset.try_into().map_err(|_| io::Errno::OVERFLOW)?;
 
-    ret_usize(c::pread(borrowed_fd(fd), buf.0.cast(), len, offset))
+    ret_usize(c::pread(borrowed_fd(fd), buf.cast(), len, offset))
 }
 
 pub(crate) fn pwrite(fd: BorrowedFd<'_>, buf: &[u8], offset: u64) -> io::Result<usize> {

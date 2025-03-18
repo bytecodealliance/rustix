@@ -4,8 +4,6 @@ use crate::backend::c;
 #[cfg(any(linux_kernel, solarish, target_os = "redox"))]
 use crate::backend::conv::ret;
 use crate::backend::conv::ret_c_int;
-#[cfg(any(linux_kernel, target_os = "illumos", target_os = "redox"))]
-use crate::backend::conv::ret_u32;
 #[cfg(solarish)]
 use crate::event::port::Event;
 #[cfg(any(
@@ -21,7 +19,13 @@ use crate::event::{PollFd, Timespec};
 use crate::io;
 #[cfg(any(linux_kernel, target_os = "illumos", target_os = "redox"))]
 use crate::utils::as_ptr;
-#[cfg(solarish)]
+#[cfg(any(
+    bsd,
+    linux_kernel,
+    solarish,
+    target_os = "illumos",
+    target_os = "redox"
+))]
 use core::mem::MaybeUninit;
 #[cfg(any(
     bsd,
@@ -47,6 +51,8 @@ use {crate::backend::conv::borrowed_fd, crate::fd::BorrowedFd};
     target_os = "redox"
 ))]
 use {crate::backend::conv::ret_owned_fd, crate::fd::OwnedFd};
+#[cfg(any(linux_kernel, target_os = "illumos", target_os = "redox"))]
+use {crate::backend::conv::ret_u32, crate::event::epoll::Event};
 #[cfg(bsd)]
 use {crate::event::kqueue::Event, crate::utils::as_ptr};
 
@@ -95,7 +101,7 @@ pub(crate) fn kqueue() -> io::Result<OwnedFd> {
 pub(crate) unsafe fn kevent(
     kq: BorrowedFd<'_>,
     changelist: &[Event],
-    eventlist: (*mut Event, usize),
+    eventlist: *mut [MaybeUninit<Event>],
     timeout: Option<&c::timespec>,
 ) -> io::Result<c::c_int> {
     ret_c_int(c::kevent(
@@ -105,8 +111,11 @@ pub(crate) unsafe fn kevent(
             .len()
             .try_into()
             .map_err(|_| io::Errno::OVERFLOW)?,
-        eventlist.0.cast(),
-        eventlist.1.try_into().map_err(|_| io::Errno::OVERFLOW)?,
+        eventlist.cast::<c::kevent>(),
+        eventlist
+            .len()
+            .try_into()
+            .map_err(|_| io::Errno::OVERFLOW)?,
         timeout.map_or(null(), as_ptr),
     ))
 }
@@ -395,7 +404,7 @@ pub(crate) fn port_get(port: BorrowedFd<'_>, timeout: Option<&Timespec>) -> io::
 #[cfg(solarish)]
 pub(crate) unsafe fn port_getn(
     port: BorrowedFd<'_>,
-    events: (*mut Event, usize),
+    events: *mut [MaybeUninit<Eventt>],
     mut nget: u32,
     timeout: Option<&Timespec>,
 ) -> io::Result<usize> {
@@ -422,15 +431,15 @@ pub(crate) unsafe fn port_getn(
 
     // `port_getn` special-cases a max value of 0 to be a query that returns
     // the number of events, so bail out early if needed.
-    if events.1 == 0 {
+    if events.is_empty() {
         return Ok(0);
     }
 
     // In Rust ≥ 1.65, the `as _` can be `.cast_mut()`.
     ret(c::port_getn(
         borrowed_fd(port),
-        events.0.cast(),
-        events.1.try_into().unwrap_or(u32::MAX),
+        events.cast::<c::port_event_t>(),
+        events.len().try_into().unwrap_or(u32::MAX),
         &mut nget,
         timeout as _,
     ))?;
@@ -484,7 +493,7 @@ pub(crate) fn epoll_create(flags: super::epoll::CreateFlags) -> io::Result<Owned
 pub(crate) fn epoll_add(
     epoll: BorrowedFd<'_>,
     source: BorrowedFd<'_>,
-    event: &crate::event::epoll::Event,
+    event: &Event,
 ) -> io::Result<()> {
     // We use our own `Event` struct instead of libc's because
     // ours preserves pointer provenance instead of just using a `u64`,
@@ -505,7 +514,7 @@ pub(crate) fn epoll_add(
 pub(crate) fn epoll_mod(
     epoll: BorrowedFd<'_>,
     source: BorrowedFd<'_>,
-    event: &crate::event::epoll::Event,
+    event: &Event,
 ) -> io::Result<()> {
     unsafe {
         ret(c::epoll_ctl(
@@ -535,7 +544,7 @@ pub(crate) fn epoll_del(epoll: BorrowedFd<'_>, source: BorrowedFd<'_>) -> io::Re
 #[cfg(any(linux_kernel, target_os = "illumos", target_os = "redox"))]
 pub(crate) unsafe fn epoll_wait(
     epoll: BorrowedFd<'_>,
-    events: (*mut crate::event::epoll::Event, usize),
+    events: *mut [MaybeUninit<Event>],
     timeout: Option<&Timespec>,
 ) -> io::Result<usize> {
     // If we're on Linux ≥ 5.11 and a libc that has an `epoll_pwait2`
@@ -560,8 +569,8 @@ pub(crate) unsafe fn epoll_wait(
         if let Some(epoll_pwait2_func) = epoll_pwait2.get() {
             return ret_u32(epoll_pwait2_func(
                 borrowed_fd(epoll),
-                events.0.cast::<c::epoll_event>(),
-                events.1.try_into().unwrap_or(i32::MAX),
+                events.cast::<c::epoll_event>(),
+                events.len().try_into().unwrap_or(i32::MAX),
                 crate::utils::option_as_ptr(timeout).cast(),
                 null(),
             ))
@@ -584,8 +593,8 @@ pub(crate) unsafe fn epoll_wait(
 
         ret_u32(epoll_pwait2(
             borrowed_fd(epoll),
-            events.0.cast::<c::epoll_event>(),
-            events.1.try_into().unwrap_or(i32::MAX),
+            events.cast::<c::epoll_event>(),
+            events.len().try_into().unwrap_or(i32::MAX),
             crate::utils::option_as_ptr(timeout).cast(),
             null(),
         ))
@@ -602,8 +611,8 @@ pub(crate) unsafe fn epoll_wait(
 
         ret_u32(c::epoll_wait(
             borrowed_fd(epoll),
-            events.0.cast::<c::epoll_event>(),
-            events.1.try_into().unwrap_or(i32::MAX),
+            events.cast::<c::epoll_event>(),
+            events.len().try_into().unwrap_or(i32::MAX),
             timeout,
         ))
         .map(|i| i as usize)

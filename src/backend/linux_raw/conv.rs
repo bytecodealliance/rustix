@@ -242,6 +242,24 @@ pub(super) fn opt_ref<T: Sized, Num: ArgNumber>(t: Option<&T>) -> ArgReg<'_, Num
     }
 }
 
+/// Convert a buffer pointer as passed by `Buffer` to a pointer for passing to
+/// a syscall.
+///
+/// When `slice_ptr_get` is stabilized, the `.cast(::<T>()` can be replaced by
+/// `.as_mut_ptr()`.
+/// <https://doc.rust-lang.org/stable/std/primitive.pointer.html#method.as_mut_ptr>
+#[inline]
+pub(super) fn buffer_ptr<'a, Num: ArgNumber, T>(buf: *mut [MaybeUninit<T>]) -> ArgReg<'a, Num> {
+    buf.cast::<T>().into()
+}
+
+/// Convert a buffer pointer as passed by `Buffer` to a length for passing to
+/// a syscall.
+#[inline]
+pub(super) fn buffer_len<'a, Num: ArgNumber, T>(buf: *mut [MaybeUninit<T>]) -> ArgReg<'a, Num> {
+    pass_usize(buf.len())
+}
+
 /// Convert a `c_int` into an `ArgReg`.
 ///
 /// Be sure to use `raw_fd` to pass `RawFd` values.
