@@ -398,6 +398,9 @@ pub fn kqueue() -> io::Result<OwnedFd> {
 /// `kevent(kqueue, changelist, eventlist, timeout)`—Wait for events on a
 /// `kqueue`.
 ///
+/// If an unsupported timeout is passed, this function fails with
+/// [`io::Errno::INVAL`].
+///
 /// # Safety
 ///
 /// The file descriptors referred to by the `Event` structs must be valid for
@@ -421,10 +424,13 @@ pub unsafe fn kevent<Fd: AsFd, Buf: Buffer<Event>>(
     mut eventlist: Buf,
     timeout: Option<Duration>,
 ) -> io::Result<Buf::Output> {
-    let timeout = timeout.map(|timeout| backend::c::timespec {
-        tv_sec: timeout.as_secs() as _,
-        tv_nsec: timeout.subsec_nanos() as _,
-    });
+    let timeout = match timeout {
+        Some(timeout) => Some(backend::c::timespec {
+            tv_sec: timeout.as_secs().try_into().map_err(|_| io::Errno::INVAL)?,
+            tv_nsec: timeout.subsec_nanos() as _,
+        }),
+        None => None,
+    };
 
     // Populate the event list with events.
     let len = syscalls::kevent(
