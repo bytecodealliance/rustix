@@ -154,6 +154,25 @@ impl<T> private::Sealed<T> for &mut Vec<T> {
     }
 }
 
+impl<'a, T> private::Sealed<T> for &'a mut MaybeUninit<T> {
+    type Output = Option<&'a mut T>;
+
+    #[inline]
+    fn parts_mut(&mut self) -> (*mut T, usize) {
+        (self.as_mut_ptr(), 1)
+    }
+
+    #[inline]
+    unsafe fn assume_init(self, len: usize) -> Self::Output {
+        if len == 0 {
+            None
+        } else {
+            // SAFETY: The user asserts that the object is now initialized.
+            Some(MaybeUninit::assume_init_mut(self))
+        }
+    }
+}
+
 impl<'a, T> private::Sealed<T> for &'a mut [MaybeUninit<T>] {
     type Output = (&'a mut [T], &'a mut [MaybeUninit<T>]);
 
