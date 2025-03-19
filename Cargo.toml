@@ -30,7 +30,7 @@ compiler_builtins = { version = '0.1.49', optional = true }
 # libc backend can be selected via adding `--cfg=rustix_use_libc` to
 # `RUSTFLAGS` or enabling the `use-libc` cargo feature.
 [target.'cfg(all(not(rustix_use_libc), not(miri), target_os = "linux", any(target_endian = "little", any(target_arch = "s390x", target_arch = "powerpc")), any(target_arch = "arm", all(target_arch = "aarch64", target_pointer_width = "64"), target_arch = "riscv64", all(rustix_use_experimental_asm, target_arch = "powerpc"), all(rustix_use_experimental_asm, target_arch = "powerpc64"), all(rustix_use_experimental_asm, target_arch = "s390x"), all(rustix_use_experimental_asm, target_arch = "mips"), all(rustix_use_experimental_asm, target_arch = "mips32r6"), all(rustix_use_experimental_asm, target_arch = "mips64"), all(rustix_use_experimental_asm, target_arch = "mips64r6"), target_arch = "x86", all(target_arch = "x86_64", target_pointer_width = "64"))))'.dependencies]
-linux-raw-sys = { version = "0.9.2", default-features = false, features = ["general", "errno", "ioctl", "no_std", "elf"] }
+linux-raw-sys = { version = "0.9.3", default-features = false, features = ["general", "errno", "ioctl", "no_std", "elf"] }
 libc_errno = { package = "errno", version = "0.3.10", default-features = false, optional = true }
 libc = { version = "0.2.168", default-features = false, optional = true }
 
