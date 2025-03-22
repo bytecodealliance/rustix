@@ -25,8 +25,14 @@ pub struct Itimerspec {
 ///
 /// # References
 ///  - [Linux]
+///  - [FreeBSD]
+///  - [illumos]
+///  - [NetBSD]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/timerfd_create.2.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=timerfd_create&sektion=2
+/// [illumos]: https://illumos.org/man/3C/timerfd_create
+/// [NetBSD]: https://man.netbsd.org/timerfd_create.2
 #[inline]
 pub fn timerfd_create(clockid: TimerfdClockId, flags: TimerfdFlags) -> io::Result<OwnedFd> {
     backend::time::syscalls::timerfd_create(clockid, flags)
@@ -36,8 +42,14 @@ pub fn timerfd_create(clockid: TimerfdClockId, flags: TimerfdFlags) -> io::Resul
 ///
 /// # References
 ///  - [Linux]
+///  - [FreeBSD]
+///  - [illumos]
+///  - [NetBSD]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/timerfd_settime.2.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=timerfd_settime&sektion=2
+/// [illumos]: https://illumos.org/man/3C/timerfd_settime
+/// [NetBSD]: https://man.netbsd.org/timerfd_settime.2
 #[inline]
 pub fn timerfd_settime<Fd: AsFd>(
     fd: Fd,
@@ -51,8 +63,14 @@ pub fn timerfd_settime<Fd: AsFd>(
 ///
 /// # References
 ///  - [Linux]
+///  - [FreeBSD]
+///  - [illumos]
+///  - [NetBSD]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/timerfd_gettime.2.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=timerfd_gettime&sektion=2
+/// [illumos]: https://illumos.org/man/3C/timerfd_gettime
+/// [NetBSD]: https://man.netbsd.org/timerfd_gettime.2
 #[inline]
 pub fn timerfd_gettime<Fd: AsFd>(fd: Fd) -> io::Result<Itimerspec> {
     backend::time::syscalls::timerfd_gettime(fd.as_fd())
