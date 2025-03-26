@@ -616,6 +616,30 @@ pub fn set_socket_incoming_cpu<Fd: AsFd>(fd: Fd, value: u32) -> io::Result<()> {
     backend::net::sockopt::set_socket_incoming_cpu(fd.as_fd(), value)
 }
 
+/// `getsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_socket_-and-set_socket_-functions
+#[cfg(feature = "alloc")]
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
+#[inline]
+#[doc(alias = "SO_BINDTODEVICE")]
+pub fn socket_bind_device<Fd: AsFd>(fd: Fd) -> io::Result<Vec<u8>> {
+    backend::net::sockopt::socket_bind_device(fd.as_fd())
+}
+
+/// `setsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, interface)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_socket_-and-set_socket_-functions
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
+#[doc(alias = "SO_BINDTODEVICE")]
+pub fn set_socket_bind_device<Fd: AsFd>(fd: Fd, interface: Option<&[u8]>) -> io::Result<()> {
+    backend::net::sockopt::set_socket_bind_device(fd.as_fd(), interface)
+}
+
 /// `setsockopt(fd, IPPROTO_IP, IP_TTL, value)`
 ///
 /// See the [module-level documentation] for more.

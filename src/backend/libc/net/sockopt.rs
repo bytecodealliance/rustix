@@ -69,6 +69,9 @@ use alloc::borrow::ToOwned as _;
     target_os = "illumos"
 ))]
 use alloc::string::String;
+#[cfg(feature = "alloc")]
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
+use alloc::vec::Vec;
 #[cfg(apple)]
 use c::TCP_KEEPALIVE as TCP_KEEPIDLE;
 #[cfg(not(any(apple, target_os = "haiku", target_os = "nto", target_os = "openbsd")))]
@@ -354,6 +357,41 @@ pub(crate) fn set_socket_recv_buffer_size_force(fd: BorrowedFd<'_>, size: usize)
 #[inline]
 pub(crate) fn socket_recv_buffer_size(fd: BorrowedFd<'_>) -> io::Result<usize> {
     getsockopt(fd, c::SOL_SOCKET, c::SO_RCVBUF).map(|size: u32| size as usize)
+}
+
+#[cfg(feature = "alloc")]
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
+#[inline]
+pub(crate) fn socket_bind_device(fd: BorrowedFd<'_>) -> io::Result<Vec<u8>> {
+    let mut value = MaybeUninit::<[MaybeUninit<u8>; 16]>::uninit();
+    let mut optlen = 16;
+    getsockopt_raw(
+        fd,
+        c::SOL_SOCKET,
+        c::SO_BINDTODEVICE,
+        &mut value,
+        &mut optlen,
+    )?;
+    unsafe {
+        let value = value.assume_init();
+        let slice: &[u8] = core::mem::transmute(&value[..optlen as usize]);
+        assert!(slice.contains(&b'\0'));
+        Ok(slice[..optlen as usize - 1].to_vec())
+    }
+}
+
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
+#[inline]
+pub(crate) fn set_socket_bind_device(
+    fd: BorrowedFd<'_>,
+    interface: Option<&[u8]>,
+) -> io::Result<()> {
+    setsockopt(
+        fd,
+        c::SOL_SOCKET,
+        c::SO_BINDTODEVICE,
+        interface.unwrap_or(&[]),
+    )
 }
 
 #[inline]
