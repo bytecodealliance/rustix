@@ -625,3 +625,26 @@ fn test_sockopts_multicast_ifv6() {
         Err(e) => panic!("{e}"),
     }
 }
+
+#[cfg(feature = "alloc")]
+#[cfg(any(linux_kernel, target_os = "fuchsia"))]
+#[test]
+fn test_socket_bind_device() {
+    let fd = rustix::net::socket(AddressFamily::INET, SocketType::STREAM, None).unwrap();
+
+    let loopback_index = std::fs::read_to_string("/sys/class/net/lo/ifindex")
+        .unwrap()
+        .as_str()
+        .split_at(1)
+        .0
+        .parse::<u32>()
+        .unwrap();
+    let name = rustix::net::netdevice::index_to_name(&fd, loopback_index).unwrap();
+
+    sockopt::set_socket_bind_device(&fd, Some(name.as_bytes())).unwrap();
+
+    assert_eq!(
+        name.as_bytes(),
+        sockopt::socket_bind_device(&fd).unwrap().as_slice()
+    );
+}
