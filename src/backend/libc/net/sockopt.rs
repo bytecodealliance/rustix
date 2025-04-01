@@ -770,9 +770,9 @@ pub(crate) fn ip_tos(fd: BorrowedFd<'_>) -> io::Result<u8> {
 #[cfg(any(
     apple,
     linux_like,
+    target_os = "cygwin",
     target_os = "freebsd",
     target_os = "fuchsia",
-    target_os = "cygwin",
 ))]
 #[inline]
 pub(crate) fn set_ip_recvtos(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
@@ -782,9 +782,9 @@ pub(crate) fn set_ip_recvtos(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> 
 #[cfg(any(
     apple,
     linux_like,
+    target_os = "cygwin",
     target_os = "freebsd",
     target_os = "fuchsia",
-    target_os = "cygwin",
 ))]
 #[inline]
 pub(crate) fn ip_recvtos(fd: BorrowedFd<'_>) -> io::Result<bool> {
