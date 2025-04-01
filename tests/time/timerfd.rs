@@ -5,7 +5,11 @@ use rustix::time::{
 
 #[test]
 fn test_timerfd() {
-    let fd = timerfd_create(TimerfdClockId::Monotonic, TimerfdFlags::CLOEXEC).unwrap();
+    let fd = match timerfd_create(TimerfdClockId::Monotonic, TimerfdFlags::CLOEXEC) {
+        Ok(fd) => fd,
+        Err(rustix::io::Errno::NOSYS) => return,
+        Err(err) => Err(err).unwrap(),
+    };
 
     let set = Itimerspec {
         it_interval: Timespec {
@@ -39,12 +43,20 @@ fn test_timerfd() {
 /// times are monotonic because that would race with the timer repeating.
 #[test]
 fn test_timerfd_with_interval() {
-    let fd = timerfd_create(TimerfdClockId::Monotonic, TimerfdFlags::CLOEXEC).unwrap();
+    let fd = match timerfd_create(TimerfdClockId::Monotonic, TimerfdFlags::CLOEXEC) {
+        Ok(fd) => fd,
+        Err(rustix::io::Errno::NOSYS) => return,
+        Err(err) => Err(err).unwrap(),
+    };
 
+    // An `Itimerspec` with an initial value and an interval.
+    //
+    // For the interval, use a value of more than 200000 nanoseconds, as
+    // illumos appears not to support values smaller than that.
     let set = Itimerspec {
         it_interval: Timespec {
             tv_sec: 0,
-            tv_nsec: 6,
+            tv_nsec: 200001,
         },
         it_value: Timespec {
             tv_sec: 1,

@@ -146,8 +146,8 @@ unsafe fn fetch(name: &str) -> *mut c_void {
 
 #[cfg(not(linux_kernel))]
 macro_rules! syscall {
-    (fn $name:ident($($arg_name:ident: $t:ty),*) via $_sys_name:ident -> $ret:ty) => (
-        unsafe fn $name($($arg_name: $t),*) -> $ret {
+    ($vis:vis fn $name:ident($($arg_name:ident: $t:ty),*) via $_sys_name:ident -> $ret:ty) => (
+        $vis unsafe fn $name($($arg_name: $t),*) -> $ret {
             weak! { fn $name($($t),*) -> $ret }
 
             if let Some(fun) = $name.get() {
@@ -162,8 +162,8 @@ macro_rules! syscall {
 
 #[cfg(linux_kernel)]
 macro_rules! syscall {
-    (fn $name:ident($($arg_name:ident: $t:ty),*) via $sys_name:ident -> $ret:ty) => (
-        unsafe fn $name($($arg_name:$t),*) -> $ret {
+    ($vis:vis fn $name:ident($($arg_name:ident: $t:ty),*) via $sys_name:ident -> $ret:ty) => (
+        $vis unsafe fn $name($($arg_name:$t),*) -> $ret {
             // This looks like a hack, but `concat_idents` only accepts idents
             // (not paths).
             use libc::*;
