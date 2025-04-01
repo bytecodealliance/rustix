@@ -159,6 +159,7 @@ fn main() {
             || (arch == "aarch64" && os == "linux" && abi == Ok("ilp32".to_string())))
         && (apple
             || os == "android"
+            || (os == "freebsd" && arch == "x86")
             || os == "haiku"
             || env == "gnu"
             || (env == "musl" && arch == "x86")
