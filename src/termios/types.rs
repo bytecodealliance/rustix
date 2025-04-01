@@ -1567,7 +1567,8 @@ mod tests {
         solarish,
         target_os = "emscripten",
         target_os = "haiku",
-        target_os = "redox"
+        target_os = "redox",
+        target_os = "cygwin",
     )))]
     fn termios_legacy() {
         // Check that our doc aliases above are correct.

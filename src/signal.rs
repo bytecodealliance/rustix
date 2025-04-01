@@ -316,6 +316,7 @@ impl Signal {
                 target_os = "hurd",
                 target_os = "nto",
                 target_os = "vita",
+                target_os = "cygwin",
                 all(
                     linux_kernel,
                     any(

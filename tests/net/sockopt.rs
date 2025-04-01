@@ -148,7 +148,7 @@ fn test_sockopts_socket(s: &OwnedFd) {
     assert!(sockopt::socket_oobinline(s).unwrap());
 
     // Check the initial value of `SO_REUSEPORT`, set it, and check it.
-    #[cfg(not(any(solarish, windows)))]
+    #[cfg(not(any(solarish, windows, target_os = "cygwin")))]
     {
         assert!(!sockopt::socket_reuseport(s).unwrap());
         sockopt::set_socket_reuseport(s, true).unwrap();
@@ -320,6 +320,7 @@ fn test_sockopts_ipv4() {
         target_os = "haiku",
         target_os = "netbsd",
         target_os = "nto",
+        target_os = "cygwin",
     )))]
     assert_eq!(sockopt::socket_domain(&s).unwrap(), AddressFamily::INET);
     assert_ne!(sockopt::ip_ttl(&s).unwrap(), 0);
@@ -365,7 +366,13 @@ fn test_sockopts_ipv4() {
     }
 
     // Check the initial value of `IP_RECVTOS`, set it, and check it.
-    #[cfg(any(apple, linux_like, target_os = "freebsd", target_os = "fuchsia"))]
+    #[cfg(any(
+        apple,
+        linux_like,
+        target_os = "freebsd",
+        target_os = "fuchsia",
+        target_os = "cygwin",
+    ))]
     {
         assert!(!sockopt::ip_recvtos(&s).unwrap());
         sockopt::set_ip_recvtos(&s, true).unwrap();
@@ -409,6 +416,7 @@ fn test_sockopts_ipv6() {
         target_os = "haiku",
         target_os = "netbsd",
         target_os = "nto",
+        target_os = "cygwin",
     )))]
     assert_eq!(sockopt::socket_domain(&s).unwrap(), AddressFamily::INET6);
 
@@ -514,7 +522,7 @@ fn test_sockopts_ipv6() {
     test_sockopts_tcp(&s);
 }
 
-#[cfg(linux_kernel)]
+#[cfg(any(linux_kernel, target_os = "cygwin"))]
 #[test]
 fn test_socketopts_ip_mtu() {
     use std::net::SocketAddrV4;

@@ -50,25 +50,55 @@ fn main() -> rustix::io::Result<()> {
         println!("Stack Limit: {:?}", getrlimit(Resource::Stack));
         #[cfg(not(target_os = "haiku"))]
         println!("Core Limit: {:?}", getrlimit(Resource::Core));
-        #[cfg(not(any(solarish, target_os = "haiku")))]
+        #[cfg(not(any(solarish, target_os = "haiku", target_os = "cygwin")))]
         println!("Rss Limit: {:?}", getrlimit(Resource::Rss));
-        #[cfg(not(any(solarish, target_os = "haiku")))]
+        #[cfg(not(any(solarish, target_os = "haiku", target_os = "cygwin")))]
         println!("Nproc Limit: {:?}", getrlimit(Resource::Nproc));
         #[cfg(not(target_os = "solaris"))]
         println!("Nofile Limit: {:?}", getrlimit(Resource::Nofile));
-        #[cfg(not(any(solarish, target_os = "aix", target_os = "haiku")))]
+        #[cfg(not(any(solarish, target_os = "aix", target_os = "haiku", target_os = "cygwin")))]
         println!("Memlock Limit: {:?}", getrlimit(Resource::Memlock));
         #[cfg(not(target_os = "openbsd"))]
         println!("As Limit: {:?}", getrlimit(Resource::As));
-        #[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "haiku")))]
+        #[cfg(not(any(
+            bsd,
+            solarish,
+            target_os = "aix",
+            target_os = "haiku",
+            target_os = "cygwin",
+        )))]
         println!("Locks Limit: {:?}", getrlimit(Resource::Locks));
-        #[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "haiku")))]
+        #[cfg(not(any(
+            bsd,
+            solarish,
+            target_os = "aix",
+            target_os = "haiku",
+            target_os = "cygwin",
+        )))]
         println!("Sigpending Limit: {:?}", getrlimit(Resource::Sigpending));
-        #[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "haiku")))]
+        #[cfg(not(any(
+            bsd,
+            solarish,
+            target_os = "aix",
+            target_os = "haiku",
+            target_os = "cygwin",
+        )))]
         println!("Msgqueue Limit: {:?}", getrlimit(Resource::Msgqueue));
-        #[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "haiku")))]
+        #[cfg(not(any(
+            bsd,
+            solarish,
+            target_os = "aix",
+            target_os = "haiku",
+            target_os = "cygwin",
+        )))]
         println!("Nice Limit: {:?}", getrlimit(Resource::Nice));
-        #[cfg(not(any(bsd, solarish, target_os = "aix", target_os = "haiku")))]
+        #[cfg(not(any(
+            bsd,
+            solarish,
+            target_os = "aix",
+            target_os = "haiku",
+            target_os = "cygwin",
+        )))]
         println!("Rtprio Limit: {:?}", getrlimit(Resource::Rtprio));
         #[cfg(not(any(
             bsd,
@@ -77,6 +107,7 @@ fn main() -> rustix::io::Result<()> {
             target_os = "android",
             target_os = "emscripten",
             target_os = "haiku",
+            target_os = "cygwin",
         )))]
         println!("Rttime Limit: {:?}", getrlimit(Resource::Rttime));
     }

@@ -95,7 +95,8 @@ fn test_waitpgid() {
     target_os = "emscripten",
     target_os = "openbsd",
     target_os = "redox",
-    target_os = "wasi"
+    target_os = "wasi",
+    target_os = "cygwin",
 )))]
 #[test]
 #[serial]
