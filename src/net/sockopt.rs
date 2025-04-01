@@ -1091,9 +1091,9 @@ pub fn ip_tos<Fd: AsFd>(fd: Fd) -> io::Result<u8> {
 #[cfg(any(
     apple,
     linux_like,
+    target_os = "cygwin",
     target_os = "freebsd",
     target_os = "fuchsia",
-    target_os = "cygwin",
 ))]
 #[inline]
 #[doc(alias = "IP_RECVTOS")]
@@ -1109,9 +1109,9 @@ pub fn set_ip_recvtos<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
 #[cfg(any(
     apple,
     linux_like,
+    target_os = "cygwin",
     target_os = "freebsd",
     target_os = "fuchsia",
-    target_os = "cygwin",
 ))]
 #[inline]
 #[doc(alias = "IP_RECVTOS")]

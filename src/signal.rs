@@ -311,12 +311,12 @@ impl Signal {
                 bsd,
                 solarish,
                 target_os = "aix",
+                target_os = "cygwin",
                 target_os = "haiku",
                 target_os = "horizon",
                 target_os = "hurd",
                 target_os = "nto",
                 target_os = "vita",
-                target_os = "cygwin",
                 all(
                     linux_kernel,
                     any(

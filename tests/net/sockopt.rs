@@ -314,13 +314,13 @@ fn test_sockopts_ipv4() {
     #[cfg(not(any(
         apple,
         windows,
+        target_os = "cygwin",
         target_os = "dragonfly",
         target_os = "emscripten",
         target_os = "espidf",
         target_os = "haiku",
         target_os = "netbsd",
         target_os = "nto",
-        target_os = "cygwin",
     )))]
     assert_eq!(sockopt::socket_domain(&s).unwrap(), AddressFamily::INET);
     assert_ne!(sockopt::ip_ttl(&s).unwrap(), 0);
@@ -369,9 +369,9 @@ fn test_sockopts_ipv4() {
     #[cfg(any(
         apple,
         linux_like,
+        target_os = "cygwin",
         target_os = "freebsd",
         target_os = "fuchsia",
-        target_os = "cygwin",
     ))]
     {
         assert!(!sockopt::ip_recvtos(&s).unwrap());
@@ -410,13 +410,13 @@ fn test_sockopts_ipv6() {
     #[cfg(not(any(
         apple,
         windows,
+        target_os = "cygwin",
         target_os = "dragonfly",
         target_os = "emscripten",
         target_os = "espidf",
         target_os = "haiku",
         target_os = "netbsd",
         target_os = "nto",
-        target_os = "cygwin",
     )))]
     assert_eq!(sockopt::socket_domain(&s).unwrap(), AddressFamily::INET6);
 
