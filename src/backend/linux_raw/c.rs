@@ -114,6 +114,19 @@ pub(crate) use linux_raw_sys::{
     },
 };
 
+#[cfg(feature = "time")]
+pub use linux_raw_sys::general::__kernel_clockid_t as clockid_t;
+
+#[cfg(all(feature = "net", feature = "time"))]
+pub use linux_raw_sys::net::{sock_txtime, SCM_TXTIME, SO_TXTIME};
+
+#[cfg(all(feature = "net", feature = "time"))]
+pub(crate) const SOF_TXTIME_DEADLINE_MODE: u32 =
+    linux_raw_sys::net::txtime_flags::SOF_TXTIME_DEADLINE_MODE as _;
+#[cfg(all(feature = "net", feature = "time"))]
+pub(crate) const SOF_TXTIME_REPORT_ERRORS: u32 =
+    linux_raw_sys::net::txtime_flags::SOF_TXTIME_REPORT_ERRORS as _;
+
 // Cast away bindgen's `enum` type to make these consistent with the other
 // `setsockopt`/`getsockopt` level values.
 #[cfg(feature = "net")]
