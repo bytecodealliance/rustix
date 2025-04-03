@@ -11,6 +11,14 @@ use {
 
 use bitflags::bitflags;
 
+/// The datatype used for the ioctl number
+#[cfg(any(target_os = "android", target_env = "musl"))]
+#[doc(hidden)]
+pub type IoctlNumType = c::c_int;
+#[cfg(not(any(target_os = "android", target_env = "musl")))]
+#[doc(hidden)]
+pub type IoctlNumType = c::c_ulong;
+
 #[cfg(all(linux_kernel, not(any(target_arch = "sparc", target_arch = "sparc64"))))]
 use crate::fd::{AsRawFd as _, BorrowedFd};
 
@@ -79,7 +87,7 @@ unsafe impl ioctl::Ioctl for Ficlone<'_> {
     const IS_MUTATING: bool = false;
 
     fn opcode(&self) -> ioctl::Opcode {
-        c::FICLONE as ioctl::Opcode
+        linux_raw_sys::ioctl::FICLONE as ioctl::Opcode
     }
 
     fn as_ptr(&mut self) -> *mut c::c_void {
@@ -141,7 +149,11 @@ bitflags! {
 #[doc(alias = "FS_IOC_GETFLAGS")]
 pub fn ioctl_getflags<Fd: AsFd>(fd: Fd) -> io::Result<IFlags> {
     unsafe {
-        #[cfg(target_pointer_width = "32")]
+        #[cfg(target_arch = "riscv32")]
+        let ctl =
+            ioctl::Getter::<{ linux_raw_sys::ioctl::FS_IOC32_GETFLAGS as IoctlNumType }, u32>::new(
+            );
+        #[cfg(all(target_pointer_width = "32", not(target_arch = "riscv32")))]
         let ctl = ioctl::Getter::<{ c::FS_IOC32_GETFLAGS }, u32>::new();
         #[cfg(target_pointer_width = "64")]
         let ctl = ioctl::Getter::<{ c::FS_IOC_GETFLAGS }, u32>::new();
@@ -158,7 +170,12 @@ pub fn ioctl_getflags<Fd: AsFd>(fd: Fd) -> io::Result<IFlags> {
 #[doc(alias = "FS_IOC_SETFLAGS")]
 pub fn ioctl_setflags<Fd: AsFd>(fd: Fd, flags: IFlags) -> io::Result<()> {
     unsafe {
-        #[cfg(target_pointer_width = "32")]
+        #[cfg(target_arch = "riscv32")]
+        let ctl =
+            ioctl::Setter::<{ linux_raw_sys::ioctl::FS_IOC32_SETFLAGS as IoctlNumType }, u32>::new(
+                flags.bits(),
+            );
+        #[cfg(all(target_pointer_width = "32", not(target_arch = "riscv32")))]
         let ctl = ioctl::Setter::<{ c::FS_IOC32_SETFLAGS }, u32>::new(flags.bits());
 
         #[cfg(target_pointer_width = "64")]
