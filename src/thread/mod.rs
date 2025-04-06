@@ -11,12 +11,12 @@ mod libcap;
 #[cfg(linux_kernel)]
 mod membarrier;
 #[cfg(linux_kernel)]
+mod ns;
+#[cfg(linux_kernel)]
 mod prctl;
 #[cfg(any(freebsdlike, linux_kernel, target_os = "fuchsia"))]
 mod sched;
 mod sched_yield;
-#[cfg(linux_kernel)]
-mod setns;
 
 #[cfg(not(target_os = "redox"))]
 pub use clock::*;
@@ -29,9 +29,9 @@ pub use libcap::{capabilities, set_capabilities, CapabilityFlags, CapabilitySet,
 #[cfg(linux_kernel)]
 pub use membarrier::*;
 #[cfg(linux_kernel)]
+pub use ns::*;
+#[cfg(linux_kernel)]
 pub use prctl::*;
 #[cfg(any(freebsdlike, linux_kernel, target_os = "fuchsia"))]
 pub use sched::*;
 pub use sched_yield::sched_yield;
-#[cfg(linux_kernel)]
-pub use setns::*;

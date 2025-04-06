@@ -383,3 +383,8 @@ mod statx_flags {
     )
 ))]
 pub(crate) use statx_flags::*;
+
+#[cfg(feature = "thread")]
+pub(crate) use linux_raw_sys::ioctl::{
+    NS_GET_NSTYPE, NS_GET_OWNER_UID, NS_GET_PARENT, NS_GET_USERNS,
+};
