@@ -27,6 +27,8 @@ use crate::prctl::{
 };
 use crate::utils::as_ptr;
 
+use super::CapabilitySet;
+
 //
 // PR_GET_KEEPCAPS/PR_SET_KEEPCAPS
 //
@@ -178,6 +180,7 @@ pub fn set_secure_computing_mode(mode: SecureComputingMode) -> io::Result<()> {
 const PR_CAPBSET_READ: c_int = 23;
 
 /// Linux per-thread capability.
+#[deprecated(since = "1.1.0", note = "Use CapabilitySet with a single bit instead")]
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[repr(u32)]
 #[non_exhaustive]
@@ -383,6 +386,75 @@ pub enum Capability {
     CheckpointRestore = linux_raw_sys::general::CAP_CHECKPOINT_RESTORE,
 }
 
+mod private {
+    pub trait Sealed {}
+    pub struct Token;
+
+    #[allow(deprecated)]
+    impl Sealed for crate::thread::Capability {}
+    impl Sealed for crate::thread::CapabilitySet {}
+}
+/// Compatibility trait to keep existing code that uses the deprecated [`Capability`] type working.
+///
+/// This trait and its methods are sealed. It must not be used downstream.
+pub trait CompatCapability: private::Sealed + Copy {
+    #[doc(hidden)]
+    fn as_capability_set(self, _: private::Token) -> CapabilitySet;
+}
+#[allow(deprecated)]
+impl CompatCapability for Capability {
+    fn as_capability_set(self, _: private::Token) -> CapabilitySet {
+        match self {
+            Self::ChangeOwnership => CapabilitySet::CHOWN,
+            Self::DACOverride => CapabilitySet::DAC_OVERRIDE,
+            Self::DACReadSearch => CapabilitySet::DAC_READ_SEARCH,
+            Self::FileOwner => CapabilitySet::FOWNER,
+            Self::FileSetID => CapabilitySet::FSETID,
+            Self::Kill => CapabilitySet::KILL,
+            Self::SetGroupID => CapabilitySet::SETGID,
+            Self::SetUserID => CapabilitySet::SETUID,
+            Self::SetPermittedCapabilities => CapabilitySet::SETPCAP,
+            Self::LinuxImmutable => CapabilitySet::LINUX_IMMUTABLE,
+            Self::NetBindService => CapabilitySet::NET_BIND_SERVICE,
+            Self::NetBroadcast => CapabilitySet::NET_BROADCAST,
+            Self::NetAdmin => CapabilitySet::NET_ADMIN,
+            Self::NetRaw => CapabilitySet::NET_RAW,
+            Self::IPCLock => CapabilitySet::IPC_LOCK,
+            Self::IPCOwner => CapabilitySet::IPC_OWNER,
+            Self::SystemModule => CapabilitySet::SYS_MODULE,
+            Self::SystemRawIO => CapabilitySet::SYS_RAWIO,
+            Self::SystemChangeRoot => CapabilitySet::SYS_CHROOT,
+            Self::SystemProcessTrace => CapabilitySet::SYS_PTRACE,
+            Self::SystemProcessAccounting => CapabilitySet::SYS_PACCT,
+            Self::SystemAdmin => CapabilitySet::SYS_ADMIN,
+            Self::SystemBoot => CapabilitySet::SYS_BOOT,
+            Self::SystemNice => CapabilitySet::SYS_NICE,
+            Self::SystemResource => CapabilitySet::SYS_RESOURCE,
+            Self::SystemTime => CapabilitySet::SYS_TIME,
+            Self::SystemTTYConfig => CapabilitySet::SYS_TTY_CONFIG,
+            Self::MakeNode => CapabilitySet::MKNOD,
+            Self::Lease => CapabilitySet::LEASE,
+            Self::AuditWrite => CapabilitySet::AUDIT_WRITE,
+            Self::AuditControl => CapabilitySet::AUDIT_CONTROL,
+            Self::SetFileCapabilities => CapabilitySet::SETFCAP,
+            Self::MACOverride => CapabilitySet::MAC_OVERRIDE,
+            Self::MACAdmin => CapabilitySet::MAC_ADMIN,
+            Self::SystemLog => CapabilitySet::SYSLOG,
+            Self::WakeAlarm => CapabilitySet::WAKE_ALARM,
+            Self::BlockSuspend => CapabilitySet::BLOCK_SUSPEND,
+            Self::AuditRead => CapabilitySet::AUDIT_READ,
+            Self::PerformanceMonitoring => CapabilitySet::PERFMON,
+            Self::BerkeleyPacketFilters => CapabilitySet::BPF,
+            Self::CheckpointRestore => CapabilitySet::CHECKPOINT_RESTORE,
+        }
+    }
+}
+impl CompatCapability for CapabilitySet {
+    fn as_capability_set(self, _: private::Token) -> CapabilitySet {
+        self
+    }
+}
+
 /// Check if the specified capability is in the calling thread's capability
 /// bounding set.
 ///
@@ -391,8 +463,14 @@ pub enum Capability {
 ///
 /// [`prctl(PR_CAPBSET_READ,…)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
-pub fn capability_is_in_bounding_set(capability: Capability) -> io::Result<bool> {
-    unsafe { prctl_2args(PR_CAPBSET_READ, capability as usize as *mut _) }.map(|r| r != 0)
+pub fn capability_is_in_bounding_set(capability: impl CompatCapability) -> io::Result<bool> {
+    unsafe {
+        prctl_2args(
+            PR_CAPBSET_READ,
+            capability.as_capability_set(private::Token).bits() as usize as *mut _,
+        )
+    }
+    .map(|r| r != 0)
 }
 
 const PR_CAPBSET_DROP: c_int = 24;
@@ -406,8 +484,14 @@ const PR_CAPBSET_DROP: c_int = 24;
 ///
 /// [`prctl(PR_CAPBSET_DROP,…)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
-pub fn remove_capability_from_bounding_set(capability: Capability) -> io::Result<()> {
-    unsafe { prctl_2args(PR_CAPBSET_DROP, capability as usize as *mut _) }.map(|_r| ())
+pub fn remove_capability_from_bounding_set(capability: impl CompatCapability) -> io::Result<()> {
+    unsafe {
+        prctl_2args(
+            PR_CAPBSET_DROP,
+            capability.as_capability_set(private::Token).bits() as usize as *mut _,
+        )
+    }
+    .map(|_r| ())
 }
 
 //
@@ -608,8 +692,8 @@ const PR_CAP_AMBIENT_IS_SET: usize = 1;
 ///
 /// [`prctl(PR_CAP_AMBIENT,PR_CAP_AMBIENT_IS_SET,…)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
-pub fn capability_is_in_ambient_set(capability: Capability) -> io::Result<bool> {
-    let cap = capability as usize as *mut _;
+pub fn capability_is_in_ambient_set(capability: impl CompatCapability) -> io::Result<bool> {
+    let cap = capability.as_capability_set(private::Token).bits() as usize as *mut _;
     unsafe { prctl_3args(PR_CAP_AMBIENT, PR_CAP_AMBIENT_IS_SET as *mut _, cap) }.map(|r| r != 0)
 }
 
@@ -636,13 +720,16 @@ const PR_CAP_AMBIENT_LOWER: usize = 3;
 ///
 /// [`prctl(PR_CAP_AMBIENT,…)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
-pub fn configure_capability_in_ambient_set(capability: Capability, enable: bool) -> io::Result<()> {
+pub fn configure_capability_in_ambient_set(
+    capability: impl CompatCapability,
+    enable: bool,
+) -> io::Result<()> {
     let sub_operation = if enable {
         PR_CAP_AMBIENT_RAISE
     } else {
         PR_CAP_AMBIENT_LOWER
     };
-    let cap = capability as usize as *mut _;
+    let cap = capability.as_capability_set(private::Token).bits() as usize as *mut _;
 
     unsafe { prctl_3args(PR_CAP_AMBIENT, sub_operation as *mut _, cap) }.map(|_r| ())
 }
