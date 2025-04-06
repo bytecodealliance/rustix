@@ -23,7 +23,9 @@ pub use clock::*;
 #[cfg(linux_kernel)]
 pub use id::*;
 #[cfg(linux_kernel)]
-pub use libcap::{capabilities, set_capabilities, CapabilityFlags, CapabilitySets};
+// #[expect(deprecated, reason = "CapabilityFlags is deprecated")]
+#[allow(deprecated)]
+pub use libcap::{capabilities, set_capabilities, CapabilityFlags, CapabilitySet, CapabilitySets};
 #[cfg(linux_kernel)]
 pub use membarrier::*;
 #[cfg(linux_kernel)]
