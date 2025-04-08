@@ -71,6 +71,12 @@ impl Pid {
         self.0
     }
 
+    /// Converts a `Pid` into a `RawPid`.
+    #[inline]
+    pub const fn as_raw_pid(self) -> RawPid {
+        self.0.get()
+    }
+
     /// Converts an `Option<Pid>` into a `RawPid`.
     #[inline]
     pub const fn as_raw(pid: Option<Self>) -> RawPid {
