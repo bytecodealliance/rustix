@@ -1739,6 +1739,7 @@ pub(crate) fn fallocate(
 
     // ESP-IDF and Vita don't support 64-bit offsets, for example.
     let offset = offset.try_into().map_err(|_| io::Errno::OVERFLOW)?;
+    let len = len.try_into().map_err(|_| io::Errno::OVERFLOW)?;
 
     #[cfg(any(linux_kernel, target_os = "fuchsia"))]
     unsafe {
