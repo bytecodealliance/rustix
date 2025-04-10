@@ -27,7 +27,7 @@ impl Pid {
 
     /// Converts a `RawPid` into a `Pid`.
     ///
-    /// Returns `Some` for positive `RawPid`s. Otherwise, returns `None`.
+    /// Returns `Some` for positive values, and `None` for zero values.
     ///
     /// This is safe because a `Pid` is a number without any guarantees for the
     /// kernel. Non-child `Pid`s are always racy for any syscalls, but can only
@@ -35,9 +35,13 @@ impl Pid {
     /// non-child processes, please consider other mechanisms like [pidfd] on
     /// Linux.
     ///
+    /// Passing a negative number doesn't invoke undefined behavior, but it
+    /// may cause unexpected behavior.
+    ///
     /// [pidfd]: https://man7.org/linux/man-pages/man2/pidfd_open.2.html
     #[inline]
     pub const fn from_raw(raw: RawPid) -> Option<Self> {
+        debug_assert!(raw > 0);
         match NonZeroI32::new(raw) {
             Some(non_zero) => Some(Self(non_zero)),
             None => None,
@@ -46,9 +50,12 @@ impl Pid {
 
     /// Converts a known positive `RawPid` into a `Pid`.
     ///
+    /// Passing a negative number doesn't invoke undefined behavior, but it
+    /// may cause unexpected behavior.
+    ///
     /// # Safety
     ///
-    /// The caller must guarantee `raw` is positive.
+    /// The caller must guarantee `raw` is non-zero.
     #[inline]
     pub const unsafe fn from_raw_unchecked(raw: RawPid) -> Self {
         debug_assert!(raw > 0);
