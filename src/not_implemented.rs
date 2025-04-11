@@ -299,7 +299,6 @@ pub mod yet {
     not_implemented!(fanotify_mark);
     not_implemented!(getifaddrs);
     not_implemented!(signalfd);
-    not_implemented!(pidfd_send_signal);
     not_implemented!(mount_setattr);
     not_implemented!(extattr_delete_fd);
     not_implemented!(extattr_delete_link);
