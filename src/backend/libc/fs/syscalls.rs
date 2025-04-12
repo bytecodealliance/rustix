@@ -1404,9 +1404,8 @@ pub(crate) fn seek(fd: BorrowedFd<'_>, pos: SeekFrom) -> io::Result<u64> {
         }
     };
 
-    // ESP-IDF and Vita don't support 64-bit offsets.
-    #[cfg(any(target_os = "espidf", target_os = "vita"))]
-    let offset: i32 = offset.try_into().map_err(|_| io::Errno::OVERFLOW)?;
+    // ESP-IDF and Vita don't support 64-bit offsets, for example.
+    let offset = offset.try_into().map_err(|_| io::Errno::OVERFLOW)?;
 
     let offset = unsafe { ret_off_t(c::lseek(borrowed_fd(fd), offset, whence))? };
     Ok(offset as u64)
@@ -1734,9 +1733,13 @@ pub(crate) fn fallocate(
     offset: u64,
     len: u64,
 ) -> io::Result<()> {
-    // Silently cast; we'll get `EINVAL` if the value is negative.
+    // Silently cast to `i64`; we'll get `EINVAL` if the value is negative.
     let offset = offset as i64;
     let len = len as i64;
+
+    // ESP-IDF and Vita don't support 64-bit offsets, for example.
+    let offset = offset.try_into().map_err(|_| io::Errno::OVERFLOW)?;
+    let len = len.try_into().map_err(|_| io::Errno::OVERFLOW)?;
 
     #[cfg(any(linux_kernel, target_os = "fuchsia"))]
     unsafe {
