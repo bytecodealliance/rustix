@@ -1,5 +1,7 @@
 //! User and Group ID types.
 
+use core::fmt;
+
 use crate::backend::c;
 use crate::ffi;
 
@@ -83,6 +85,18 @@ impl Gid {
     #[inline]
     pub const fn is_root(self) -> bool {
         self.0 == Self::ROOT.0
+    }
+}
+
+impl fmt::Display for Uid {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl fmt::Display for Gid {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
     }
 }
 
