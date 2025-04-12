@@ -48,9 +48,10 @@ pub(in crate::backend) unsafe fn syscall1_readonly(
 pub(in crate::backend) unsafe fn syscall1_noreturn(nr: SyscallNumber<'_>, a0: ArgReg<'_, A0>) -> ! {
     asm!(
         "svc 0",
+        "j .+2",
         in("r1") nr.to_asm(),
         in("r2") a0.to_asm(),
-        options(nostack, preserves_flags, noreturn)
+        options(nostack, noreturn)
     )
 }
 
