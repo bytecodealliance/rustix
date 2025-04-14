@@ -8,12 +8,8 @@ use crate::io;
 use core::ptr::addr_of_mut;
 use core::{slice, str};
 use linux_raw_sys::ctypes::c_char;
-use linux_raw_sys::ioctl::SIOCGIFINDEX;
-#[cfg(feature = "alloc")]
-use linux_raw_sys::ioctl::SIOCGIFNAME;
+use linux_raw_sys::ioctl::{SIOCGIFINDEX, SIOCGIFNAME};
 use linux_raw_sys::net::{ifreq, ifreq__bindgen_ty_1, ifreq__bindgen_ty_2, IFNAMSIZ};
-#[cfg(feature = "alloc")]
-use {alloc::borrow::ToOwned, alloc::string::String};
 
 pub(crate) fn name_to_index(fd: BorrowedFd<'_>, if_name: &str) -> io::Result<u32> {
     let if_name_bytes = if_name.as_bytes();
@@ -40,8 +36,7 @@ pub(crate) fn name_to_index(fd: BorrowedFd<'_>, if_name: &str) -> io::Result<u32
     Ok(index as u32)
 }
 
-#[cfg(feature = "alloc")]
-pub(crate) fn index_to_name(fd: BorrowedFd<'_>, index: u32) -> io::Result<String> {
+pub(crate) fn index_to_name(fd: BorrowedFd<'_>, index: u32) -> io::Result<(usize, [u8; 16])> {
     let mut ifreq = ifreq {
         ifr_ifrn: ifreq__bindgen_ty_1 { ifrn_name: [0; 16] },
         ifr_ifru: ifreq__bindgen_ty_2 {
@@ -61,9 +56,10 @@ pub(crate) fn index_to_name(fd: BorrowedFd<'_>, index: u32) -> io::Result<String
         let ifrn_name =
             unsafe { slice::from_raw_parts(ifrn_name.as_ptr().cast::<u8>(), ifrn_name.len()) };
 
-        str::from_utf8(ifrn_name)
-            .map_err(|_| io::Errno::ILSEQ)
-            .map(ToOwned::to_owned)
+        let mut name_buf = [0; 16];
+        name_buf[..ifrn_name.len()].copy_from_slice(ifrn_name);
+
+        Ok((nul_byte, name_buf))
     } else {
         Err(io::Errno::INVAL)
     }
