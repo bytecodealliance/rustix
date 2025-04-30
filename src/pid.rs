@@ -41,7 +41,7 @@ impl Pid {
     /// [pidfd]: https://man7.org/linux/man-pages/man2/pidfd_open.2.html
     #[inline]
     pub const fn from_raw(raw: RawPid) -> Option<Self> {
-        debug_assert!(raw > 0);
+        debug_assert!(raw >= 0);
         match NonZeroI32::new(raw) {
             Some(non_zero) => Some(Self(non_zero)),
             None => None,
@@ -79,6 +79,8 @@ impl Pid {
     }
 
     /// Converts a `Pid` into a `RawPid`.
+    ///
+    /// This is the same as `self.as_raw_nonzero().get()`.
     #[inline]
     pub const fn as_raw_pid(self) -> RawPid {
         self.0.get()
@@ -120,5 +122,22 @@ mod tests {
         const_assert_eq!(4567 as RawPid, unsafe {
             transmute::<Option<Pid>, RawPid>(Some(Pid::from_raw_unchecked(4567)))
         });
+    }
+
+    #[test]
+    fn test_ctors() {
+        use std::num::NonZero;
+        assert!(Pid::from_raw(0).is_none());
+        assert_eq!(
+            Pid::from_raw(77).unwrap().as_raw_nonzero(),
+            NonZero::new(77).unwrap()
+        );
+        assert_eq!(Pid::from_raw(77).unwrap().as_raw_pid(), 77);
+        assert_eq!(Pid::as_raw(Pid::from_raw(77)), 77);
+    }
+
+    #[test]
+    fn test_specials() {
+        assert!(Pid::from_raw(1).unwrap().is_init());
     }
 }
