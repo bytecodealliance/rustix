@@ -139,5 +139,6 @@ mod tests {
     #[test]
     fn test_specials() {
         assert!(Pid::from_raw(1).unwrap().is_init());
+        assert_eq!(Pid::from_raw(1).unwrap(), Pid::INIT);
     }
 }
