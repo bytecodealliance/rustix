@@ -122,6 +122,12 @@
 #![allow(clippy::useless_conversion)]
 // This clippy lint gets too many false positives.
 #![allow(clippy::needless_lifetimes)]
+// Until `unnecessary_transmutes` is recognized by our MSRV, don't warn about
+// it being unrecognized.
+#![allow(unknown_lints)]
+// Until `cast_signed` and `cast_unsigned` are supported by our MSRV, don't
+// warn about transmutes that could be changed to them.
+#![allow(unnecessary_transmutes)]
 // Redox and WASI have enough differences that it isn't worth precisely
 // conditionalizing all the `use`s for them. Similar for if we don't have
 // "all-apis".
