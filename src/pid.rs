@@ -126,11 +126,11 @@ mod tests {
 
     #[test]
     fn test_ctors() {
-        use std::num::NonZero;
+        use std::num::NonZeroI32;
         assert!(Pid::from_raw(0).is_none());
         assert_eq!(
             Pid::from_raw(77).unwrap().as_raw_nonzero(),
-            NonZero::new(77).unwrap()
+            NonZeroI32::new(77).unwrap()
         );
         assert_eq!(Pid::from_raw(77).unwrap().as_raw_pid(), 77);
         assert_eq!(Pid::as_raw(Pid::from_raw(77)), 77);
