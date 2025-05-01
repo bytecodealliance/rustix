@@ -28,8 +28,6 @@ use crate::{fd::FromRawFd as _, ioctl};
 
 bitflags::bitflags! {
     /// `O_*` flags for use with [`openpt`] and [`ioctl_tiocgptpeer`].
-    ///
-    /// [`ioctl_tiocgptpeer`]: https://docs.rs/rustix/*/x86_64-unknown-linux-gnu/rustix/pty/fn.ioctl_tiocgptpeer.html
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct OpenptFlags: u32 {
@@ -133,6 +131,7 @@ pub fn openpt(flags: OpenptFlags) -> io::Result<OwnedFd> {
 ))]
 #[inline]
 #[doc(alias = "ptsname_r")]
+#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
 pub fn ptsname<Fd: AsFd, B: Into<Vec<u8>>>(fd: Fd, reuse: B) -> io::Result<CString> {
     backend::pty::syscalls::ptsname(fd.as_fd(), reuse.into())
 }

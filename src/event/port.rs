@@ -123,6 +123,9 @@ pub unsafe fn dissociate_fd<Fd: AsFd, RawFd: AsRawFd>(port: Fd, object: RawFd) -
 
 /// `port_get(port, timeout)`—Gets an event from a port.
 ///
+/// If an unsupported timeout is passed, this function fails with
+/// [`io::Errno::INVAL`].
+///
 /// # References
 ///  - [OpenSolaris]
 ///  - [illumos]
@@ -140,6 +143,9 @@ pub fn get<Fd: AsFd>(port: Fd, timeout: Option<&Timespec>) -> io::Result<Event> 
 /// If `events` is empty, this does nothing and returns immediately.
 ///
 /// To query the number of events without retrieving any, use [`getn_query`].
+///
+/// If an unsupported timeout is passed, this function fails with
+/// [`io::Errno::INVAL`].
 ///
 /// # References
 ///  - [OpenSolaris]

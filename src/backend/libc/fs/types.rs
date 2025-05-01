@@ -376,6 +376,7 @@ bitflags! {
         /// functions, use [`rustix::fs::fcntl_setfl`] instead.
         #[cfg(not(any(
             target_os = "aix",
+            target_os = "cygwin",
             target_os = "espidf",
             target_os = "haiku",
             target_os = "horizon",
@@ -630,12 +631,12 @@ impl FileType {
 #[cfg(not(any(
     apple,
     netbsdlike,
-    target_os = "solaris",
     target_os = "dragonfly",
     target_os = "espidf",
     target_os = "horizon",
     target_os = "haiku",
     target_os = "redox",
+    target_os = "solaris",
     target_os = "vita",
 )))]
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
@@ -735,6 +736,9 @@ bitflags! {
         /// `F_SEAL_FUTURE_WRITE` (since Linux 5.1)
         #[cfg(linux_kernel)]
         const FUTURE_WRITE = bitcast!(c::F_SEAL_FUTURE_WRITE);
+        /// `F_SEAL_EXEC` (since Linux 6.3)
+        #[cfg(linux_kernel)]
+        const EXEC = bitcast!(c::F_SEAL_EXEC);
 
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
@@ -781,6 +785,7 @@ bitflags! {
             bsd,
             solarish,
             target_os = "aix",
+            target_os = "cygwin",
             target_os = "emscripten",
             target_os = "fuchsia",
             target_os = "haiku",
@@ -1057,13 +1062,14 @@ pub type StatFs = c::statfs64;
 /// `fsid_t` for use with [`StatFs`].
 #[cfg(not(any(
     solarish,
+    target_os = "cygwin",
     target_os = "espidf",
     target_os = "haiku",
     target_os = "horizon",
     target_os = "nto",
     target_os = "redox",
     target_os = "vita",
-    target_os = "wasi"
+    target_os = "wasi",
 )))]
 pub type Fsid = c::fsid_t;
 

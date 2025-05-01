@@ -90,6 +90,7 @@ impl Signal {
         bsd,
         solarish,
         target_os = "aix",
+        target_os = "cygwin",
         target_os = "haiku",
         target_os = "horizon",
         target_os = "hurd",
@@ -105,7 +106,7 @@ impl Signal {
                 target_arch = "sparc",
                 target_arch = "sparc64"
             ),
-        )
+        ),
     )))]
     pub const STKFLT: Self = Self(unsafe { NonZeroI32::new_unchecked(c::SIGSTKFLT) });
     /// `SIGCHLD`
@@ -254,6 +255,144 @@ impl Signal {
     pub const unsafe fn from_raw_nonzero_unchecked(sig: NonZeroI32) -> Self {
         Self(sig)
     }
+
+    /// Convert a raw named signal number into a `Signal`.
+    ///
+    /// If the given signal number corresponds to one of the named constant
+    /// signal values, such as [`Signal::HUP`] or [`Signal::INT`], return the
+    /// `Signal` value. Otherwise return `None`.
+    ///
+    /// Signals in the range `SIGRTMIN` through `SIGRTMAX` are not supported by
+    /// this function. For a constructor that does recognize those values, see
+    /// [`Signal::from_raw`] in [rustix-libc-wrappers].
+    ///
+    /// [`Signal::from_raw`]: https://docs.rs/rustix-libc-wrappers/*/rustix_libc_wrappers/trait.SignalExt.html#tymethod.from_raw
+    /// [rustix-libc-wrappers]: https://docs.rs/rustix-libc-wrappers
+    pub const fn from_named_raw(sig: i32) -> Option<Self> {
+        if let Some(sig) = NonZeroI32::new(sig) {
+            Self::from_named_raw_nonzero(sig)
+        } else {
+            None
+        }
+    }
+
+    /// Convert a raw non-zero named signal number into a `Signal`.
+    ///
+    /// If the given signal number corresponds to one of the constant signal
+    /// values, such as [`Signal::HUP`] or [`Signal::INT`], return the
+    /// `Signal` value. Otherwise return `None`.
+    ///
+    /// Signals in the range `SIGRTMIN` through `SIGRTMAX` are not supported by
+    /// this function. For a constructor that does recognize those values, see
+    /// [`Signal::from_raw_nonzero`] in [rustix-libc-wrappers].
+    ///
+    /// [`Signal::from_raw_nonzero`]: https://docs.rs/rustix-libc-wrappers/*/rustix_libc_wrappers/trait.SignalExt.html#tymethod.from_raw_nonzero
+    /// [rustix-libc-wrappers]: https://docs.rs/rustix-libc-wrappers
+    pub const fn from_named_raw_nonzero(sig: NonZeroI32) -> Option<Self> {
+        match sig.get() {
+            c::SIGHUP => Some(Self::HUP),
+            c::SIGINT => Some(Self::INT),
+            c::SIGQUIT => Some(Self::QUIT),
+            c::SIGILL => Some(Self::ILL),
+            c::SIGTRAP => Some(Self::TRAP),
+            c::SIGABRT => Some(Self::ABORT),
+            c::SIGBUS => Some(Self::BUS),
+            c::SIGFPE => Some(Self::FPE),
+            c::SIGKILL => Some(Self::KILL),
+            #[cfg(not(target_os = "vita"))]
+            c::SIGUSR1 => Some(Self::USR1),
+            c::SIGSEGV => Some(Self::SEGV),
+            #[cfg(not(target_os = "vita"))]
+            c::SIGUSR2 => Some(Self::USR2),
+            c::SIGPIPE => Some(Self::PIPE),
+            c::SIGALRM => Some(Self::ALARM),
+            c::SIGTERM => Some(Self::TERM),
+            #[cfg(not(any(
+                bsd,
+                solarish,
+                target_os = "aix",
+                target_os = "cygwin",
+                target_os = "haiku",
+                target_os = "horizon",
+                target_os = "hurd",
+                target_os = "nto",
+                target_os = "vita",
+                all(
+                    linux_kernel,
+                    any(
+                        target_arch = "mips",
+                        target_arch = "mips32r6",
+                        target_arch = "mips64",
+                        target_arch = "mips64r6",
+                        target_arch = "sparc",
+                        target_arch = "sparc64"
+                    ),
+                )
+            )))]
+            c::SIGSTKFLT => Some(Self::STKFLT),
+            #[cfg(not(target_os = "vita"))]
+            c::SIGCHLD => Some(Self::CHILD),
+            #[cfg(not(target_os = "vita"))]
+            c::SIGCONT => Some(Self::CONT),
+            #[cfg(not(target_os = "vita"))]
+            c::SIGSTOP => Some(Self::STOP),
+            #[cfg(not(target_os = "vita"))]
+            c::SIGTSTP => Some(Self::TSTP),
+            #[cfg(not(target_os = "vita"))]
+            c::SIGTTIN => Some(Self::TTIN),
+            #[cfg(not(target_os = "vita"))]
+            c::SIGTTOU => Some(Self::TTOU),
+            #[cfg(not(target_os = "vita"))]
+            c::SIGURG => Some(Self::URG),
+            #[cfg(not(target_os = "vita"))]
+            c::SIGXCPU => Some(Self::XCPU),
+            #[cfg(not(target_os = "vita"))]
+            c::SIGXFSZ => Some(Self::XFSZ),
+            #[cfg(not(target_os = "vita"))]
+            c::SIGVTALRM => Some(Self::VTALARM),
+            #[cfg(not(target_os = "vita"))]
+            c::SIGPROF => Some(Self::PROF),
+            #[cfg(not(target_os = "vita"))]
+            c::SIGWINCH => Some(Self::WINCH),
+            #[cfg(not(any(target_os = "haiku", target_os = "vita")))]
+            c::SIGIO => Some(Self::IO),
+            #[cfg(not(any(
+                bsd,
+                target_os = "haiku",
+                target_os = "horizon",
+                target_os = "hurd",
+                target_os = "vita"
+            )))]
+            c::SIGPWR => Some(Self::POWER),
+            c::SIGSYS => Some(Self::SYS),
+            #[cfg(any(
+                bsd,
+                solarish,
+                target_os = "aix",
+                target_os = "hermit",
+                all(
+                    linux_kernel,
+                    any(
+                        target_arch = "mips",
+                        target_arch = "mips32r6",
+                        target_arch = "mips64",
+                        target_arch = "mips64r6",
+                        target_arch = "sparc",
+                        target_arch = "sparc64"
+                    )
+                )
+            ))]
+            c::SIGEMT => Some(Self::EMT),
+            #[cfg(bsd)]
+            c::SIGINFO => Some(Self::INFO),
+            #[cfg(target_os = "freebsd")]
+            c::SIGTHR => Some(Self::THR),
+            #[cfg(target_os = "freebsd")]
+            c::SIGLIBRT => Some(Self::LIBRT),
+
+            _ => None,
+        }
+    }
 }
 
 impl fmt::Debug for Signal {
@@ -280,6 +419,7 @@ impl fmt::Debug for Signal {
                 bsd,
                 solarish,
                 target_os = "aix",
+                target_os = "cygwin",
                 target_os = "haiku",
                 target_os = "horizon",
                 target_os = "hurd",
@@ -295,7 +435,7 @@ impl fmt::Debug for Signal {
                         target_arch = "sparc",
                         target_arch = "sparc64"
                     ),
-                )
+                ),
             )))]
             Self::STKFLT => "Signal::STKFLT".fmt(f),
             #[cfg(not(target_os = "vita"))]
@@ -380,6 +520,20 @@ mod tests {
                 Signal::from_raw_nonzero_unchecked(NonZeroI32::new(libc::SIGHUP).unwrap()),
                 Signal::HUP
             );
+        }
+    }
+
+    #[test]
+    fn test_named() {
+        assert_eq!(Signal::from_named_raw(-1), None);
+        assert_eq!(Signal::from_named_raw(0), None);
+        assert_eq!(Signal::from_named_raw(c::SIGHUP), Some(Signal::HUP));
+        assert_eq!(Signal::from_named_raw(c::SIGSEGV), Some(Signal::SEGV));
+        assert_eq!(Signal::from_named_raw(c::SIGSYS), Some(Signal::SYS));
+        #[cfg(any(linux_like, solarish, target_os = "hurd"))]
+        {
+            assert_eq!(Signal::from_named_raw(libc::SIGRTMIN()), None);
+            assert_eq!(Signal::from_named_raw(libc::SIGRTMAX()), None);
         }
     }
 }

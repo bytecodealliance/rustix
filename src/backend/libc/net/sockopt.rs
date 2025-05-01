@@ -20,6 +20,7 @@ use crate::net::xdp::{XdpMmapOffsets, XdpOptionsFlags, XdpRingOffset, XdpStatist
     apple,
     windows,
     target_os = "aix",
+    target_os = "cygwin",
     target_os = "dragonfly",
     target_os = "emscripten",
     target_os = "espidf",
@@ -417,6 +418,7 @@ pub(crate) fn socket_send_buffer_size(fd: BorrowedFd<'_>) -> io::Result<usize> {
     apple,
     windows,
     target_os = "aix",
+    target_os = "cygwin",
     target_os = "dragonfly",
     target_os = "emscripten",
     target_os = "espidf",
@@ -450,13 +452,13 @@ pub(crate) fn socket_oobinline(fd: BorrowedFd<'_>) -> io::Result<bool> {
     getsockopt(fd, c::SOL_SOCKET, c::SO_OOBINLINE).map(to_bool)
 }
 
-#[cfg(not(any(solarish, windows)))]
+#[cfg(not(any(solarish, windows, target_os = "cygwin")))]
 #[inline]
 pub(crate) fn set_socket_reuseport(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
     setsockopt(fd, c::SOL_SOCKET, c::SO_REUSEPORT, from_bool(value))
 }
 
-#[cfg(not(any(solarish, windows)))]
+#[cfg(not(any(solarish, windows, target_os = "cygwin")))]
 #[inline]
 pub(crate) fn socket_reuseport(fd: BorrowedFd<'_>) -> io::Result<bool> {
     getsockopt(fd, c::SOL_SOCKET, c::SO_REUSEPORT).map(to_bool)
@@ -526,13 +528,13 @@ pub(crate) fn ipv6_v6only(fd: BorrowedFd<'_>) -> io::Result<bool> {
     getsockopt(fd, c::IPPROTO_IPV6, c::IPV6_V6ONLY).map(to_bool)
 }
 
-#[cfg(linux_kernel)]
+#[cfg(any(linux_kernel, target_os = "cygwin"))]
 #[inline]
 pub(crate) fn ip_mtu(fd: BorrowedFd<'_>) -> io::Result<u32> {
     getsockopt(fd, c::IPPROTO_IP, c::IP_MTU)
 }
 
-#[cfg(linux_kernel)]
+#[cfg(any(linux_kernel, target_os = "cygwin"))]
 #[inline]
 pub(crate) fn ipv6_mtu(fd: BorrowedFd<'_>) -> io::Result<u32> {
     getsockopt(fd, c::IPPROTO_IPV6, c::IPV6_MTU)
@@ -803,13 +805,25 @@ pub(crate) fn ip_tos(fd: BorrowedFd<'_>) -> io::Result<u8> {
     Ok(value as u8)
 }
 
-#[cfg(any(apple, linux_like, target_os = "freebsd", target_os = "fuchsia"))]
+#[cfg(any(
+    apple,
+    linux_like,
+    target_os = "cygwin",
+    target_os = "freebsd",
+    target_os = "fuchsia",
+))]
 #[inline]
 pub(crate) fn set_ip_recvtos(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
     setsockopt(fd, c::IPPROTO_IP, c::IP_RECVTOS, from_bool(value))
 }
 
-#[cfg(any(apple, linux_like, target_os = "freebsd", target_os = "fuchsia"))]
+#[cfg(any(
+    apple,
+    linux_like,
+    target_os = "cygwin",
+    target_os = "freebsd",
+    target_os = "fuchsia",
+))]
 #[inline]
 pub(crate) fn ip_recvtos(fd: BorrowedFd<'_>) -> io::Result<bool> {
     getsockopt(fd, c::IPPROTO_IP, c::IP_RECVTOS).map(to_bool)

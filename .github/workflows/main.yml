@@ -56,6 +56,7 @@ jobs:
         cargo update --package=half --precise=2.2.1
         cargo update --package=flate2 --precise=1.0.35
         cargo update --package=textwrap --precise=0.16.1
+        cargo update --package=once_cell --precise=1.20.3
 
     - run: >
         rustup target add
@@ -221,18 +222,20 @@ jobs:
     - run: cargo check -Z build-std --target armv7-unknown-freebsd --all-targets --features=all-apis
     - run: cargo check -Z build-std --target aarch64-unknown-linux-gnu_ilp32 --all-targets --features=all-apis
     - run: cargo check -Z build-std --target x86_64-unknown-haiku --all-targets --features=all-apis
-    - run: cargo check -Z build-std --target x86_64-uwp-windows-msvc --all-targets --features=all-apis
+    # Temporarily disable due to build errors on nightly.
+    # - run: cargo check -Z build-std --target x86_64-uwp-windows-msvc --all-targets --features=all-apis
     - run: cargo check -Z build-std --target=riscv32imc-esp-espidf --features=all-apis
     - run: cargo check -Z build-std --target=aarch64-unknown-nto-qnx710 --features=all-apis
     - run: cargo check -Z build-std --target=x86_64-pc-nto-qnx710 --features=all-apis
     - run: cargo check -Z build-std --target=armv6k-nintendo-3ds --all-features
-    # Temporarily disable armv7-sony-vita-newlibeabihf, as it gets build errors.
-    # - run: cargo check -Z build-std --target=armv7-sony-vita-newlibeabihf --features=all-apis
-    - run: cargo check -Z build-std --target=powerpc64-ibm-aix --features=all-apis
+    - run: cargo check -Z build-std --target=armv7-sony-vita-newlibeabihf --features=all-apis
+    # Temporarily disable due to build errors on nightly.
+    # - run: cargo check -Z build-std --target=powerpc64-ibm-aix --features=all-apis
     - run: cargo check -Z build-std --target=mipsel-unknown-linux-gnu --features=all-apis
     - run: cargo check -Z build-std --target=mips64el-unknown-linux-gnuabi64 --features=all-apis
     - run: cargo check -Z build-std --target=powerpc-unknown-linux-musl --features=all-apis
     - run: cargo check -Z build-std --target=powerpc64le-unknown-linux-musl --features=all-apis
+    - run: cargo check -Z build-std --target=armv7k-apple-watchos --features=all-apis
 
 
   test:
@@ -244,13 +247,13 @@ jobs:
       RUSTFLAGS: --cfg rustix_use_experimental_features
     strategy:
       matrix:
-        build: [ubuntu, ubuntu-20.04, i686-linux, aarch64-linux, powerpc-linux, powerpc64le-linux, riscv64-linux, s390x-linux, arm-linux, ubuntu-stable, i686-linux-stable, aarch64-linux-stable, riscv64-linux-stable, s390x-linux-stable, powerpc-linux-stable, powerpc64le-linux-stable, arm-linux-stable, ubuntu-1.63, i686-linux-1.63, aarch64-linux-1.63, riscv64-linux-1.63, s390x-linux-1.63, powerpc64le-linux, powerpc64le-linux-1.63, arm-linux-1.63, macos-latest, macos-13, windows, windows-2019, musl]
+        build: [ubuntu, ubuntu-22.04, i686-linux, aarch64-linux, powerpc-linux, powerpc64le-linux, riscv64-linux, s390x-linux, arm-linux, ubuntu-stable, i686-linux-stable, aarch64-linux-stable, riscv64-linux-stable, s390x-linux-stable, powerpc-linux-stable, powerpc64le-linux-stable, arm-linux-stable, ubuntu-1.63, i686-linux-1.63, aarch64-linux-1.63, riscv64-linux-1.63, s390x-linux-1.63, powerpc64le-linux, powerpc64le-linux-1.63, arm-linux-1.63, macos-latest, macos-13, windows, windows-2019, musl]
         include:
           - build: ubuntu
             os: ubuntu-latest
             rust: nightly
-          - build: ubuntu-20.04
-            os: ubuntu-20.04
+          - build: ubuntu-22.04
+            os: ubuntu-22.04
             rust: nightly
           - build: i686-linux
             os: ubuntu-latest
@@ -533,6 +536,7 @@ jobs:
         cargo update --package=half --precise=2.2.1
         cargo update --package=flate2 --precise=1.0.35
         cargo update --package=textwrap --precise=0.16.1
+        cargo update --package=once_cell --precise=1.20.3
 
     - run: |
         cargo test --verbose --features=all-apis --release --workspace -- --nocapture

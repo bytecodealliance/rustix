@@ -11,8 +11,11 @@ use crate::fd::BorrowedFd;
 /// [`clock_gettime`]: crate::time::clock_gettime
 #[cfg(not(any(apple, target_os = "wasi")))]
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
-#[cfg_attr(not(any(target_os = "aix", target_os = "dragonfly")), repr(i32))]
-#[cfg_attr(target_os = "dragonfly", repr(u64))]
+#[cfg_attr(
+    not(any(target_os = "aix", target_os = "cygwin", target_os = "dragonfly")),
+    repr(i32)
+)]
+#[cfg_attr(any(target_os = "cygwin", target_os = "dragonfly"), repr(u64))]
 #[cfg_attr(target_os = "aix", repr(i64))]
 #[non_exhaustive]
 pub enum ClockId {
@@ -142,7 +145,7 @@ pub enum DynamicClockId<'a> {
     Dynamic(BorrowedFd<'a>),
 
     /// `CLOCK_REALTIME_ALARM`
-    #[cfg(linux_kernel)]
+    #[cfg(any(linux_kernel, target_os = "fuchsia"))]
     #[doc(alias = "CLOCK_REALTIME_ALARM")]
     RealtimeAlarm,
 

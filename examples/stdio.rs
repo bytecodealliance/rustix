@@ -258,7 +258,7 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
             if term.local_modes.contains(LocalModes::ECHOCTL) {
                 print!(" ECHOCTL");
             }
-            #[cfg(not(any(target_os = "redox")))]
+            #[cfg(not(any(target_os = "cygwin", target_os = "redox")))]
             if term.local_modes.contains(LocalModes::ECHOPRT) {
                 print!(" ECHOPRT");
             }
@@ -276,7 +276,7 @@ fn show<Fd: AsFd>(fd: Fd) -> io::Result<()> {
             if term.local_modes.contains(LocalModes::TOSTOP) {
                 print!(" TOSTOP");
             }
-            #[cfg(not(any(target_os = "redox")))]
+            #[cfg(not(any(target_os = "cygwin", target_os = "redox")))]
             if term.local_modes.contains(LocalModes::PENDIN) {
                 print!(" PENDIN");
             }

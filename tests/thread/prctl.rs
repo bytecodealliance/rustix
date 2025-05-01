@@ -18,7 +18,12 @@ fn test_name() {
 
 #[test]
 fn test_capability_is_in_bounding_set() {
-    dbg!(capability_is_in_bounding_set(Capability::ChangeOwnership).unwrap());
+    dbg!(capability_is_in_bounding_set(CapabilitySet::CHOWN).unwrap());
+    dbg!(capability_is_in_bounding_set(
+        #[allow(deprecated)]
+        Capability::ChangeOwnership
+    )
+    .unwrap());
 }
 
 #[test]
@@ -38,7 +43,12 @@ fn test_no_new_privs() {
 
 #[test]
 fn test_capability_is_in_ambient_set() {
-    dbg!(capability_is_in_ambient_set(Capability::ChangeOwnership).unwrap());
+    dbg!(capability_is_in_ambient_set(CapabilitySet::CHOWN).unwrap());
+    dbg!(capability_is_in_ambient_set(
+        #[allow(deprecated)]
+        Capability::ChangeOwnership
+    )
+    .unwrap());
 }
 
 #[cfg(target_arch = "aarch64")]

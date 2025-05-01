@@ -1981,6 +1981,7 @@ impl Default for register_or_sqe_op_or_sqe_flags_union {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::fd::AsRawFd as _;
 
     /// Check that our custom structs and unions have the same layout as the
     /// kernel's versions.
@@ -2011,7 +2012,7 @@ mod tests {
         assert_eq_align!(io_uring_user_data, u64);
 
         // Test that `u64`s and pointers are properly stored in
-        // io_uring_user_data`.
+        // `io_uring_user_data`.
         unsafe {
             const MAGIC: u64 = !0x0123_4567_89ab_cdef;
             let user_data = io_uring_user_data::from_u64(MAGIC);
@@ -2193,5 +2194,14 @@ mod tests {
             msg_controllen,
             msg_flags
         );
+    }
+
+    #[test]
+    fn test_io_uring_register_files_skip() {
+        use crate::backend::c;
+        assert!(IORING_REGISTER_FILES_SKIP.as_raw_fd() != -1);
+        assert!(IORING_REGISTER_FILES_SKIP.as_raw_fd() != c::STDIN_FILENO);
+        assert!(IORING_REGISTER_FILES_SKIP.as_raw_fd() != c::STDOUT_FILENO);
+        assert!(IORING_REGISTER_FILES_SKIP.as_raw_fd() != c::STDERR_FILENO);
     }
 }

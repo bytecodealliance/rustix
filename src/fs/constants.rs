@@ -79,11 +79,16 @@ mod tests {
         ))]
         assert_eq_size!(u16, linux_raw_sys::general::__kernel_mode_t);
 
-        // Ensure that seconds fields are 64-bit.
         let some_stat: Stat = unsafe { core::mem::zeroed() };
-        assert_eq!(some_stat.st_atime, 0_i64);
-        assert_eq!(some_stat.st_mtime, 0_i64);
-        assert_eq!(some_stat.st_ctime, 0_i64);
+
+        // Ensure that seconds fields are 64-bit on non-y2038-bug platforms, and
+        // on Linux where we use statx.
+        #[cfg(any(linux_kernel, not(fix_y2038)))]
+        {
+            assert_eq!(some_stat.st_atime, 0_i64);
+            assert_eq!(some_stat.st_mtime, 0_i64);
+            assert_eq!(some_stat.st_ctime, 0_i64);
+        }
 
         // Ensure that file offsets are 64-bit.
         assert_eq!(some_stat.st_size, 0_i64);
@@ -269,10 +274,11 @@ mod tests {
 
         #[cfg(not(any(
             solarish,
+            target_os = "cygwin",
             target_os = "haiku",
             target_os = "nto",
             target_os = "redox",
-            target_os = "wasi"
+            target_os = "wasi",
         )))]
         {
             check_renamed_type!(Fsid, fsid_t);

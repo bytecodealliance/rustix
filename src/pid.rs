@@ -27,7 +27,7 @@ impl Pid {
 
     /// Converts a `RawPid` into a `Pid`.
     ///
-    /// Returns `Some` for positive `RawPid`s. Otherwise, returns `None`.
+    /// Returns `Some` for positive values, and `None` for zero values.
     ///
     /// This is safe because a `Pid` is a number without any guarantees for the
     /// kernel. Non-child `Pid`s are always racy for any syscalls, but can only
@@ -35,9 +35,13 @@ impl Pid {
     /// non-child processes, please consider other mechanisms like [pidfd] on
     /// Linux.
     ///
+    /// Passing a negative number doesn't invoke undefined behavior, but it
+    /// may cause unexpected behavior.
+    ///
     /// [pidfd]: https://man7.org/linux/man-pages/man2/pidfd_open.2.html
     #[inline]
     pub const fn from_raw(raw: RawPid) -> Option<Self> {
+        debug_assert!(raw >= 0);
         match NonZeroI32::new(raw) {
             Some(non_zero) => Some(Self(non_zero)),
             None => None,
@@ -46,9 +50,12 @@ impl Pid {
 
     /// Converts a known positive `RawPid` into a `Pid`.
     ///
+    /// Passing a negative number doesn't invoke undefined behavior, but it
+    /// may cause unexpected behavior.
+    ///
     /// # Safety
     ///
-    /// The caller must guarantee `raw` is positive.
+    /// The caller must guarantee `raw` is non-zero.
     #[inline]
     pub const unsafe fn from_raw_unchecked(raw: RawPid) -> Self {
         debug_assert!(raw > 0);
@@ -71,6 +78,14 @@ impl Pid {
         self.0
     }
 
+    /// Converts a `Pid` into a `RawPid`.
+    ///
+    /// This is the same as `self.as_raw_nonzero().get()`.
+    #[inline]
+    pub const fn as_raw_pid(self) -> RawPid {
+        self.0.get()
+    }
+
     /// Converts an `Option<Pid>` into a `RawPid`.
     #[inline]
     pub const fn as_raw(pid: Option<Self>) -> RawPid {
@@ -80,27 +95,50 @@ impl Pid {
         }
     }
 
-    /// Test whether this pid represents the init process (pid 1).
+    /// Test whether this pid represents the init process ([`Pid::INIT`]).
     #[inline]
     pub const fn is_init(self) -> bool {
         self.0.get() == Self::INIT.0.get()
     }
 }
 
-#[test]
-fn test_sizes() {
-    use core::mem::transmute;
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-    assert_eq_size!(RawPid, NonZeroI32);
-    assert_eq_size!(RawPid, Pid);
-    assert_eq_size!(RawPid, Option<Pid>);
+    #[test]
+    fn test_sizes() {
+        use core::mem::transmute;
 
-    // Rustix doesn't depend on `Option<Pid>` matching the ABI of a raw integer
-    // for correctness, but it should work nonetheless.
-    const_assert_eq!(0 as RawPid, unsafe {
-        transmute::<Option<Pid>, RawPid>(None)
-    });
-    const_assert_eq!(4567 as RawPid, unsafe {
-        transmute::<Option<Pid>, RawPid>(Some(Pid::from_raw_unchecked(4567)))
-    });
+        assert_eq_size!(RawPid, NonZeroI32);
+        assert_eq_size!(RawPid, Pid);
+        assert_eq_size!(RawPid, Option<Pid>);
+
+        // Rustix doesn't depend on `Option<Pid>` matching the ABI of a raw integer
+        // for correctness, but it should work nonetheless.
+        const_assert_eq!(0 as RawPid, unsafe {
+            transmute::<Option<Pid>, RawPid>(None)
+        });
+        const_assert_eq!(4567 as RawPid, unsafe {
+            transmute::<Option<Pid>, RawPid>(Some(Pid::from_raw_unchecked(4567)))
+        });
+    }
+
+    #[test]
+    fn test_ctors() {
+        use std::num::NonZeroI32;
+        assert!(Pid::from_raw(0).is_none());
+        assert_eq!(
+            Pid::from_raw(77).unwrap().as_raw_nonzero(),
+            NonZeroI32::new(77).unwrap()
+        );
+        assert_eq!(Pid::from_raw(77).unwrap().as_raw_pid(), 77);
+        assert_eq!(Pid::as_raw(Pid::from_raw(77)), 77);
+    }
+
+    #[test]
+    fn test_specials() {
+        assert!(Pid::from_raw(1).unwrap().is_init());
+        assert_eq!(Pid::from_raw(1).unwrap(), Pid::INIT);
+    }
 }

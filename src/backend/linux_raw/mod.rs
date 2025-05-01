@@ -78,11 +78,8 @@ pub(crate) mod thread;
 #[cfg(feature = "time")]
 pub(crate) mod time;
 
-pub(crate) mod fd {
-    pub use crate::maybe_polyfill::os::fd::{
-        AsFd, AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, OwnedFd, RawFd,
-    };
-}
+// Re-export the maybe-polyfill `core::os::fd`.
+pub(crate) use crate::maybe_polyfill::os::fd;
 
 // The linux_raw backend doesn't use actual libc, so we define selected
 // libc-like definitions in a module called `c`.

@@ -13,7 +13,7 @@ use crate::ffi;
 #[cfg(not(fix_y2038))]
 use core::ptr::null;
 
-/// `struct timespec`
+/// `struct timespec`—A quantity of time in seconds plus nanoseconds.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord)]
 #[repr(C)]
 pub struct Timespec {
@@ -338,83 +338,91 @@ pub(crate) fn option_as_libc_timespec_ptr(timespec: Option<&Timespec>) -> *const
 /// [here]: https://github.com/rust-lang/rust/issues/108277#issuecomment-1787057158
 #[cfg(apple)]
 #[inline]
-pub(crate) fn fix_negative_nsecs(secs: &mut i64, mut nsecs: i32) -> i32 {
+pub(crate) fn fix_negative_nsecs(
+    mut secs: c::time_t,
+    mut nsecs: c::c_long,
+) -> (c::time_t, c::c_long) {
     #[cold]
-    fn adjust(secs: &mut i64, nsecs: i32) -> i32 {
+    fn adjust(secs: &mut c::time_t, nsecs: c::c_long) -> c::c_long {
         assert!(nsecs >= -1_000_000_000);
         assert!(*secs < 0);
-        assert!(*secs > i64::MIN);
+        assert!(*secs > c::time_t::MIN);
         *secs -= 1;
         nsecs + 1_000_000_000
     }
 
     if nsecs < 0 {
-        nsecs = adjust(secs, nsecs);
+        nsecs = adjust(&mut secs, nsecs);
     }
-    nsecs
+    (secs, nsecs)
 }
 
-#[cfg(apple)]
-#[test]
-fn test_negative_timestamps() {
-    let mut secs = -59;
-    let mut nsecs = -900_000_000;
-    nsecs = fix_negative_nsecs(&mut secs, nsecs);
-    assert_eq!(secs, -60);
-    assert_eq!(nsecs, 100_000_000);
-    nsecs = fix_negative_nsecs(&mut secs, nsecs);
-    assert_eq!(secs, -60);
-    assert_eq!(nsecs, 100_000_000);
-}
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-#[test]
-fn test_sizes() {
-    assert_eq_size!(Secs, u64);
-    const_assert!(core::mem::size_of::<Timespec>() >= core::mem::size_of::<(u64, u32)>());
-    const_assert!(core::mem::size_of::<Nsecs>() >= 4);
+    #[cfg(apple)]
+    #[test]
+    fn test_negative_timestamps() {
+        let mut secs = -59;
+        let mut nsecs = -900_000_000;
+        (secs, nsecs) = fix_negative_nsecs(secs, nsecs);
+        assert_eq!(secs, -60);
+        assert_eq!(nsecs, 100_000_000);
+        (secs, nsecs) = fix_negative_nsecs(secs, nsecs);
+        assert_eq!(secs, -60);
+        assert_eq!(nsecs, 100_000_000);
+    }
 
-    let mut t = Timespec {
-        tv_sec: 0,
-        tv_nsec: 0,
-    };
+    #[test]
+    fn test_sizes() {
+        assert_eq_size!(Secs, u64);
+        const_assert!(core::mem::size_of::<Timespec>() >= core::mem::size_of::<(u64, u32)>());
+        const_assert!(core::mem::size_of::<Nsecs>() >= 4);
 
-    // `tv_nsec` needs to be able to hold nanoseconds up to a second.
-    t.tv_nsec = 999_999_999_u32 as _;
-    assert_eq!(t.tv_nsec as u64, 999_999_999_u64);
+        let mut t = Timespec {
+            tv_sec: 0,
+            tv_nsec: 0,
+        };
 
-    // `tv_sec` needs to be able to hold more than 32-bits of seconds.
-    t.tv_sec = 0x1_0000_0000_u64 as _;
-    assert_eq!(t.tv_sec as u64, 0x1_0000_0000_u64);
-}
+        // `tv_nsec` needs to be able to hold nanoseconds up to a second.
+        t.tv_nsec = 999_999_999_u32 as _;
+        assert_eq!(t.tv_nsec as u64, 999_999_999_u64);
 
-// Test that our workarounds are needed.
-#[cfg(fix_y2038)]
-#[test]
-#[allow(deprecated)]
-fn test_fix_y2038() {
-    assert_eq_size!(libc::time_t, u32);
-}
+        // `tv_sec` needs to be able to hold more than 32-bits of seconds.
+        t.tv_sec = 0x1_0000_0000_u64 as _;
+        assert_eq!(t.tv_sec as u64, 0x1_0000_0000_u64);
+    }
 
-// Test that our workarounds are not needed.
-#[cfg(not(fix_y2038))]
-#[test]
-fn timespec_layouts() {
-    use crate::backend::c;
-    check_renamed_struct!(Timespec, timespec, tv_sec, tv_nsec);
-}
+    // Test that our workarounds are needed.
+    #[cfg(fix_y2038)]
+    #[test]
+    #[allow(deprecated)]
+    fn test_fix_y2038() {
+        assert_eq_size!(libc::time_t, u32);
+    }
 
-// Test that `Timespec` matches Linux's `__kernel_timespec`.
-#[cfg(linux_kernel)]
-#[test]
-fn test_against_kernel_timespec() {
-    assert_eq_size!(Timespec, linux_raw_sys::general::__kernel_timespec);
-    assert_eq_align!(Timespec, linux_raw_sys::general::__kernel_timespec);
-    assert_eq!(
-        memoffset::span_of!(Timespec, tv_sec),
-        memoffset::span_of!(linux_raw_sys::general::__kernel_timespec, tv_sec)
-    );
-    assert_eq!(
-        memoffset::span_of!(Timespec, tv_nsec),
-        memoffset::span_of!(linux_raw_sys::general::__kernel_timespec, tv_nsec)
-    );
+    // Test that our workarounds are not needed.
+    #[cfg(not(fix_y2038))]
+    #[test]
+    fn timespec_layouts() {
+        use crate::backend::c;
+        check_renamed_struct!(Timespec, timespec, tv_sec, tv_nsec);
+    }
+
+    // Test that `Timespec` matches Linux's `__kernel_timespec`.
+    #[cfg(linux_kernel)]
+    #[test]
+    fn test_against_kernel_timespec() {
+        assert_eq_size!(Timespec, linux_raw_sys::general::__kernel_timespec);
+        assert_eq_align!(Timespec, linux_raw_sys::general::__kernel_timespec);
+        assert_eq!(
+            memoffset::span_of!(Timespec, tv_sec),
+            memoffset::span_of!(linux_raw_sys::general::__kernel_timespec, tv_sec)
+        );
+        assert_eq!(
+            memoffset::span_of!(Timespec, tv_nsec),
+            memoffset::span_of!(linux_raw_sys::general::__kernel_timespec, tv_nsec)
+        );
+    }
 }

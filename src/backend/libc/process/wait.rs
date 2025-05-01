@@ -8,9 +8,10 @@ pub(crate) use c::{
 pub(crate) use c::{WCONTINUED, WUNTRACED};
 
 #[cfg(not(any(
+    target_os = "cygwin",
     target_os = "horizon",
     target_os = "openbsd",
     target_os = "redox",
-    target_os = "wasi"
+    target_os = "wasi",
 )))]
 pub(crate) use c::{WEXITED, WNOWAIT, WSTOPPED};

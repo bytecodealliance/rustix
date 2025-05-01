@@ -60,10 +60,13 @@ bitflags! {
         /// [`Signal::Cont`]: crate::process::Signal::Cont
         const CONTINUED = bitcast!(backend::process::wait::WCONTINUED);
         /// Wait for processed that have exited.
+        #[cfg(not(target_os = "cygwin"))]
         const EXITED = bitcast!(backend::process::wait::WEXITED);
         /// Keep processed in a waitable state.
+        #[cfg(not(target_os = "cygwin"))]
         const NOWAIT = bitcast!(backend::process::wait::WNOWAIT);
         /// Wait for processes that have been stopped.
+        #[cfg(not(target_os = "cygwin"))]
         const STOPPED = bitcast!(backend::process::wait::WSTOPPED);
 
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
@@ -404,24 +407,17 @@ pub enum WaitId<'a> {
 /// `waitpid(pid, waitopts)`—Wait for a specific process to change state.
 ///
 /// If the pid is `None`, the call will wait for any child process whose
-/// process group id matches that of the calling process.
-///
-/// Otherwise, the call will wait for the child process with the given pid.
+/// process group id matches that of the calling process. Otherwise, the call
+/// will wait for the child process with the given pid.
 ///
 /// On Success, returns the status of the selected process.
 ///
 /// If `NOHANG` was specified in the options, and the selected child process
 /// didn't change state, returns `None`.
 ///
-/// # Bugs
-///
-/// This function does not currently support waiting for given process group
-/// (the `< -1` case of `waitpid`); to do that, currently the [`waitpgid`] or
-/// [`waitid`] function must be used.
-///
-/// This function does not currently support waiting for any process (the
-/// `-1` case of `waitpid`); to do that, currently the [`wait`] function must
-/// be used.
+/// To wait for a given process group (the `< -1` case of `waitpid`), use
+/// [`waitpgid`] or [`waitid`]. To wait for any process (the `-1` case of
+/// `waitpid`), use [`wait`].
 ///
 /// # References
 ///  - [POSIX]
@@ -482,10 +478,11 @@ pub fn wait(waitopts: WaitOptions) -> io::Result<Option<(Pid, WaitStatus)>> {
 /// `waitid(_, _, _, opts)`—Wait for the specified child process to change
 /// state.
 #[cfg(not(any(
+    target_os = "cygwin",
     target_os = "horizon",
     target_os = "openbsd",
     target_os = "redox",
-    target_os = "wasi"
+    target_os = "wasi",
 )))]
 #[inline]
 pub fn waitid<'a, Id: Into<WaitId<'a>>>(

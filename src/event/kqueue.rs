@@ -4,6 +4,7 @@ use crate::buffer::Buffer;
 use crate::fd::{AsFd, OwnedFd, RawFd};
 use crate::pid::Pid;
 use crate::signal::Signal;
+use crate::timespec::Timespec;
 use crate::{backend, io};
 
 use backend::c::{self, intptr_t, kevent as kevent_t, uintptr_t};
@@ -330,6 +331,7 @@ bitflags::bitflags! {
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct UserFlags: u32 {
         /// Ignore the user input flags.
+        #[doc(alias = "NOP")]
         const NOINPUT = c::NOTE_FFNOP;
 
         /// Bitwise AND `fflags`.
@@ -397,6 +399,9 @@ pub fn kqueue() -> io::Result<OwnedFd> {
 /// `kevent(kqueue, changelist, eventlist, timeout)`—Wait for events on a
 /// `kqueue`.
 ///
+/// If an unsupported timeout is passed, this function fails with
+/// [`io::Errno::INVAL`].
+///
 /// # Safety
 ///
 /// The file descriptors referred to by the `Event` structs must be valid for
@@ -414,25 +419,48 @@ pub fn kqueue() -> io::Result<OwnedFd> {
 /// [OpenBSD]: https://man.openbsd.org/kevent.2
 /// [NetBSD]: https://man.netbsd.org/kevent.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=kevent&section=2
-pub unsafe fn kevent<Fd: AsFd, Buf: Buffer<Event>>(
+pub unsafe fn kevent_timespec<Fd: AsFd, Buf: Buffer<Event>>(
     kqueue: Fd,
     changelist: &[Event],
     mut eventlist: Buf,
-    timeout: Option<Duration>,
+    timeout: Option<&Timespec>,
 ) -> io::Result<Buf::Output> {
-    let timeout = timeout.map(|timeout| backend::c::timespec {
-        tv_sec: timeout.as_secs() as _,
-        tv_nsec: timeout.subsec_nanos() as _,
-    });
-
     // Populate the event list with events.
-    let len = syscalls::kevent(
-        kqueue.as_fd(),
-        changelist,
-        eventlist.parts_mut(),
-        timeout.as_ref(),
-    )
-    .map(|res| res as _)?;
+    let len = syscalls::kevent(kqueue.as_fd(), changelist, eventlist.parts_mut(), timeout)
+        .map(|res| res as _)?;
 
     Ok(eventlist.assume_init(len))
+}
+
+/// `kevent(kqueue, changelist, eventlist, timeout)`—Wait for events on a
+/// `kqueue`.
+///
+/// This is a wrapper around [`kevent_timespec`] which takes a `Duration`
+/// instead of a `Timespec` for the timemout value. `Timespec` has a signed
+/// `i64` seconds field; if converting `Duration` to `Timespec` overflows,
+/// `None` is passed as the timeout instead, such such a large timeout would
+/// be effectively infinite in practice.
+///
+/// # Safety
+///
+/// The file descriptors referred to by the `Event` structs must be valid for
+/// the lifetime of the `kqueue` file descriptor.
+pub unsafe fn kevent<Fd: AsFd, Buf: Buffer<Event>>(
+    kqueue: Fd,
+    changelist: &[Event],
+    eventlist: Buf,
+    timeout: Option<Duration>,
+) -> io::Result<Buf::Output> {
+    let timeout = match timeout {
+        Some(timeout) => match timeout.as_secs().try_into() {
+            Ok(tv_sec) => Some(Timespec {
+                tv_sec,
+                tv_nsec: timeout.subsec_nanos() as _,
+            }),
+            Err(_) => None,
+        },
+        None => None,
+    };
+
+    kevent_timespec(kqueue, changelist, eventlist, timeout.as_ref())
 }

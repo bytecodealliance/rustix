@@ -52,9 +52,9 @@ building.
 
 ## Cargo features
 
-The modules [`rustix::io`], [`rustix::fd`], [`rustix::ffi`], and
-[`rustix::ioctl`] are enabled by default. The rest of the API modules are
-conditional with cargo feature flags.
+The modules [`rustix::io`], [`rustix::buffer`], [`rustix::fd`],
+[`rustix::ffi`], and [`rustix::ioctl`] are enabled by default. The rest of the
+API modules are conditional with cargo feature flags.
 
 | Name       | Description                                                    |
 | ---------- | -------------------------------------------------------------- |
@@ -88,6 +88,7 @@ conditional with cargo feature flags.
 | `std`      | On by default; disable to activate `#![no_std]`.               |
 | `alloc`    | On by default; enables features that depend on [`alloc`].      |
 
+[`rustix::buffer`]: https://docs.rs/rustix/*/rustix/buffer/index.html
 [`rustix::event`]: https://docs.rs/rustix/*/rustix/event/index.html
 [`rustix::fs`]: https://docs.rs/rustix/*/rustix/fs/index.html
 [`rustix::io_uring`]: https://docs.rs/rustix/*/rustix/io_uring/index.html

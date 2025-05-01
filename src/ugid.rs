@@ -27,7 +27,7 @@ impl Uid {
     /// `raw` must be the value of a valid Unix user ID, and not `-1`.
     #[inline]
     pub fn from_raw(raw: RawUid) -> Self {
-        debug_assert_ne!(raw, -1 as _);
+        debug_assert_ne!(raw, !0);
         Self(raw)
     }
 
@@ -45,7 +45,7 @@ impl Uid {
         self.0
     }
 
-    /// Test whether this uid represents the root user (uid 0).
+    /// Test whether this uid represents the root user ([`Uid::ROOT`]).
     #[inline]
     pub const fn is_root(self) -> bool {
         self.0 == Self::ROOT.0
@@ -61,7 +61,7 @@ impl Gid {
     /// `raw` must be the value of a valid Unix group ID, and not `-1`.
     #[inline]
     pub fn from_raw(raw: RawGid) -> Self {
-        debug_assert_ne!(raw, -1 as _);
+        debug_assert_ne!(raw, !0);
         Self(raw)
     }
 
@@ -79,7 +79,7 @@ impl Gid {
         self.0
     }
 
-    /// Test whether this gid represents the root group (gid 0).
+    /// Test whether this gid represents the root group ([`Gid::ROOT`]).
     #[inline]
     pub const fn is_root(self) -> bool {
         self.0 == Self::ROOT.0
@@ -105,10 +105,15 @@ pub(crate) fn translate_fchown_args(
     (ow as c::uid_t, gr as c::gid_t)
 }
 
-#[test]
-fn test_sizes() {
-    assert_eq_size!(RawUid, u32);
-    assert_eq_size!(RawGid, u32);
-    assert_eq_size!(RawUid, libc::uid_t);
-    assert_eq_size!(RawGid, libc::gid_t);
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_sizes() {
+        assert_eq_size!(RawUid, u32);
+        assert_eq_size!(RawGid, u32);
+        assert_eq_size!(RawUid, libc::uid_t);
+        assert_eq_size!(RawGid, libc::gid_t);
+    }
 }

@@ -1,6 +1,7 @@
 #[cfg(not(target_os = "redox"))]
+#[cfg(not(target_os = "cygwin"))]
 #[test]
-fn negative_file_timetamp() {
+fn negative_file_timestamp() {
     use rustix::fs::{
         fstat, futimens, lstat, open, stat, statat, AtFlags, Mode, OFlags, Timespec, Timestamps,
         CWD,

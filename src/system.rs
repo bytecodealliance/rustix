@@ -54,13 +54,13 @@ pub fn uname() -> Uname {
 pub struct Uname(backend::system::types::RawUname);
 
 impl Uname {
-    /// `sysname`—Operating system release name
+    /// `sysname`—Operating system release name.
     #[inline]
     pub fn sysname(&self) -> &CStr {
         Self::to_cstr(self.0.sysname.as_ptr().cast())
     }
 
-    /// `nodename`—Name with vague meaning
+    /// `nodename`—Name with vague meaning.
     ///
     /// This is intended to be a network name, however it's unable to convey
     /// information about hosts that have multiple names, or any information
@@ -72,25 +72,25 @@ impl Uname {
         Self::to_cstr(self.0.nodename.as_ptr().cast())
     }
 
-    /// `release`—Operating system release version string
+    /// `release`—Operating system release version string.
     #[inline]
     pub fn release(&self) -> &CStr {
         Self::to_cstr(self.0.release.as_ptr().cast())
     }
 
-    /// `version`—Operating system build identifiers
+    /// `version`—Operating system build identifiers.
     #[inline]
     pub fn version(&self) -> &CStr {
         Self::to_cstr(self.0.version.as_ptr().cast())
     }
 
-    /// `machine`—Hardware architecture identifier
+    /// `machine`—Hardware architecture identifier.
     #[inline]
     pub fn machine(&self) -> &CStr {
         Self::to_cstr(self.0.machine.as_ptr().cast())
     }
 
-    /// `domainname`—NIS or YP domain identifier
+    /// `domainname`—NIS or YP domain identifier.
     #[cfg(linux_kernel)]
     #[inline]
     pub fn domainname(&self) -> &CStr {
@@ -174,6 +174,7 @@ pub fn sethostname(name: &[u8]) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/setdomainname.2.html
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=setdomainname&sektion=3
 #[cfg(not(any(
+    target_os = "cygwin",
     target_os = "emscripten",
     target_os = "espidf",
     target_os = "haiku",
@@ -182,7 +183,7 @@ pub fn sethostname(name: &[u8]) -> io::Result<()> {
     target_os = "redox",
     target_os = "solaris",
     target_os = "vita",
-    target_os = "wasi"
+    target_os = "wasi",
 )))]
 #[inline]
 pub fn setdomainname(name: &[u8]) -> io::Result<()> {
@@ -197,9 +198,11 @@ pub fn setdomainname(name: &[u8]) -> io::Result<()> {
 pub enum RebootCommand {
     /// Disables the Ctrl-Alt-Del keystroke.
     ///
-    /// When disabled, the keystroke will send a [`Signal::INT`] to pid 1.
+    /// When disabled, the keystroke will send a [`Signal::INT`] to
+    /// [`Pid::INIT`].
     ///
     /// [`Signal::INT`]: crate::process::Signal::INT
+    /// [`Pid::INIT`]: crate::process::Pid::INIT
     CadOff = c::LINUX_REBOOT_CMD_CAD_OFF,
     /// Enables the Ctrl-Alt-Del keystroke.
     ///

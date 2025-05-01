@@ -518,3 +518,70 @@ pub(crate) use __fsid_t as fsid_t;
 #[cfg(feature = "mm")]
 #[cfg(target_os = "android")]
 pub(crate) const MAP_DROPPABLE: c_int = bitcast!(linux_raw_sys::general::MAP_DROPPABLE);
+
+// FreeBSD added `timerfd_*` in FreeBSD 14. NetBSD added then in NetBSD 10.
+#[cfg(all(feature = "time", any(target_os = "freebsd", target_os = "netbsd")))]
+syscall!(pub(crate) fn timerfd_create(
+    clockid: c_int,
+    flags: c_int
+) via SYS_timerfd_create -> c_int);
+#[cfg(all(feature = "time", any(target_os = "freebsd", target_os = "netbsd")))]
+syscall!(pub(crate) fn timerfd_gettime(
+    fd: c_int,
+    curr_value: *mut itimerspec
+) via SYS_timerfd_gettime -> c_int);
+#[cfg(all(feature = "time", any(target_os = "freebsd", target_os = "netbsd")))]
+syscall!(pub(crate) fn timerfd_settime(
+    fd: c_int,
+    flags: c_int,
+    new_value: *const itimerspec,
+    old_value: *mut itimerspec
+) via SYS_timerfd_settime -> c_int);
+
+#[cfg(all(feature = "time", target_os = "illumos"))]
+extern "C" {
+    pub(crate) fn timerfd_create(clockid: c_int, flags: c_int) -> c_int;
+    pub(crate) fn timerfd_gettime(fd: c_int, curr_value: *mut itimerspec) -> c_int;
+    pub(crate) fn timerfd_settime(
+        fd: c_int,
+        flags: c_int,
+        new_value: *const itimerspec,
+        old_value: *mut itimerspec,
+    ) -> c_int;
+}
+
+// illumos and NetBSD timerfd support.
+// Submitted upstream in <https://github.com/rust-lang/libc/pull/4333>.
+
+// <https://code.illumos.org/plugins/gitiles/illumos-gate/+/refs/heads/master/usr/src/uts/common/sys/timerfd.h#34>
+#[cfg(all(feature = "time", target_os = "illumos"))]
+pub(crate) const TFD_CLOEXEC: i32 = 0o2000000;
+#[cfg(all(feature = "time", target_os = "illumos"))]
+pub(crate) const TFD_NONBLOCK: i32 = 0o4000;
+#[cfg(all(feature = "time", target_os = "illumos"))]
+pub(crate) const TFD_TIMER_ABSTIME: i32 = 1 << 0;
+#[cfg(all(feature = "time", target_os = "illumos"))]
+pub(crate) const TFD_TIMER_CANCEL_ON_SET: i32 = 1 << 1;
+
+// <https://nxr.netbsd.org/xref/src/sys/sys/timerfd.h#44>
+#[cfg(all(feature = "time", target_os = "netbsd"))]
+pub(crate) const TFD_CLOEXEC: i32 = O_CLOEXEC;
+#[cfg(all(feature = "time", target_os = "netbsd"))]
+pub(crate) const TFD_NONBLOCK: i32 = O_NONBLOCK;
+#[cfg(all(feature = "time", target_os = "netbsd"))]
+pub(crate) const TFD_TIMER_ABSTIME: i32 = O_WRONLY;
+#[cfg(all(feature = "time", target_os = "netbsd"))]
+pub(crate) const TFD_TIMER_CANCEL_ON_SET: i32 = O_RDWR;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    #[cfg(linux_kernel)]
+    fn test_flags() {
+        // libc may publicly define `O_LARGEFILE` to 0, but we want the real
+        // non-zero value.
+        assert_ne!(O_LARGEFILE, 0);
+    }
+}

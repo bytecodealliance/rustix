@@ -52,9 +52,8 @@ pub(crate) unsafe fn pread(
     // Silently cast; we'll get `EINVAL` if the value is negative.
     let offset = offset as i64;
 
-    // ESP-IDF and Vita don't support 64-bit offsets.
-    #[cfg(any(target_os = "espidf", target_os = "vita"))]
-    let offset: i32 = offset.try_into().map_err(|_| io::Errno::OVERFLOW)?;
+    // ESP-IDF and Vita don't support 64-bit offsets, for example.
+    let offset = offset.try_into().map_err(|_| io::Errno::OVERFLOW)?;
 
     ret_usize(c::pread(borrowed_fd(fd), buf.0.cast(), len, offset))
 }
@@ -65,9 +64,8 @@ pub(crate) fn pwrite(fd: BorrowedFd<'_>, buf: &[u8], offset: u64) -> io::Result<
     // Silently cast; we'll get `EINVAL` if the value is negative.
     let offset = offset as i64;
 
-    // ESP-IDF and Vita don't support 64-bit offsets.
-    #[cfg(any(target_os = "espidf", target_os = "vita"))]
-    let offset: i32 = offset.try_into().map_err(|_| io::Errno::OVERFLOW)?;
+    // ESP-IDF and Vita don't support 64-bit offsets, for example.
+    let offset = offset.try_into().map_err(|_| io::Errno::OVERFLOW)?;
 
     unsafe { ret_usize(c::pwrite(borrowed_fd(fd), buf.as_ptr().cast(), len, offset)) }
 }
@@ -95,13 +93,14 @@ pub(crate) fn writev(fd: BorrowedFd<'_>, bufs: &[IoSlice<'_>]) -> io::Result<usi
 }
 
 #[cfg(not(any(
+    target_os = "cygwin",
     target_os = "espidf",
     target_os = "haiku",
     target_os = "horizon",
     target_os = "nto",
     target_os = "redox",
     target_os = "solaris",
-    target_os = "vita"
+    target_os = "vita",
 )))]
 pub(crate) fn preadv(
     fd: BorrowedFd<'_>,
@@ -110,6 +109,10 @@ pub(crate) fn preadv(
 ) -> io::Result<usize> {
     // Silently cast; we'll get `EINVAL` if the value is negative.
     let offset = offset as i64;
+
+    // ESP-IDF and Vita don't support 64-bit offsets, for example.
+    let offset = offset.try_into().map_err(|_| io::Errno::OVERFLOW)?;
+
     unsafe {
         ret_usize(c::preadv(
             borrowed_fd(fd),
@@ -121,17 +124,22 @@ pub(crate) fn preadv(
 }
 
 #[cfg(not(any(
+    target_os = "cygwin",
     target_os = "espidf",
     target_os = "haiku",
     target_os = "nto",
     target_os = "horizon",
     target_os = "redox",
     target_os = "solaris",
-    target_os = "vita"
+    target_os = "vita",
 )))]
 pub(crate) fn pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice<'_>], offset: u64) -> io::Result<usize> {
     // Silently cast; we'll get `EINVAL` if the value is negative.
     let offset = offset as i64;
+
+    // ESP-IDF and Vita don't support 64-bit offsets, for example.
+    let offset = offset.try_into().map_err(|_| io::Errno::OVERFLOW)?;
+
     unsafe {
         ret_usize(c::pwritev(
             borrowed_fd(fd),
