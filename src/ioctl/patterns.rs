@@ -57,7 +57,7 @@ unsafe impl<const OPCODE: Opcode> Ioctl for NoArg<OPCODE> {
 /// To compute a value for the `OPCODE` argument, see the functions in the
 /// [`opcode`] module.
 ///
-/// [`opcode`]: rustix::ioctl::opcode
+/// [`opcode`]: crate::ioctl::opcode
 pub struct NoArgGetter<const OPCODE: Opcode> {}
 impl<const OPCODE: Opcode> fmt::Debug for NoArgGetter<OPCODE> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

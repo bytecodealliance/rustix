@@ -74,31 +74,41 @@ bitflags! {
     }
 }
 
-bitflags! {
-    /// Thread name space type.
-    #[deprecated(since = "1.1.0", note = "Use NamespaceType instead")]
-    #[repr(transparent)]
-    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
-    pub struct ThreadNameSpaceType: u32 {
-        /// Time name space.
-        const TIME = CLONE_NEWTIME;
-        /// Mount name space.
-        const MOUNT = CLONE_NEWNS;
-        /// Control group (CGroup) name space.
-        const CONTROL_GROUP = CLONE_NEWCGROUP;
-        /// `Host name` and `NIS domain name` (UTS) name space.
-        const HOST_NAME_AND_NIS_DOMAIN_NAME = CLONE_NEWUTS;
-        /// Inter-process communication (IPC) name space.
-        const INTER_PROCESS_COMMUNICATION = CLONE_NEWIPC;
-        /// User name space.
-        const USER = CLONE_NEWUSER;
-        /// Process ID name space.
-        const PROCESS_ID = CLONE_NEWPID;
-        /// Network name space.
-        const NETWORK = CLONE_NEWNET;
+pub use allow_deprecated_workaround::*;
+mod allow_deprecated_workaround {
+    #![allow(deprecated)]
 
-        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
-        const _ = !0;
+    use linux_raw_sys::general::{
+        CLONE_NEWCGROUP, CLONE_NEWIPC, CLONE_NEWNET, CLONE_NEWNS, CLONE_NEWPID, CLONE_NEWTIME,
+        CLONE_NEWUSER, CLONE_NEWUTS,
+    };
+
+    bitflags::bitflags! {
+        /// Thread name space type.
+        #[deprecated(since = "1.1.0", note = "Use NamespaceType instead")]
+        #[repr(transparent)]
+        #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+        pub struct ThreadNameSpaceType: u32 {
+            /// Time name space.
+            const TIME = CLONE_NEWTIME;
+            /// Mount name space.
+            const MOUNT = CLONE_NEWNS;
+            /// Control group (CGroup) name space.
+            const CONTROL_GROUP = CLONE_NEWCGROUP;
+            /// `Host name` and `NIS domain name` (UTS) name space.
+            const HOST_NAME_AND_NIS_DOMAIN_NAME = CLONE_NEWUTS;
+            /// Inter-process communication (IPC) name space.
+            const INTER_PROCESS_COMMUNICATION = CLONE_NEWIPC;
+            /// User name space.
+            const USER = CLONE_NEWUSER;
+            /// Process ID name space.
+            const PROCESS_ID = CLONE_NEWPID;
+            /// Network name space.
+            const NETWORK = CLONE_NEWNET;
+
+            /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
+            const _ = !0;
+        }
     }
 }
 
