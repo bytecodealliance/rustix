@@ -105,8 +105,13 @@ pub fn set_thread_uid(uid: Uid) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/setresuid.2.html
 /// [linux_notes]: https://man7.org/linux/man-pages/man2/setresuid.2.html#NOTES
 #[inline]
-pub fn set_thread_res_uid(ruid: Uid, euid: Uid, suid: Uid) -> io::Result<()> {
-    backend::thread::syscalls::setresuid_thread(ruid, euid, suid)
+pub fn set_thread_res_uid<R, E, S>(ruid: R, euid: E, suid: S) -> io::Result<()>
+where
+    R: Into<Option<Uid>>,
+    E: Into<Option<Uid>>,
+    S: Into<Option<Uid>>,
+{
+    backend::thread::syscalls::setresuid_thread(ruid.into(), euid.into(), suid.into())
 }
 
 /// `setgid(gid)`—Sets the effective group ID of the current thread.
@@ -154,8 +159,13 @@ pub fn set_thread_gid(gid: Gid) -> io::Result<()> {
 /// [Linux]: https://man7.org/linux/man-pages/man2/setresgid.2.html
 /// [linux_notes]: https://man7.org/linux/man-pages/man2/setresgid.2.html#NOTES
 #[inline]
-pub fn set_thread_res_gid(rgid: Gid, egid: Gid, sgid: Gid) -> io::Result<()> {
-    backend::thread::syscalls::setresgid_thread(rgid, egid, sgid)
+pub fn set_thread_res_gid<R, E, S>(rgid: R, egid: E, sgid: S) -> io::Result<()>
+where
+    R: Into<Option<Gid>>,
+    E: Into<Option<Gid>>,
+    S: Into<Option<Gid>>,
+{
+    backend::thread::syscalls::setresgid_thread(rgid.into(), egid.into(), sgid.into())
 }
 
 /// `setgroups(groups)`—Sets the supplementary group IDs for the calling
