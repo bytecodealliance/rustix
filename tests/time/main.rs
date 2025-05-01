@@ -14,7 +14,13 @@ mod monotonic;
     all(apple, not(target_os = "macos"))
 )))]
 mod settime;
-#[cfg(linux_kernel)]
+#[cfg(any(
+    linux_kernel,
+    target_os = "freebsd",
+    target_os = "fuchsia",
+    target_os = "illumos",
+    target_os = "netbsd"
+))]
 mod timerfd;
 mod timespec;
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
