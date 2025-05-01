@@ -367,6 +367,12 @@ mod statx_flags {
         STATX_ATTR_VERITY,
     };
 }
+#[cfg(feature = "thread")]
+pub(crate) use linux_raw_sys::ptrace::{
+    sock_filter, sock_fprog, SECCOMP_FILTER_FLAG_LOG, SECCOMP_FILTER_FLAG_NEW_LISTENER,
+    SECCOMP_FILTER_FLAG_SPEC_ALLOW, SECCOMP_FILTER_FLAG_TSYNC, SECCOMP_FILTER_FLAG_TSYNC_ESRCH,
+    SECCOMP_FILTER_FLAG_WAIT_KILLABLE_RECV,
+};
 #[cfg(any(
     feature = "fs",
     all(
