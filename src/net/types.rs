@@ -752,7 +752,7 @@ impl AddressFamily {
     #[cfg(apple)]
     pub const UTUN: Self = Self(c::AF_UTUN as _);
     /// `AF_VSOCK`
-    #[cfg(any(apple, target_os = "emscripten", target_os = "fuchsia"))]
+    #[cfg(any(apple, linux_kernel, target_os = "emscripten", target_os = "fuchsia"))]
     pub const VSOCK: Self = Self(c::AF_VSOCK as _);
     /// `AF_XDP`
     #[cfg(target_os = "linux")]
