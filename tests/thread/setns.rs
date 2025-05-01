@@ -8,6 +8,7 @@ use rustix::thread::*;
 
 #[test]
 #[ignore = "Requires CAP_SYS_ADMIN capability"]
+#[allow(deprecated)]
 fn test_move_into_link_name_space() {
     let f = File::open("/proc/self/ns/uts").unwrap();
 
@@ -21,6 +22,7 @@ fn test_move_into_link_name_space() {
 #[test]
 #[ignore = "Requires CAP_SYS_ADMIN capability"]
 #[cfg(not(target_os = "android"))] // Android libc bindings don't have `SYS_pidfd_open` yet.
+#[allow(deprecated)]
 fn test_move_into_thread_name_spaces() {
     let fd = unsafe { libc::syscall(libc::SYS_pidfd_open, std::process::id() as usize, 0_usize) };
     if fd == -1 {
