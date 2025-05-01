@@ -52,6 +52,50 @@ unsafe impl<const OPCODE: Opcode> Ioctl for NoArg<OPCODE> {
     }
 }
 
+/// Implements an `ioctl` with no real arguments.
+///
+/// To compute a value for the `OPCODE` argument, see the functions in the
+/// [`opcode`] module.
+///
+/// [`opcode`]: crate::ioctl::opcode
+pub struct NoArgGetter<const OPCODE: Opcode> {}
+impl<const OPCODE: Opcode> fmt::Debug for NoArgGetter<OPCODE> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_tuple("NoArgGetter").field(&OPCODE).finish()
+    }
+}
+impl<const OPCODE: Opcode> NoArgGetter<OPCODE> {
+    /// Create a new no-argument-getter `ioctl` object.
+    ///
+    /// # Safety
+    ///
+    /// - `OPCODE` must provide a valid opcode.
+    #[inline]
+    pub const unsafe fn new() -> Self {
+        Self {}
+    }
+}
+unsafe impl<const OPCODE: Opcode> Ioctl for NoArgGetter<OPCODE> {
+    type Output = IoctlOutput;
+
+    const IS_MUTATING: bool = false;
+
+    fn opcode(&self) -> self::Opcode {
+        OPCODE
+    }
+
+    fn as_ptr(&mut self) -> *mut core::ffi::c_void {
+        core::ptr::null_mut()
+    }
+
+    unsafe fn output_from_ptr(
+        output: IoctlOutput,
+        _: *mut core::ffi::c_void,
+    ) -> Result<Self::Output> {
+        Ok(output)
+    }
+}
+
 /// Implements the traditional “getter” pattern for `ioctl`s.
 ///
 /// Some `ioctl`s just read data into the userspace. As this is a popular
