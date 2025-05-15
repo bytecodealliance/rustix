@@ -259,6 +259,7 @@ check-cfg = [
     'cfg(linux_kernel)',
     'cfg(linux_like)',
     'cfg(linux_raw)',
+    'cfg(lower_upper_exp_for_non_zero)',
     'cfg(netbsdlike)',
     'cfg(rustc_attrs)',
     'cfg(solarish)',
