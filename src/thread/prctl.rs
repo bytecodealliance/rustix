@@ -21,6 +21,7 @@ use crate::backend::prctl::syscalls;
 use crate::ffi::CString;
 use crate::ffi::{c_int, c_uint, c_void, CStr};
 use crate::io;
+use crate::io::Errno;
 use crate::pid::Pid;
 use crate::prctl::{
     prctl_1arg, prctl_2args, prctl_3args, prctl_get_at_arg2_optional, PointerAuthenticationKeys,
@@ -464,13 +465,14 @@ impl CompatCapability for CapabilitySet {
 /// [`prctl(PR_CAPBSET_READ,…)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
 pub fn capability_is_in_bounding_set(capability: impl CompatCapability) -> io::Result<bool> {
-    unsafe {
-        prctl_2args(
-            PR_CAPBSET_READ,
-            capability.as_capability_set(private::Token).bits() as usize as *mut _,
-        )
+    let capset = capability.as_capability_set(private::Token).bits();
+    if capset.count_ones() != 1 {
+        return Err(Errno::INVAL);
     }
-    .map(|r| r != 0)
+    let cap = capset.trailing_zeros();
+
+    // as *mut _ should be ptr::without_provenance_mut but our MSRV does not allow it.
+    unsafe { prctl_2args(PR_CAPBSET_READ, cap as usize as *mut _) }.map(|r| r != 0)
 }
 
 const PR_CAPBSET_DROP: c_int = 24;
@@ -485,13 +487,14 @@ const PR_CAPBSET_DROP: c_int = 24;
 /// [`prctl(PR_CAPBSET_DROP,…)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
 pub fn remove_capability_from_bounding_set(capability: impl CompatCapability) -> io::Result<()> {
-    unsafe {
-        prctl_2args(
-            PR_CAPBSET_DROP,
-            capability.as_capability_set(private::Token).bits() as usize as *mut _,
-        )
+    let capset = capability.as_capability_set(private::Token).bits();
+    if capset.count_ones() != 1 {
+        return Err(Errno::INVAL);
     }
-    .map(|_r| ())
+    let cap = capset.trailing_zeros();
+
+    // as *mut _ should be ptr::without_provenance_mut but our MSRV does not allow it.
+    unsafe { prctl_2args(PR_CAPBSET_DROP, cap as usize as *mut _) }.map(|_r| ())
 }
 
 //
@@ -693,8 +696,21 @@ const PR_CAP_AMBIENT_IS_SET: usize = 1;
 /// [`prctl(PR_CAP_AMBIENT,PR_CAP_AMBIENT_IS_SET,…)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
 pub fn capability_is_in_ambient_set(capability: impl CompatCapability) -> io::Result<bool> {
-    let cap = capability.as_capability_set(private::Token).bits() as usize as *mut _;
-    unsafe { prctl_3args(PR_CAP_AMBIENT, PR_CAP_AMBIENT_IS_SET as *mut _, cap) }.map(|r| r != 0)
+    let capset = capability.as_capability_set(private::Token).bits();
+    if capset.count_ones() != 1 {
+        return Err(Errno::INVAL);
+    }
+    let cap = capset.trailing_zeros();
+
+    unsafe {
+        prctl_3args(
+            PR_CAP_AMBIENT,
+            PR_CAP_AMBIENT_IS_SET as *mut _,
+            // as *mut _ should be ptr::without_provenance_mut but our MSRV does not allow it.
+            cap as usize as *mut _,
+        )
+    }
+    .map(|r| r != 0)
 }
 
 const PR_CAP_AMBIENT_CLEAR_ALL: usize = 4;
@@ -729,9 +745,21 @@ pub fn configure_capability_in_ambient_set(
     } else {
         PR_CAP_AMBIENT_LOWER
     };
-    let cap = capability.as_capability_set(private::Token).bits() as usize as *mut _;
+    let capset = capability.as_capability_set(private::Token).bits();
+    if capset.count_ones() != 1 {
+        return Err(Errno::INVAL);
+    }
+    let cap = capset.trailing_zeros();
 
-    unsafe { prctl_3args(PR_CAP_AMBIENT, sub_operation as *mut _, cap) }.map(|_r| ())
+    unsafe {
+        prctl_3args(
+            PR_CAP_AMBIENT,
+            sub_operation as *mut _,
+            // as *mut _ should be ptr::without_provenance_mut but our MSRV does not allow it.
+            cap as usize as *mut _,
+        )
+    }
+    .map(|_r| ())
 }
 
 //
