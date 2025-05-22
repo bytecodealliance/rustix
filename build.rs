@@ -79,6 +79,11 @@ fn main() {
         use_feature("static_assertions");
     }
 
+    // `LowerExp`/`UpperExp` for `NonZeroI32` etc.
+    if has_lower_upper_exp_for_non_zero() {
+        use_feature("lower_upper_exp_for_non_zero");
+    }
+
     // WASI support can utilize wasi_ext if present.
     if os == "wasi" {
         use_feature_or_nothing("wasi_ext");
@@ -186,6 +191,12 @@ fn use_static_assertions() -> bool {
 fn use_thumb_mode() -> bool {
     // In thumb mode, r7 is reserved.
     !can_compile("pub unsafe fn f() { core::arch::asm!(\"udf #16\", in(\"r7\") 0); }")
+}
+
+fn has_lower_upper_exp_for_non_zero() -> bool {
+    // LowerExp/UpperExp for NonZero* were added in Rust 1.84.
+    // <https://doc.rust-lang.org/stable/std/fmt/trait.LowerExp.html#impl-LowerExp-for-NonZero%3CT%3E>
+    can_compile("fn a(x: &core::num::NonZeroI32, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result { core::fmt::LowerExp::fmt(x, f) }")
 }
 
 fn use_feature_or_nothing(feature: &str) {
