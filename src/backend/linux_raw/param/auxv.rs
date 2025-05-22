@@ -403,14 +403,6 @@ unsafe fn init_from_aux_iter(aux_iter: impl Iterator<Item = Elf_auxv_t>) -> Opti
             AT_EXECFN => execfn = check_raw_pointer::<c::c_char>(a_val as *mut _)?.as_ptr(),
             AT_SYSINFO_EHDR => sysinfo_ehdr = check_elf_base(a_val as *mut _)?.as_ptr(),
 
-            AT_BASE => {
-                // The `AT_BASE` value can be null in a static executable that
-                // doesn't use a dynamic linker. If so, ignore it.
-                if !a_val.is_null() {
-                    let _ = check_elf_base(a_val.cast())?;
-                }
-            }
-
             #[cfg(feature = "runtime")]
             AT_SECURE => secure = (a_val as usize != 0) as u8 + 1,
             #[cfg(feature = "runtime")]
