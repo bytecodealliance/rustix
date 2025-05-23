@@ -44,7 +44,7 @@ pub struct Statx {
     pub stx_atomic_write_unit_min: u32,
     pub stx_atomic_write_unit_max: u32,
     pub stx_atomic_write_segments_max: u32,
-    pub(crate) __spare1: [u32; 1],
+    pub stx_dio_read_offset_align: u32,
     pub(crate) __spare3: [u64; 9],
 }
 
@@ -114,6 +114,15 @@ bitflags! {
         /// `STATX_DIOALIGN` (since Linux 6.1)
         const DIOALIGN = c::STATX_DIOALIGN;
 
+        /// `STATX_MNT_ID_UNIQUE` (since Linux 6.8)
+        const MNT_ID_UNIQUE = c::STATX_MNT_ID_UNIQUE;
+
+        /// `STATX_SUBVOL` (since Linux 6.10)
+        const SUBVOL = c::STATX_SUBVOL;
+
+        /// `STATX_WRITE_ATOMIC ` (since Linux 6.11)
+        const WRITE_ATOMIC = c::STATX_WRITE_ATOMIC;
+
         /// `STATX_ALL`
         const ALL = c::STATX_ALL;
 
@@ -153,6 +162,9 @@ bitflags! {
 
         /// `STATX_ATTR_DAX`
         const DAX = c::STATX_ATTR_DAX as u64;
+
+        /// `STATX_ATTR_WRITE_ATOMIC`
+        const WRITE_ATOMIC = c::STATX_ATTR_WRITE_ATOMIC as u64;
 
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
