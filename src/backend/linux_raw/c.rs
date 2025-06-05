@@ -286,11 +286,11 @@ pub(crate) const SIGSYS: c_int = linux_raw_sys::general::SIGSYS as _;
 ))]
 pub(crate) const SIGEMT: c_int = linux_raw_sys::general::SIGEMT as _;
 
-#[cfg(feature = "stdio")]
+#[cfg(any(test, feature = "stdio"))]
 pub(crate) const STDIN_FILENO: c_int = linux_raw_sys::general::STDIN_FILENO as _;
-#[cfg(feature = "stdio")]
+#[cfg(any(test, feature = "stdio"))]
 pub(crate) const STDOUT_FILENO: c_int = linux_raw_sys::general::STDOUT_FILENO as _;
-#[cfg(feature = "stdio")]
+#[cfg(any(test, feature = "stdio"))]
 pub(crate) const STDERR_FILENO: c_int = linux_raw_sys::general::STDERR_FILENO as _;
 
 pub(crate) const PIPE_BUF: usize = linux_raw_sys::general::PIPE_BUF as _;
