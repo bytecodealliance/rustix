@@ -684,6 +684,34 @@ fn test_unix_peercred() {
     };
 }
 
+#[cfg(all(
+    feature = "process",
+    feature = "net",
+    linux_kernel,
+    not(target_os = "android")
+))]
+#[test]
+fn test_unix_peerpidfd() {
+    use rustix::net::{sockopt, AddressFamily, SocketFlags, SocketType};
+    use rustix::process::PidfdFlags;
+
+    let (send_sock, _recv_sock) = rustix::net::socketpair(
+        AddressFamily::UNIX,
+        SocketType::STREAM,
+        SocketFlags::CLOEXEC,
+        None,
+    )
+    .unwrap();
+    let pidfd = sockopt::socket_peerpidfd(&send_sock).unwrap();
+    let own_pidfd =
+        rustix::process::pidfd_open(rustix::process::getpid(), PidfdFlags::empty()).unwrap();
+    // Two pidfds refer to the same process iff their `st_ino` values are the same.
+    assert_eq!(
+        rustix::fs::fstat(pidfd).unwrap().st_ino,
+        rustix::fs::fstat(own_pidfd).unwrap().st_ino
+    )
+}
+
 /// Like `test_unix_msg_with_scm_rights`, but with multiple file descriptors
 /// over multiple control messages.
 #[cfg(not(any(target_os = "redox", target_os = "wasi")))]
