@@ -22,10 +22,12 @@ use crate::net::{
 use alloc::borrow::ToOwned as _;
 #[cfg(feature = "alloc")]
 use alloc::string::String;
+#[cfg(feature = "alloc")]
+use alloc::vec::Vec;
 use core::mem::{size_of, MaybeUninit};
 use core::time::Duration;
 use linux_raw_sys::general::{__kernel_old_timeval, __kernel_sock_timeval};
-use linux_raw_sys::net::{IPV6_MTU, IPV6_MULTICAST_IF, IP_MTU, IP_MULTICAST_IF};
+use linux_raw_sys::net::{IPV6_MTU, IPV6_MULTICAST_IF, IP_MTU, IP_MULTICAST_IF, SO_BINDTODEVICE};
 #[cfg(target_os = "linux")]
 use linux_raw_sys::xdp::{xdp_mmap_offsets, xdp_statistics, xdp_statistics_v1};
 #[cfg(target_arch = "x86")]
@@ -430,6 +432,28 @@ pub(crate) fn socket_incoming_cpu(fd: BorrowedFd<'_>) -> io::Result<u32> {
 #[inline]
 pub(crate) fn set_socket_incoming_cpu(fd: BorrowedFd<'_>, value: u32) -> io::Result<()> {
     setsockopt(fd, c::SOL_SOCKET, c::SO_INCOMING_CPU, value)
+}
+
+#[cfg(feature = "alloc")]
+#[inline]
+pub(crate) fn socket_bind_device(fd: BorrowedFd<'_>) -> io::Result<Vec<u8>> {
+    let mut value = MaybeUninit::<[MaybeUninit<u8>; 16]>::uninit();
+    let mut optlen = 16;
+    getsockopt_raw(fd, c::SOL_SOCKET, SO_BINDTODEVICE, &mut value, &mut optlen)?;
+    unsafe {
+        let value = value.assume_init();
+        let slice: &[u8] = core::mem::transmute(&value[..optlen as usize]);
+        assert!(slice.contains(&b'\0'));
+        Ok(slice[..optlen as usize - 1].to_vec())
+    }
+}
+
+#[inline]
+pub(crate) fn set_socket_bind_device(
+    fd: BorrowedFd<'_>,
+    interface: Option<&[u8]>,
+) -> io::Result<()> {
+    setsockopt(fd, c::SOL_SOCKET, SO_BINDTODEVICE, interface.unwrap_or(&[]))
 }
 
 #[inline]
