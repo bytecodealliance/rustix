@@ -78,8 +78,6 @@ use core::mem::{size_of, MaybeUninit};
 use core::time::Duration;
 #[cfg(target_os = "linux")]
 use linux_raw_sys::xdp::{xdp_mmap_offsets, xdp_statistics, xdp_statistics_v1};
-#[cfg(windows)]
-use windows_sys::Win32::Foundation::BOOL;
 
 #[inline]
 fn getsockopt<T: Copy>(fd: BorrowedFd<'_>, level: i32, optname: i32) -> io::Result<T> {
@@ -1306,10 +1304,11 @@ fn to_ipv6mr_interface(interface: u32) -> c::c_uint {
 }
 
 // `getsockopt` and `setsockopt` represent boolean values as integers.
-#[cfg(not(windows))]
+//
+// On Windows, this should use `BOOL`, however windows-sys moved its `BOOL`
+// from `windows_sys::Win32::Foundation::BOOL` to `windows_sys::core::BOOL`
+// in windows-sys 0.60, and we'd prefer
 type RawSocketBool = c::c_int;
-#[cfg(windows)]
-type RawSocketBool = BOOL;
 
 // Wrap `RawSocketBool` in a newtype to discourage misuse.
 #[repr(transparent)]
