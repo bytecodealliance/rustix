@@ -842,11 +842,27 @@ impl<'a, Num: ArgNumber> From<crate::ugid::Uid> for ArgReg<'a, Num> {
     }
 }
 
+#[cfg(feature = "thread")]
+impl<'a, Num: ArgNumber> From<Option<crate::ugid::Uid>> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(t: Option<crate::ugid::Uid>) -> Self {
+        c_uint(t.map_or(-1_i32 as u32, |x| x.as_raw()))
+    }
+}
+
 #[cfg(any(feature = "process", feature = "thread"))]
 impl<'a, Num: ArgNumber> From<crate::ugid::Gid> for ArgReg<'a, Num> {
     #[inline]
     fn from(t: crate::ugid::Gid) -> Self {
         c_uint(t.as_raw())
+    }
+}
+
+#[cfg(feature = "thread")]
+impl<'a, Num: ArgNumber> From<Option<crate::ugid::Gid>> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(t: Option<crate::ugid::Gid>) -> Self {
+        c_uint(t.map_or(-1_i32 as u32, |x| x.as_raw()))
     }
 }
 
