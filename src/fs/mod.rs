@@ -30,7 +30,7 @@ pub(crate) mod fd;
 mod getpath;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have get[gpu]id.
 mod id;
-#[cfg(linux_kernel)]
+#[cfg(linux_raw_dep)]
 pub mod inotify;
 #[cfg(linux_kernel)]
 mod ioctl;
@@ -45,7 +45,7 @@ mod ioctl;
 mod makedev;
 #[cfg(any(linux_kernel, target_os = "freebsd"))]
 mod memfd_create;
-#[cfg(linux_kernel)]
+#[cfg(linux_raw_dep)]
 mod openat2;
 #[cfg(linux_kernel)]
 mod raw_dir;
@@ -110,7 +110,7 @@ pub use ioctl::*;
 pub use makedev::*;
 #[cfg(any(linux_kernel, target_os = "freebsd"))]
 pub use memfd_create::memfd_create;
-#[cfg(linux_kernel)]
+#[cfg(linux_raw_dep)]
 pub use openat2::openat2;
 #[cfg(linux_kernel)]
 pub use raw_dir::{RawDir, RawDirEntry};

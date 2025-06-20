@@ -1840,7 +1840,7 @@ pub(crate) fn memfd_create(name: &CStr, flags: MemfdFlags) -> io::Result<OwnedFd
     unsafe { ret_owned_fd(memfd_create(c_str(name), bitflags_bits!(flags))) }
 }
 
-#[cfg(linux_kernel)]
+#[cfg(linux_raw_dep)]
 pub(crate) fn openat2(
     dirfd: BorrowedFd<'_>,
     path: &CStr,
