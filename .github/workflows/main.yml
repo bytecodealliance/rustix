@@ -218,6 +218,8 @@ jobs:
         # See the comments in the libc crate
         RUSTFLAGS: -A improper_ctypes_definitions --cfg criterion
     - run: rustup component add rust-src
+    - run: cargo check -Z build-std --target=armeb-unknown-linux-gnueabi --all-targets --features=all-apis
+    - run: cargo check -Z build-std --target=aarch64_be-unknown-linux-gnu --all-targets --features=all-apis
     - run: cargo check -Z build-std --target x86_64-unknown-openbsd --all-targets --features=all-apis
     - run: cargo check -Z build-std --target mips64-openwrt-linux-musl --all-targets --features=all-apis
     - run: cargo check -Z build-std --target x86_64-unknown-dragonfly --all-targets --features=all-apis
