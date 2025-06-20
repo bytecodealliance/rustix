@@ -39,7 +39,7 @@ unsafe impl<const OPCODE: Opcode> Ioctl for NoArg<OPCODE> {
 
     const IS_MUTATING: bool = false;
 
-    fn opcode(&self) -> self::Opcode {
+    fn opcode(&self) -> Opcode {
         OPCODE
     }
 
@@ -52,7 +52,7 @@ unsafe impl<const OPCODE: Opcode> Ioctl for NoArg<OPCODE> {
     }
 }
 
-/// Implements an `ioctl` with no real arguments.
+/// Implements an `ioctl` with no real arguments that returns an integer.
 ///
 /// To compute a value for the `OPCODE` argument, see the functions in the
 /// [`opcode`] module.
@@ -80,18 +80,65 @@ unsafe impl<const OPCODE: Opcode> Ioctl for NoArgGetter<OPCODE> {
 
     const IS_MUTATING: bool = false;
 
-    fn opcode(&self) -> self::Opcode {
+    fn opcode(&self) -> Opcode {
         OPCODE
     }
 
-    fn as_ptr(&mut self) -> *mut core::ffi::c_void {
+    fn as_ptr(&mut self) -> *mut c::c_void {
         core::ptr::null_mut()
     }
 
-    unsafe fn output_from_ptr(
-        output: IoctlOutput,
-        _: *mut core::ffi::c_void,
-    ) -> Result<Self::Output> {
+    unsafe fn output_from_ptr(output: IoctlOutput, _: *mut c::c_void) -> Result<Self::Output> {
+        Ok(output)
+    }
+}
+
+/// Implements an `ioctl` with one real argument that returns an integer.
+///
+/// To compute a value for the `OPCODE` argument, see the functions in the
+/// [`opcode`] module.
+///
+/// [`opcode`]: crate::ioctl::opcode
+pub struct ParameterizedReturnGetter<const OPCODE: Opcode> {
+    value: *const c::c_void,
+}
+
+impl<const OPCODE: Opcode> fmt::Debug for ParameterizedReturnGetter<OPCODE> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_tuple("ParameterizedReturnGetter")
+            .field(&OPCODE)
+            .field(&self.value)
+            .finish()
+    }
+}
+
+impl<const OPCODE: Opcode> ParameterizedReturnGetter<OPCODE> {
+    /// Create a new `ioctl` object.
+    ///
+    /// # Safety
+    ///
+    /// - `OPCODE` must provide a valid opcode.
+    #[inline]
+    pub const unsafe fn new(value: usize) -> Self {
+        Self {
+            value: core::ptr::without_provenance(value),
+        }
+    }
+}
+unsafe impl<const OPCODE: Opcode> Ioctl for ParameterizedReturnGetter<OPCODE> {
+    type Output = IoctlOutput;
+
+    const IS_MUTATING: bool = false;
+
+    fn opcode(&self) -> Opcode {
+        OPCODE
+    }
+
+    fn as_ptr(&mut self) -> *mut c::c_void {
+        self.value.cast_mut()
+    }
+
+    unsafe fn output_from_ptr(output: IoctlOutput, _: *mut c::c_void) -> Result<Self::Output> {
         Ok(output)
     }
 }
@@ -137,7 +184,7 @@ unsafe impl<const OPCODE: Opcode, Output> Ioctl for Getter<OPCODE, Output> {
 
     const IS_MUTATING: bool = true;
 
-    fn opcode(&self) -> self::Opcode {
+    fn opcode(&self) -> Opcode {
         OPCODE
     }
 
@@ -192,7 +239,7 @@ unsafe impl<const OPCODE: Opcode, Input> Ioctl for Setter<OPCODE, Input> {
 
     const IS_MUTATING: bool = false;
 
-    fn opcode(&self) -> self::Opcode {
+    fn opcode(&self) -> Opcode {
         OPCODE
     }
 
@@ -219,6 +266,15 @@ pub struct Updater<'a, const OPCODE: Opcode, Value> {
     value: &'a mut Value,
 }
 
+impl<'a, const OPCODE: Opcode, Value: fmt::Debug> fmt::Debug for Updater<'a, OPCODE, Value> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_tuple("Setter")
+            .field(&OPCODE)
+            .field(&self.value)
+            .finish()
+    }
+}
+
 impl<'a, const OPCODE: Opcode, Value> Updater<'a, OPCODE, Value> {
     /// Create a new pointer updater-style `ioctl` object.
     ///
@@ -238,7 +294,7 @@ unsafe impl<'a, const OPCODE: Opcode, T> Ioctl for Updater<'a, OPCODE, T> {
 
     const IS_MUTATING: bool = true;
 
-    fn opcode(&self) -> self::Opcode {
+    fn opcode(&self) -> Opcode {
         OPCODE
     }
 
@@ -262,6 +318,15 @@ pub struct IntegerSetter<const OPCODE: Opcode> {
     ///
     /// For strict provenance preservation, this is a pointer.
     value: *mut c::c_void,
+}
+
+impl<const OPCODE: Opcode> fmt::Debug for IntegerSetter<OPCODE> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_tuple("IntegerSetter")
+            .field(&OPCODE)
+            .field(&self.value)
+            .finish()
+    }
 }
 
 impl<const OPCODE: Opcode> IntegerSetter<OPCODE> {
@@ -295,7 +360,7 @@ unsafe impl<const OPCODE: Opcode> Ioctl for IntegerSetter<OPCODE> {
 
     const IS_MUTATING: bool = false;
 
-    fn opcode(&self) -> self::Opcode {
+    fn opcode(&self) -> Opcode {
         OPCODE
     }
 
