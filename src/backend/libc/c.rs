@@ -19,49 +19,49 @@ pub(crate) const NFS_SUPER_MAGIC: u32 = 0x0000_6969;
 pub(crate) const EXIT_SIGNALED_SIGABRT: c_int = 128 + SIGABRT as c_int;
 
 // TODO: Upstream these.
-#[cfg(all(linux_kernel, feature = "net"))]
+#[cfg(all(linux_raw_dep, feature = "net"))]
 pub(crate) const ETH_P_TSN: c_int = linux_raw_sys::if_ether::ETH_P_TSN as _;
-#[cfg(all(linux_kernel, feature = "net"))]
+#[cfg(all(linux_raw_dep, feature = "net"))]
 pub(crate) const ETH_P_ERSPAN2: c_int = linux_raw_sys::if_ether::ETH_P_ERSPAN2 as _;
-#[cfg(all(linux_kernel, feature = "net"))]
+#[cfg(all(linux_raw_dep, feature = "net"))]
 pub(crate) const ETH_P_ERSPAN: c_int = linux_raw_sys::if_ether::ETH_P_ERSPAN as _;
-#[cfg(all(linux_kernel, feature = "net"))]
+#[cfg(all(linux_raw_dep, feature = "net"))]
 pub(crate) const ETH_P_PROFINET: c_int = linux_raw_sys::if_ether::ETH_P_PROFINET as _;
-#[cfg(all(linux_kernel, feature = "net"))]
+#[cfg(all(linux_raw_dep, feature = "net"))]
 pub(crate) const ETH_P_REALTEK: c_int = linux_raw_sys::if_ether::ETH_P_REALTEK as _;
-#[cfg(all(linux_kernel, feature = "net"))]
+#[cfg(all(linux_raw_dep, feature = "net"))]
 pub(crate) const ETH_P_ETHERCAT: c_int = linux_raw_sys::if_ether::ETH_P_ETHERCAT as _;
-#[cfg(all(linux_kernel, feature = "net"))]
+#[cfg(all(linux_raw_dep, feature = "net"))]
 pub(crate) const ETH_P_PREAUTH: c_int = linux_raw_sys::if_ether::ETH_P_PREAUTH as _;
-#[cfg(all(linux_kernel, feature = "net"))]
+#[cfg(all(linux_raw_dep, feature = "net"))]
 pub(crate) const ETH_P_LLDP: c_int = linux_raw_sys::if_ether::ETH_P_LLDP as _;
-#[cfg(all(linux_kernel, feature = "net"))]
+#[cfg(all(linux_raw_dep, feature = "net"))]
 pub(crate) const ETH_P_MRP: c_int = linux_raw_sys::if_ether::ETH_P_MRP as _;
-#[cfg(all(linux_kernel, feature = "net"))]
+#[cfg(all(linux_raw_dep, feature = "net"))]
 pub(crate) const ETH_P_NCSI: c_int = linux_raw_sys::if_ether::ETH_P_NCSI as _;
-#[cfg(all(linux_kernel, feature = "net"))]
+#[cfg(all(linux_raw_dep, feature = "net"))]
 pub(crate) const ETH_P_CFM: c_int = linux_raw_sys::if_ether::ETH_P_CFM as _;
-#[cfg(all(linux_kernel, feature = "net"))]
+#[cfg(all(linux_raw_dep, feature = "net"))]
 pub(crate) const ETH_P_IBOE: c_int = linux_raw_sys::if_ether::ETH_P_IBOE as _;
-#[cfg(all(linux_kernel, feature = "net"))]
+#[cfg(all(linux_raw_dep, feature = "net"))]
 pub(crate) const ETH_P_HSR: c_int = linux_raw_sys::if_ether::ETH_P_HSR as _;
-#[cfg(all(linux_kernel, feature = "net"))]
+#[cfg(all(linux_raw_dep, feature = "net"))]
 pub(crate) const ETH_P_NSH: c_int = linux_raw_sys::if_ether::ETH_P_NSH as _;
-#[cfg(all(linux_kernel, feature = "net"))]
+#[cfg(all(linux_raw_dep, feature = "net"))]
 pub(crate) const ETH_P_DSA_8021Q: c_int = linux_raw_sys::if_ether::ETH_P_DSA_8021Q as _;
-#[cfg(all(linux_kernel, feature = "net"))]
+#[cfg(all(linux_raw_dep, feature = "net"))]
 pub(crate) const ETH_P_DSA_A5PSW: c_int = linux_raw_sys::if_ether::ETH_P_DSA_A5PSW as _;
-#[cfg(all(linux_kernel, feature = "net"))]
+#[cfg(all(linux_raw_dep, feature = "net"))]
 pub(crate) const ETH_P_IFE: c_int = linux_raw_sys::if_ether::ETH_P_IFE as _;
-#[cfg(all(linux_kernel, feature = "net"))]
+#[cfg(all(linux_raw_dep, feature = "net"))]
 pub(crate) const ETH_P_CAN: c_int = linux_raw_sys::if_ether::ETH_P_CAN as _;
-#[cfg(all(linux_kernel, feature = "net"))]
+#[cfg(all(linux_raw_dep, feature = "net"))]
 pub(crate) const ETH_P_CANXL: c_int = linux_raw_sys::if_ether::ETH_P_CANXL as _;
-#[cfg(all(linux_kernel, feature = "net"))]
+#[cfg(all(linux_raw_dep, feature = "net"))]
 pub(crate) const ETH_P_XDSA: c_int = linux_raw_sys::if_ether::ETH_P_XDSA as _;
-#[cfg(all(linux_kernel, feature = "net"))]
+#[cfg(all(linux_raw_dep, feature = "net"))]
 pub(crate) const ETH_P_MAP: c_int = linux_raw_sys::if_ether::ETH_P_MAP as _;
-#[cfg(all(linux_kernel, feature = "net"))]
+#[cfg(all(linux_raw_dep, feature = "net"))]
 pub(crate) const ETH_P_MCTP: c_int = linux_raw_sys::if_ether::ETH_P_MCTP as _;
 
 #[cfg(all(
@@ -89,7 +89,7 @@ pub(crate) const MSG_DONTWAIT: c_int = MSG_NONBLOCK;
 // `O_LARGEFILE` can be automatically set by the kernel on Linux:
 // <https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/fs/open.c?h=v6.13#n1423>
 // so libc implementations may leave it undefined or defined to zero.
-#[cfg(linux_kernel)]
+#[cfg(linux_raw_dep)]
 pub(crate) const O_LARGEFILE: c_int = linux_raw_sys::general::O_LARGEFILE as _;
 
 // Gated under `_LARGEFILE_SOURCE` but automatically set by the kernel.
@@ -514,10 +514,6 @@ pub(crate) use statx_flags::*;
 #[cfg(feature = "fs")]
 #[cfg(target_os = "android")]
 pub(crate) use __fsid_t as fsid_t;
-
-#[cfg(feature = "mm")]
-#[cfg(target_os = "android")]
-pub(crate) const MAP_DROPPABLE: c_int = bitcast!(linux_raw_sys::general::MAP_DROPPABLE);
 
 // FreeBSD added `timerfd_*` in FreeBSD 14. NetBSD added then in NetBSD 10.
 #[cfg(all(feature = "time", any(target_os = "freebsd", target_os = "netbsd")))]

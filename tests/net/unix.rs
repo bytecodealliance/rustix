@@ -984,7 +984,7 @@ fn test_long_named_address() {
 
     let lens = [
         span_of!(libc::sockaddr_un, sun_path).len(),
-        #[cfg(linux_kernel)]
+        #[cfg(linux_raw_dep)]
         span_of!(linux_raw_sys::net::sockaddr_un, sun_path).len(),
     ];
 

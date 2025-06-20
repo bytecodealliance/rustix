@@ -1604,7 +1604,7 @@ pub fn set_xdp_rx_ring_size<Fd: AsFd>(fd: Fd, value: u32) -> io::Result<()> {
 ///   - [Linux]
 ///
 /// [Linux]: https://www.kernel.org/doc/html/next/networking/af_xdp.html
-#[cfg(target_os = "linux")]
+#[cfg(linux_raw_dep)]
 #[doc(alias = "XDP_MMAP_OFFSETS")]
 pub fn xdp_mmap_offsets<Fd: AsFd>(fd: Fd) -> io::Result<XdpMmapOffsets> {
     backend::net::sockopt::xdp_mmap_offsets(fd.as_fd())
@@ -1616,7 +1616,7 @@ pub fn xdp_mmap_offsets<Fd: AsFd>(fd: Fd) -> io::Result<XdpMmapOffsets> {
 ///   - [Linux]
 ///
 /// [Linux]: https://www.kernel.org/doc/html/next/networking/af_xdp.html#xdp-statistics-getsockopt
-#[cfg(target_os = "linux")]
+#[cfg(linux_raw_dep)]
 #[doc(alias = "XDP_STATISTICS")]
 pub fn xdp_statistics<Fd: AsFd>(fd: Fd) -> io::Result<XdpStatistics> {
     backend::net::sockopt::xdp_statistics(fd.as_fd())

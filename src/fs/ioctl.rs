@@ -58,7 +58,7 @@ pub fn ioctl_ficlone<Fd: AsFd, SrcFd: AsFd>(fd: Fd, src_fd: SrcFd) -> io::Result
 }
 
 /// `ioctl(fd, EXT4_IOC_RESIZE_FS, blocks)`—Resize ext4 filesystem on fd.
-#[cfg(linux_kernel)]
+#[cfg(linux_raw_dep)]
 #[inline]
 #[doc(alias = "EXT4_IOC_RESIZE_FS")]
 pub fn ext4_ioc_resize_fs<Fd: AsFd>(fd: Fd, blocks: u64) -> io::Result<()> {
@@ -94,7 +94,7 @@ unsafe impl ioctl::Ioctl for Ficlone<'_> {
     }
 }
 
-#[cfg(linux_kernel)]
+#[cfg(linux_raw_dep)]
 bitflags! {
     /// `FS_*` constants for use with [`ioctl_getflags`].
     ///
@@ -136,7 +136,7 @@ bitflags! {
 /// `ioctl(fd, FS_IOC_GETFLAGS)`—Returns the [inode flags] attributes
 ///
 /// [inode flags]: https://man7.org/linux/man-pages/man2/ioctl_iflags.2.html
-#[cfg(linux_kernel)]
+#[cfg(linux_raw_dep)]
 #[inline]
 #[doc(alias = "FS_IOC_GETFLAGS")]
 pub fn ioctl_getflags<Fd: AsFd>(fd: Fd) -> io::Result<IFlags> {
@@ -153,7 +153,7 @@ pub fn ioctl_getflags<Fd: AsFd>(fd: Fd) -> io::Result<IFlags> {
 /// `ioctl(fd, FS_IOC_SETFLAGS)`—Modify the [inode flags] attributes
 ///
 /// [inode flags]: https://man7.org/linux/man-pages/man2/ioctl_iflags.2.html
-#[cfg(linux_kernel)]
+#[cfg(linux_raw_dep)]
 #[inline]
 #[doc(alias = "FS_IOC_SETFLAGS")]
 pub fn ioctl_setflags<Fd: AsFd>(fd: Fd, flags: IFlags) -> io::Result<()> {
