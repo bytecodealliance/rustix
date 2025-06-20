@@ -4,14 +4,17 @@ use linux_raw_sys::general::{
     CLONE_NEWTIME, CLONE_NEWUSER, CLONE_NEWUTS, CLONE_SYSVSEM,
 };
 
-use crate::backend::c::{c_int, NS_GET_NSTYPE, NS_GET_OWNER_UID, NS_GET_PARENT, NS_GET_USERNS};
+use crate::backend::c::{
+    c_int, NS_GET_NSTYPE, NS_GET_OWNER_UID, NS_GET_PARENT, NS_GET_PID_FROM_PIDNS,
+    NS_GET_PID_IN_PIDNS, NS_GET_TGID_FROM_PIDNS, NS_GET_TGID_IN_PIDNS, NS_GET_USERNS,
+};
 use crate::backend::thread::syscalls;
 use crate::fd::BorrowedFd;
 use crate::fd::{AsFd, FromRawFd, OwnedFd};
-use crate::io;
+use crate::io::{self, Errno};
 use crate::ioctl;
 
-use super::{RawUid, Uid};
+use super::{Pid, RawUid, Uid};
 
 bitflags! {
     /// Namespace type.
@@ -213,7 +216,7 @@ pub fn unshare(flags: UnshareFlags) -> io::Result<()> {
 ///
 /// # Safety
 ///
-/// `fd` must refer to a `/proc/pid/ns/*` file.
+/// `fd` must refer to a `/proc/{pid}/ns/*` file.
 #[inline]
 #[doc(alias = "NS_GET_USERNS")]
 pub fn ioctl_ns_get_userns<FD: AsFd>(fd: FD) -> io::Result<OwnedFd> {
@@ -228,7 +231,7 @@ pub fn ioctl_ns_get_userns<FD: AsFd>(fd: FD) -> io::Result<OwnedFd> {
 ///
 /// # Safety
 ///
-/// `fd` must refer to a `/proc/pid/ns/*` file.
+/// `fd` must refer to a `/proc/{pid}/ns/*` file.
 #[inline]
 #[doc(alias = "NS_GET_PARENT")]
 pub fn ioctl_ns_get_parent<FD: AsFd>(fd: FD) -> io::Result<OwnedFd> {
@@ -243,7 +246,7 @@ pub fn ioctl_ns_get_parent<FD: AsFd>(fd: FD) -> io::Result<OwnedFd> {
 ///
 /// # Safety
 ///
-/// `fd` must refer to a `/proc/pid/ns/*` file.
+/// `fd` must refer to a `/proc/{pid}/ns/*` file.
 #[inline]
 #[doc(alias = "NS_GET_NSTYPE")]
 pub fn ioctl_ns_get_nstype<FD: AsFd>(fd: FD) -> io::Result<NamespaceType> {
@@ -258,7 +261,7 @@ pub fn ioctl_ns_get_nstype<FD: AsFd>(fd: FD) -> io::Result<NamespaceType> {
 ///
 /// # Safety
 ///
-/// `fd` must refer to a `/proc/pid/ns/*` file.
+/// `fd` must refer to a `/proc/{pid}/ns/*` file.
 #[inline]
 #[doc(alias = "NS_GET_OWNER_UID")]
 pub fn ioctl_ns_get_owner_uid<FD: AsFd>(fd: FD) -> io::Result<Uid> {
@@ -266,5 +269,73 @@ pub fn ioctl_ns_get_owner_uid<FD: AsFd>(fd: FD) -> io::Result<Uid> {
     unsafe {
         let ctl = ioctl::Getter::<{ NS_GET_OWNER_UID }, RawUid>::new();
         ioctl::ioctl(fd, ctl).map(Uid::from_raw)
+    }
+}
+
+/// `ioctl(ns_fd, NS_GET_PID_FROM_PIDNS, pid)`
+///
+/// # Safety
+///
+/// `fd` must refer to a `/proc/{pid}/ns/pid` file.
+#[inline]
+#[doc(alias = "NS_GET_PID_FROM_PIDNS")]
+pub fn ioctl_ns_get_pid_from_pidns<FD: AsFd>(fd: FD, pid: Pid) -> io::Result<Pid> {
+    #[allow(unsafe_code)]
+    unsafe {
+        let ctl = ioctl::ParameterizedReturnGetter::<{ NS_GET_PID_FROM_PIDNS }>::new(
+            pid.as_raw_pid() as usize,
+        );
+        ioctl::ioctl(fd, ctl).and_then(|pid| Pid::from_raw(pid).ok_or(Errno::INVAL))
+    }
+}
+
+/// `ioctl(ns_fd, NS_GET_TGID_FROM_PIDNS, tgid)`
+///
+/// # Safety
+///
+/// `fd` must refer to a `/proc/{pid}/ns/pid` file.
+#[inline]
+#[doc(alias = "NS_GET_TGID_FROM_PIDNS")]
+pub fn ioctl_ns_get_tgid_from_pidns<FD: AsFd>(fd: FD, tgid: Pid) -> io::Result<Pid> {
+    #[allow(unsafe_code)]
+    unsafe {
+        let ctl = ioctl::ParameterizedReturnGetter::<{ NS_GET_TGID_FROM_PIDNS }>::new(
+            tgid.as_raw_pid() as usize,
+        );
+        ioctl::ioctl(fd, ctl).and_then(|tgid| Pid::from_raw(tgid).ok_or(Errno::INVAL))
+    }
+}
+
+/// `ioctl(ns_fd, NS_GET_PID_IN_PIDNS, pid)`
+///
+/// # Safety
+///
+/// `fd` must refer to a `/proc/{pid}/ns/pid` file.
+#[inline]
+#[doc(alias = "NS_GET_PID_IN_PIDNS")]
+pub fn ioctl_ns_get_pid_in_pidns<FD: AsFd>(fd: FD, pid: Pid) -> io::Result<Pid> {
+    #[allow(unsafe_code)]
+    unsafe {
+        let ctl = ioctl::ParameterizedReturnGetter::<{ NS_GET_PID_IN_PIDNS }>::new(
+            pid.as_raw_pid() as usize,
+        );
+        ioctl::ioctl(fd, ctl).and_then(|pid| Pid::from_raw(pid).ok_or(Errno::INVAL))
+    }
+}
+
+/// `ioctl(ns_fd, NS_GET_TGID_IN_PIDNS, tgid)`
+///
+/// # Safety
+///
+/// `fd` must refer to a `/proc/{pid}/ns/pid` file.
+#[inline]
+#[doc(alias = "NS_GET_TGID_IN_PIDNS")]
+pub fn ioctl_ns_get_tgid_in_pidns<FD: AsFd>(fd: FD, tgid: Pid) -> io::Result<Pid> {
+    #[allow(unsafe_code)]
+    unsafe {
+        let ctl = ioctl::ParameterizedReturnGetter::<{ NS_GET_TGID_IN_PIDNS }>::new(
+            tgid.as_raw_pid() as usize,
+        );
+        ioctl::ioctl(fd, ctl).and_then(|tgid| Pid::from_raw(tgid).ok_or(Errno::INVAL))
     }
 }

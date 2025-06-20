@@ -386,5 +386,9 @@ pub(crate) use statx_flags::*;
 
 #[cfg(feature = "thread")]
 pub(crate) use linux_raw_sys::ioctl::{
-    NS_GET_NSTYPE, NS_GET_OWNER_UID, NS_GET_PARENT, NS_GET_USERNS,
+    NS_GET_NSTYPE,
+    NS_GET_OWNER_UID,
+    NS_GET_PARENT,
+    NS_GET_USERNS,
+    // NS_GET_PID_FROM_PIDNS, NS_GET_PID_IN_PIDNS, NS_GET_TGID_FROM_PIDNS, NS_GET_TGID_IN_PIDNS,
 };
