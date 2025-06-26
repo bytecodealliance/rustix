@@ -488,9 +488,9 @@ pub(super) use readwrite_pv64v2::{preadv64v2 as preadv2, pwritev64v2 as pwritev2
 mod statx_flags {
     pub(crate) use linux_raw_sys::general::{
         STATX_ALL, STATX_ATIME, STATX_BASIC_STATS, STATX_BLOCKS, STATX_BTIME, STATX_CTIME,
-        STATX_DIOALIGN, STATX_GID, STATX_INO, STATX_MNT_ID, STATX_MNT_ID_UNIQUE, STATX_MODE,
-        STATX_MTIME, STATX_NLINK, STATX_SIZE, STATX_SUBVOL, STATX_TYPE, STATX_UID,
-        STATX_WRITE_ATOMIC,
+        STATX_DIOALIGN, STATX_DIO_READ_ALIGN, STATX_GID, STATX_INO, STATX_MNT_ID,
+        STATX_MNT_ID_UNIQUE, STATX_MODE, STATX_MTIME, STATX_NLINK, STATX_SIZE, STATX_SUBVOL,
+        STATX_TYPE, STATX_UID, STATX_WRITE_ATOMIC,
     };
 
     pub(crate) use linux_raw_sys::general::{
