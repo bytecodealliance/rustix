@@ -646,6 +646,18 @@ pub enum IoringOp {
 
     /// `IORING_OP_LISTEN` (since Linux 6.11)
     Listen = sys::io_uring_op::IORING_OP_LISTEN as _,
+
+    /// `IORING_OP_RECV_ZC` (since Linux 6.15)
+    RecvZc = sys::io_uring_op::IORING_OP_RECV_ZC as _,
+
+    /// `IORING_OP_EPOLL_WAIT` (since Linux 6.15)
+    EpollWait = sys::io_uring_op::IORING_OP_EPOLL_WAIT as _,
+
+    /// `IORING_OP_READV_FIXED` (since Linux 6.15)
+    ReadvFixed = sys::io_uring_op::IORING_OP_READV_FIXED as _,
+
+    /// `IORING_OP_WRITEV_FIXED` (since Linux 6.15)
+    WritevFixed = sys::io_uring_op::IORING_OP_WRITEV_FIXED as _,
 }
 
 impl Default for IoringOp {
