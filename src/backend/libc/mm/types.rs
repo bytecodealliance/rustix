@@ -44,19 +44,19 @@ bitflags! {
         #[cfg(linux_kernel)]
         const GROWSDOWN = bitcast!(c::PROT_GROWSDOWN);
         /// `PROT_SEM`
-        #[cfg(linux_kernel)]
+        #[cfg(linux_raw_dep)]
         const SEM = linux_raw_sys::general::PROT_SEM;
         /// `PROT_BTI`
-        #[cfg(all(linux_kernel, target_arch = "aarch64"))]
+        #[cfg(all(linux_raw_dep, target_arch = "aarch64"))]
         const BTI = linux_raw_sys::general::PROT_BTI;
         /// `PROT_MTE`
-        #[cfg(all(linux_kernel, target_arch = "aarch64"))]
+        #[cfg(all(linux_raw_dep, target_arch = "aarch64"))]
         const MTE = linux_raw_sys::general::PROT_MTE;
         /// `PROT_SAO`
-        #[cfg(all(linux_kernel, any(target_arch = "powerpc", target_arch = "powerpc64")))]
+        #[cfg(all(linux_raw_dep, any(target_arch = "powerpc", target_arch = "powerpc64")))]
         const SAO = linux_raw_sys::general::PROT_SAO;
         /// `PROT_ADI`
-        #[cfg(all(linux_kernel, any(target_arch = "sparc", target_arch = "sparc64")))]
+        #[cfg(all(linux_raw_dep, any(target_arch = "sparc", target_arch = "sparc64")))]
         const ADI = linux_raw_sys::general::PROT_ADI;
 
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
@@ -252,7 +252,7 @@ bitflags! {
         #[cfg(any())]
         const UNINITIALIZED = bitcast!(c::MAP_UNINITIALIZED);
         /// `MAP_DROPPABLE`
-        #[cfg(linux_kernel)]
+        #[cfg(all(linux_kernel, not(target_os = "android")))]
         const DROPPABLE = bitcast!(c::MAP_DROPPABLE);
 
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>

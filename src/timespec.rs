@@ -411,7 +411,7 @@ mod tests {
     }
 
     // Test that `Timespec` matches Linux's `__kernel_timespec`.
-    #[cfg(linux_kernel)]
+    #[cfg(linux_raw_dep)]
     #[test]
     fn test_against_kernel_timespec() {
         assert_eq_size!(Timespec, linux_raw_sys::general::__kernel_timespec);

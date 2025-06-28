@@ -76,7 +76,7 @@ use c::TCP_KEEPALIVE as TCP_KEEPIDLE;
 use c::TCP_KEEPIDLE;
 use core::mem::{size_of, MaybeUninit};
 use core::time::Duration;
-#[cfg(target_os = "linux")]
+#[cfg(linux_raw_dep)]
 use linux_raw_sys::xdp::{xdp_mmap_offsets, xdp_statistics, xdp_statistics_v1};
 
 #[inline]
@@ -1088,7 +1088,7 @@ pub(crate) fn set_xdp_rx_ring_size(fd: BorrowedFd<'_>, value: u32) -> io::Result
     setsockopt(fd, c::SOL_XDP, c::XDP_RX_RING, value)
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(linux_raw_dep)]
 #[inline]
 pub(crate) fn xdp_mmap_offsets(fd: BorrowedFd<'_>) -> io::Result<XdpMmapOffsets> {
     // The kernel will write `xdp_mmap_offsets` or `xdp_mmap_offsets_v1` to the
@@ -1175,7 +1175,7 @@ pub(crate) fn xdp_mmap_offsets(fd: BorrowedFd<'_>) -> io::Result<XdpMmapOffsets>
     }
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(linux_raw_dep)]
 #[inline]
 pub(crate) fn xdp_statistics(fd: BorrowedFd<'_>) -> io::Result<XdpStatistics> {
     let mut optlen = size_of::<xdp_statistics>().try_into().unwrap();

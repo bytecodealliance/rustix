@@ -1840,7 +1840,7 @@ pub(crate) fn memfd_create(name: &CStr, flags: MemfdFlags) -> io::Result<OwnedFd
     unsafe { ret_owned_fd(memfd_create(c_str(name), bitflags_bits!(flags))) }
 }
 
-#[cfg(linux_kernel)]
+#[cfg(linux_raw_dep)]
 pub(crate) fn openat2(
     dirfd: BorrowedFd<'_>,
     path: &CStr,
@@ -2053,9 +2053,9 @@ pub(crate) fn statx(
     // doesn't represent all the known flags.
     //
     // [it's deprecated]: https://patchwork.kernel.org/project/linux-fsdevel/patch/20200505095915.11275-7-mszeredi@redhat.com/
-    #[cfg(not(any(target_os = "android", target_env = "musl")))]
+    #[cfg(not(target_env = "musl"))]
     const STATX__RESERVED: u32 = c::STATX__RESERVED as u32;
-    #[cfg(any(target_os = "android", target_env = "musl"))]
+    #[cfg(target_env = "musl")]
     const STATX__RESERVED: u32 = linux_raw_sys::general::STATX__RESERVED;
     if (mask.bits() & STATX__RESERVED) == STATX__RESERVED {
         return Err(io::Errno::INVAL);

@@ -35,6 +35,10 @@ fn main() {
     // enable the libc backend even if rustix is depended on transitively.
     let cfg_use_libc = var("CARGO_CFG_RUSTIX_USE_LIBC").is_ok();
 
+    // Check for `RUSTFLAGS=--cfg=rustix_no_linux_raw`. This allows Linux users to
+    // enable the libc backend without the linux raw dependency.
+    let cfg_no_linux_raw = var("CARGO_CFG_RUSTIX_NO_LINUX_RAW").is_ok();
+
     // Check for `--features=rustc-dep-of-std`.
     let rustc_dep_of_std = var("CARGO_FEATURE_RUSTC_DEP_OF_STD").is_ok();
 
@@ -108,10 +112,15 @@ fn main() {
             || arch.starts_with("mips"))
             && !rustix_use_experimental_asm);
     if libc {
+        if os != "android" && os == "linux" && !cfg_no_linux_raw {
+            use_feature("linux_raw_dep");
+        }
+
         // Use the libc backend.
         use_feature("libc");
     } else {
         // Use the linux_raw backend.
+        use_feature("linux_raw_dep");
         use_feature("linux_raw");
         if rustix_use_experimental_asm {
             use_feature("asm_experimental_arch");
