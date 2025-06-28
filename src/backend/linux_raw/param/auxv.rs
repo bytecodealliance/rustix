@@ -22,8 +22,7 @@ use core::sync::atomic::Ordering::Relaxed;
 use core::sync::atomic::{AtomicPtr, AtomicUsize};
 use linux_raw_sys::elf::*;
 use linux_raw_sys::general::{
-    AT_BASE, AT_CLKTCK, AT_EXECFN, AT_HWCAP, AT_HWCAP2, AT_MINSIGSTKSZ, AT_NULL, AT_PAGESZ,
-    AT_SYSINFO_EHDR,
+    AT_CLKTCK, AT_EXECFN, AT_HWCAP, AT_HWCAP2, AT_MINSIGSTKSZ, AT_NULL, AT_PAGESZ, AT_SYSINFO_EHDR,
 };
 #[cfg(feature = "runtime")]
 use linux_raw_sys::general::{
@@ -404,9 +403,11 @@ unsafe fn init_from_aux_iter(aux_iter: impl Iterator<Item = Elf_auxv_t>) -> Opti
 
             // Use the `AT_SYSINFO_EHDR` if it matches the platform rustix is
             // compiled for.
-            AT_SYSINFO_EHDR => if let Some(value) = check_elf_base(a_val as *mut _) {
-                sysinfo_ehdr = value.as_ptr();
-            },
+            AT_SYSINFO_EHDR => {
+                if let Some(value) = check_elf_base(a_val as *mut _) {
+                    sysinfo_ehdr = value.as_ptr();
+                }
+            }
 
             #[cfg(feature = "runtime")]
             AT_SECURE => secure = (a_val as usize != 0) as u8 + 1,
