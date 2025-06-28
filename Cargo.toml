@@ -21,7 +21,6 @@ bitflags = { version = "2.4.0", default-features = false }
 # Special dependencies used in rustc-dep-of-std mode.
 core = { version = "1.0.0", optional = true, package = "rustc-std-workspace-core" }
 rustc-std-workspace-alloc = { version = "1.0.0", optional = true } # not aliased here but in lib.rs because of name collision with the alloc feature
-compiler_builtins = { version = '0.1.49', optional = true }
 
 # Dependencies for platforms where linux_raw is supported, in addition to libc:
 #
@@ -229,10 +228,8 @@ alloc = []
 rustc-dep-of-std = [
     "core",
     "rustc-std-workspace-alloc",
-    "compiler_builtins",
     "linux-raw-sys/rustc-dep-of-std",
     "bitflags/rustc-dep-of-std",
-    "compiler_builtins?/rustc-dep-of-std",
 ]
 
 # Enable `rustix::io::try_close`. The rustix developers do not intend the
