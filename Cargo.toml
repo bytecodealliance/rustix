@@ -269,3 +269,6 @@ check-cfg = [
     'cfg(target_arch, values("xtensa"))',
     'cfg(target_os, values("cygwin"))',
 ]
+
+[patch.crates-io]
+linux-raw-sys = { git = "https://github.com/LtdJorge/linux-raw-sys", branch = "linux-6.15" }
