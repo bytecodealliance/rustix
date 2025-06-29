@@ -697,6 +697,29 @@ impl Default for IoringRestrictionOp {
     }
 }
 
+/// `SOCKET_URING_OP_*` constants which represent commands for use with
+/// [`IoringOp::SetSockOpt`].
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
+#[repr(u32)]
+#[non_exhaustive]
+pub enum IoringSocketOp {
+    /// `SOCKET_URING_OP_SIOCINQ`
+    Siocinq = sys::io_uring_socket_op::SOCKET_URING_OP_SIOCINQ as _,
+    /// `SOCKET_URING_OP_SIOCOUTQ`
+    Siocoutq = sys::io_uring_socket_op::SOCKET_URING_OP_SIOCOUTQ as _,
+    /// `SOCKET_URING_OP_GETSOCKOPT`
+    Getsockopt = sys::io_uring_socket_op::SOCKET_URING_OP_GETSOCKOPT as _,
+    /// `SOCKET_URING_OP_SETSOCKOPT`
+    Setsockopt = sys::io_uring_socket_op::SOCKET_URING_OP_SETSOCKOPT as _,
+}
+
+impl Default for IoringSocketOp {
+    #[inline]
+    fn default() -> Self {
+        Self::Siocinq
+    }
+}
+
 /// `IORING_MSG_*` constants which represent commands for use with
 /// [`IoringOp::MsgRing`], (`seq.addr`)
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
@@ -1469,6 +1492,8 @@ pub union len_union {
 #[derive(Copy, Clone)]
 pub union addr3_or_cmd_union {
     pub addr3: addr3_struct,
+    pub optval: io_uring_ptr,
+    pub path: io_uring_ptr,
     pub cmd: [u8; 0],
 }
 
@@ -1509,7 +1534,17 @@ pub union addr_or_splice_off_in_union {
     pub addr: io_uring_ptr,
     pub splice_off_in: u64,
     pub msgring_cmd: IoringMsgringCmds,
+    pub sockopt_level_optname: sockopt_level_optname_struct,
     pub user_data: io_uring_user_data,
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Copy, Clone)]
+#[non_exhaustive]
+pub struct sockopt_level_optname_struct {
+    pub level: u32,
+    pub optname: u32,
 }
 
 #[allow(missing_docs)]
@@ -1542,6 +1577,7 @@ pub union op_flags_union {
     pub uring_cmd_flags: IoringUringCmdFlags,
     pub futex_flags: FutexWaitvFlags,
     pub install_fd_flags: IoringFixedFdFlags,
+    pub socket_op: IoringSocketOp,
 }
 
 #[allow(missing_docs)]
@@ -1559,6 +1595,7 @@ pub union splice_fd_in_or_file_index_or_addr_len_union {
     pub splice_fd_in: i32,
     pub file_index: u32,
     pub addr_len: addr_len_struct,
+    pub optlen: u32,
 }
 
 #[allow(missing_docs)]
