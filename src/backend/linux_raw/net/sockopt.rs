@@ -7,7 +7,7 @@
 
 use crate::backend::c;
 use crate::backend::conv::{by_mut, c_uint, ret, socklen_t};
-use crate::fd::BorrowedFd;
+use crate::fd::{BorrowedFd, FromRawFd, OwnedFd, RawFd};
 #[cfg(feature = "alloc")]
 use crate::ffi::CStr;
 use crate::io;
@@ -846,6 +846,12 @@ pub(crate) fn tcp_cork(fd: BorrowedFd<'_>) -> io::Result<bool> {
 #[inline]
 pub(crate) fn socket_peercred(fd: BorrowedFd<'_>) -> io::Result<UCred> {
     getsockopt(fd, c::SOL_SOCKET, linux_raw_sys::net::SO_PEERCRED)
+}
+
+#[inline]
+pub(crate) fn socket_peerpidfd(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
+    let raw = getsockopt::<RawFd>(fd, c::SOL_SOCKET, linux_raw_sys::net::SO_PEERPIDFD)?;
+    Ok(unsafe { OwnedFd::from_raw_fd(raw) })
 }
 
 #[cfg(target_os = "linux")]
