@@ -453,6 +453,9 @@ pub enum IoringRegisterOp {
 
     /// `IORING_REGISTER_RESIZE_RINGS`(since Linux 6.13)
     RegisterResizeRings = sys::io_uring_register_op::IORING_REGISTER_RESIZE_RINGS as _,
+
+    /// `IORING_REGISTER_MEM_REGION` (since Linux 6.13)
+    RegisterMemRegion = sys::io_uring_register_op::IORING_REGISTER_MEM_REGION as _,
 }
 
 bitflags::bitflags! {
