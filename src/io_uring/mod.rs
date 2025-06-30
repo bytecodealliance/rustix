@@ -451,7 +451,10 @@ pub enum IoringRegisterOp {
     /// `IORING_REGISTER_SEND_MSG_RING` (since Linux 6.12)
     RegisterSendMsgRing = sys::io_uring_register_op::IORING_REGISTER_SEND_MSG_RING as _,
 
-    /// `IORING_REGISTER_RESIZE_RINGS`(since Linux 6.13)
+    /// `IORING_REGISTER_ZCRX_IFQ` (since Linux 6.15)
+    RegisterZcrxIfq = sys::io_uring_register_op::IORING_REGISTER_ZCRX_IFQ as _,
+
+    /// `IORING_REGISTER_RESIZE_RINGS` (since Linux 6.13)
     RegisterResizeRings = sys::io_uring_register_op::IORING_REGISTER_RESIZE_RINGS as _,
 
     /// `IORING_REGISTER_MEM_REGION` (since Linux 6.13)
@@ -1204,6 +1207,45 @@ bitflags::bitflags! {
     }
 }
 
+bitflags::bitflags! {
+    /// flags for [`io_uring_region_desc`]
+    #[repr(transparent)]
+    #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct IoringRegionDescFlags: u32 {
+        /// `MEM_REGION_TYPE_USER`
+        const TYPE_USER = sys::IORING_MEM_REGION_TYPE_USER as _;
+
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
+        const _ = !0;
+    }
+}
+
+bitflags::bitflags! {
+    /// flags for [`io_uring_mem_region_reg`]
+    #[repr(transparent)]
+    #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct IoringMemRegionRegFlags: u32 {
+        /// `IORING_MEM_REGION_REG_WAIT_ARG`
+        const REG_WAIT_ARG = sys::IORING_MEM_REGION_REG_WAIT_ARG as _;
+
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
+        const _ = !0;
+    }
+}
+
+bitflags::bitflags! {
+    /// flags for [`io_uring_zcrx_area_reg`]
+    #[repr(transparent)]
+    #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct IoringZcrxAreaRegFlags: u32 {
+        /// `IORING_ZCRX_AREA_DMABUF`
+        const DMABUF = sys::IORING_ZCRX_AREA_DMABUF;
+
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
+        const _ = !0;
+    }
+}
+
 #[allow(missing_docs)]
 pub const IORING_CQE_BUFFER_SHIFT: u32 = sys::IORING_CQE_BUFFER_SHIFT as _;
 #[allow(missing_docs)]
@@ -1594,6 +1636,7 @@ pub union buf_union {
 pub union splice_fd_in_or_file_index_or_addr_len_union {
     pub splice_fd_in: i32,
     pub file_index: u32,
+    pub zcrx_ifq_idx: u32,
     pub addr_len: addr_len_struct,
     pub optlen: u32,
 }
@@ -1769,6 +1812,31 @@ pub struct io_uring_files_update {
 }
 
 #[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Copy, Clone, Default)]
+#[non_exhaustive]
+pub struct io_uring_region_desc {
+    pub user_addr: io_uring_ptr,
+    pub size: u64,
+    pub flags: IoringRegionDescFlags,
+    pub id: u32,
+    pub mmap_offset: u64,
+    #[doc(hidden)]
+    pub resv: [u64; 4],
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Copy, Clone, Default)]
+#[non_exhaustive]
+pub struct io_uring_mem_region_reg {
+    pub region_uptr: io_uring_ptr,
+    pub flags: IoringMemRegionRegFlags,
+    #[doc(hidden)]
+    pub resv: [u64; 2],
+}
+
+#[allow(missing_docs)]
 #[repr(C, align(8))]
 #[derive(Debug, Copy, Clone, Default)]
 #[non_exhaustive]
@@ -1825,6 +1893,75 @@ pub struct io_uring_recvmsg_out {
     pub controllen: u32,
     pub payloadlen: u32,
     pub flags: RecvmsgOutFlags,
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+#[non_exhaustive]
+pub struct io_uring_zcrx_rqe {
+    pub off: u64,
+    pub len: u32,
+    #[doc(hidden)]
+    pub pad: u32,
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+#[non_exhaustive]
+pub struct io_uring_zcrx_cqe {
+    pub off: u64,
+    #[doc(hidden)]
+    pub pad: u64,
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+#[non_exhaustive]
+pub struct io_uring_zcrx_offsets {
+    pub head: u32,
+    pub tail: u32,
+    pub rqes: u32,
+    #[doc(hidden)]
+    pub resv2: u32,
+    #[doc(hidden)]
+    pub resv: [u64; 2],
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+#[non_exhaustive]
+pub struct io_uring_zcrx_area_reg {
+    pub addr: io_uring_ptr,
+    pub len: u64,
+    pub rq_area_token: u64,
+    pub flags: IoringZcrxAreaRegFlags,
+    #[doc(hidden)]
+    pub resv1: u32,
+    #[doc(hidden)]
+    pub resv2: [u64; 2],
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+#[non_exhaustive]
+pub struct io_uring_zcrx_ifq_reg {
+    pub if_idx: u32,
+    pub if_rxq: u32,
+    pub rq_entries: u32,
+    pub flags: u32,
+    pub area_ptr: u64,
+    pub region_ptr: u64,
+    pub offsets: io_uring_zcrx_offsets,
+    pub zcrx_id: u32,
+    #[doc(hidden)]
+    pub resv2: u32,
+    #[doc(hidden)]
+    pub resv: [u64; 3],
 }
 
 #[allow(missing_docs)]
