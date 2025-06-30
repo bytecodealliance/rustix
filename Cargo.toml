@@ -275,3 +275,6 @@ check-cfg = [
     'cfg(target_arch, values("xtensa"))',
     'cfg(target_os, values("cygwin"))',
 ]
+
+[patch.crates-io]
+linux-raw-sys = { git = "https://github.com/silvanshade/linux-raw-sys", branch = "io_uring-zcrx" }
