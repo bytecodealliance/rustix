@@ -56,12 +56,12 @@ mod tests {
 
     #[test]
     fn test_layouts() {
-        #[cfg(linux_kernel)]
+        #[cfg(linux_raw_dep)]
         assert_eq_size!(FsWord, linux_raw_sys::general::__fsword_t);
 
         // Don't test against `__kernel_mode_t` on platforms where it's a
         // `u16`.
-        #[cfg(linux_kernel)]
+        #[cfg(linux_raw_dep)]
         #[cfg(not(any(
             target_arch = "x86",
             target_arch = "sparc",
@@ -70,7 +70,7 @@ mod tests {
         )))]
         assert_eq_size!(RawMode, linux_raw_sys::general::__kernel_mode_t);
 
-        #[cfg(linux_kernel)]
+        #[cfg(linux_raw_dep)]
         #[cfg(any(
             target_arch = "x86",
             target_arch = "sparc",

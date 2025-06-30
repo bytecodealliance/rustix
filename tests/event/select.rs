@@ -5,6 +5,7 @@ use rustix::event::{
 use rustix::fd::{AsRawFd as _, RawFd};
 #[cfg(feature = "pipe")]
 #[cfg(not(windows))]
+#[allow(unused_imports)]
 use rustix::fd::{FromRawFd as _, OwnedFd};
 use rustix::io::retry_on_intr;
 use serial_test::serial;
