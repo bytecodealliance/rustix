@@ -489,7 +489,8 @@ pub(super) use readwrite_pv64v2::{preadv64v2 as preadv2, pwritev64v2 as pwritev2
 #[cfg(feature = "fs")]
 #[cfg(all(
     linux_like,
-    not(any(target_os = "android", target_os = "emscripten", target_env = "gnu"))
+    linux_raw_dep,
+    not(any(target_os = "emscripten", target_env = "gnu"))
 ))]
 mod statx_flags {
     pub(crate) use linux_raw_sys::general::{
@@ -507,7 +508,8 @@ mod statx_flags {
 #[cfg(feature = "fs")]
 #[cfg(all(
     linux_like,
-    not(any(target_os = "android", target_os = "emscripten", target_env = "gnu"))
+    linux_raw_dep,
+    not(any(target_os = "emscripten", target_env = "gnu"))
 ))]
 pub(crate) use statx_flags::*;
 
