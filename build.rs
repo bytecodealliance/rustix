@@ -50,6 +50,14 @@ fn main() {
     // and not something we want accidentally enabled via `--all-features`.
     let rustix_use_experimental_asm = var("CARGO_CFG_RUSTIX_USE_EXPERIMENTAL_ASM").is_ok();
 
+    // Check for eg. `RUSTFLAGS=--cfg=rustix_use_untested_linux_raw`. This is a
+    // rustc flag rather than a cargo feature flag because it's experimental
+    // and not something we want accidentally enabled via `--all-features`.
+    // This setting is as a result of CI testing of the linux_raw backend being
+    // complex as a result of the requirement for a custom toolchain for which
+    // binary distributions are not avaialble.
+    let rustix_use_untested_linux_raw = var("CARGO_CFG_RUSTIX_USE_UNTESTED_LINUX_RAW").is_ok();
+
     // Miri doesn't support inline asm, and has builtin support for recognizing
     // libc FFI calls, so if we're running under miri, use the libc backend.
     let miri = var("CARGO_CFG_MIRI").is_ok();
@@ -102,11 +110,14 @@ fn main() {
         || !inline_asm_name_present
         || is_unsupported_abi
         || miri
-        || ((arch == "powerpc"
+        || (arch == "powerpc"
             || arch == "powerpc64"
             || arch == "s390x"
             || arch.starts_with("mips"))
-            && !rustix_use_experimental_asm);
+            && !rustix_use_experimental_asm
+        || (endian == "big"
+            && (arch == "arm" || arch == "aarch64")
+            && !rustix_use_untested_linux_raw);
     if libc {
         // Use the libc backend.
         use_feature("libc");
@@ -174,6 +185,7 @@ fn main() {
     }
 
     println!("cargo:rerun-if-env-changed=CARGO_CFG_RUSTIX_USE_EXPERIMENTAL_ASM");
+    println!("cargo:rerun-if-env-changed=CARGO_CFG_RUSTIX_USE_UNTESTED_LINUX_RAW");
     println!("cargo:rerun-if-env-changed=CARGO_CFG_RUSTIX_USE_LIBC");
 
     // Rerun this script if any of our features or configuration flags change,
