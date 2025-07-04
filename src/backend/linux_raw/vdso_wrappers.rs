@@ -422,8 +422,8 @@ extern "C" {
 }
 
 // This uses `.weak` so that it doesn't conflict if multiple versions of rustix
-// are linked in in non-lto builds, and `.ifndef` so that it doesn't conflict
-// if multiple versions of rustix are linked in in lto builds.
+// are linked in non-lto builds, and `.ifndef` so that it doesn't conflict
+// if multiple versions of rustix are linked in lto builds.
 #[cfg(target_arch = "x86")]
 global_asm!(
     r#"
