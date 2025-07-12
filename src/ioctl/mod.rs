@@ -344,7 +344,7 @@ type _Opcode = c::c_uint;
 #[cfg(windows)]
 type _Opcode = i32;
 
-#[cfg(linux_kernel)]
+#[cfg(linux_raw_dep)]
 #[cfg(not(any(target_arch = "sparc", target_arch = "sparc64")))]
 #[cfg(test)]
 mod tests {

@@ -20,7 +20,7 @@ mod file;
 #[cfg(not(target_os = "wasi"))]
 mod flock;
 mod futimens;
-#[cfg(linux_kernel)]
+#[cfg(linux_raw_dep)]
 mod inotify;
 mod invalid_offset;
 #[cfg(not(target_os = "redox"))]
@@ -34,7 +34,7 @@ mod mknodat;
 mod negative_timestamp;
 #[cfg(linux_kernel)]
 mod openat;
-#[cfg(linux_kernel)]
+#[cfg(linux_raw_dep)]
 mod openat2;
 #[cfg(not(target_os = "redox"))]
 mod readdir;

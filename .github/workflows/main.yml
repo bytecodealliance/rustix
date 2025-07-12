@@ -104,8 +104,8 @@ jobs:
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-linux-musl --features=all-apis --all-targets
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-linux-musl --features=use-libc,all-apis --all-targets
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-linux-gnux32 --features=all-apis --all-targets
-    - run: cargo check --workspace --release -vv --target=x86_64-linux-android --features=all-apis --all-targets
-    - run: cargo check --workspace --release -vv --target=i686-linux-android --features=all-apis --all-targets
+    - run: cargo check --workspace --release -vv --target=x86_64-linux-android --features=use-libc,net,std,alloc,event,fs,mm,param,pipe,use-libc-auxv,libc_errno --all-targets
+    - run: cargo check --workspace --release -vv --target=i686-linux-android --features=use-libc,net,std,alloc,event,fs,mm,param,pipe,use-libc-auxv,libc_errno --all-targets
     - run: cargo check --workspace --release -vv --target=x86_64-apple-darwin --features=all-apis --all-targets
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-freebsd --features=all-apis --all-targets
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-netbsd --features=all-apis --all-targets
@@ -132,11 +132,11 @@ jobs:
     - run: cargo check --workspace --release -vv --target=powerpc64le-unknown-linux-gnu --features=all-apis --all-targets
     - run: cargo check --workspace --release -vv --target=armv5te-unknown-linux-gnueabi --features=all-apis --all-targets
     - run: cargo check --workspace --release -vv --target=s390x-unknown-linux-gnu --features=all-apis --all-targets
-    - run: cargo check --workspace --release -vv --target=arm-linux-androideabi --features=all-apis --all-targets
+    - run: cargo check --workspace --release -vv --target=arm-linux-androideabi --features=use-libc,net,std,alloc,event,fs,mm,param,pipe,use-libc-auxv,libc_errno --all-targets
     - run: cargo check --workspace --release -vv --target=sparc64-unknown-linux-gnu --features=all-apis --all-targets
     - run: cargo check --workspace --release -vv --target=sparcv9-sun-solaris --features=all-apis --all-targets
     - run: cargo check --workspace --release -vv --target=aarch64-apple-ios --features=all-apis --all-targets
-    - run: cargo check --workspace --release -vv --target=aarch64-linux-android --features=all-apis --all-targets
+    - run: cargo check --workspace --release -vv --target=aarch64-linux-android --features=use-libc,net,std,alloc,event,fs,mm,param,pipe,use-libc-auxv,libc_errno --all-targets
     - run: cargo check --workspace --release -vv --target=i686-pc-windows-msvc --features=all-apis --all-targets
 
   check_no_default_features:

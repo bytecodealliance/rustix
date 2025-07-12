@@ -88,12 +88,12 @@ mod tests {
     #[allow(unused_imports)]
     use super::*;
 
-    #[cfg(not(any(
+    #[cfg(all(linux_raw_dep, not(any(
     // These have no ioctl opcodes defined in linux_raw_sys so we can't use
     // that as a known-good value for this test.
     target_arch = "sparc",
     target_arch = "sparc64"
-)))]
+))))]
     #[test]
     fn check_known_opcodes() {
         use crate::backend::c::{c_long, c_uint};
