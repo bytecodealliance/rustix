@@ -2,7 +2,7 @@
 //!
 //! Futex is a very low-level mechanism for implementing concurrency primitives
 //! such as mutexes, rwlocks, and condvars. For a higher-level API that
-//! provides those abstractions, see [rustix-futex-syntax].
+//! provides those abstractions, see [rustix-futex-sync].
 //!
 //! # Examples
 //!
