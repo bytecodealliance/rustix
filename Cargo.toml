@@ -15,6 +15,10 @@ categories = ["os::unix-apis", "date-and-time", "filesystem", "network-programmi
 include = ["src", "build.rs", "Cargo.toml", "COPYRIGHT", "LICENSE*", "/*.md", "benches"]
 rust-version = "1.63"
 
+[hints]
+# Most users use a fraction of the rustix API surface area, so this reduces compilation times
+mostly-unused = true
+
 [dependencies]
 bitflags = { version = "2.4.0", default-features = false }
 
