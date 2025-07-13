@@ -16,6 +16,7 @@ include = ["src", "build.rs", "Cargo.toml", "COPYRIGHT", "LICENSE*", "/*.md", "b
 rust-version = "1.63"
 
 [hints]
+# Most users use a fraction of the rustix API surface area, so this reduces compilation times
 mostly-unused = true
 
 [dependencies]
