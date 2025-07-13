@@ -84,6 +84,10 @@ fn main() {
         use_feature("lower_upper_exp_for_non_zero");
     }
 
+    if can_compile("#[diagnostic::on_unimplemented()] trait Foo {}") {
+        use_feature("rustc_diagnostics")
+    }
+
     // WASI support can utilize wasi_ext if present.
     if os == "wasi" {
         use_feature_or_nothing("wasi_ext");
