@@ -15,6 +15,9 @@ categories = ["os::unix-apis", "date-and-time", "filesystem", "network-programmi
 include = ["src", "build.rs", "Cargo.toml", "COPYRIGHT", "LICENSE*", "/*.md", "benches"]
 rust-version = "1.63"
 
+[hints]
+mostly-unused = true
+
 [dependencies]
 bitflags = { version = "2.4.0", default-features = false }
 
