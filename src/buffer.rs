@@ -94,6 +94,15 @@ use core::slice;
 /// "captured variable cannot escape `FnMut` closure body",
 /// use an explicit loop instead of `retry_on_intr`, assuming you're using
 /// that. See `error_retry_closure_uninit` in examples/buffer_errors.rs.
+#[cfg_attr(
+    rustc_diagnostics,
+    diagnostic::on_unimplemented(
+        message = "rustix does not accept `{Self}` buffers",
+        label = "Unsupported buffer type",
+        note = "only (potentially uninitialized) byte arrays, slices, and Vecs are supported",
+        note = "please read the docs: https://docs.rs/rustix/latest/rustix/buffer/trait.Buffer.html"
+    )
+)]
 pub trait Buffer<T>: private::Sealed<T> {}
 
 // Implement `Buffer` for all the types that implement `Sealed`.

@@ -264,6 +264,7 @@ check-cfg = [
     'cfg(lower_upper_exp_for_non_zero)',
     'cfg(netbsdlike)',
     'cfg(rustc_attrs)',
+    'cfg(rustc_diagnostics)',
     'cfg(solarish)',
     'cfg(staged_api)',
     'cfg(static_assertions)',
