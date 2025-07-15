@@ -22,8 +22,7 @@ use core::sync::atomic::Ordering::Relaxed;
 use core::sync::atomic::{AtomicPtr, AtomicUsize};
 use linux_raw_sys::elf::*;
 use linux_raw_sys::general::{
-    AT_BASE, AT_CLKTCK, AT_EXECFN, AT_HWCAP, AT_HWCAP2, AT_MINSIGSTKSZ, AT_NULL, AT_PAGESZ,
-    AT_SYSINFO_EHDR,
+    AT_CLKTCK, AT_EXECFN, AT_HWCAP, AT_HWCAP2, AT_MINSIGSTKSZ, AT_NULL, AT_PAGESZ, AT_SYSINFO_EHDR,
 };
 #[cfg(feature = "runtime")]
 use linux_raw_sys::general::{
@@ -401,13 +400,12 @@ unsafe fn init_from_aux_iter(aux_iter: impl Iterator<Item = Elf_auxv_t>) -> Opti
             AT_HWCAP2 => hwcap2 = a_val as usize,
             AT_MINSIGSTKSZ => minsigstksz = a_val as usize,
             AT_EXECFN => execfn = check_raw_pointer::<c::c_char>(a_val as *mut _)?.as_ptr(),
-            AT_SYSINFO_EHDR => sysinfo_ehdr = check_elf_base(a_val as *mut _)?.as_ptr(),
 
-            AT_BASE => {
-                // The `AT_BASE` value can be null in a static executable that
-                // doesn't use a dynamic linker. If so, ignore it.
-                if !a_val.is_null() {
-                    let _ = check_elf_base(a_val.cast())?;
+            // Use the `AT_SYSINFO_EHDR` if it matches the platform rustix is
+            // compiled for.
+            AT_SYSINFO_EHDR => {
+                if let Some(value) = check_elf_base(a_val as *mut _) {
+                    sysinfo_ehdr = value.as_ptr();
                 }
             }
 
@@ -448,8 +446,7 @@ unsafe fn init_from_aux_iter(aux_iter: impl Iterator<Item = Elf_auxv_t>) -> Opti
         secure = 2;
     }
 
-    // The base and sysinfo_ehdr (if present) matches our platform. Accept the
-    // aux values.
+    // Accept the aux values.
     PAGE_SIZE.store(pagesz, Relaxed);
     CLOCK_TICKS_PER_SECOND.store(clktck, Relaxed);
     HWCAP.store(hwcap, Relaxed);
