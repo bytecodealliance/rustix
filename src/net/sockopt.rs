@@ -143,6 +143,8 @@
 #![doc(alias = "getsockopt")]
 #![doc(alias = "setsockopt")]
 
+#[cfg(all(target_os = "linux", feature = "time"))]
+use crate::clockid::ClockId;
 #[cfg(target_os = "linux")]
 use crate::net::xdp::{XdpMmapOffsets, XdpOptionsFlags, XdpStatistics, XdpUmemReg};
 #[cfg(not(any(
@@ -172,6 +174,8 @@ use crate::net::Protocol;
 use crate::net::SocketAddrV4;
 #[cfg(linux_kernel)]
 use crate::net::SocketAddrV6;
+#[cfg(all(target_os = "linux", feature = "time"))]
+use crate::net::TxTimeFlags;
 use crate::net::{Ipv4Addr, Ipv6Addr, SocketType};
 use crate::{backend, io};
 #[cfg(feature = "alloc")]
@@ -1534,6 +1538,20 @@ pub fn tcp_cork<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
 #[doc(alias = "SO_PEERCRED")]
 pub fn socket_peercred<Fd: AsFd>(fd: Fd) -> io::Result<super::UCred> {
     backend::net::sockopt::socket_peercred(fd.as_fd())
+}
+
+/// `getsockopt(fd, SOL_SOCKET, SO_TXTIME)` — Get transmission timing configuration.
+#[cfg(all(target_os = "linux", feature = "time"))]
+#[doc(alias = "SO_TXTIME")]
+pub fn get_txtime<Fd: AsFd>(fd: Fd) -> io::Result<(ClockId, TxTimeFlags)> {
+    backend::net::sockopt::get_txtime(fd.as_fd())
+}
+
+/// `setsockopt(fd, SOL_SOCKET, SO_TXTIME)` — Configure transmission timing.
+#[cfg(all(target_os = "linux", feature = "time"))]
+#[doc(alias = "SO_TXTIME")]
+pub fn set_txtime<Fd: AsFd>(fd: Fd, clockid: ClockId, flags: TxTimeFlags) -> io::Result<()> {
+    backend::net::sockopt::set_txtime(fd.as_fd(), clockid, flags)
 }
 
 /// `setsockopt(fd, SOL_XDP, XDP_UMEM_REG, value)`
