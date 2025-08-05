@@ -845,7 +845,7 @@ bitflags! {
     }
 }
 
-#[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 bitflags! {
     /// `ST_*` constants for use with [`StatVfs`].
     #[repr(transparent)]
@@ -877,11 +877,11 @@ bitflags! {
         const NOEXEC = c::ST_NOEXEC as u64;
 
         /// `ST_NOSUID`
-        #[cfg(not(any(target_os = "espidf", target_os = "horizon", target_os = "vita")))]
+        #[cfg(not(any(target_os = "espidf", target_os = "haiku", target_os = "horizon", target_os = "vita")))]
         const NOSUID = c::ST_NOSUID as u64;
 
         /// `ST_RDONLY`
-        #[cfg(not(any(target_os = "espidf", target_os = "horizon", target_os = "vita")))]
+        #[cfg(not(any(target_os = "espidf", target_os = "haiku", target_os = "horizon", target_os = "vita")))]
         const RDONLY = c::ST_RDONLY as u64;
 
         /// `ST_RELATIME`
@@ -1077,7 +1077,7 @@ pub type Fsid = c::fsid_t;
 ///
 /// [`statvfs`]: crate::fs::statvfs
 /// [`fstatvfs`]: crate::fs::fstatvfs
-#[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
 #[allow(missing_docs)]
 pub struct StatVfs {
     pub f_bsize: u64,
