@@ -24,7 +24,7 @@ use crate::fs::{fstat, Stat};
     target_os = "wasi",
 )))]
 use crate::fs::{fstatfs, StatFs};
-#[cfg(not(any(solarish, target_os = "redox", target_os = "vita", target_os = "wasi")))]
+#[cfg(not(any(solarish, target_os = "vita", target_os = "wasi")))]
 use crate::fs::{fstatvfs, StatVfs};
 use crate::io;
 #[cfg(not(any(target_os = "fuchsia", target_os = "vita", target_os = "wasi")))]
@@ -238,7 +238,6 @@ impl Dir {
     #[cfg(not(any(
         solarish,
         target_os = "horizon",
-        target_os = "redox",
         target_os = "vita",
         target_os = "wasi"
     )))]
