@@ -1722,6 +1722,21 @@ bitflags! {
     }
 }
 
+#[cfg(all(target_os = "linux", feature = "time"))]
+bitflags! {
+    /// Flags for use with [`set_txtime`].
+    ///
+    /// [`set_txtime`]: crate::net::sockopt::set_txtime
+    #[repr(transparent)]
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct TxTimeFlags: u32 {
+        /// `SOF_TXTIME_DEADLINE_MODE`
+        const DEADLINE_MODE = bitcast!(c::SOF_TXTIME_DEADLINE_MODE);
+        /// `SOF_TXTIME_REPORT_ERRORS`
+        const REPORT_ERRORS = bitcast!(c::SOF_TXTIME_REPORT_ERRORS);
+    }
+}
+
 /// `AF_XDP` related types and constants.
 #[cfg(target_os = "linux")]
 pub mod xdp {
