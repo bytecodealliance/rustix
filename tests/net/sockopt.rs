@@ -314,6 +314,7 @@ fn test_sockopts_ipv4() {
     #[cfg(not(any(
         apple,
         windows,
+        target_os = "aix",
         target_os = "cygwin",
         target_os = "dragonfly",
         target_os = "emscripten",
