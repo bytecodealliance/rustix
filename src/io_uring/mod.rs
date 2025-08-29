@@ -451,8 +451,14 @@ pub enum IoringRegisterOp {
     /// `IORING_REGISTER_SEND_MSG_RING` (since Linux 6.12)
     RegisterSendMsgRing = sys::io_uring_register_op::IORING_REGISTER_SEND_MSG_RING as _,
 
-    /// `IORING_REGISTER_RESIZE_RINGS`(since Linux 6.13)
+    /// `IORING_REGISTER_ZCRX_IFQ` (since Linux 6.15)
+    RegisterZcrxIfq = sys::io_uring_register_op::IORING_REGISTER_ZCRX_IFQ as _,
+
+    /// `IORING_REGISTER_RESIZE_RINGS` (since Linux 6.13)
     RegisterResizeRings = sys::io_uring_register_op::IORING_REGISTER_RESIZE_RINGS as _,
+
+    /// `IORING_REGISTER_MEM_REGION` (since Linux 6.13)
+    RegisterMemRegion = sys::io_uring_register_op::IORING_REGISTER_MEM_REGION as _,
 }
 
 bitflags::bitflags! {
@@ -646,6 +652,407 @@ pub enum IoringOp {
 
     /// `IORING_OP_LISTEN` (since Linux 6.11)
     Listen = sys::io_uring_op::IORING_OP_LISTEN as _,
+
+    /// `IORING_OP_RECV_ZC` (since Linux 6.15)
+    RecvZc = sys::io_uring_op::IORING_OP_RECV_ZC as _,
+
+    /// `IORING_OP_EPOLL_WAIT` (since Linux 6.15)
+    EpollWait = sys::io_uring_op::IORING_OP_EPOLL_WAIT as _,
+
+    /// `IORING_OP_READV_FIXED` (since Linux 6.15)
+    ReadvFixed = sys::io_uring_op::IORING_OP_READV_FIXED as _,
+
+    /// `IORING_OP_WRITEV_FIXED` (since Linux 6.15)
+    WritevFixed = sys::io_uring_op::IORING_OP_WRITEV_FIXED as _,
+
+    #[doc(hidden)]
+    Unknown62 = 62,
+    #[doc(hidden)]
+    Unknown63 = 63,
+    #[doc(hidden)]
+    Unknown64 = 64,
+    #[doc(hidden)]
+    Unknown65 = 65,
+    #[doc(hidden)]
+    Unknown66 = 66,
+    #[doc(hidden)]
+    Unknown67 = 67,
+    #[doc(hidden)]
+    Unknown68 = 68,
+    #[doc(hidden)]
+    Unknown69 = 69,
+    #[doc(hidden)]
+    Unknown70 = 70,
+    #[doc(hidden)]
+    Unknown71 = 71,
+    #[doc(hidden)]
+    Unknown72 = 72,
+    #[doc(hidden)]
+    Unknown73 = 73,
+    #[doc(hidden)]
+    Unknown74 = 74,
+    #[doc(hidden)]
+    Unknown75 = 75,
+    #[doc(hidden)]
+    Unknown76 = 76,
+    #[doc(hidden)]
+    Unknown77 = 77,
+    #[doc(hidden)]
+    Unknown78 = 78,
+    #[doc(hidden)]
+    Unknown79 = 79,
+    #[doc(hidden)]
+    Unknown80 = 80,
+    #[doc(hidden)]
+    Unknown81 = 81,
+    #[doc(hidden)]
+    Unknown82 = 82,
+    #[doc(hidden)]
+    Unknown83 = 83,
+    #[doc(hidden)]
+    Unknown84 = 84,
+    #[doc(hidden)]
+    Unknown85 = 85,
+    #[doc(hidden)]
+    Unknown86 = 86,
+    #[doc(hidden)]
+    Unknown87 = 87,
+    #[doc(hidden)]
+    Unknown88 = 88,
+    #[doc(hidden)]
+    Unknown89 = 89,
+    #[doc(hidden)]
+    Unknown90 = 90,
+    #[doc(hidden)]
+    Unknown91 = 91,
+    #[doc(hidden)]
+    Unknown92 = 92,
+    #[doc(hidden)]
+    Unknown93 = 93,
+    #[doc(hidden)]
+    Unknown94 = 94,
+    #[doc(hidden)]
+    Unknown95 = 95,
+    #[doc(hidden)]
+    Unknown96 = 96,
+    #[doc(hidden)]
+    Unknown97 = 97,
+    #[doc(hidden)]
+    Unknown98 = 98,
+    #[doc(hidden)]
+    Unknown99 = 99,
+    #[doc(hidden)]
+    Unknown100 = 100,
+    #[doc(hidden)]
+    Unknown101 = 101,
+    #[doc(hidden)]
+    Unknown102 = 102,
+    #[doc(hidden)]
+    Unknown103 = 103,
+    #[doc(hidden)]
+    Unknown104 = 104,
+    #[doc(hidden)]
+    Unknown105 = 105,
+    #[doc(hidden)]
+    Unknown106 = 106,
+    #[doc(hidden)]
+    Unknown107 = 107,
+    #[doc(hidden)]
+    Unknown108 = 108,
+    #[doc(hidden)]
+    Unknown109 = 109,
+    #[doc(hidden)]
+    Unknown110 = 110,
+    #[doc(hidden)]
+    Unknown111 = 111,
+    #[doc(hidden)]
+    Unknown112 = 112,
+    #[doc(hidden)]
+    Unknown113 = 113,
+    #[doc(hidden)]
+    Unknown114 = 114,
+    #[doc(hidden)]
+    Unknown115 = 115,
+    #[doc(hidden)]
+    Unknown116 = 116,
+    #[doc(hidden)]
+    Unknown117 = 117,
+    #[doc(hidden)]
+    Unknown118 = 118,
+    #[doc(hidden)]
+    Unknown119 = 119,
+    #[doc(hidden)]
+    Unknown120 = 120,
+    #[doc(hidden)]
+    Unknown121 = 121,
+    #[doc(hidden)]
+    Unknown122 = 122,
+    #[doc(hidden)]
+    Unknown123 = 123,
+    #[doc(hidden)]
+    Unknown124 = 124,
+    #[doc(hidden)]
+    Unknown125 = 125,
+    #[doc(hidden)]
+    Unknown126 = 126,
+    #[doc(hidden)]
+    Unknown127 = 127,
+    #[doc(hidden)]
+    Unknown128 = 128,
+    #[doc(hidden)]
+    Unknown129 = 129,
+    #[doc(hidden)]
+    Unknown130 = 130,
+    #[doc(hidden)]
+    Unknown131 = 131,
+    #[doc(hidden)]
+    Unknown132 = 132,
+    #[doc(hidden)]
+    Unknown133 = 133,
+    #[doc(hidden)]
+    Unknown134 = 134,
+    #[doc(hidden)]
+    Unknown135 = 135,
+    #[doc(hidden)]
+    Unknown136 = 136,
+    #[doc(hidden)]
+    Unknown137 = 137,
+    #[doc(hidden)]
+    Unknown138 = 138,
+    #[doc(hidden)]
+    Unknown139 = 139,
+    #[doc(hidden)]
+    Unknown140 = 140,
+    #[doc(hidden)]
+    Unknown141 = 141,
+    #[doc(hidden)]
+    Unknown142 = 142,
+    #[doc(hidden)]
+    Unknown143 = 143,
+    #[doc(hidden)]
+    Unknown144 = 144,
+    #[doc(hidden)]
+    Unknown145 = 145,
+    #[doc(hidden)]
+    Unknown146 = 146,
+    #[doc(hidden)]
+    Unknown147 = 147,
+    #[doc(hidden)]
+    Unknown148 = 148,
+    #[doc(hidden)]
+    Unknown149 = 149,
+    #[doc(hidden)]
+    Unknown150 = 150,
+    #[doc(hidden)]
+    Unknown151 = 151,
+    #[doc(hidden)]
+    Unknown152 = 152,
+    #[doc(hidden)]
+    Unknown153 = 153,
+    #[doc(hidden)]
+    Unknown154 = 154,
+    #[doc(hidden)]
+    Unknown155 = 155,
+    #[doc(hidden)]
+    Unknown156 = 156,
+    #[doc(hidden)]
+    Unknown157 = 157,
+    #[doc(hidden)]
+    Unknown158 = 158,
+    #[doc(hidden)]
+    Unknown159 = 159,
+    #[doc(hidden)]
+    Unknown160 = 160,
+    #[doc(hidden)]
+    Unknown161 = 161,
+    #[doc(hidden)]
+    Unknown162 = 162,
+    #[doc(hidden)]
+    Unknown163 = 163,
+    #[doc(hidden)]
+    Unknown164 = 164,
+    #[doc(hidden)]
+    Unknown165 = 165,
+    #[doc(hidden)]
+    Unknown166 = 166,
+    #[doc(hidden)]
+    Unknown167 = 167,
+    #[doc(hidden)]
+    Unknown168 = 168,
+    #[doc(hidden)]
+    Unknown169 = 169,
+    #[doc(hidden)]
+    Unknown170 = 170,
+    #[doc(hidden)]
+    Unknown171 = 171,
+    #[doc(hidden)]
+    Unknown172 = 172,
+    #[doc(hidden)]
+    Unknown173 = 173,
+    #[doc(hidden)]
+    Unknown174 = 174,
+    #[doc(hidden)]
+    Unknown175 = 175,
+    #[doc(hidden)]
+    Unknown176 = 176,
+    #[doc(hidden)]
+    Unknown177 = 177,
+    #[doc(hidden)]
+    Unknown178 = 178,
+    #[doc(hidden)]
+    Unknown179 = 179,
+    #[doc(hidden)]
+    Unknown180 = 180,
+    #[doc(hidden)]
+    Unknown181 = 181,
+    #[doc(hidden)]
+    Unknown182 = 182,
+    #[doc(hidden)]
+    Unknown183 = 183,
+    #[doc(hidden)]
+    Unknown184 = 184,
+    #[doc(hidden)]
+    Unknown185 = 185,
+    #[doc(hidden)]
+    Unknown186 = 186,
+    #[doc(hidden)]
+    Unknown187 = 187,
+    #[doc(hidden)]
+    Unknown188 = 188,
+    #[doc(hidden)]
+    Unknown189 = 189,
+    #[doc(hidden)]
+    Unknown190 = 190,
+    #[doc(hidden)]
+    Unknown191 = 191,
+    #[doc(hidden)]
+    Unknown192 = 192,
+    #[doc(hidden)]
+    Unknown193 = 193,
+    #[doc(hidden)]
+    Unknown194 = 194,
+    #[doc(hidden)]
+    Unknown195 = 195,
+    #[doc(hidden)]
+    Unknown196 = 196,
+    #[doc(hidden)]
+    Unknown197 = 197,
+    #[doc(hidden)]
+    Unknown198 = 198,
+    #[doc(hidden)]
+    Unknown199 = 199,
+    #[doc(hidden)]
+    Unknown200 = 200,
+    #[doc(hidden)]
+    Unknown201 = 201,
+    #[doc(hidden)]
+    Unknown202 = 202,
+    #[doc(hidden)]
+    Unknown203 = 203,
+    #[doc(hidden)]
+    Unknown204 = 204,
+    #[doc(hidden)]
+    Unknown205 = 205,
+    #[doc(hidden)]
+    Unknown206 = 206,
+    #[doc(hidden)]
+    Unknown207 = 207,
+    #[doc(hidden)]
+    Unknown208 = 208,
+    #[doc(hidden)]
+    Unknown209 = 209,
+    #[doc(hidden)]
+    Unknown210 = 210,
+    #[doc(hidden)]
+    Unknown211 = 211,
+    #[doc(hidden)]
+    Unknown212 = 212,
+    #[doc(hidden)]
+    Unknown213 = 213,
+    #[doc(hidden)]
+    Unknown214 = 214,
+    #[doc(hidden)]
+    Unknown215 = 215,
+    #[doc(hidden)]
+    Unknown216 = 216,
+    #[doc(hidden)]
+    Unknown217 = 217,
+    #[doc(hidden)]
+    Unknown218 = 218,
+    #[doc(hidden)]
+    Unknown219 = 219,
+    #[doc(hidden)]
+    Unknown220 = 220,
+    #[doc(hidden)]
+    Unknown221 = 221,
+    #[doc(hidden)]
+    Unknown222 = 222,
+    #[doc(hidden)]
+    Unknown223 = 223,
+    #[doc(hidden)]
+    Unknown224 = 224,
+    #[doc(hidden)]
+    Unknown225 = 225,
+    #[doc(hidden)]
+    Unknown226 = 226,
+    #[doc(hidden)]
+    Unknown227 = 227,
+    #[doc(hidden)]
+    Unknown228 = 228,
+    #[doc(hidden)]
+    Unknown229 = 229,
+    #[doc(hidden)]
+    Unknown230 = 230,
+    #[doc(hidden)]
+    Unknown231 = 231,
+    #[doc(hidden)]
+    Unknown232 = 232,
+    #[doc(hidden)]
+    Unknown233 = 233,
+    #[doc(hidden)]
+    Unknown234 = 234,
+    #[doc(hidden)]
+    Unknown235 = 235,
+    #[doc(hidden)]
+    Unknown236 = 236,
+    #[doc(hidden)]
+    Unknown237 = 237,
+    #[doc(hidden)]
+    Unknown238 = 238,
+    #[doc(hidden)]
+    Unknown239 = 239,
+    #[doc(hidden)]
+    Unknown240 = 240,
+    #[doc(hidden)]
+    Unknown241 = 241,
+    #[doc(hidden)]
+    Unknown242 = 242,
+    #[doc(hidden)]
+    Unknown243 = 243,
+    #[doc(hidden)]
+    Unknown244 = 244,
+    #[doc(hidden)]
+    Unknown245 = 245,
+    #[doc(hidden)]
+    Unknown246 = 246,
+    #[doc(hidden)]
+    Unknown247 = 247,
+    #[doc(hidden)]
+    Unknown248 = 248,
+    #[doc(hidden)]
+    Unknown249 = 249,
+    #[doc(hidden)]
+    Unknown250 = 250,
+    #[doc(hidden)]
+    Unknown251 = 251,
+    #[doc(hidden)]
+    Unknown252 = 252,
+    #[doc(hidden)]
+    Unknown253 = 253,
+    #[doc(hidden)]
+    Unknown254 = 254,
+    #[doc(hidden)]
+    Unknown255 = 255,
 }
 
 impl Default for IoringOp {
@@ -679,6 +1086,29 @@ impl Default for IoringRestrictionOp {
     #[inline]
     fn default() -> Self {
         Self::RegisterOp
+    }
+}
+
+/// `SOCKET_URING_OP_*` constants which represent commands for use with
+/// [`IoringOp::SetSockOpt`].
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
+#[repr(u32)]
+#[non_exhaustive]
+pub enum IoringSocketOp {
+    /// `SOCKET_URING_OP_SIOCINQ`
+    Siocinq = sys::io_uring_socket_op::SOCKET_URING_OP_SIOCINQ as _,
+    /// `SOCKET_URING_OP_SIOCOUTQ`
+    Siocoutq = sys::io_uring_socket_op::SOCKET_URING_OP_SIOCOUTQ as _,
+    /// `SOCKET_URING_OP_GETSOCKOPT`
+    Getsockopt = sys::io_uring_socket_op::SOCKET_URING_OP_GETSOCKOPT as _,
+    /// `SOCKET_URING_OP_SETSOCKOPT`
+    Setsockopt = sys::io_uring_socket_op::SOCKET_URING_OP_SETSOCKOPT as _,
+}
+
+impl Default for IoringSocketOp {
+    #[inline]
+    fn default() -> Self {
+        Self::Siocinq
     }
 }
 
@@ -1166,6 +1596,45 @@ bitflags::bitflags! {
     }
 }
 
+bitflags::bitflags! {
+    /// flags for [`io_uring_region_desc`]
+    #[repr(transparent)]
+    #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct IoringRegionDescFlags: u32 {
+        /// `MEM_REGION_TYPE_USER`
+        const TYPE_USER = sys::IORING_MEM_REGION_TYPE_USER as _;
+
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
+        const _ = !0;
+    }
+}
+
+bitflags::bitflags! {
+    /// flags for [`io_uring_mem_region_reg`]
+    #[repr(transparent)]
+    #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct IoringMemRegionRegFlags: u32 {
+        /// `IORING_MEM_REGION_REG_WAIT_ARG`
+        const REG_WAIT_ARG = sys::IORING_MEM_REGION_REG_WAIT_ARG as _;
+
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
+        const _ = !0;
+    }
+}
+
+bitflags::bitflags! {
+    /// flags for [`io_uring_zcrx_area_reg`]
+    #[repr(transparent)]
+    #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct IoringZcrxAreaRegFlags: u32 {
+        /// `IORING_ZCRX_AREA_DMABUF`
+        const DMABUF = sys::IORING_ZCRX_AREA_DMABUF;
+
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
+        const _ = !0;
+    }
+}
+
 #[allow(missing_docs)]
 pub const IORING_CQE_BUFFER_SHIFT: u32 = sys::IORING_CQE_BUFFER_SHIFT as _;
 #[allow(missing_docs)]
@@ -1454,6 +1923,8 @@ pub union len_union {
 #[derive(Copy, Clone)]
 pub union addr3_or_cmd_union {
     pub addr3: addr3_struct,
+    pub optval: io_uring_ptr,
+    pub path: io_uring_ptr,
     pub cmd: [u8; 0],
 }
 
@@ -1494,7 +1965,17 @@ pub union addr_or_splice_off_in_union {
     pub addr: io_uring_ptr,
     pub splice_off_in: u64,
     pub msgring_cmd: IoringMsgringCmds,
+    pub sockopt_level_optname: sockopt_level_optname_struct,
     pub user_data: io_uring_user_data,
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Copy, Clone)]
+#[non_exhaustive]
+pub struct sockopt_level_optname_struct {
+    pub level: u32,
+    pub optname: u32,
 }
 
 #[allow(missing_docs)]
@@ -1527,6 +2008,7 @@ pub union op_flags_union {
     pub uring_cmd_flags: IoringUringCmdFlags,
     pub futex_flags: FutexWaitvFlags,
     pub install_fd_flags: IoringFixedFdFlags,
+    pub socket_op: IoringSocketOp,
 }
 
 #[allow(missing_docs)]
@@ -1543,7 +2025,9 @@ pub union buf_union {
 pub union splice_fd_in_or_file_index_or_addr_len_union {
     pub splice_fd_in: i32,
     pub file_index: u32,
+    pub zcrx_ifq_idx: u32,
     pub addr_len: addr_len_struct,
+    pub optlen: u32,
 }
 
 #[allow(missing_docs)]
@@ -1717,6 +2201,31 @@ pub struct io_uring_files_update {
 }
 
 #[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Copy, Clone, Default)]
+#[non_exhaustive]
+pub struct io_uring_region_desc {
+    pub user_addr: io_uring_ptr,
+    pub size: u64,
+    pub flags: IoringRegionDescFlags,
+    pub id: u32,
+    pub mmap_offset: u64,
+    #[doc(hidden)]
+    pub resv: [u64; 4],
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Copy, Clone, Default)]
+#[non_exhaustive]
+pub struct io_uring_mem_region_reg {
+    pub region_uptr: io_uring_ptr,
+    pub flags: IoringMemRegionRegFlags,
+    #[doc(hidden)]
+    pub resv: [u64; 2],
+}
+
+#[allow(missing_docs)]
 #[repr(C, align(8))]
 #[derive(Debug, Copy, Clone, Default)]
 #[non_exhaustive]
@@ -1773,6 +2282,75 @@ pub struct io_uring_recvmsg_out {
     pub controllen: u32,
     pub payloadlen: u32,
     pub flags: RecvmsgOutFlags,
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+#[non_exhaustive]
+pub struct io_uring_zcrx_rqe {
+    pub off: u64,
+    pub len: u32,
+    #[doc(hidden)]
+    pub pad: u32,
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+#[non_exhaustive]
+pub struct io_uring_zcrx_cqe {
+    pub off: u64,
+    #[doc(hidden)]
+    pub pad: u64,
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+#[non_exhaustive]
+pub struct io_uring_zcrx_offsets {
+    pub head: u32,
+    pub tail: u32,
+    pub rqes: u32,
+    #[doc(hidden)]
+    pub resv2: u32,
+    #[doc(hidden)]
+    pub resv: [u64; 2],
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+#[non_exhaustive]
+pub struct io_uring_zcrx_area_reg {
+    pub addr: io_uring_ptr,
+    pub len: u64,
+    pub rq_area_token: u64,
+    pub flags: IoringZcrxAreaRegFlags,
+    #[doc(hidden)]
+    pub resv1: u32,
+    #[doc(hidden)]
+    pub resv2: [u64; 2],
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+#[non_exhaustive]
+pub struct io_uring_zcrx_ifq_reg {
+    pub if_idx: u32,
+    pub if_rxq: u32,
+    pub rq_entries: u32,
+    pub flags: u32,
+    pub area_ptr: u64,
+    pub region_ptr: u64,
+    pub offsets: io_uring_zcrx_offsets,
+    pub zcrx_id: u32,
+    #[doc(hidden)]
+    pub resv2: u32,
+    #[doc(hidden)]
+    pub resv: [u64; 3],
 }
 
 #[allow(missing_docs)]
