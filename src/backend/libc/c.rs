@@ -490,7 +490,11 @@ pub(super) use readwrite_pv64v2::{preadv64v2 as preadv2, pwritev64v2 as pwritev2
 #[cfg(all(
     linux_like,
     linux_raw_dep,
-    not(any(target_os = "emscripten", target_env = "gnu"))
+    not(any(
+        target_os = "emscripten",
+        target_env = "gnu",
+        all(target_arch = "loongarch64", target_env = "musl")
+    ))
 ))]
 mod statx_flags {
     pub(crate) use linux_raw_sys::general::{
@@ -509,7 +513,11 @@ mod statx_flags {
 #[cfg(all(
     linux_like,
     linux_raw_dep,
-    not(any(target_os = "emscripten", target_env = "gnu"))
+    not(any(
+        target_os = "emscripten",
+        target_env = "gnu",
+        all(target_arch = "loongarch64", target_env = "musl")
+    ))
 ))]
 pub(crate) use statx_flags::*;
 
