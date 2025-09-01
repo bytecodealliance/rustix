@@ -60,8 +60,8 @@ jobs:
         cargo update --package=parking_lot --precise=0.12.3
         cargo update --package=parking_lot_core --precise=0.9.10
         cargo update --package=lock_api --precise=0.4.12
-        cargo update --package=rayon-core --precise=1.12.1
         cargo update --package=rayon --precise=1.10.0
+        cargo update --package=rayon-core --precise=1.12.1
 
     - run: >
         rustup target add
@@ -542,8 +542,8 @@ jobs:
         cargo update --package=parking_lot --precise=0.12.3
         cargo update --package=parking_lot_core --precise=0.9.10
         cargo update --package=lock_api --precise=0.4.12
-        cargo update --package=rayon-core --precise=1.12.1
         cargo update --package=rayon --precise=1.10.0
+        cargo update --package=rayon-core --precise=1.12.1
 
     - run: |
         cargo test --verbose --features=all-apis --release --workspace -- --nocapture
