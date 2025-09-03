@@ -10,6 +10,7 @@ use crate::fs::Access;
     target_os = "horizon",
     target_os = "netbsd",
     target_os = "nto",
+    target_os = "redox",
     target_os = "vita",
     target_os = "wasi",
 )))]
@@ -260,6 +261,7 @@ pub fn access<P: path::Arg>(path: P, access: Access) -> io::Result<()> {
     target_os = "horizon",
     target_os = "netbsd",
     target_os = "nto",
+    target_os = "redox",
     target_os = "vita",
     target_os = "wasi",
 )))]
