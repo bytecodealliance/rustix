@@ -169,6 +169,10 @@ const PR_SET_SECCOMP: c_int = 22;
 ///  - [`prctl(PR_SET_SECCOMP,…)`]
 ///
 /// [`prctl(PR_SET_SECCOMP,…)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
+#[deprecated(
+    since = "1.1.0",
+    note = "Use set_secure_computing_mode_strict/set_secure_computing_mode_filter"
+)]
 #[inline]
 pub fn set_secure_computing_mode(mode: SecureComputingMode) -> io::Result<()> {
     unsafe { prctl_2args(PR_SET_SECCOMP, mode as usize as *mut _) }.map(|_r| ())
