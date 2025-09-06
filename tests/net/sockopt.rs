@@ -9,7 +9,11 @@ use rustix::io;
     target_env = "newlib"
 ))]
 use rustix::net::ipproto;
+#[cfg(target_os = "linux")]
+use rustix::net::TxTimeFlags;
 use rustix::net::{sockopt, AddressFamily, SocketType};
+#[cfg(target_os = "linux")]
+use rustix::time::ClockId;
 use std::net::Ipv4Addr;
 use std::time::Duration;
 
@@ -627,6 +631,27 @@ fn test_sockopts_multicast_ifv6() {
     match sockopt::set_ipv6_multicast_if(&s, 1) {
         Ok(()) => {
             assert_eq!(sockopt::ipv6_multicast_if(&s).unwrap(), 1);
+        }
+        Err(e) if e.to_string().contains("Protocol not available") => {
+            // Skip test on unsupported platforms
+        }
+        Err(e) => panic!("{e}"),
+    }
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn test_sockopts_txtime() {
+    crate::init();
+
+    let s = rustix::net::socket(AddressFamily::INET, SocketType::DGRAM, None).unwrap();
+
+    match sockopt::set_txtime(&s, ClockId::Monotonic, TxTimeFlags::DEADLINE_MODE) {
+        Ok(()) => {
+            assert_eq!(
+                sockopt::get_txtime(&s).unwrap(),
+                (ClockId::Monotonic, TxTimeFlags::DEADLINE_MODE)
+            );
         }
         Err(e) if e.to_string().contains("Protocol not available") => {
             // Skip test on unsupported platforms
