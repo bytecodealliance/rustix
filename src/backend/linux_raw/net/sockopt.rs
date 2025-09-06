@@ -11,7 +11,7 @@ use crate::fd::BorrowedFd;
 #[cfg(feature = "alloc")]
 use crate::ffi::CStr;
 use crate::io;
-use crate::net::sockopt::Timeout;
+use crate::net::sockopt::{Ipv4PathMtuDiscovery, Ipv6PathMtuDiscovery, Timeout};
 #[cfg(target_os = "linux")]
 use crate::net::xdp::{XdpMmapOffsets, XdpOptionsFlags, XdpRingOffset, XdpStatistics, XdpUmemReg};
 use crate::net::{
@@ -25,7 +25,9 @@ use alloc::string::String;
 use core::mem::{size_of, MaybeUninit};
 use core::time::Duration;
 use linux_raw_sys::general::{__kernel_old_timeval, __kernel_sock_timeval};
-use linux_raw_sys::net::{IPV6_MTU, IPV6_MULTICAST_IF, IP_MTU, IP_MULTICAST_IF};
+use linux_raw_sys::net::{
+    IPV6_MTU, IPV6_MTU_DISCOVER, IPV6_MULTICAST_IF, IP_MTU, IP_MTU_DISCOVER, IP_MULTICAST_IF,
+};
 #[cfg(target_os = "linux")]
 use linux_raw_sys::xdp::{xdp_mmap_offsets, xdp_statistics, xdp_statistics_v1};
 #[cfg(target_arch = "x86")]
@@ -460,6 +462,32 @@ pub(crate) fn ip_mtu(fd: BorrowedFd<'_>) -> io::Result<u32> {
 #[inline]
 pub(crate) fn ipv6_mtu(fd: BorrowedFd<'_>) -> io::Result<u32> {
     getsockopt(fd, c::IPPROTO_IPV6, IPV6_MTU)
+}
+
+#[inline]
+pub(crate) fn set_ip_mtu_discover(
+    fd: BorrowedFd<'_>,
+    value: Ipv4PathMtuDiscovery,
+) -> io::Result<()> {
+    setsockopt(fd, c::IPPROTO_IP, IP_MTU_DISCOVER, value)
+}
+
+#[inline]
+pub(crate) fn ip_mtu_discover(fd: BorrowedFd<'_>) -> io::Result<Ipv4PathMtuDiscovery> {
+    getsockopt(fd, c::IPPROTO_IP, IP_MTU_DISCOVER)
+}
+
+#[inline]
+pub(crate) fn set_ipv6_mtu_discover(
+    fd: BorrowedFd<'_>,
+    value: Ipv6PathMtuDiscovery,
+) -> io::Result<()> {
+    setsockopt(fd, c::IPPROTO_IPV6, IPV6_MTU_DISCOVER, value)
+}
+
+#[inline]
+pub(crate) fn ipv6_mtu_discover(fd: BorrowedFd<'_>) -> io::Result<Ipv6PathMtuDiscovery> {
+    getsockopt(fd, c::IPPROTO_IPV6, IPV6_MTU_DISCOVER)
 }
 
 #[inline]
