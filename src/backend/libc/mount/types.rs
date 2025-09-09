@@ -57,6 +57,7 @@ bitflags! {
         const SYNCHRONOUS = c::MS_SYNCHRONOUS;
 
         /// `MS_NOSYMFOLLOW`
+        #[cfg(linux_raw_dep)]
         const NOSYMFOLLOW = c::MS_NOSYMFOLLOW;
 
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>

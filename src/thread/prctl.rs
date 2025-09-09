@@ -23,9 +23,9 @@ use crate::ffi::{c_int, c_uint, c_void, CStr};
 use crate::io;
 use crate::io::Errno;
 use crate::pid::Pid;
-use crate::prctl::{
-    prctl_1arg, prctl_2args, prctl_3args, prctl_get_at_arg2_optional, PointerAuthenticationKeys,
-};
+#[cfg(linux_raw_dep)]
+use crate::prctl::PointerAuthenticationKeys;
+use crate::prctl::{prctl_1arg, prctl_2args, prctl_3args, prctl_get_at_arg2_optional};
 use crate::utils::as_ptr;
 
 use super::CapabilitySet;
@@ -851,6 +851,7 @@ const PR_PAC_RESET_KEYS: c_int = 54;
 ///
 /// [`prctl(PR_PAC_RESET_KEYS,…)`]: https://man7.org/linux/man-pages/man2/prctl.2.html
 #[inline]
+#[cfg(linux_raw_dep)]
 pub unsafe fn reset_pointer_authentication_keys(
     keys: Option<PointerAuthenticationKeys>,
 ) -> io::Result<()> {

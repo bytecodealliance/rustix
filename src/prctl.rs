@@ -10,6 +10,7 @@ use bitflags::bitflags;
 use core::mem::MaybeUninit;
 use core::ptr::null_mut;
 
+#[cfg(linux_raw_dep)]
 bitflags! {
     /// `PR_PAC_AP*`
     #[repr(transparent)]
