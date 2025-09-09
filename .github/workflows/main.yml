@@ -62,7 +62,7 @@ jobs:
         cargo update --package=lock_api --precise=0.4.12
         cargo update --package=rayon --precise=1.10.0
         cargo update --package=rayon-core --precise=1.12.1
-        cargo update --package=windows-sys --precise=0.60.0
+        cargo update --package=windows-sys@0.61.0 --precise=0.60.2
 
     - run: >
         rustup target add
@@ -545,7 +545,7 @@ jobs:
         cargo update --package=lock_api --precise=0.4.12
         cargo update --package=rayon --precise=1.10.0
         cargo update --package=rayon-core --precise=1.12.1
-        cargo update --package=windows-sys --precise=0.60.0
+        cargo update --package=windows-sys@0.61.0 --precise=0.60.2
 
     - run: |
         cargo test --verbose --features=all-apis --release --workspace -- --nocapture
