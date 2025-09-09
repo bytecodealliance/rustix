@@ -13,12 +13,12 @@ use core::ptr::{null_mut, read, NonNull};
 #[cfg(feature = "runtime")]
 use core::sync::atomic::AtomicBool;
 use core::sync::atomic::{AtomicPtr, AtomicUsize, Ordering};
-use linux_raw_sys::elf::*;
-use linux_raw_sys::general::{
+use linux_raw_sys::auxvec::{
     AT_CLKTCK, AT_EXECFN, AT_HWCAP, AT_HWCAP2, AT_MINSIGSTKSZ, AT_NULL, AT_PAGESZ, AT_SYSINFO_EHDR,
 };
 #[cfg(feature = "runtime")]
-use linux_raw_sys::general::{AT_ENTRY, AT_PHDR, AT_PHENT, AT_PHNUM, AT_RANDOM, AT_SECURE};
+use linux_raw_sys::auxvec::{AT_ENTRY, AT_PHDR, AT_PHENT, AT_PHNUM, AT_RANDOM, AT_SECURE};
+use linux_raw_sys::elf::*;
 
 #[cfg(feature = "param")]
 #[inline]
