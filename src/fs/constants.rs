@@ -347,7 +347,11 @@ mod tests {
             #[cfg(not(libc))] // not in libc yet
             check_renamed_struct_field!(Statx, statx, stx_atomic_write_segments_max);
             #[cfg(linux_raw)]
-            check_renamed_struct_field!(Statx, statx, __spare1);
+            check_renamed_struct_field!(Statx, statx, stx_dio_read_offset_align);
+            #[cfg(linux_raw)]
+            check_renamed_struct_field!(Statx, statx, stx_atomic_write_unit_max_opt);
+            #[cfg(linux_raw)]
+            check_renamed_struct_field!(Statx, statx, __spare2);
             #[cfg(linux_raw)]
             check_renamed_struct_field!(Statx, statx, __spare3);
         }

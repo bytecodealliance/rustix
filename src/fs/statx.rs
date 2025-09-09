@@ -44,8 +44,10 @@ pub struct Statx {
     pub stx_atomic_write_unit_min: u32,
     pub stx_atomic_write_unit_max: u32,
     pub stx_atomic_write_segments_max: u32,
-    pub(crate) __spare1: [u32; 1],
-    pub(crate) __spare3: [u64; 9],
+    pub stx_dio_read_offset_align: u32,
+    pub stx_atomic_write_unit_max_opt: u32,
+    pub __spare2: [u32; 1usize],
+    pub __spare3: [u64; 8usize],
 }
 
 /// `struct statx_timestamp` for use with [`Statx`].

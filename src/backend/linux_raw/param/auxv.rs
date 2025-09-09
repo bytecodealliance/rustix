@@ -20,14 +20,14 @@ use core::ptr::{null_mut, read_unaligned, NonNull};
 use core::sync::atomic::AtomicU8;
 use core::sync::atomic::Ordering::Relaxed;
 use core::sync::atomic::{AtomicPtr, AtomicUsize};
-use linux_raw_sys::elf::*;
-use linux_raw_sys::general::{
+use linux_raw_sys::auxvec::{
     AT_CLKTCK, AT_EXECFN, AT_HWCAP, AT_HWCAP2, AT_MINSIGSTKSZ, AT_NULL, AT_PAGESZ, AT_SYSINFO_EHDR,
 };
 #[cfg(feature = "runtime")]
-use linux_raw_sys::general::{
+use linux_raw_sys::auxvec::{
     AT_EGID, AT_ENTRY, AT_EUID, AT_GID, AT_PHDR, AT_PHENT, AT_PHNUM, AT_RANDOM, AT_SECURE, AT_UID,
 };
+use linux_raw_sys::elf::*;
 #[cfg(feature = "alloc")]
 use {alloc::borrow::Cow, alloc::vec};
 

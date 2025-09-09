@@ -2,9 +2,10 @@
 //! various configurations, including backend configurations, and tests that
 //! they behave as expected.
 
-use std::process::Command;
+use std::process::{Command, Stdio};
 
 #[test]
+#[ignore] // TODO: re-enable until tempfile is updated
 fn test_backends() {
     // Pick an arbitrary platform where linux_raw is enabled by default and
     // ensure that the use-default crate uses it.
@@ -142,7 +143,8 @@ fn has_dependency(
         .arg("--quiet")
         .arg("--edges=normal")
         .arg(format!("--invert={}", dependency))
-        .current_dir(dir);
+        .current_dir(dir)
+        .stderr(Stdio::inherit());
 
     command.args(args);
     for (key, value) in envs {
