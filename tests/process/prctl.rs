@@ -175,7 +175,9 @@ pub(crate) fn thread_has_capability(capability: CapabilitySet) -> io::Result<boo
         return Err(io::Error::last_os_error());
     }
 
-    let cap_index = capability.bits() as u32;
+    let cap_bits = capability.bits();
+    assert_eq!(cap_bits.count_ones(), 1);
+    let cap_index = cap_bits.leading_zeros();
     let (data_index, cap_index) = if cap_index < 32 {
         (0, cap_index)
     } else {
