@@ -73,6 +73,10 @@ impl FileHandle {
     fn as_mut_ptr(&mut self) -> *mut ffi::c_void {
         self.raw.as_mut_ptr() as *mut _
     }
+
+    fn as_ptr(&self) -> *const ffi::c_void {
+        self.raw.as_ptr() as *const _
+    }
 }
 
 /// An identifier for a mount that is returned by [`name_to_handle_at`].
@@ -141,6 +145,20 @@ pub fn name_to_handle_at<Fd: AsFd, P: path::Arg>(
 
         return ret.map(|_| (file_handle, mount_id));
     })
+}
+
+/// `open_by_handle_at(mount_fd, handle, flags)` - Open a file by filehandle.
+///
+/// # References
+///  - [Linux]
+///
+///  [Linux]: https://man7.org/linux/man-pages/man2/open_by_handle_at.2.html
+pub fn open_by_handle_at<Fd: AsFd>(
+    mount_fd: Fd,
+    handle: &FileHandle,
+    flags: OFlags,
+) -> io::Result<OwnedFd> {
+    backend::fs::syscalls::open_by_handle_at(mount_fd.as_fd(), handle.as_ptr(), flags)
 }
 
 #[cfg(test)]

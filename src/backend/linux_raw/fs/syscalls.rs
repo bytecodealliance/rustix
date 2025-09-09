@@ -1677,6 +1677,15 @@ pub(crate) fn name_to_handle_at(
     }
 }
 
+#[inline]
+pub(crate) fn open_by_handle_at(
+    mount_fd: BorrowedFd<'_>,
+    handle: *const core::ffi::c_void,
+    flags: OFlags,
+) -> io::Result<OwnedFd> {
+    unsafe { ret_owned_fd(syscall!(__NR_open_by_handle_at, mount_fd, handle, flags)) }
+}
+
 // Some linux_raw_sys structs have unsigned types for values which are
 // interpreted as signed. This defines a utility or casting to the
 // same-sized signed type.

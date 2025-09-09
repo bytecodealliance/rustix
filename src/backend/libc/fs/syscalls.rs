@@ -1912,6 +1912,29 @@ pub(crate) fn name_to_handle_at(
 }
 
 #[cfg(target_os = "linux")]
+pub(crate) fn open_by_handle_at(
+    mount_fd: BorrowedFd<'_>,
+    handle: *const core::ffi::c_void,
+    flags: OFlags,
+) -> io::Result<OwnedFd> {
+    syscall! {
+        fn open_by_handle_at(
+            mount_fd: c::c_int,
+            handle: *const ffi::c_void,
+            flags: u32
+        ) via SYS_open_by_handle_at -> c::c_int
+    }
+
+    unsafe {
+        ret_owned_fd(open_by_handle_at(
+            borrowed_fd(mount_fd),
+            handle,
+            flags.bits(),
+        ))
+    }
+}
+
+#[cfg(target_os = "linux")]
 pub(crate) fn sendfile(
     out_fd: BorrowedFd<'_>,
     in_fd: BorrowedFd<'_>,
