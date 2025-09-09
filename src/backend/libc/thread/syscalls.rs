@@ -398,9 +398,9 @@ pub(crate) fn setuid_thread(uid: crate::ugid::Uid) -> io::Result<()> {
 #[cfg(linux_kernel)]
 #[inline]
 pub(crate) fn setresuid_thread(
-    ruid: crate::ugid::Uid,
-    euid: crate::ugid::Uid,
-    suid: crate::ugid::Uid,
+    ruid: Option<crate::ugid::Uid>,
+    euid: Option<crate::ugid::Uid>,
+    suid: Option<crate::ugid::Uid>,
 ) -> io::Result<()> {
     #[cfg(any(target_arch = "x86", target_arch = "arm", target_arch = "sparc"))]
     const SYS: c::c_long = c::SYS_setresuid32 as c::c_long;
@@ -411,7 +411,13 @@ pub(crate) fn setresuid_thread(
         fn setresuid(ruid: c::uid_t, euid: c::uid_t, suid: c::uid_t) via SYS -> c::c_int
     }
 
-    unsafe { ret(setresuid(ruid.as_raw(), euid.as_raw(), suid.as_raw())) }
+    unsafe {
+        ret(setresuid(
+            ruid.map_or(-1_i32 as u32, |x| x.as_raw()),
+            euid.map_or(-1_i32 as u32, |x| x.as_raw()),
+            suid.map_or(-1_i32 as u32, |x| x.as_raw()),
+        ))
+    }
 }
 
 #[cfg(linux_kernel)]
@@ -427,9 +433,9 @@ pub(crate) fn setgid_thread(gid: crate::ugid::Gid) -> io::Result<()> {
 #[cfg(linux_kernel)]
 #[inline]
 pub(crate) fn setresgid_thread(
-    rgid: crate::ugid::Gid,
-    egid: crate::ugid::Gid,
-    sgid: crate::ugid::Gid,
+    rgid: Option<crate::ugid::Gid>,
+    egid: Option<crate::ugid::Gid>,
+    sgid: Option<crate::ugid::Gid>,
 ) -> io::Result<()> {
     #[cfg(any(target_arch = "x86", target_arch = "arm", target_arch = "sparc"))]
     const SYS: c::c_long = c::SYS_setresgid32 as c::c_long;
@@ -440,7 +446,13 @@ pub(crate) fn setresgid_thread(
         fn setresgid(rgid: c::gid_t, egid: c::gid_t, sgid: c::gid_t) via SYS -> c::c_int
     }
 
-    unsafe { ret(setresgid(rgid.as_raw(), egid.as_raw(), sgid.as_raw())) }
+    unsafe {
+        ret(setresgid(
+            rgid.map_or(-1_i32 as u32, |x| x.as_raw()),
+            egid.map_or(-1_i32 as u32, |x| x.as_raw()),
+            sgid.map_or(-1_i32 as u32, |x| x.as_raw()),
+        ))
+    }
 }
 
 /// # Safety
