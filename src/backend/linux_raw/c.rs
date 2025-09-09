@@ -117,10 +117,10 @@ pub(crate) use linux_raw_sys::{
     },
 };
 
-#[cfg(feature = "time")]
+#[cfg(any(feature = "io_uring", feature = "time", feature = "thread"))]
 pub use linux_raw_sys::general::__kernel_clockid_t as clockid_t;
 
-#[cfg(all(feature = "net", feature = "time"))]
+#[cfg(feature = "net")]
 pub use linux_raw_sys::net::{sock_txtime, SCM_TXTIME, SO_TXTIME};
 
 #[cfg(all(feature = "net", feature = "time"))]
