@@ -2,7 +2,7 @@
 //! various configurations, including backend configurations, and tests that
 //! they behave as expected.
 
-use std::process::Command;
+use std::process::{Command, Stdio};
 
 #[test]
 fn test_backends() {
@@ -142,7 +142,8 @@ fn has_dependency(
         .arg("--quiet")
         .arg("--edges=normal")
         .arg(format!("--invert={}", dependency))
-        .current_dir(dir);
+        .current_dir(dir)
+        .stderr(Stdio::inherit());
 
     command.args(args);
     for (key, value) in envs {
