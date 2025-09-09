@@ -570,6 +570,34 @@ fn test_socketopts_ipv6_mtu() {
     }
 }
 
+#[cfg(linux_kernel)]
+#[test]
+fn test_ip_mtu_discover() {
+    crate::init();
+
+    // IPv4
+    {
+        use sockopt::Ipv4PathMtuDiscovery as P;
+
+        let s = rustix::net::socket(AddressFamily::INET, SocketType::DGRAM, None).unwrap();
+        for val in [P::DONT, P::WANT, P::DO, P::PROBE, P::INTERFACE, P::OMIT] {
+            sockopt::set_ip_mtu_discover(&s, val).unwrap();
+            assert_eq!(sockopt::ip_mtu_discover(&s), Ok(val));
+        }
+    }
+
+    // IPv6
+    {
+        use sockopt::Ipv6PathMtuDiscovery as P;
+
+        let s = rustix::net::socket(AddressFamily::INET6, SocketType::DGRAM, None).unwrap();
+        for val in [P::DONT, P::WANT, P::DO, P::PROBE, P::INTERFACE, P::OMIT] {
+            sockopt::set_ipv6_mtu_discover(&s, val).unwrap();
+            assert_eq!(sockopt::ipv6_mtu_discover(&s), Ok(val));
+        }
+    }
+}
+
 #[test]
 fn test_sockopts_multicast_ifv4() {
     crate::init();
