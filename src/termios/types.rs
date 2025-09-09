@@ -275,7 +275,7 @@ bitflags! {
         const ICRNL = c::ICRNL;
 
         /// `IUCLC`
-        #[cfg(any(linux_kernel, solarish, target_os = "aix", target_os = "haiku", target_os = "nto"))]
+        #[cfg(any(linux_raw_dep, solarish, target_os = "aix", target_os = "haiku", target_os = "nto"))]
         const IUCLC = c::IUCLC;
 
         /// `IXON`
@@ -597,7 +597,7 @@ bitflags! {
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct LocalModes: types::tcflag_t {
         /// `XCASE`
-        #[cfg(any(linux_kernel, target_arch = "s390x", target_os = "haiku"))]
+        #[cfg(any(linux_raw_dep, target_arch = "s390x", target_os = "haiku"))]
         const XCASE = c::XCASE;
 
         /// `ECHOCTL`
