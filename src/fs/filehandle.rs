@@ -56,6 +56,16 @@ impl FileHandle {
         self.raw
     }
 
+    /// We allocate the "maximum" size for a file handle straight away in order to avoid needing
+    /// multiple syscalls / reallocations whenever possible. However, that leaves raw.len()
+    /// excessively high when the filehandle will usually be much smaller than MAX_HANDLE_SIZE.
+    /// This function "trims" the filehandle so that the slice is only as large as it needs to be.
+    fn trim(&mut self) {
+        let len = self.get_handle_bytes() + HANDLE_STRUCT_SIZE;
+
+        self.raw = Box::from(&self.raw[0..len]);
+    }
+
     /// Set the `handle_bytes` field (first 4 bytes of the struct) to the given length.
     fn set_handle_bytes(&mut self, size: usize) {
         self.raw[0..size_of::<ffi::c_uint>()].copy_from_slice(&(size as ffi::c_uint).to_ne_bytes());
@@ -142,6 +152,9 @@ pub fn name_to_handle_at<Fd: AsFd, P: path::Arg>(
         } else {
             MountId::Regular(mount_id_int)
         };
+
+        // Ensure the slice is only as large as it needs to be before returning it to the user.
+        file_handle.trim();
 
         return ret.map(|_| (file_handle, mount_id));
     })
