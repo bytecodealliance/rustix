@@ -320,6 +320,34 @@ bitflags! {
     }
 }
 
+#[cfg(target_os = "linux")]
+bitflags! {
+    /// `AT_*` constants for use with [`name_to_handle_at`]
+    ///
+    /// [`name_to_handle_at`]: crate::fs::name_to_handle_at
+    #[repr(transparent)]
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct HandleFlags: ffi::c_uint {
+        /// `AT_HANDLE_FID`
+        const FID = linux_raw_sys::general::AT_HANDLE_FID;
+
+        /// `AT_HANDLE_MNT_ID_UNIQUE`
+        const MNT_ID_UNIQUE = linux_raw_sys::general::AT_HANDLE_MNT_ID_UNIQUE;
+
+        /// `AT_HANDLE_CONNECTABLE`
+        const CONNECTABLE = linux_raw_sys::general::AT_HANDLE_CONNECTABLE;
+
+        /// `AT_SYMLINK_FOLLOW`
+        const SYMLINK_FOLLOW = linux_raw_sys::general::AT_SYMLINK_FOLLOW;
+
+        /// `AT_EMPTY_PATH`
+        const EMPTY_PATH = linux_raw_sys::general::AT_EMPTY_PATH;
+
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
+        const _ = !0;
+    }
+}
+
 /// `S_IF*` constants for use with [`mknodat`] and [`Stat`]'s `st_mode` field.
 ///
 /// [`mknodat`]: crate::fs::mknodat
