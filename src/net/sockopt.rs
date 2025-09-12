@@ -187,7 +187,7 @@ use crate::{backend, io};
 ))]
 use alloc::string::String;
 use backend::c;
-use backend::fd::AsFd;
+use backend::fd::{AsFd, OwnedFd};
 use core::time::Duration;
 
 /// Timeout identifier for use with [`set_socket_timeout`] and
@@ -1690,6 +1690,15 @@ pub fn tcp_cork<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
 #[doc(alias = "SO_PEERCRED")]
 pub fn socket_peercred<Fd: AsFd>(fd: Fd) -> io::Result<super::UCred> {
     backend::net::sockopt::socket_peercred(fd.as_fd())
+}
+
+///`getsockopt(fd, SOL_SOCKET, SO_PEERPIDFD)`—Get pidfd of Unix domain peer
+///
+/// Added in Linux 6.5.
+#[cfg(linux_kernel)]
+#[doc(alias = "SO_PEERPIDFD")]
+pub fn socket_peerpidfd<Fd: AsFd>(fd: Fd) -> io::Result<OwnedFd> {
+    backend::net::sockopt::socket_peerpidfd(fd.as_fd())
 }
 
 /// `getsockopt(fd, SOL_SOCKET, SO_TXTIME)` — Get transmission timing configuration.
