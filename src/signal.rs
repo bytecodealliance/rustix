@@ -171,7 +171,7 @@ impl Signal {
         target_os = "aix",
         target_os = "hermit",
         all(
-            linux_kernel,
+            linux_raw_dep,
             any(
                 target_arch = "mips",
                 target_arch = "mips32r6",
