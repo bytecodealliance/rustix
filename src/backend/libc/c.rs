@@ -67,7 +67,7 @@ pub(crate) const ETH_P_MCTP: c_int = linux_raw_sys::if_ether::ETH_P_MCTP as _;
 pub(crate) const MS_NOSYMFOLLOW: c_ulong = linux_raw_sys::general::MS_NOSYMFOLLOW as _;
 
 #[cfg(all(
-    linux_kernel,
+    linux_raw_dep,
     any(
         target_arch = "mips",
         target_arch = "mips32r6",
