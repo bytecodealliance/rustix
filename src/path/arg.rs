@@ -513,12 +513,12 @@ impl Arg for &CStr {
 impl Arg for &CString {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        unimplemented!()
+        self.to_str().map_err(|_utf8_err| io::Errno::INVAL)
     }
 
     #[inline]
     fn to_string_lossy(&self) -> Cow<'_, str> {
-        unimplemented!()
+        CStr::to_string_lossy(self)
     }
 
     #[inline]
