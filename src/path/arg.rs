@@ -229,7 +229,6 @@ impl Arg for String {
 }
 
 #[cfg(feature = "std")]
-#[cfg(any(not(target_os = "wasi"), not(target_env = "p2"), wasip2))]
 impl Arg for &OsStr {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -251,6 +250,9 @@ impl Arg for &OsStr {
     where
         Self: 'b,
     {
+        #[cfg(all(target_os = "wasi", target_env = "p2", not(wasip2)))]
+        return self.to_str().ok_or(io::Errno::INVAL)?.into_c_str();
+        #[cfg(any(wasip2, not(all(target_os = "wasi", target_env = "p2"))))]
         return self.as_bytes().into_c_str();
     }
 
@@ -260,12 +262,15 @@ impl Arg for &OsStr {
         Self: Sized,
         F: FnOnce(&CStr) -> io::Result<T>,
     {
+        #[cfg(all(target_os = "wasi", target_env = "p2", not(wasip2)))]
+        return self.as_str()?.into_with_c_str(f);
+
+        #[cfg(any(wasip2, not(all(target_os = "wasi", target_env = "p2"))))]
         return self.as_bytes().into_with_c_str(f);
     }
 }
 
 #[cfg(feature = "std")]
-#[cfg(any(not(target_os = "wasi"), not(target_env = "p2"), wasip2))]
 impl Arg for &OsString {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -322,6 +327,12 @@ impl Arg for OsString {
     where
         Self: 'b,
     {
+        #[cfg(all(target_os = "wasi", target_env = "p2", not(wasip2)))]
+        return self
+            .into_string()
+            .map_err(|_strng_err| io::Errno::INVAL)?
+            .into_c_str();
+        #[cfg(any(wasip2, not(all(target_os = "wasi", target_env = "p2"))))]
         self.into_vec().into_c_str()
     }
 
@@ -591,7 +602,6 @@ impl<'a> Arg for Cow<'a, str> {
 }
 
 #[cfg(feature = "std")]
-#[cfg(any(not(target_os = "wasi"), not(target_env = "p2"), wasip2))]
 impl<'a> Arg for Cow<'a, OsStr> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -666,7 +676,6 @@ impl<'a> Arg for Cow<'a, CStr> {
 }
 
 #[cfg(feature = "std")]
-#[cfg(any(not(target_os = "wasi"), not(target_env = "p2"), wasip2))]
 impl<'a> Arg for Component<'a> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -855,7 +864,6 @@ impl Arg for &Vec<u8> {
 }
 
 #[cfg(feature = "alloc")]
-#[cfg(any(not(target_os = "wasi"), not(target_env = "p2"), wasip2))]
 impl Arg for Vec<u8> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
