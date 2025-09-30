@@ -516,6 +516,7 @@ mod statx_flags {
     linux_like,
     linux_raw_dep,
     not(any(
+        target_os = "android",
         target_os = "emscripten",
         target_env = "gnu",
         all(target_arch = "loongarch64", target_env = "musl")
