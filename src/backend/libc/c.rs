@@ -66,19 +66,6 @@ pub(crate) const ETH_P_MCTP: c_int = linux_raw_sys::if_ether::ETH_P_MCTP as _;
 #[cfg(all(linux_raw_dep, feature = "mount"))]
 pub(crate) const MS_NOSYMFOLLOW: c_ulong = linux_raw_sys::general::MS_NOSYMFOLLOW as _;
 
-#[cfg(all(
-    linux_kernel,
-    any(
-        target_arch = "mips",
-        target_arch = "mips32r6",
-        target_arch = "mips64",
-        target_arch = "mips64r6",
-        target_arch = "sparc",
-        target_arch = "sparc64"
-    )
-))]
-pub(crate) const SIGEMT: c_int = linux_raw_sys::general::SIGEMT as _;
-
 // TODO: Upstream these.
 #[cfg(all(linux_raw_dep, feature = "termios"))]
 pub(crate) const IUCLC: tcflag_t = linux_raw_sys::general::IUCLC as _;
