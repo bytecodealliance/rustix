@@ -224,7 +224,7 @@ pub mod ffi;
 #[cfg_attr(docsrs, doc(cfg(feature = "fs")))]
 pub mod fs;
 pub mod io;
-#[cfg(linux_kernel)]
+#[cfg(all(linux_kernel, not(target_os = "android")))]
 #[cfg(feature = "io_uring")]
 #[cfg_attr(docsrs, doc(cfg(feature = "io_uring")))]
 pub mod io_uring;
