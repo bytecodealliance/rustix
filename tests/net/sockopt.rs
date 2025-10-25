@@ -9,10 +9,10 @@ use rustix::io;
     target_env = "newlib"
 ))]
 use rustix::net::ipproto;
-#[cfg(target_os = "linux")]
+#[cfg(all(target_os = "linux", feature = "time"))]
 use rustix::net::TxTimeFlags;
 use rustix::net::{sockopt, AddressFamily, SocketType};
-#[cfg(target_os = "linux")]
+#[cfg(all(target_os = "linux", feature = "time"))]
 use rustix::time::ClockId;
 use std::net::Ipv4Addr;
 use std::time::Duration;
@@ -668,7 +668,7 @@ fn test_sockopts_multicast_ifv6() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(all(target_os = "linux", feature = "time"))]
 fn test_sockopts_txtime() {
     crate::init();
 
