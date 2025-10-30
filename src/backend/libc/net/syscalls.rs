@@ -21,7 +21,6 @@ use core::ptr::null_mut;
     windows,
     target_os = "espidf",
     target_os = "horizon",
-    target_os = "redox",
     target_os = "vita"
 )))]
 use {
@@ -187,7 +186,6 @@ pub(crate) fn accept(sockfd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
     windows,
     target_os = "espidf",
     target_os = "horizon",
-    target_os = "redox",
     target_os = "vita"
 )))]
 pub(crate) fn recvmsg(
@@ -222,7 +220,6 @@ pub(crate) fn recvmsg(
     windows,
     target_os = "espidf",
     target_os = "horizon",
-    target_os = "redox",
     target_os = "vita"
 )))]
 pub(crate) fn sendmsg(
@@ -245,7 +242,6 @@ pub(crate) fn sendmsg(
     windows,
     target_os = "espidf",
     target_os = "horizon",
-    target_os = "redox",
     target_os = "vita"
 )))]
 pub(crate) fn sendmsg_addr(
