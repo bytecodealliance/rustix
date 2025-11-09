@@ -85,8 +85,14 @@ fn xattr_basic() {
             .raw_os_error(),
         enodata
     );
-    assert_eq!(rustix::fs::listxattr("Cargo.toml", &mut empty).unwrap(), 0);
-    assert_eq!(rustix::fs::llistxattr("Cargo.toml", &mut empty).unwrap(), 0);
+    assert_eq!(
+        rustix::fs::listxattr("Cargo.toml", &mut empty).unwrap(),
+        libc_listxattr("Cargo.toml")
+    );
+    assert_eq!(
+        rustix::fs::llistxattr("Cargo.toml", &mut empty).unwrap(),
+        libc_listxattr("Cargo.toml")
+    );
     assert_eq!(
         rustix::fs::removexattr("Cargo.toml", "user.test")
             .unwrap_err()
@@ -113,11 +119,36 @@ fn xattr_basic() {
             .raw_os_error(),
         enodata
     );
-    assert_eq!(rustix::fs::flistxattr(&file, &mut empty).unwrap(), 0);
+    assert_eq!(
+        rustix::fs::flistxattr(&file, &mut empty).unwrap(),
+        libc_listxattr("Cargo.toml")
+    );
     assert_eq!(
         rustix::fs::fremovexattr(&file, "user.test")
             .unwrap_err()
             .raw_os_error(),
         enodata
     );
+}
+
+/// To check the correctness of the tested implementations of *listxattr(), their output can be
+/// compared to an external implementation, in this case listxattr() from the libc crate.
+fn libc_listxattr(path: &str) -> usize {
+    let path = std::ffi::CString::new(path).unwrap();
+    let path: *const _ = path.as_ptr();
+
+    let list = std::ffi::CString::new("").unwrap();
+    let list = list.as_ptr() as *mut _;
+
+    ({
+        #[cfg(not(apple))]
+        unsafe {
+            libc::listxattr(path, list, 0)
+        }
+
+        #[cfg(apple)]
+        unsafe {
+            libc::listxattr(path, list, 0, 0)
+        }
+    }) as usize
 }
