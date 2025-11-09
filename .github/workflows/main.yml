@@ -55,6 +55,7 @@ jobs:
         cargo update --package=regex --precise=1.9.0
         cargo update --package=half --precise=2.2.1
         cargo update --package=flate2 --precise=1.0.35
+        cargo update --package=syn --precise=2.0.106
         cargo update --package=textwrap --precise=0.16.1
         cargo update --package=once_cell --precise=1.20.3
         cargo update --package=parking_lot --precise=0.12.3
@@ -62,7 +63,7 @@ jobs:
         cargo update --package=lock_api --precise=0.4.12
         cargo update --package=rayon --precise=1.10.0
         cargo update --package=rayon-core --precise=1.12.1
-        cargo update --package=windows-sys@0.61.0 --precise=0.60.2
+        cargo update --package=windows-sys@0.61.2 --precise=0.60.2
 
     - run: >
         rustup target add
@@ -538,6 +539,7 @@ jobs:
         cargo update --package=regex --precise=1.9.0
         cargo update --package=half --precise=2.2.1
         cargo update --package=flate2 --precise=1.0.35
+        cargo update --package=syn --precise=2.0.106
         cargo update --package=textwrap --precise=0.16.1
         cargo update --package=once_cell --precise=1.20.3
         cargo update --package=parking_lot --precise=0.12.3
@@ -545,7 +547,7 @@ jobs:
         cargo update --package=lock_api --precise=0.4.12
         cargo update --package=rayon --precise=1.10.0
         cargo update --package=rayon-core --precise=1.12.1
-        cargo update --package=windows-sys@0.61.0 --precise=0.60.2
+        cargo update --package=windows-sys@0.61.2 --precise=0.60.2
 
     - run: |
         cargo test --verbose --features=all-apis --release --workspace -- --nocapture
