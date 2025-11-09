@@ -237,7 +237,8 @@ jobs:
     - run: cargo check -Z build-std --target=x86_64-pc-nto-qnx710 --features=all-apis
     # Temporarily disable due to build errors on nightly.
     # - run: cargo check -Z build-std --target=armv6k-nintendo-3ds --all-features
-    - run: cargo check -Z build-std --target=armv7-sony-vita-newlibeabihf --features=all-apis
+    # Temporarily disable due to build errors on nightly.
+    # - run: cargo check -Z build-std --target=armv7-sony-vita-newlibeabihf --features=all-apis
     # Temporarily disable due to build errors on nightly.
     # - run: cargo check -Z build-std --target=powerpc64-ibm-aix --features=all-apis
     - run: cargo check -Z build-std --target=mipsel-unknown-linux-gnu --features=all-apis
