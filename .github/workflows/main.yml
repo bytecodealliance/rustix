@@ -25,14 +25,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [stable, nightly-2025-06-23, 1.63]
+        build: [stable, nightly, 1.63]
         include:
           - build: stable
             os: ubuntu-latest
             rust: stable
-          - build: nightly-2025-06-23
+          - build: nightly
             os: ubuntu-latest
-            rust: nightly-2025-06-23
+            rust: nightly
           - build: 1.63
             os: ubuntu-latest
             rust: 1.63
@@ -149,11 +149,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [nightly-2025-06-23]
+        build: [nightly]
         include:
-          - build: nightly-2025-06-23
+          - build: nightly
             os: ubuntu-latest
-            rust: nightly-2025-06-23
+            rust: nightly
 
     env:
       # -D warnings is commented out in our install-rust action; re-add it here.
@@ -181,11 +181,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [nightly-2025-06-23]
+        build: [nightly]
         include:
-          - build: nightly-2025-06-23
+          - build: nightly
             os: ubuntu-latest
-            rust: nightly-2025-06-23
+            rust: nightly
 
     steps:
     - uses: actions/checkout@v4
@@ -206,11 +206,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [nightly-2025-06-23]
+        build: [nightly]
         include:
-          - build: nightly-2025-06-23
+          - build: nightly
             os: ubuntu-latest
-            rust: nightly-2025-06-23
+            rust: nightly
 
     steps:
     - uses: actions/checkout@v4
@@ -259,20 +259,20 @@ jobs:
         include:
           - build: ubuntu
             os: ubuntu-latest
-            rust: nightly-2025-06-23
+            rust: nightly
           - build: ubuntu-22.04
             os: ubuntu-22.04
-            rust: nightly-2025-06-23
+            rust: nightly
           - build: i686-linux
             os: ubuntu-latest
-            rust: nightly-2025-06-23
+            rust: nightly
             target: i686-unknown-linux-gnu
             gcc_package: gcc-i686-linux-gnu
             gcc: i686-linux-gnu-gcc
             libc_package: libc-dev-i386-cross
           - build: aarch64-linux
             os: ubuntu-latest
-            rust: nightly-2025-06-23
+            rust: nightly
             target: aarch64-unknown-linux-gnu
             gcc_package: gcc-aarch64-linux-gnu
             gcc: aarch64-linux-gnu-gcc
@@ -281,7 +281,7 @@ jobs:
             qemu_target: aarch64-linux-user
           - build: powerpc-linux
             os: ubuntu-latest
-            rust: nightly-2025-06-23
+            rust: nightly
             target: powerpc-unknown-linux-gnu
             gcc_package: gcc-powerpc-linux-gnu
             gcc: powerpc-linux-gnu-gcc
@@ -290,7 +290,7 @@ jobs:
             qemu_target: ppc-linux-user
           - build: powerpc64le-linux
             os: ubuntu-latest
-            rust: nightly-2025-06-23
+            rust: nightly
             target: powerpc64le-unknown-linux-gnu
             gcc_package: gcc-powerpc64le-linux-gnu
             gcc: powerpc64le-linux-gnu-gcc
@@ -299,7 +299,7 @@ jobs:
             qemu_target: ppc64le-linux-user
           - build: riscv64-linux
             os: ubuntu-latest
-            rust: nightly-2025-06-23
+            rust: nightly
             target: riscv64gc-unknown-linux-gnu
             gcc_package: gcc-riscv64-linux-gnu
             gcc: riscv64-linux-gnu-gcc
@@ -308,7 +308,7 @@ jobs:
             qemu_target: riscv64-linux-user
           - build: s390x-linux
             os: ubuntu-latest
-            rust: nightly-2025-06-23
+            rust: nightly
             target: s390x-unknown-linux-gnu
             gcc_package: gcc-s390x-linux-gnu
             gcc: s390x-linux-gnu-gcc
@@ -317,7 +317,7 @@ jobs:
             qemu_target: s390x-linux-user
           - build: arm-linux
             os: ubuntu-latest
-            rust: nightly-2025-06-23
+            rust: nightly
             target: armv5te-unknown-linux-gnueabi
             gcc_package: gcc-arm-linux-gnueabi
             gcc: arm-linux-gnueabi-gcc
@@ -460,7 +460,7 @@ jobs:
             rust: stable
           - build: windows
             os: windows-latest
-            rust: nightly-2025-06-23
+            rust: nightly
           - build: musl
             os: ubuntu-latest
             rust: stable
@@ -715,7 +715,7 @@ jobs:
         include:
           - build: powerpc-linux
             os: ubuntu-latest
-            rust: nightly-2025-06-23
+            rust: nightly
             target: powerpc-unknown-linux-gnu
             gcc_package: gcc-powerpc-linux-gnu
             gcc: powerpc-linux-gnu-gcc
@@ -724,7 +724,7 @@ jobs:
             qemu_target: ppc-linux-user
           - build: powerpc64le-linux
             os: ubuntu-latest
-            rust: nightly-2025-06-23
+            rust: nightly
             target: powerpc64le-unknown-linux-gnu
             gcc_package: gcc-powerpc64le-linux-gnu
             gcc: powerpc64le-linux-gnu-gcc
@@ -733,7 +733,7 @@ jobs:
             qemu_target: ppc64le-linux-user
           - build: s390x-linux
             os: ubuntu-latest
-            rust: nightly-2025-06-23
+            rust: nightly
             target: s390x-unknown-linux-gnu
             gcc_package: gcc-s390x-linux-gnu
             gcc: s390x-linux-gnu-gcc
