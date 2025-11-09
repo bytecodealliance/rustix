@@ -15,7 +15,7 @@ fn do_register<FD>(
     fd: FD,
     registered_fd: bool,
     opcode: IoringRegisterOp,
-    arg: *const c_void,
+    arg: *mut c_void,
     arg_nr: u32,
 ) -> Result<()>
 where
@@ -27,8 +27,10 @@ where
         IoringRegisterFlags::default()
     };
 
+    // Cast `arg` to `*const c_void` to match the current API. See
+    // <https://github.com/bytecodealliance/rustix/issues/1545>.
     unsafe {
-        io_uring_register_with(fd, opcode, flags, arg, arg_nr)?;
+        io_uring_register_with(fd, opcode, flags, arg as *const c_void, arg_nr)?;
     }
 
     Ok(())
@@ -43,7 +45,7 @@ fn register_ring(fd: BorrowedFd<'_>) -> Result<BorrowedFd<'_>> {
         fd,
         false,
         IoringRegisterOp::RegisterRingFds,
-        (&update as *const io_uring_rsrc_update).cast::<c_void>(),
+        (&mut update as *mut io_uring_rsrc_update).cast::<c_void>(),
         1,
     )?;
 
@@ -63,7 +65,7 @@ where
         fd,
         true,
         IoringRegisterOp::UnregisterRingFds,
-        (&update as *const io_uring_rsrc_update).cast::<c_void>(),
+        (&update as *const io_uring_rsrc_update as *mut io_uring_rsrc_update).cast::<c_void>(),
         1,
     )?;
 
@@ -81,7 +83,7 @@ where
         fd,
         true,
         IoringRegisterOp::RegisterIowqMaxWorkers,
-        (&iowq_max_workers as *const [u32; 2]).cast::<c_void>(),
+        (&iowq_max_workers as *const [u32; 2] as *mut [u32; 2]).cast::<c_void>(),
         2,
     )?;
 
@@ -96,7 +98,7 @@ where
         fd,
         false,
         IoringRegisterOp::RegisterPbufRing,
-        (reg as *const io_uring_buf_reg).cast::<c_void>(),
+        (reg as *const io_uring_buf_reg as *mut io_uring_buf_reg).cast::<c_void>(),
         1,
     )
 }
