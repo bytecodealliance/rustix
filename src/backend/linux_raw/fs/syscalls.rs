@@ -513,6 +513,10 @@ pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     unsafe {
         let mut result = MaybeUninit::<Stat>::uninit();
         ret(syscall!(__NR_fstat, fd, &mut result))?;
+
+        #[cfg(sanitize_memory)]
+        crate::msan::unpoison_maybe_uninit(&result);
+
         Ok(result.assume_init())
     }
 }

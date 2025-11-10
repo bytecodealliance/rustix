@@ -262,6 +262,7 @@ check-cfg = [
     'cfg(linux_raw)',
     'cfg(linux_raw_dep)',
     'cfg(lower_upper_exp_for_non_zero)',
+    'cfg(sanitize_memory)',
     'cfg(netbsdlike)',
     'cfg(rustc_attrs)',
     'cfg(rustc_diagnostics)',

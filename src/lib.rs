@@ -178,6 +178,8 @@ pub(crate) mod maybe_polyfill;
 pub(crate) mod check_types;
 #[macro_use]
 pub(crate) mod bitcast;
+#[cfg(sanitize_memory)]
+pub(crate) mod msan;
 
 // linux_raw: Weak symbols are used by the use-libc-auxv feature for
 // glibc 2.15 support.
