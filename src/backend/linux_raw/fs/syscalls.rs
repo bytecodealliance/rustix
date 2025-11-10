@@ -16,10 +16,7 @@ use crate::backend::conv::fs::oflags_for_open_how;
     target_arch = "mips32r6",
     all(
         target_pointer_width = "32",
-        any(
-            target_arch = "arm",
-            target_arch = "powerpc"
-        ),
+        any(target_arch = "arm", target_arch = "powerpc"),
     )
 ))]
 use crate::backend::conv::zero;
