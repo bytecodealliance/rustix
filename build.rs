@@ -117,7 +117,7 @@ fn main() {
             || arch.starts_with("mips"))
             && !rustix_use_experimental_asm);
     if libc {
-        if os != "android" && os == "linux" && !cfg_no_linux_raw {
+        if (os == "linux" || os == "android") && !cfg_no_linux_raw {
             use_feature("linux_raw_dep");
         }
 
