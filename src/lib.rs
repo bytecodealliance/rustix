@@ -194,7 +194,6 @@ mod weak;
 // Pick the backend implementation to use.
 #[cfg_attr(libc, path = "backend/libc/mod.rs")]
 #[cfg_attr(linux_raw, path = "backend/linux_raw/mod.rs")]
-#[cfg_attr(wasi, path = "backend/wasi/mod.rs")]
 mod backend;
 
 /// Export the `*Fd` types and traits that are used in rustix's public API.

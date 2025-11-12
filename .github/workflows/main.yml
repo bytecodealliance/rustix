@@ -25,14 +25,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [stable, nightly-2025-06-23, 1.63]
+        build: [stable, nightly, 1.63]
         include:
           - build: stable
             os: ubuntu-latest
             rust: stable
-          - build: nightly-2025-06-23
+          - build: nightly
             os: ubuntu-latest
-            rust: nightly-2025-06-23
+            rust: nightly
           - build: 1.63
             os: ubuntu-latest
             rust: 1.63
@@ -55,6 +55,7 @@ jobs:
         cargo update --package=regex --precise=1.9.0
         cargo update --package=half --precise=2.2.1
         cargo update --package=flate2 --precise=1.0.35
+        cargo update --package=syn --precise=2.0.106
         cargo update --package=textwrap --precise=0.16.1
         cargo update --package=once_cell --precise=1.20.3
         cargo update --package=parking_lot --precise=0.12.3
@@ -62,7 +63,8 @@ jobs:
         cargo update --package=lock_api --precise=0.4.12
         cargo update --package=rayon --precise=1.10.0
         cargo update --package=rayon-core --precise=1.12.1
-        cargo update --package=windows-sys@0.61.0 --precise=0.60.2
+        cargo update --package=windows-sys@0.61.2 --precise=0.60.2
+        cargo update --package=quote --precise=1.0.41
 
     - run: >
         rustup target add
@@ -147,11 +149,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [nightly-2025-06-23]
+        build: [nightly]
         include:
-          - build: nightly-2025-06-23
+          - build: nightly
             os: ubuntu-latest
-            rust: nightly-2025-06-23
+            rust: nightly
 
     env:
       # -D warnings is commented out in our install-rust action; re-add it here.
@@ -179,11 +181,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [nightly-2025-06-23]
+        build: [nightly]
         include:
-          - build: nightly-2025-06-23
+          - build: nightly
             os: ubuntu-latest
-            rust: nightly-2025-06-23
+            rust: nightly
 
     steps:
     - uses: actions/checkout@v4
@@ -204,11 +206,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [nightly-2025-06-23]
+        build: [nightly]
         include:
-          - build: nightly-2025-06-23
+          - build: nightly
             os: ubuntu-latest
-            rust: nightly-2025-06-23
+            rust: nightly
 
     steps:
     - uses: actions/checkout@v4
@@ -233,8 +235,10 @@ jobs:
     - run: cargo check -Z build-std --target=riscv32imc-esp-espidf --features=all-apis
     - run: cargo check -Z build-std --target=aarch64-unknown-nto-qnx710 --features=all-apis
     - run: cargo check -Z build-std --target=x86_64-pc-nto-qnx710 --features=all-apis
-    - run: cargo check -Z build-std --target=armv6k-nintendo-3ds --all-features
-    - run: cargo check -Z build-std --target=armv7-sony-vita-newlibeabihf --features=all-apis
+    # Temporarily disable due to build errors on nightly.
+    # - run: cargo check -Z build-std --target=armv6k-nintendo-3ds --all-features
+    # Temporarily disable due to build errors on nightly.
+    # - run: cargo check -Z build-std --target=armv7-sony-vita-newlibeabihf --features=all-apis
     # Temporarily disable due to build errors on nightly.
     # - run: cargo check -Z build-std --target=powerpc64-ibm-aix --features=all-apis
     - run: cargo check -Z build-std --target=mipsel-unknown-linux-gnu --features=all-apis
@@ -257,20 +261,20 @@ jobs:
         include:
           - build: ubuntu
             os: ubuntu-latest
-            rust: nightly-2025-06-23
+            rust: nightly
           - build: ubuntu-22.04
             os: ubuntu-22.04
-            rust: nightly-2025-06-23
+            rust: nightly
           - build: i686-linux
             os: ubuntu-latest
-            rust: nightly-2025-06-23
+            rust: nightly
             target: i686-unknown-linux-gnu
             gcc_package: gcc-i686-linux-gnu
             gcc: i686-linux-gnu-gcc
             libc_package: libc-dev-i386-cross
           - build: aarch64-linux
             os: ubuntu-latest
-            rust: nightly-2025-06-23
+            rust: nightly
             target: aarch64-unknown-linux-gnu
             gcc_package: gcc-aarch64-linux-gnu
             gcc: aarch64-linux-gnu-gcc
@@ -279,7 +283,7 @@ jobs:
             qemu_target: aarch64-linux-user
           - build: powerpc-linux
             os: ubuntu-latest
-            rust: nightly-2025-06-23
+            rust: nightly
             target: powerpc-unknown-linux-gnu
             gcc_package: gcc-powerpc-linux-gnu
             gcc: powerpc-linux-gnu-gcc
@@ -288,7 +292,7 @@ jobs:
             qemu_target: ppc-linux-user
           - build: powerpc64le-linux
             os: ubuntu-latest
-            rust: nightly-2025-06-23
+            rust: nightly
             target: powerpc64le-unknown-linux-gnu
             gcc_package: gcc-powerpc64le-linux-gnu
             gcc: powerpc64le-linux-gnu-gcc
@@ -297,7 +301,7 @@ jobs:
             qemu_target: ppc64le-linux-user
           - build: riscv64-linux
             os: ubuntu-latest
-            rust: nightly-2025-06-23
+            rust: nightly
             target: riscv64gc-unknown-linux-gnu
             gcc_package: gcc-riscv64-linux-gnu
             gcc: riscv64-linux-gnu-gcc
@@ -306,7 +310,7 @@ jobs:
             qemu_target: riscv64-linux-user
           - build: s390x-linux
             os: ubuntu-latest
-            rust: nightly-2025-06-23
+            rust: nightly
             target: s390x-unknown-linux-gnu
             gcc_package: gcc-s390x-linux-gnu
             gcc: s390x-linux-gnu-gcc
@@ -315,7 +319,7 @@ jobs:
             qemu_target: s390x-linux-user
           - build: arm-linux
             os: ubuntu-latest
-            rust: nightly-2025-06-23
+            rust: nightly
             target: armv5te-unknown-linux-gnueabi
             gcc_package: gcc-arm-linux-gnueabi
             gcc: arm-linux-gnueabi-gcc
@@ -458,7 +462,7 @@ jobs:
             rust: stable
           - build: windows
             os: windows-latest
-            rust: nightly-2025-06-23
+            rust: nightly
           - build: musl
             os: ubuntu-latest
             rust: stable
@@ -538,6 +542,7 @@ jobs:
         cargo update --package=regex --precise=1.9.0
         cargo update --package=half --precise=2.2.1
         cargo update --package=flate2 --precise=1.0.35
+        cargo update --package=syn --precise=2.0.106
         cargo update --package=textwrap --precise=0.16.1
         cargo update --package=once_cell --precise=1.20.3
         cargo update --package=parking_lot --precise=0.12.3
@@ -545,7 +550,8 @@ jobs:
         cargo update --package=lock_api --precise=0.4.12
         cargo update --package=rayon --precise=1.10.0
         cargo update --package=rayon-core --precise=1.12.1
-        cargo update --package=windows-sys@0.61.0 --precise=0.60.2
+        cargo update --package=windows-sys@0.61.2 --precise=0.60.2
+        cargo update --package=quote --precise=1.0.41
 
     - run: |
         cargo test --verbose --features=all-apis --release --workspace -- --nocapture
@@ -711,7 +717,7 @@ jobs:
         include:
           - build: powerpc-linux
             os: ubuntu-latest
-            rust: nightly-2025-06-23
+            rust: nightly
             target: powerpc-unknown-linux-gnu
             gcc_package: gcc-powerpc-linux-gnu
             gcc: powerpc-linux-gnu-gcc
@@ -720,7 +726,7 @@ jobs:
             qemu_target: ppc-linux-user
           - build: powerpc64le-linux
             os: ubuntu-latest
-            rust: nightly-2025-06-23
+            rust: nightly
             target: powerpc64le-unknown-linux-gnu
             gcc_package: gcc-powerpc64le-linux-gnu
             gcc: powerpc64le-linux-gnu-gcc
@@ -729,7 +735,7 @@ jobs:
             qemu_target: ppc64le-linux-user
           - build: s390x-linux
             os: ubuntu-latest
-            rust: nightly-2025-06-23
+            rust: nightly
             target: s390x-unknown-linux-gnu
             gcc_package: gcc-s390x-linux-gnu
             gcc: s390x-linux-gnu-gcc

@@ -16,6 +16,7 @@ use core::mem::zeroed;
     not(any(windows, target_os = "espidf", target_os = "wasi")),
     any(
         target_os = "android",
+        target_os = "redox",
         all(
             target_os = "linux",
             not(target_env = "musl"),
@@ -30,15 +31,10 @@ fn msg_iov_len(len: usize) -> c::size_t {
 
 /// Convert the value to the `msg_iovlen` field of a `msghdr` struct.
 #[cfg(all(
-    not(any(
-        windows,
-        target_os = "espidf",
-        target_os = "redox",
-        target_os = "vita",
-        target_os = "wasi"
-    )),
+    not(any(windows, target_os = "espidf", target_os = "vita", target_os = "wasi")),
     not(any(
         target_os = "android",
+        target_os = "redox",
         all(
             target_os = "linux",
             not(target_env = "musl"),
@@ -83,7 +79,6 @@ fn msg_control_len(len: usize) -> c::socklen_t {
     target_os = "haiku",
     target_os = "hurd",
     target_os = "nto",
-    target_os = "redox",
     target_os = "vita",
     target_os = "wasi",
 )))]
@@ -179,7 +174,7 @@ pub(crate) unsafe fn with_msghdr<R>(
 }
 
 /// Create a zero-initialized message header struct value.
-#[cfg(all(unix, not(target_os = "redox")))]
+#[cfg(unix)]
 pub(crate) fn zero_msghdr() -> c::msghdr {
     // SAFETY: We can't initialize all the fields by value because on some
     // platforms the `msghdr` struct in the libc crate contains private padding

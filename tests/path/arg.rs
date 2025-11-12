@@ -16,126 +16,243 @@ fn test_arg() {
     let t: &str = "hello";
     assert_eq!("hello", Arg::as_str(&t).unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.into_c_str().unwrap()));
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::<CStr>::borrow(&t.as_cow_c_str().unwrap())
+    );
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::<CStr>::borrow(&t.into_c_str().unwrap())
+    );
 
     let t: String = "hello".to_owned();
     assert_eq!("hello", Arg::as_str(&t).unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.into_c_str().unwrap()));
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::<CStr>::borrow(&t.as_cow_c_str().unwrap())
+    );
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::<CStr>::borrow(&t.into_c_str().unwrap())
+    );
 
     let t: &OsStr = OsStr::new("hello");
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.into_c_str().unwrap()));
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::<CStr>::borrow(&t.as_cow_c_str().unwrap())
+    );
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::<CStr>::borrow(&t.into_c_str().unwrap())
+    );
 
     let t: OsString = OsString::from("hello".to_owned());
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.into_c_str().unwrap()));
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::<CStr>::borrow(&t.as_cow_c_str().unwrap())
+    );
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::<CStr>::borrow(&t.into_c_str().unwrap())
+    );
 
     let t: &Path = Path::new("hello");
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.into_c_str().unwrap()));
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::<CStr>::borrow(&t.as_cow_c_str().unwrap())
+    );
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::<CStr>::borrow(&t.into_c_str().unwrap())
+    );
 
     let t: PathBuf = PathBuf::from("hello".to_owned());
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.into_c_str().unwrap()));
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::<CStr>::borrow(&t.as_cow_c_str().unwrap())
+    );
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::<CStr>::borrow(&t.into_c_str().unwrap())
+    );
 
     let t: &CStr = cstr!("hello");
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.into_c_str().unwrap()));
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::<CStr>::borrow(&t.as_cow_c_str().unwrap())
+    );
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::<CStr>::borrow(&t.into_c_str().unwrap())
+    );
 
     let t: CString = cstr!("hello").to_owned();
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
     assert_eq!(
         cstr!("hello"),
-        Borrow::borrow(&Arg::as_cow_c_str(&t).unwrap())
+        Borrow::<CStr>::borrow(&Arg::as_cow_c_str(&t).unwrap())
     );
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.into_c_str().unwrap()));
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::<CStr>::borrow(&t.into_c_str().unwrap())
+    );
 
     let t: Components<'_> = Path::new("hello").components();
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.into_c_str().unwrap()));
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::<CStr>::borrow(&t.as_cow_c_str().unwrap())
+    );
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::<CStr>::borrow(&t.into_c_str().unwrap())
+    );
 
     let t: Component<'_> = Path::new("hello").components().next().unwrap();
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.into_c_str().unwrap()));
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::<CStr>::borrow(&t.as_cow_c_str().unwrap())
+    );
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::<CStr>::borrow(&t.into_c_str().unwrap())
+    );
 
     let t: Iter<'_> = Path::new("hello").iter();
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.into_c_str().unwrap()));
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::<CStr>::borrow(&t.as_cow_c_str().unwrap())
+    );
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::<CStr>::borrow(&t.into_c_str().unwrap())
+    );
 
     let t: Cow<'_, str> = Cow::Borrowed("hello");
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.into_c_str().unwrap()));
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::<CStr>::borrow(&t.as_cow_c_str().unwrap())
+    );
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::<CStr>::borrow(&t.into_c_str().unwrap())
+    );
 
     let t: Cow<'_, str> = Cow::Owned("hello".to_owned());
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.into_c_str().unwrap()));
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::<CStr>::borrow(&t.as_cow_c_str().unwrap())
+    );
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::<CStr>::borrow(&t.into_c_str().unwrap())
+    );
 
     let t: Cow<'_, OsStr> = Cow::Borrowed(OsStr::new("hello"));
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.into_c_str().unwrap()));
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::<CStr>::borrow(&t.as_cow_c_str().unwrap())
+    );
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::<CStr>::borrow(&t.into_c_str().unwrap())
+    );
 
     let t: Cow<'_, OsStr> = Cow::Owned(OsString::from("hello".to_owned()));
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.into_c_str().unwrap()));
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::<CStr>::borrow(&t.as_cow_c_str().unwrap())
+    );
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::<CStr>::borrow(&t.into_c_str().unwrap())
+    );
 
     let t: Cow<'_, CStr> = Cow::Borrowed(cstr!("hello"));
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.into_c_str().unwrap()));
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::<CStr>::borrow(&t.as_cow_c_str().unwrap())
+    );
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::<CStr>::borrow(&t.into_c_str().unwrap())
+    );
 
     let t: Cow<'_, CStr> = Cow::Owned(cstr!("hello").to_owned());
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.into_c_str().unwrap()));
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::<CStr>::borrow(&t.as_cow_c_str().unwrap())
+    );
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::<CStr>::borrow(&t.into_c_str().unwrap())
+    );
 
     let t: &[u8] = b"hello";
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.into_c_str().unwrap()));
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::<CStr>::borrow(&t.as_cow_c_str().unwrap())
+    );
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::<CStr>::borrow(&t.into_c_str().unwrap())
+    );
 
     let t: Vec<u8> = b"hello".to_vec();
     assert_eq!("hello", t.as_str().unwrap());
     assert_eq!("hello".to_owned(), Arg::to_string_lossy(&t));
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
-    assert_eq!(cstr!("hello"), Borrow::borrow(&t.into_c_str().unwrap()));
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::<CStr>::borrow(&t.as_cow_c_str().unwrap())
+    );
+    assert_eq!(
+        cstr!("hello"),
+        Borrow::<CStr>::borrow(&t.into_c_str().unwrap())
+    );
 
     let t: DecInt = DecInt::new(43110);
     assert_eq!("43110", t.as_str());
     assert_eq!("43110".to_owned(), Arg::to_string_lossy(&t));
-    assert_eq!(cstr!("43110"), Borrow::borrow(&t.as_cow_c_str().unwrap()));
+    assert_eq!(
+        cstr!("43110"),
+        Borrow::<CStr>::borrow(&t.as_cow_c_str().unwrap())
+    );
     assert_eq!(cstr!("43110"), t.as_c_str());
-    assert_eq!(cstr!("43110"), Borrow::borrow(&t.into_c_str().unwrap()));
+    assert_eq!(
+        cstr!("43110"),
+        Borrow::<CStr>::borrow(&t.into_c_str().unwrap())
+    );
 }
 
 #[test]

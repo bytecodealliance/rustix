@@ -28,22 +28,23 @@ fn encode_decode() {
 fn test_unix_addr() {
     use rustix::cstr;
     use rustix::net::SocketAddrUnix;
+    use std::borrow::Cow;
 
     assert_eq!(
         SocketAddrUnix::new("/").unwrap().path().unwrap(),
-        cstr!("/").into()
+        Cow::from(cstr!("/"))
     );
     assert_eq!(
         SocketAddrUnix::new("//").unwrap().path().unwrap(),
-        cstr!("//").into()
+        Cow::from(cstr!("//"))
     );
     assert_eq!(
         SocketAddrUnix::new("/foo/bar").unwrap().path().unwrap(),
-        cstr!("/foo/bar").into()
+        Cow::from(cstr!("/foo/bar"))
     );
     assert_eq!(
         SocketAddrUnix::new("foo").unwrap().path().unwrap(),
-        cstr!("foo").into()
+        Cow::from(cstr!("foo"))
     );
     SocketAddrUnix::new("/foo\0/bar").unwrap_err();
     assert!(SocketAddrUnix::new("").unwrap().path().is_none());

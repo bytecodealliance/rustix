@@ -36,8 +36,8 @@ macro_rules! cstr {
         // We don't use std's `CStr::from_bytes_with_nul`; as of this writing,
         // that function isn't defined as `#[inline]` in std and doesn't
         // constant-fold away.
-        assert!(
-            !$str.bytes().any(|b| b == b'\0'),
+        ::core::assert!(
+            !::core::iter::Iterator::any(&mut ::core::primitive::str::bytes($str), |b| b == b'\0'),
             "cstr argument contains embedded NUL bytes",
         );
 
@@ -51,7 +51,9 @@ macro_rules! cstr {
             // contain embedded NULs above, and we append or own NUL terminator
             // here.
             unsafe {
-                $crate::ffi::CStr::from_bytes_with_nul_unchecked(concat!($str, "\0").as_bytes())
+                $crate::ffi::CStr::from_bytes_with_nul_unchecked(
+                    ::core::concat!($str, "\0").as_bytes(),
+                )
             }
         }
     }};
@@ -82,5 +84,26 @@ mod tests {
     #[should_panic]
     fn test_invalid_empty_cstr() {
         let _ = cstr!("\0");
+    }
+
+    #[no_implicit_prelude]
+    mod hygiene {
+        #[allow(unused_macros)]
+        #[test]
+        fn macro_hygiene() {
+            macro_rules! assert {
+                ($($tt:tt)*) => {
+                    ::core::panic!("cstr! called the wrong assert! macro");
+                };
+            }
+            macro_rules! concat {
+                ($($tt:tt)*) => {{
+                    let v: &str = ::core::panic!("cstr! called the wrong concat! macro");
+                    v
+                }};
+            }
+
+            let _ = cstr!("foo");
+        }
     }
 }

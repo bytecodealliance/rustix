@@ -1,5 +1,6 @@
 use std::env::var;
 use std::io::Write as _;
+use std::path::PathBuf;
 
 /// The directory for inline asm.
 const ASM_PATH: &str = "src/backend/linux_raw/arch";
@@ -253,12 +254,14 @@ fn can_compile<T: AsRef<str>>(test: T) -> bool {
         std::process::Command::new(rustc)
     };
 
+    let out_dir = var("OUT_DIR").unwrap();
+    let out_file = PathBuf::from(out_dir).join("rustix_test_can_compile");
     cmd.arg("--crate-type=rlib") // Don't require `main`.
         .arg("--emit=metadata") // Do as little as possible but still parse.
         .arg("--target")
         .arg(target)
         .arg("-o")
-        .arg(std::env::temp_dir().join("rustix_test_can_compile"))
+        .arg(out_file)
         .stdout(Stdio::null()); // We don't care about the output (only whether it builds or not)
 
     // If Cargo wants to set RUSTFLAGS, use that.

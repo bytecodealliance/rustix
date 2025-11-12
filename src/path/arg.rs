@@ -229,7 +229,6 @@ impl Arg for String {
 }
 
 #[cfg(feature = "std")]
-#[cfg(any(not(target_os = "wasi"), not(target_env = "p2"), wasip2))]
 impl Arg for &OsStr {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -243,9 +242,7 @@ impl Arg for &OsStr {
 
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
-        Ok(Cow::Owned(
-            CString::new(self.as_bytes()).map_err(|_cstr_err| io::Errno::INVAL)?,
-        ))
+        self.into_c_str()
     }
 
     #[inline]
@@ -253,9 +250,10 @@ impl Arg for &OsStr {
     where
         Self: 'b,
     {
-        Ok(Cow::Owned(
-            CString::new(self.as_bytes()).map_err(|_cstr_err| io::Errno::INVAL)?,
-        ))
+        #[cfg(all(target_os = "wasi", target_env = "p2", not(wasip2)))]
+        return self.to_str().ok_or(io::Errno::INVAL)?.into_c_str();
+        #[cfg(any(wasip2, not(all(target_os = "wasi", target_env = "p2"))))]
+        return self.as_bytes().into_c_str();
     }
 
     #[inline]
@@ -264,12 +262,15 @@ impl Arg for &OsStr {
         Self: Sized,
         F: FnOnce(&CStr) -> io::Result<T>,
     {
-        with_c_str(self.as_bytes(), f)
+        #[cfg(all(target_os = "wasi", target_env = "p2", not(wasip2)))]
+        return self.as_str()?.into_with_c_str(f);
+
+        #[cfg(any(wasip2, not(all(target_os = "wasi", target_env = "p2"))))]
+        return self.as_bytes().into_with_c_str(f);
     }
 }
 
 #[cfg(feature = "std")]
-#[cfg(any(not(target_os = "wasi"), not(target_env = "p2"), wasip2))]
 impl Arg for &OsString {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -283,10 +284,7 @@ impl Arg for &OsString {
 
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
-        Ok(Cow::Owned(
-            CString::new(OsString::as_os_str(self).as_bytes())
-                .map_err(|_cstr_err| io::Errno::INVAL)?,
-        ))
+        self.as_os_str().into_c_str()
     }
 
     #[inline]
@@ -303,12 +301,11 @@ impl Arg for &OsString {
         Self: Sized,
         F: FnOnce(&CStr) -> io::Result<T>,
     {
-        with_c_str(self.as_bytes(), f)
+        self.as_os_str().into_with_c_str(f)
     }
 }
 
 #[cfg(feature = "std")]
-#[cfg(any(not(target_os = "wasi"), not(target_env = "p2"), wasip2))]
 impl Arg for OsString {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -322,9 +319,7 @@ impl Arg for OsString {
 
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
-        Ok(Cow::Owned(
-            CString::new(self.as_bytes()).map_err(|_cstr_err| io::Errno::INVAL)?,
-        ))
+        self.as_os_str().into_c_str()
     }
 
     #[inline]
@@ -332,9 +327,13 @@ impl Arg for OsString {
     where
         Self: 'b,
     {
-        Ok(Cow::Owned(
-            CString::new(self.into_vec()).map_err(|_cstr_err| io::Errno::INVAL)?,
-        ))
+        #[cfg(all(target_os = "wasi", target_env = "p2", not(wasip2)))]
+        return self
+            .into_string()
+            .map_err(|_strng_err| io::Errno::INVAL)?
+            .into_c_str();
+        #[cfg(any(wasip2, not(all(target_os = "wasi", target_env = "p2"))))]
+        self.into_vec().into_c_str()
     }
 
     #[inline]
@@ -343,12 +342,11 @@ impl Arg for OsString {
         Self: Sized,
         F: FnOnce(&CStr) -> io::Result<T>,
     {
-        f(&CString::new(self.into_vec()).map_err(|_cstr_err| io::Errno::INVAL)?)
+        f(&self.into_c_str()?)
     }
 }
 
 #[cfg(feature = "std")]
-#[cfg(any(not(target_os = "wasi"), not(target_env = "p2"), wasip2))]
 impl Arg for &Path {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -362,9 +360,7 @@ impl Arg for &Path {
 
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
-        Ok(Cow::Owned(
-            CString::new(self.as_os_str().as_bytes()).map_err(|_cstr_err| io::Errno::INVAL)?,
-        ))
+        self.as_os_str().into_c_str()
     }
 
     #[inline]
@@ -372,9 +368,7 @@ impl Arg for &Path {
     where
         Self: 'b,
     {
-        Ok(Cow::Owned(
-            CString::new(self.as_os_str().as_bytes()).map_err(|_cstr_err| io::Errno::INVAL)?,
-        ))
+        self.as_os_str().into_c_str()
     }
 
     #[inline]
@@ -383,19 +377,15 @@ impl Arg for &Path {
         Self: Sized,
         F: FnOnce(&CStr) -> io::Result<T>,
     {
-        with_c_str(self.as_os_str().as_bytes(), f)
+        self.as_os_str().into_with_c_str(f)
     }
 }
 
 #[cfg(feature = "std")]
-#[cfg(any(not(target_os = "wasi"), not(target_env = "p2"), wasip2))]
 impl Arg for &PathBuf {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        PathBuf::as_path(self)
-            .as_os_str()
-            .to_str()
-            .ok_or(io::Errno::INVAL)
+        self.as_os_str().to_str().ok_or(io::Errno::INVAL)
     }
 
     #[inline]
@@ -405,10 +395,7 @@ impl Arg for &PathBuf {
 
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
-        Ok(Cow::Owned(
-            CString::new(PathBuf::as_path(self).as_os_str().as_bytes())
-                .map_err(|_cstr_err| io::Errno::INVAL)?,
-        ))
+        self.as_os_str().into_c_str()
     }
 
     #[inline]
@@ -425,12 +412,11 @@ impl Arg for &PathBuf {
         Self: Sized,
         F: FnOnce(&CStr) -> io::Result<T>,
     {
-        with_c_str(self.as_os_str().as_bytes(), f)
+        self.as_os_str().into_with_c_str(f)
     }
 }
 
 #[cfg(feature = "std")]
-#[cfg(any(not(target_os = "wasi"), not(target_env = "p2"), wasip2))]
 impl Arg for PathBuf {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -444,9 +430,7 @@ impl Arg for PathBuf {
 
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
-        Ok(Cow::Owned(
-            CString::new(self.as_os_str().as_bytes()).map_err(|_cstr_err| io::Errno::INVAL)?,
-        ))
+        self.as_os_str().into_c_str()
     }
 
     #[inline]
@@ -454,9 +438,7 @@ impl Arg for PathBuf {
     where
         Self: 'b,
     {
-        Ok(Cow::Owned(
-            CString::new(self.into_os_string().into_vec()).map_err(|_cstr_err| io::Errno::INVAL)?,
-        ))
+        self.into_os_string().into_c_str()
     }
 
     #[inline]
@@ -465,10 +447,7 @@ impl Arg for PathBuf {
         Self: Sized,
         F: FnOnce(&CStr) -> io::Result<T>,
     {
-        f(
-            &CString::new(self.into_os_string().into_vec())
-                .map_err(|_cstr_err| io::Errno::INVAL)?,
-        )
+        self.into_os_string().into_with_c_str(f)
     }
 }
 
@@ -513,12 +492,12 @@ impl Arg for &CStr {
 impl Arg for &CString {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        unimplemented!()
+        self.to_str().map_err(|_utf8_err| io::Errno::INVAL)
     }
 
     #[inline]
     fn to_string_lossy(&self) -> Cow<'_, str> {
-        unimplemented!()
+        CStr::to_string_lossy(self)
     }
 
     #[inline]
@@ -623,7 +602,6 @@ impl<'a> Arg for Cow<'a, str> {
 }
 
 #[cfg(feature = "std")]
-#[cfg(any(not(target_os = "wasi"), not(target_env = "p2"), wasip2))]
 impl<'a> Arg for Cow<'a, OsStr> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -637,9 +615,7 @@ impl<'a> Arg for Cow<'a, OsStr> {
 
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
-        Ok(Cow::Owned(
-            CString::new(self.as_bytes()).map_err(|_cstr_err| io::Errno::INVAL)?,
-        ))
+        (&**self).into_c_str()
     }
 
     #[inline]
@@ -647,13 +623,10 @@ impl<'a> Arg for Cow<'a, OsStr> {
     where
         Self: 'b,
     {
-        Ok(Cow::Owned(
-            match self {
-                Cow::Owned(os) => CString::new(os.into_vec()),
-                Cow::Borrowed(os) => CString::new(os.as_bytes()),
-            }
-            .map_err(|_cstr_err| io::Errno::INVAL)?,
-        ))
+        match self {
+            Cow::Owned(os) => os.into_c_str(),
+            Cow::Borrowed(os) => os.into_c_str(),
+        }
     }
 
     #[inline]
@@ -662,7 +635,7 @@ impl<'a> Arg for Cow<'a, OsStr> {
         Self: Sized,
         F: FnOnce(&CStr) -> io::Result<T>,
     {
-        with_c_str(self.as_bytes(), f)
+        (&*self).into_with_c_str(f)
     }
 }
 
@@ -703,7 +676,6 @@ impl<'a> Arg for Cow<'a, CStr> {
 }
 
 #[cfg(feature = "std")]
-#[cfg(any(not(target_os = "wasi"), not(target_env = "p2"), wasip2))]
 impl<'a> Arg for Component<'a> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -717,9 +689,7 @@ impl<'a> Arg for Component<'a> {
 
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
-        Ok(Cow::Owned(
-            CString::new(self.as_os_str().as_bytes()).map_err(|_cstr_err| io::Errno::INVAL)?,
-        ))
+        self.as_os_str().into_c_str()
     }
 
     #[inline]
@@ -727,9 +697,7 @@ impl<'a> Arg for Component<'a> {
     where
         Self: 'b,
     {
-        Ok(Cow::Owned(
-            CString::new(self.as_os_str().as_bytes()).map_err(|_cstr_err| io::Errno::INVAL)?,
-        ))
+        self.as_os_str().into_c_str()
     }
 
     #[inline]
@@ -738,12 +706,11 @@ impl<'a> Arg for Component<'a> {
         Self: Sized,
         F: FnOnce(&CStr) -> io::Result<T>,
     {
-        with_c_str(self.as_os_str().as_bytes(), f)
+        self.as_os_str().into_with_c_str(f)
     }
 }
 
 #[cfg(feature = "std")]
-#[cfg(any(not(target_os = "wasi"), not(target_env = "p2"), wasip2))]
 impl<'a> Arg for Components<'a> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -757,10 +724,7 @@ impl<'a> Arg for Components<'a> {
 
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
-        Ok(Cow::Owned(
-            CString::new(self.as_path().as_os_str().as_bytes())
-                .map_err(|_cstr_err| io::Errno::INVAL)?,
-        ))
+        self.as_path().into_c_str()
     }
 
     #[inline]
@@ -768,10 +732,7 @@ impl<'a> Arg for Components<'a> {
     where
         Self: 'b,
     {
-        Ok(Cow::Owned(
-            CString::new(self.as_path().as_os_str().as_bytes())
-                .map_err(|_cstr_err| io::Errno::INVAL)?,
-        ))
+        self.as_path().into_c_str()
     }
 
     #[inline]
@@ -780,12 +741,11 @@ impl<'a> Arg for Components<'a> {
         Self: Sized,
         F: FnOnce(&CStr) -> io::Result<T>,
     {
-        with_c_str(self.as_path().as_os_str().as_bytes(), f)
+        self.as_path().into_with_c_str(f)
     }
 }
 
 #[cfg(feature = "std")]
-#[cfg(any(not(target_os = "wasi"), not(target_env = "p2"), wasip2))]
 impl<'a> Arg for Iter<'a> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
@@ -799,10 +759,7 @@ impl<'a> Arg for Iter<'a> {
 
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
-        Ok(Cow::Owned(
-            CString::new(self.as_path().as_os_str().as_bytes())
-                .map_err(|_cstr_err| io::Errno::INVAL)?,
-        ))
+        self.as_path().into_c_str()
     }
 
     #[inline]
@@ -810,10 +767,7 @@ impl<'a> Arg for Iter<'a> {
     where
         Self: 'b,
     {
-        Ok(Cow::Owned(
-            CString::new(self.as_path().as_os_str().as_bytes())
-                .map_err(|_cstr_err| io::Errno::INVAL)?,
-        ))
+        self.as_path().into_c_str()
     }
 
     #[inline]
@@ -822,7 +776,7 @@ impl<'a> Arg for Iter<'a> {
         Self: Sized,
         F: FnOnce(&CStr) -> io::Result<T>,
     {
-        with_c_str(self.as_path().as_os_str().as_bytes(), f)
+        self.as_path().into_with_c_str(f)
     }
 }
 
@@ -910,7 +864,6 @@ impl Arg for &Vec<u8> {
 }
 
 #[cfg(feature = "alloc")]
-#[cfg(any(not(target_os = "wasi"), not(target_env = "p2"), wasip2))]
 impl Arg for Vec<u8> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {

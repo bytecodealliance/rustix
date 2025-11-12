@@ -15,7 +15,6 @@ pub use backend::net::send_recv::{RecvFlags, ReturnFlags, SendFlags};
     windows,
     target_os = "espidf",
     target_os = "horizon",
-    target_os = "redox",
     target_os = "vita"
 )))]
 mod msg;
@@ -24,7 +23,6 @@ mod msg;
     windows,
     target_os = "espidf",
     target_os = "horizon",
-    target_os = "redox",
     target_os = "vita"
 )))]
 pub use msg::*;

@@ -9,10 +9,10 @@ use rustix::io;
     target_env = "newlib"
 ))]
 use rustix::net::ipproto;
-#[cfg(target_os = "linux")]
+#[cfg(all(target_os = "linux", feature = "time"))]
 use rustix::net::TxTimeFlags;
 use rustix::net::{sockopt, AddressFamily, SocketType};
-#[cfg(target_os = "linux")]
+#[cfg(all(target_os = "linux", feature = "time"))]
 use rustix::time::ClockId;
 use std::net::Ipv4Addr;
 use std::time::Duration;
@@ -40,8 +40,6 @@ fn test_sockopts_socket(s: &OwnedFd) {
     assert!(!sockopt::socket_broadcast(s).unwrap());
     // On a new socket we shouldn't have a linger yet.
     assert!(sockopt::socket_linger(s).unwrap().is_none());
-    #[cfg(linux_kernel)]
-    assert!(!sockopt::socket_passcred(s).unwrap());
 
     // On a new socket we shouldn't have an error yet.
     assert_eq!(sockopt::socket_error(s).unwrap(), Ok(()));
@@ -118,15 +116,6 @@ fn test_sockopts_socket(s: &OwnedFd) {
 
     // Check that we have a linger of at least the time we set.
     assert!(sockopt::socket_linger(s).unwrap().unwrap() >= Duration::new(1, 1));
-
-    #[cfg(linux_kernel)]
-    {
-        // Set the passcred flag;
-        sockopt::set_socket_passcred(s, true).unwrap();
-
-        // Check that the passcred flag is set.
-        assert!(sockopt::socket_passcred(s).unwrap());
-    }
 
     // Set the receive buffer size.
     let size = sockopt::socket_recv_buffer_size(s).unwrap();
@@ -527,6 +516,18 @@ fn test_sockopts_ipv6() {
     test_sockopts_tcp(&s);
 }
 
+#[cfg(linux_kernel)]
+#[test]
+fn test_socket_passcred() {
+    crate::init();
+
+    let s = rustix::net::socket(AddressFamily::UNIX, SocketType::STREAM, None).unwrap();
+
+    assert_eq!(sockopt::socket_passcred(&s), Ok(false));
+    sockopt::set_socket_passcred(&s, true).unwrap();
+    assert_eq!(sockopt::socket_passcred(&s), Ok(true));
+}
+
 #[cfg(any(linux_kernel, target_os = "cygwin"))]
 #[test]
 fn test_socketopts_ip_mtu() {
@@ -668,7 +669,7 @@ fn test_sockopts_multicast_ifv6() {
 }
 
 #[test]
-#[cfg(target_os = "linux")]
+#[cfg(all(target_os = "linux", feature = "time"))]
 fn test_sockopts_txtime() {
     crate::init();
 

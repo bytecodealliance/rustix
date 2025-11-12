@@ -66,12 +66,6 @@ constant.
 [`IORING_REGISTER_FILES_SKIP`]: https://docs.rs/rustix/1/rustix/io_uring/constant.IORING_REGISTER_FILES_SKIP.html
 [`rustix::fs::CWD`]: https://docs.rs/rustix/1/rustix/fs/constant.CWD.html
 
-[`rustix::io_uring::io_uring_register`] now has a [`IoringRegisterFlags`]
-argument, and `rustix::io_uring::io_uring_register_with` is removed.
-
-[`rustix::io_uring::io_uring_register`]: https://docs.rs/rustix/1/rustix/io_uring/fn.io_uring_register.html
-[`IoringRegisterFlags`]: https://docs.rs/rustix/1/rustix/io_uring/struct.IoringRegisterFlags.html
-
 Several structs in [`rustix::io_uring`] are now marked `#[non_exhaustive]`
 because they contain padding or reserved fields. Instead of constructing
 them with field values and `..Default::default()`, construct them with

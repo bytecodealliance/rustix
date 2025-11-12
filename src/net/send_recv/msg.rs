@@ -68,7 +68,7 @@ macro_rules! cmsg_space {
     };
     (TxTime($len:expr)) => {
         $crate::net::__cmsg_space(
-            $len * ::core::mem::size_of::<u64>(),
+            $len * ::core::mem::size_of::<::core::primitive::u64>(),
         )
     };
 
@@ -101,15 +101,15 @@ macro_rules! cmsg_aligned_space {
     };
     (TxTime($len:expr)) => {
         $crate::net::__cmsg_aligned_space(
-            $len * ::core::mem::size_of::<u64>(),
+            $len * ::core::mem::size_of::<::core::primitive::u64>(),
         )
     };
 
     // Combo Rules
     ($firstid:ident($firstex:expr), $($restid:ident($restex:expr)),*) => {{
-        let sum = cmsg_aligned_space!($firstid($firstex));
+        let sum = $crate::cmsg_aligned_space!($firstid($firstex));
         $(
-            let sum = sum + cmsg_aligned_space!($restid($restex));
+            let sum = sum + $crate::cmsg_aligned_space!($restid($restex));
         )*
         sum
     }};
@@ -984,4 +984,43 @@ mod messages {
     }
 
     impl FusedIterator for Messages<'_> {}
+}
+
+#[cfg(test)]
+mod tests {
+    #[no_implicit_prelude]
+    mod hygiene {
+        #[allow(unused_macros)]
+        #[test]
+        fn macro_hygiene() {
+            // This `u64` is `!Sized`, so `cmsg_space!` will fail if it tries to get its size with
+            // `size_of()`.
+            #[allow(dead_code, non_camel_case_types)]
+            struct u64([u8]);
+
+            // Ensure that when `cmsg*_space!` calls itself recursively, it really calls itself and
+            // not these macros.
+            macro_rules! cmsg_space {
+                ($($tt:tt)*) => {{
+                    let v: usize = ::core::panic!("Wrong cmsg_space! macro called");
+                    v
+                }};
+            }
+            macro_rules! cmsg_aligned_space {
+                ($($tt:tt)*) => {{
+                    let v: usize = ::core::panic!("Wrong cmsg_aligned_space! macro called");
+                    v
+                }};
+            }
+
+            crate::cmsg_space!(ScmRights(1));
+            crate::cmsg_space!(TxTime(1));
+            #[cfg(linux_kernel)]
+            {
+                crate::cmsg_space!(ScmCredentials(1));
+                crate::cmsg_space!(ScmRights(1), ScmCredentials(1), TxTime(1));
+                crate::cmsg_aligned_space!(ScmRights(1), ScmCredentials(1), TxTime(1));
+            }
+        }
+    }
 }
