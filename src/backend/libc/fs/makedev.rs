@@ -14,6 +14,7 @@ use crate::fs::Dev;
     target_os = "aix",
     target_os = "android",
     target_os = "emscripten",
+    target_os = "redox",
 )))]
 #[inline]
 pub(crate) fn makedev(maj: u32, min: u32) -> Dev {
@@ -33,15 +34,18 @@ pub(crate) fn makedev(maj: u32, min: u32) -> Dev {
     c::makedev(maj, min)
 }
 
-#[cfg(all(target_os = "android", target_pointer_width = "32"))]
+#[cfg(any(
+    all(target_os = "android", target_pointer_width = "32"),
+    target_os = "redox"
+))]
 #[inline]
 pub(crate) fn makedev(maj: u32, min: u32) -> Dev {
     // 32-bit Android's `dev_t` is 32-bit, but its `st_dev` is 64-bit, so we do
     // it ourselves.
-    ((u64::from(maj) & 0xffff_f000_u64) << 32)
+    (((u64::from(maj) & 0xffff_f000_u64) << 32)
         | ((u64::from(maj) & 0x0000_0fff_u64) << 8)
         | ((u64::from(min) & 0xffff_ff00_u64) << 12)
-        | (u64::from(min) & 0x0000_00ff_u64)
+        | (u64::from(min) & 0x0000_00ff_u64)) as Dev
 }
 
 #[cfg(target_os = "emscripten")]
@@ -70,7 +74,8 @@ pub(crate) fn makedev(maj: u32, min: u32) -> Dev {
     freebsdlike,
     target_os = "android",
     target_os = "emscripten",
-    target_os = "netbsd"
+    target_os = "netbsd",
+    target_os = "redox",
 )))]
 #[inline]
 pub(crate) fn major(dev: Dev) -> u32 {
@@ -89,7 +94,10 @@ pub(crate) fn major(dev: Dev) -> u32 {
     (unsafe { c::major(dev) }) as u32
 }
 
-#[cfg(all(target_os = "android", target_pointer_width = "32"))]
+#[cfg(any(
+    all(target_os = "android", target_pointer_width = "32"),
+    target_os = "redox"
+))]
 #[inline]
 pub(crate) fn major(dev: Dev) -> u32 {
     // 32-bit Android's `dev_t` is 32-bit, but its `st_dev` is 64-bit, so we do
@@ -109,7 +117,8 @@ pub(crate) fn major(dev: Dev) -> u32 {
     freebsdlike,
     target_os = "android",
     target_os = "emscripten",
-    target_os = "netbsd"
+    target_os = "netbsd",
+    target_os = "redox"
 )))]
 #[inline]
 pub(crate) fn minor(dev: Dev) -> u32 {
@@ -128,7 +137,10 @@ pub(crate) fn minor(dev: Dev) -> u32 {
     (unsafe { c::minor(dev) }) as u32
 }
 
-#[cfg(all(target_os = "android", target_pointer_width = "32"))]
+#[cfg(any(
+    all(target_os = "android", target_pointer_width = "32"),
+    target_os = "redox"
+))]
 #[inline]
 pub(crate) fn minor(dev: Dev) -> u32 {
     // 32-bit Android's `dev_t` is 32-bit, but its `st_dev` is 64-bit, so we do
