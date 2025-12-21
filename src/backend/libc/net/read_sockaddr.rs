@@ -11,6 +11,8 @@ use crate::io::Errno;
 use crate::net::addr::SocketAddrLen;
 #[cfg(linux_kernel)]
 use crate::net::netlink::SocketAddrNetlink;
+#[cfg(any(linux_kernel, apple))]
+use crate::net::vsock::SocketAddrVSock;
 #[cfg(target_os = "linux")]
 use crate::net::xdp::{SocketAddrXdp, SocketAddrXdpFlags};
 use crate::net::{AddressFamily, Ipv4Addr, Ipv6Addr, SocketAddrAny, SocketAddrV4, SocketAddrV6};
@@ -261,4 +263,16 @@ pub(crate) fn read_sockaddr_netlink(addr: &SocketAddrAny) -> Result<SocketAddrNe
     assert!(addr.addr_len() as usize >= size_of::<c::sockaddr_nl>());
     let decode = unsafe { &*addr.as_ptr().cast::<c::sockaddr_nl>() };
     Ok(SocketAddrNetlink::new(decode.nl_pid, decode.nl_groups))
+}
+
+#[cfg(any(linux_kernel, apple))]
+#[inline]
+pub(crate) fn read_sockaddr_vsock(addr: &SocketAddrAny) -> Result<SocketAddrVSock, Errno> {
+    if addr.address_family() != AddressFamily::VSOCK {
+        return Err(Errno::AFNOSUPPORT);
+    }
+
+    assert!(addr.addr_len() as usize >= size_of::<c::sockaddr_vm>());
+    let decode = unsafe { &*addr.as_ptr().cast::<c::sockaddr_vm>() };
+    Ok(SocketAddrVSock::new(decode.svm_cid, decode.svm_port))
 }
