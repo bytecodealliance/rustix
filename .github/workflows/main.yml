@@ -65,6 +65,7 @@ jobs:
         cargo update --package=rayon-core --precise=1.12.1
         cargo update --package=windows-sys@0.61.2 --precise=0.60.2
         cargo update --package=quote --precise=1.0.41
+        cargo update --package=ryu --precise=1.0.20
 
     - run: >
         rustup target add
