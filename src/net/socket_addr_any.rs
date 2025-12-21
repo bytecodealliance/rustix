@@ -225,6 +225,12 @@ impl fmt::Debug for SocketAddrAny {
                     return addr.fmt(f);
                 }
             }
+            #[cfg(any(linux_kernel, apple))]
+            AddressFamily::VSOCK => {
+                if let Ok(addr) = crate::net::vsock::SocketAddrVSock::try_from(self.clone()) {
+                    return addr.fmt(f);
+                }
+            }
             _ => {}
         }
 

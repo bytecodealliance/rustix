@@ -23,6 +23,7 @@ mod unix;
 mod unix_alloc;
 mod v4;
 mod v6;
+mod vsock;
 
 #[cfg(windows)]
 mod windows {
