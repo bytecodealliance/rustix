@@ -223,13 +223,13 @@ impl SocketAddrUnix {
 
     #[inline]
     fn bytes(&self) -> Option<&[u8]> {
-        let len = self.len();
-        if len != 0 {
-            let bytes = &self.unix.sun_path[..len - offsetof_sun_path()];
-            // SAFETY: `from_raw_parts` to convert from `&[c_char]` to `&[u8]`.
-            Some(unsafe { slice::from_raw_parts(bytes.as_ptr().cast(), bytes.len()) })
-        } else {
-            None
+        match self.len() {
+            0 => None,
+            len => {
+                let bytes = &self.unix.sun_path[..len - offsetof_sun_path()];
+                // SAFETY: `from_raw_parts` to convert from `&[c_char]` to `&[u8]`.
+                Some(unsafe { slice::from_raw_parts(bytes.as_ptr().cast(), bytes.len()) })
+            }
         }
     }
 }

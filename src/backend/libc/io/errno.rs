@@ -1093,7 +1093,8 @@ impl Errno {
     pub fn from_io_error(io_err: &std::io::Error) -> Option<Self> {
         io_err
             .raw_os_error()
-            .and_then(|raw| if raw != 0 { Some(Self(raw)) } else { None })
+            .filter(|&raw| raw != 0)
+            .map(Self)
     }
 
     /// Extract the raw OS error number from this error.

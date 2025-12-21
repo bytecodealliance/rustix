@@ -125,11 +125,8 @@ impl WaitStatus {
     #[inline]
     #[doc(alias = "WSTOPSIG")]
     pub fn stopping_signal(self) -> Option<i32> {
-        if self.stopped() {
-            Some(backend::process::wait::WSTOPSIG(self.0))
-        } else {
-            None
-        }
+        self.stopped()
+            .then(|| backend::process::wait::WSTOPSIG(self.0))
     }
 
     /// Returns the exit status number returned by the process, if it exited
@@ -137,11 +134,8 @@ impl WaitStatus {
     #[inline]
     #[doc(alias = "WEXITSTATUS")]
     pub fn exit_status(self) -> Option<i32> {
-        if self.exited() {
-            Some(backend::process::wait::WEXITSTATUS(self.0))
-        } else {
-            None
-        }
+        self.exited()
+            .then(|| backend::process::wait::WEXITSTATUS(self.0))
     }
 
     /// Returns the number of the signal that terminated the process, if the
@@ -149,11 +143,8 @@ impl WaitStatus {
     #[inline]
     #[doc(alias = "WTERMSIG")]
     pub fn terminating_signal(self) -> Option<i32> {
-        if self.signaled() {
-            Some(backend::process::wait::WTERMSIG(self.0))
-        } else {
-            None
-        }
+        self.signaled()
+            .then(|| backend::process::wait::WTERMSIG(self.0))
     }
 }
 
@@ -247,11 +238,7 @@ impl WaitIdStatus {
     #[inline]
     #[cfg(not(any(target_os = "emscripten", target_os = "fuchsia", target_os = "netbsd")))]
     pub fn stopping_signal(&self) -> Option<i32> {
-        if self.stopped() {
-            Some(self.si_status())
-        } else {
-            None
-        }
+        self.stopped().then(|| self.si_status())
     }
 
     /// Returns the number of the signal that trapped the process, if the
@@ -259,11 +246,7 @@ impl WaitIdStatus {
     #[inline]
     #[cfg(not(any(target_os = "emscripten", target_os = "fuchsia", target_os = "netbsd")))]
     pub fn trapping_signal(&self) -> Option<i32> {
-        if self.trapped() {
-            Some(self.si_status())
-        } else {
-            None
-        }
+        self.trapped().then(|| self.si_status())
     }
 
     /// Returns the exit status number returned by the process, if it exited
@@ -271,11 +254,7 @@ impl WaitIdStatus {
     #[inline]
     #[cfg(not(any(target_os = "emscripten", target_os = "fuchsia", target_os = "netbsd")))]
     pub fn exit_status(&self) -> Option<i32> {
-        if self.exited() {
-            Some(self.si_status())
-        } else {
-            None
-        }
+        self.exited().then(|| self.si_status())
     }
 
     /// Returns the number of the signal that terminated the process, if the
@@ -283,11 +262,7 @@ impl WaitIdStatus {
     #[inline]
     #[cfg(not(any(target_os = "emscripten", target_os = "fuchsia", target_os = "netbsd")))]
     pub fn terminating_signal(&self) -> Option<i32> {
-        if self.killed() || self.dumped() {
-            Some(self.si_status())
-        } else {
-            None
-        }
+        (self.killed() || self.dumped()).then(|| self.si_status())
     }
 
     /// Return the raw `si_signo` value returned from `waitid`.

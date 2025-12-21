@@ -55,11 +55,8 @@ impl SocketAddrBuf {
     #[inline]
     pub(crate) unsafe fn into_any_option(self) -> Option<SocketAddrAny> {
         let len = bitcast!(self.len);
-        if read_sockaddr::sockaddr_nonempty(self.storage.as_ptr().cast(), len) {
-            Some(SocketAddrAny::new(self.storage, len))
-        } else {
-            None
-        }
+        read_sockaddr::sockaddr_nonempty(self.storage.as_ptr().cast(), len)
+            .then(|| SocketAddrAny::new(self.storage, len))
     }
 }
 
