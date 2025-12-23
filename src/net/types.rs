@@ -2081,6 +2081,105 @@ pub mod xdp {
     pub const XSK_UNALIGNED_BUF_ADDR_MASK: u64 = c::XSK_UNALIGNED_BUF_ADDR_MASK;
 }
 
+/// `AF_VSOCK` and related types.
+#[cfg(any(linux_kernel, apple))]
+pub mod vsock {
+    use crate::backend::net::read_sockaddr::read_sockaddr_vsock;
+    use crate::net::addr::{call_with_sockaddr, SocketAddrArg, SocketAddrLen, SocketAddrOpaque};
+    use crate::net::SocketAddrAny;
+
+    use super::c;
+    use core::mem;
+
+    /// A VSock socket address.
+    ///
+    /// Used to bind to a VSock socket. Not ABI compatible with `sockadr_vm`.
+    #[derive(Clone, PartialEq, PartialOrd, Eq, Ord, Hash, Debug)]
+    pub struct SocketAddrVSock {
+        /// The Context IDentifier (CID) to connect to.
+        cid: u32,
+        /// The port to connect to.
+        port: u32,
+    }
+
+    impl SocketAddrVSock {
+        /// Construct a new VSock address.
+        #[inline]
+        pub const fn new(cid: u32, port: u32) -> Self {
+            Self { cid, port }
+        }
+
+        /// Context IDentifier (CID), referring to the VM to connect to.
+        #[inline]
+        pub fn cid(&self) -> u32 {
+            self.cid
+        }
+
+        /// Set the context identifier.
+        #[inline]
+        pub fn set_cid(&mut self, cid: u32) {
+            self.cid = cid;
+        }
+
+        /// Port to connect to.
+        #[inline]
+        pub fn port(&self) -> u32 {
+            self.port
+        }
+
+        /// Set the port to connect to.
+        #[inline]
+        pub fn set_port(&mut self, port: u32) {
+            self.port = port;
+        }
+    }
+
+    #[allow(unsafe_code)]
+    // SAFETY: `with_sockaddr` calls `f` using `call_with_sockaddr`, which
+    // handles calling `f` with the needed preconditions.
+    unsafe impl SocketAddrArg for SocketAddrVSock {
+        unsafe fn with_sockaddr<R>(
+            &self,
+            f: impl FnOnce(*const SocketAddrOpaque, SocketAddrLen) -> R,
+        ) -> R {
+            let addr = c::sockaddr_vm {
+                svm_family: c::AF_VSOCK as _,
+                svm_cid: self.cid,
+                svm_port: self.port,
+                ..mem::zeroed()
+            };
+
+            call_with_sockaddr(&addr, f)
+        }
+    }
+
+    impl From<SocketAddrVSock> for SocketAddrAny {
+        #[inline]
+        fn from(from: SocketAddrVSock) -> Self {
+            from.as_any()
+        }
+    }
+
+    impl TryFrom<SocketAddrAny> for SocketAddrVSock {
+        type Error = crate::io::Errno;
+
+        fn try_from(addr: SocketAddrAny) -> Result<Self, Self::Error> {
+            read_sockaddr_vsock(&addr)
+        }
+    }
+
+    /// CID to connect to any host.
+    pub const VMADDR_CID_ANY: u32 = 0xFFFFFFFF;
+    /// CID to connect to the hypervisor.
+    pub const VMADDR_CID_HYPERVISOR: u32 = 0;
+    /// CID to connect to the local host.
+    pub const VMADDR_CID_LOCAL: u32 = 1;
+    /// CID to connect to the host.
+    pub const VMADDR_CID_HOST: u32 = 2;
+    /// Connect to any port.
+    pub const VMADDR_PORT_ANY: u32 = 0xFFFFFFFF;
+}
+
 /// UNIX credentials of socket peer, for use with [`get_socket_peercred`]
 /// [`SendAncillaryMessage::ScmCredentials`] and
 /// [`RecvAncillaryMessage::ScmCredentials`].
