@@ -202,7 +202,7 @@ fn test_rwf_values() {
     );
 }
 
-#[cfg(linux_raw_dep)]
+#[cfg(all(linux_raw_dep, not(target_os = "android")))]
 #[cfg(feature = "fs")]
 #[test]
 fn test_pwritev2() {
@@ -256,7 +256,7 @@ fn test_pwritev2() {
     assert_eq!(&buf, b"world");
 }
 
-#[cfg(linux_raw_dep)]
+#[cfg(all(linux_raw_dep, not(target_os = "android")))]
 #[cfg(all(feature = "net", feature = "pipe"))]
 #[test]
 fn test_preadv2_nowait() {
@@ -308,7 +308,7 @@ fn test_preadv2_nowait() {
 fn test_p_offsets() {
     use rustix::fs::{openat, Mode, OFlags, CWD};
     use rustix::io::{pread, preadv, pwrite, pwritev};
-    #[cfg(linux_raw_dep)]
+    #[cfg(all(linux_raw_dep, not(target_os = "android")))]
     use rustix::io::{preadv2, pwritev2, ReadWriteFlags};
 
     let mut buf = [0_u8; 5];
@@ -343,7 +343,7 @@ fn test_p_offsets() {
         Ok(_) => {}
         Err(e) => panic!("pwritev failed with an unexpected error: {:?}", e),
     }
-    #[cfg(linux_raw_dep)]
+    #[cfg(all(linux_raw_dep, not(target_os = "android")))]
     {
         match preadv2(
             &f,
@@ -393,7 +393,7 @@ fn test_p_offsets() {
                 Err(e) => panic!("pwritev failed with an unexpected error: {:?}", e),
             }
         }
-        #[cfg(linux_raw_dep)]
+        #[cfg(all(linux_raw_dep, not(target_os = "android")))]
         {
             match preadv2(
                 &f,
