@@ -17,7 +17,7 @@ task:
 task:
   name: stable x86_64-unknown-freebsd-15
   freebsd_instance:
-    image_family: freebsd-15-0-snap
+    image_family: freebsd-15-0
   setup_script:
     - curl https://sh.rustup.rs -sSf --output rustup.sh
     - sh rustup.sh --default-toolchain stable -y --profile=minimal
