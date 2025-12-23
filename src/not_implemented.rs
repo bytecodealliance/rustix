@@ -297,7 +297,6 @@ pub mod yet {
     not_implemented!(cachestat);
     not_implemented!(fanotify_init);
     not_implemented!(fanotify_mark);
-    not_implemented!(getifaddrs);
     not_implemented!(signalfd);
     not_implemented!(mount_setattr);
     not_implemented!(extattr_delete_fd);
