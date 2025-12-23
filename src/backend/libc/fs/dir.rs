@@ -75,6 +75,27 @@ impl Dir {
         }
     }
 
+    /// Returns the file descriptor associated with the directory stream.
+    ///
+    /// The file descriptor is used internally by the directory stream. As a result, it is useful
+    /// only for functions which do not depend or alter the file position.
+    ///
+    /// # References
+    ///
+    ///   - [POSIX]
+    ///
+    /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/dirfd.html
+    #[inline]
+    #[doc(alias = "dirfd")]
+    pub fn fd<'a>(&'a self) -> io::Result<BorrowedFd<'a>> {
+        let raw_fd = unsafe { c::dirfd(self.libc_dir.as_ptr()) };
+        if raw_fd < 0 {
+            Err(io::Errno::last_os_error())
+        } else {
+            Ok(unsafe { BorrowedFd::borrow_raw(raw_fd) })
+        }
+    }
+
     /// Borrow `fd` and construct a `Dir` that reads entries from the given
     /// directory file descriptor.
     #[inline]
