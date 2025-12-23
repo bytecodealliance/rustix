@@ -6,7 +6,6 @@ pub mod inotify;
     target_os = "espidf",
     target_os = "haiku",
     target_os = "horizon",
-    target_os = "redox",
     target_os = "vita",
     target_os = "wasi"
 )))]
