@@ -68,6 +68,7 @@ jobs:
         cargo update --package=ryu --precise=1.0.20
         cargo update --package=itoa --precise=1.0.15
         cargo update --package=serde_json --precise=1.0.145
+        cargo update --package=log --precise=0.4.28
 
     - run: >
         rustup target add
@@ -593,6 +594,7 @@ jobs:
         cargo update --package=ryu --precise=1.0.20
         cargo update --package=itoa --precise=1.0.15
         cargo update --package=serde_json --precise=1.0.145
+        cargo update --package=log --precise=0.4.28
 
     - run: |
         cargo test --verbose --features=all-apis --release --workspace -- --nocapture
