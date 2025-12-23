@@ -238,3 +238,17 @@ impl<'buf, Fd: AsFd> RawDir<'buf, Fd> {
         self.offset >= self.initialized
     }
 }
+
+/// ```compile_fail
+/// use rustix::fs::{CWD, Mode, OFlags, RawDir, openat};
+/// use std::mem::MaybeUninit;
+///
+/// let mut buf = [MaybeUninit::uninit(); 47];
+/// let fd = openat(CWD, c".", OFlags::DIRECTORY, Mode::empty()).unwrap();
+/// let mut iter = RawDir::new(fd, &mut buf);
+/// let item1 = iter.next().unwrap();
+/// let item2 = iter.next().unwrap();
+/// println!("{item2:?}");
+/// println!("{item1:?}");
+/// ```
+fn _doctest() {}
