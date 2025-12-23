@@ -15,10 +15,12 @@ fn test_wall_clock() {
     let r = unsafe { libc::clock_gettime(libc::CLOCK_REALTIME, &mut after) };
     assert_eq!(r, 0);
 
+    #[allow(clippy::useless_conversion)]
     let before = Timespec {
         tv_sec: before.tv_sec.try_into().unwrap(),
         tv_nsec: before.tv_nsec.try_into().unwrap(),
     };
+    #[allow(clippy::useless_conversion)]
     let after = Timespec {
         tv_sec: after.tv_sec.try_into().unwrap(),
         tv_nsec: after.tv_nsec.try_into().unwrap(),
