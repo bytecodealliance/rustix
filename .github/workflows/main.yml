@@ -67,6 +67,8 @@ jobs:
         cargo update --package=quote --precise=1.0.41
         cargo update --package=ryu --precise=1.0.20
         cargo update --package=itoa --precise=1.0.15
+        cargo update --package=serde_json --precise=1.0.145
+        cargo update --package=log --precise=0.4.28
 
     - run: >
         rustup target add
@@ -288,6 +290,7 @@ jobs:
             arm-linux-1.63,
             macos-latest,
             macos-15-intel,
+            macos-14,
             windows,
             musl,
           ]
@@ -493,6 +496,9 @@ jobs:
           - build: macos-15-intel
             os: macos-15-intel
             rust: stable
+          - build: macos-14
+            os: macos-14
+            rust: stable
           - build: windows
             os: windows-latest
             rust: nightly
@@ -585,6 +591,10 @@ jobs:
         cargo update --package=rayon-core --precise=1.12.1
         cargo update --package=windows-sys@0.61.2 --precise=0.60.2
         cargo update --package=quote --precise=1.0.41
+        cargo update --package=ryu --precise=1.0.20
+        cargo update --package=itoa --precise=1.0.15
+        cargo update --package=serde_json --precise=1.0.145
+        cargo update --package=log --precise=0.4.28
 
     - run: |
         cargo test --verbose --features=all-apis --release --workspace -- --nocapture
