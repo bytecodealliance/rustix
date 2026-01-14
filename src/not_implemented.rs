@@ -1,7 +1,7 @@
 //! Documentation about unimplemented functions.
 //!
 //! This module contains documentation for several functions that rustix does
-//! not implement, either because they are out of scope, or because they are
+//! not implement, either because they are out of scope, or because they
 //! could probably be implemented but are not yet.
 
 macro_rules! not_implemented {
