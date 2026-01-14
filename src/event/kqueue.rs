@@ -436,7 +436,7 @@ pub unsafe fn kevent_timespec<Fd: AsFd, Buf: Buffer<Event>>(
 /// `kqueue`.
 ///
 /// This is a wrapper around [`kevent_timespec`] which takes a `Duration`
-/// instead of a `Timespec` for the timemout value. `Timespec` has a signed
+/// instead of a `Timespec` for the timeout value. `Timespec` has a signed
 /// `i64` seconds field; if converting `Duration` to `Timespec` overflows,
 /// `None` is passed as the timeout instead, such such a large timeout would
 /// be effectively infinite in practice.
