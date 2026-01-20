@@ -44,7 +44,7 @@ pub(crate) fn tcgetattr(fd: BorrowedFd<'_>) -> io::Result<Termios> {
             // `TCGETS2`, for example a seccomp environment or WSL that only
             // knows about `TCGETS`. Fall back to the old `TCGETS`.
             #[cfg(not(any(target_arch = "powerpc", target_arch = "powerpc64")))]
-            Err(io::Errno::NOTTY) | Err(io::Errno::ACCESS) => tcgetattr_fallback(fd),
+            Err(io::Errno::NOTTY) | Err(io::Errno::ACCESS) | Err(io::Errno::EINVAL) => tcgetattr_fallback(fd),
 
             Err(err) => Err(err),
         }
