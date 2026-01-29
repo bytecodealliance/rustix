@@ -163,15 +163,15 @@ pub fn sched_getcpu() -> usize {
 /// `sched_getcpu()`—Get the CPU and NUMA node that the current thread is currently on.
 ///
 /// # Example
-/// 
+///
 /// ```rust
 /// use rustix::thread::getcpu;
-/// 
+///
 /// let (core, numa_node) = getcpu();
-/// 
+///
 /// println!("The current thread was on the {core} core and {numa_node} numa node.");
 /// ```
-/// 
+///
 /// # References
 ///  - [Linux]
 ///
