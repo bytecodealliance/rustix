@@ -381,8 +381,8 @@ mod tests {
         let nread = read(&input, &mut buf).unwrap();
         assert_eq!(nread, buf.len());
         assert_eq!(
-            &buf[..58],
-            b"//! Utilities for functions that return data via buffers.\n"
+            &buf[..57],
+            b"//! Utilities for functions that return data via buffers."
         );
         input.seek(SeekFrom::End(-1)).unwrap();
         let nread = read(&input, &mut buf).unwrap();
@@ -407,13 +407,13 @@ mod tests {
         let (init, uninit) = read(&input, &mut buf).unwrap();
         assert_eq!(uninit.len(), 0);
         assert_eq!(
-            &init[..58],
-            b"//! Utilities for functions that return data via buffers.\n"
+            &init[..57],
+            b"//! Utilities for functions that return data via buffers."
         );
         assert_eq!(init.len(), buf.len());
         assert_eq!(
-            unsafe { core::mem::transmute::<&mut [MaybeUninit<u8>], &mut [u8]>(&mut buf[..58]) },
-            b"//! Utilities for functions that return data via buffers.\n"
+            unsafe { core::mem::transmute::<&mut [MaybeUninit<u8>], &mut [u8]>(&mut buf[..57]) },
+            b"//! Utilities for functions that return data via buffers."
         );
         input.seek(SeekFrom::End(-1)).unwrap();
         let (init, uninit) = read(&input, &mut buf).unwrap();
@@ -440,8 +440,8 @@ mod tests {
         assert_eq!(nread, buf.capacity());
         assert_eq!(nread, buf.len());
         assert_eq!(
-            &buf[..58],
-            b"//! Utilities for functions that return data via buffers.\n"
+            &buf[..57],
+            b"//! Utilities for functions that return data via buffers."
         );
         buf.clear();
         input.seek(SeekFrom::End(-1)).unwrap();

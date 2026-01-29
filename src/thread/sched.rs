@@ -11,8 +11,8 @@ use core::{fmt, hash};
 ///  - [Linux]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man3/CPU_SET.3.html
-/// [`sched_setaffinity`]: crate::thread::sched_setaffinity
-/// [`sched_getaffinity`]: crate::thread::sched_getaffinity
+/// [`sched_setaffinity`]: sched_setaffinity
+/// [`sched_getaffinity`]: sched_getaffinity
 #[repr(transparent)]
 #[derive(Clone, Copy)]
 pub struct CpuSet {
@@ -158,4 +158,26 @@ pub fn sched_getaffinity(pid: Option<Pid>) -> io::Result<CpuSet> {
 #[inline]
 pub fn sched_getcpu() -> usize {
     backend::thread::syscalls::sched_getcpu()
+}
+
+/// `sched_getcpu()`—Get the CPU and NUMA node that the current thread is currently on.
+///
+/// # Example
+/// 
+/// ```rust
+/// use rustix::thread::getcpu;
+/// 
+/// let (core, numa_node) = getcpu();
+/// 
+/// println!("The current thread was on the {core} core and {numa_node} numa node.");
+/// ```
+/// 
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/getcpu.2.html
+#[cfg(linux_kernel)]
+#[inline]
+pub fn getcpu() -> (usize, usize) {
+    backend::thread::syscalls::getcpu()
 }

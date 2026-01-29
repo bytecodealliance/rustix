@@ -457,6 +457,40 @@ pub(crate) fn setgroups_thread(gids: &[crate::ugid::Gid]) -> io::Result<()> {
 ))]
 pub(crate) use crate::backend::vdso_wrappers::sched_getcpu;
 
+// `getcpu` has special optimizations via the vDSO on some architectures.
+#[cfg(any(
+    target_arch = "x86_64",
+    target_arch = "x86",
+    target_arch = "riscv64",
+    target_arch = "powerpc",
+    target_arch = "powerpc64",
+    target_arch = "s390x"
+))]
+pub(crate) use crate::backend::vdso_wrappers::getcpu;
+
+// `getcpu` on platforms without a vDSO entry for it.
+#[cfg(not(any(
+    target_arch = "x86_64",
+    target_arch = "x86",
+    target_arch = "riscv64",
+    target_arch = "powerpc",
+    target_arch = "powerpc64",
+    target_arch = "s390x"
+)))]
+#[inline]
+pub(crate) fn getcpu() -> (usize, usize) {
+    let mut cpu = MaybeUninit::<u32>::uninit();
+    let mut numa_node = MaybeUninit::<u32>::uninit();
+
+    unsafe {
+        let r = ret(syscall!(__NR_getcpu, &mut cpu, &mut numa_node, zero()));
+
+        debug_assert!(r.is_ok());
+
+        (cpu.assume_init() as usize, numa_node.assume_init() as usize)
+    }
+}
+
 // `sched_getcpu` on platforms without a vDSO entry for it.
 #[cfg(not(any(
     target_arch = "x86_64",
@@ -468,6 +502,9 @@ pub(crate) use crate::backend::vdso_wrappers::sched_getcpu;
 )))]
 #[inline]
 pub(crate) fn sched_getcpu() -> usize {
+    // We should not implement this function by using the `getcpu` function definded above
+    // because we want to provide exactly one pointer to the system call.
+    
     let mut cpu = MaybeUninit::<u32>::uninit();
     unsafe {
         let r = ret(syscall!(__NR_getcpu, &mut cpu, zero(), zero()));
