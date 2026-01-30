@@ -865,3 +865,75 @@ jobs:
         cargo test --verbose --features=all-apis --release --workspace -- --nocapture
       env:
         RUST_BACKTRACE: full
+
+  meson-musl:
+    name: Meson Musl
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+    - uses: ./.github/actions/install-rust
+      with:
+        toolchain: stable
+    - name: Install target
+      run: rustup target add x86_64-unknown-linux-musl
+    - name: Install Meson and Ninja
+      run: sudo apt-get update && sudo apt-get install -y meson ninja-build musl-tools
+    - name: Create cross file
+      run: |
+        cat <<EOF > cross_file_musl_ci.txt
+        [binaries]
+        c = 'gcc'
+        rust = ['rustc', '--target', 'x86_64-unknown-linux-musl']
+
+        [host_machine]
+        system = 'linux'
+        cpu_family = 'x86_64'
+        cpu = 'x86_64'
+        endian = 'little'
+        EOF
+    - name: Meson setup
+      run: meson setup build-musl --cross-file cross_file_musl_ci.txt
+    - name: Meson compile
+      run: meson compile -C build-musl
+
+  meson-android:
+    name: Meson Android
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+    - uses: ./.github/actions/install-rust
+      with:
+        toolchain: stable
+    - name: Install target
+      run: rustup target add x86_64-linux-android
+    - name: Install Meson and Ninja
+      run: sudo apt-get update && sudo apt-get install -y meson ninja-build
+    - name: Setup NDK
+      uses: nttld/setup-ndk@v1
+      id: setup-ndk
+      with:
+        ndk-version: r27b
+    - name: Create cross file
+      run: |
+        cat <<EOF > cross_file_android_ci.txt
+        [binaries]
+        c = '${{ steps.setup-ndk.outputs.ndk-path }}/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android30-clang'
+        cpp = '${{ steps.setup-ndk.outputs.ndk-path }}/toolchains/llvm/prebuilt/linux-x86_64/bin/x86_64-linux-android30-clang++'
+        ar = '${{ steps.setup-ndk.outputs.ndk-path }}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-ar'
+        strip = '${{ steps.setup-ndk.outputs.ndk-path }}/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip'
+        rust = ['rustc', '--target', 'x86_64-linux-android']
+
+        [host_machine]
+        system = 'android'
+        cpu_family = 'x86_64'
+        cpu = 'x86_64'
+        endian = 'little'
+        EOF
+    - name: Meson setup
+      run: meson setup build-android --cross-file cross_file_android_ci.txt
+    - name: Meson compile
+      run: meson compile -C build-android
