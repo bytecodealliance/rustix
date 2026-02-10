@@ -873,6 +873,42 @@ pub(crate) fn ipv6_freebind(fd: BorrowedFd<'_>) -> io::Result<bool> {
     getsockopt(fd, c::IPPROTO_IPV6, c::IPV6_FREEBIND).map(to_bool)
 }
 
+#[cfg(any(linux_like, target_os = "cygwin", target_os = "fuchsia",))]
+#[inline]
+pub(crate) fn set_ip_checksum(fd: BorrowedFd<'_>, value: u32) -> io::Result<()> {
+    setsockopt(fd, c::IPPROTO_IP, c::IP_CHECKSUM, value)
+}
+
+#[cfg(any(linux_like, target_os = "cygwin", target_os = "fuchsia",))]
+#[inline]
+pub(crate) fn ip_checksum(fd: BorrowedFd<'_>) -> io::Result<u32> {
+    getsockopt(fd, c::IPPROTO_IP, c::IP_CHECKSUM)
+}
+
+#[cfg(any(
+    apple,
+    linux_like,
+    target_os = "cygwin",
+    target_os = "freebsd",
+    target_os = "fuchsia",
+))]
+#[inline]
+pub(crate) fn set_ipv6_checksum(fd: BorrowedFd<'_>, value: u32) -> io::Result<()> {
+    setsockopt(fd, c::IPPROTO_IPV6, c::IPV6_CHECKSUM, value)
+}
+
+#[cfg(any(
+    apple,
+    linux_like,
+    target_os = "cygwin",
+    target_os = "freebsd",
+    target_os = "fuchsia",
+))]
+#[inline]
+pub(crate) fn ipv6_checksum(fd: BorrowedFd<'_>) -> io::Result<u32> {
+    getsockopt(fd, c::IPPROTO_IPV6, c::IPV6_CHECKSUM)
+}
+
 #[cfg(any(linux_kernel, target_os = "fuchsia"))]
 #[inline]
 pub(crate) fn ip_original_dst(fd: BorrowedFd<'_>) -> io::Result<SocketAddrV4> {

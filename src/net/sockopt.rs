@@ -1359,6 +1359,66 @@ pub fn ipv6_freebind<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
     backend::net::sockopt::ipv6_freebind(fd.as_fd())
 }
 
+/// `setsockopt(fd, IPPROTO_IP, IP_CHECKSUM, value)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_ipv6_-and-set_ipv6_-functions
+#[cfg(any(linux_like, target_os = "cygwin", target_os = "fuchsia",))]
+#[inline]
+#[doc(alias = "IP_CHECKSUM")]
+pub fn set_ip_checksum<Fd: AsFd>(fd: Fd, value: u32) -> io::Result<()> {
+    backend::net::sockopt::set_ip_checksum(fd.as_fd(), value)
+}
+
+/// `getsockopt(fd, IPPROTO_IP, IP_CHECKSUM)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_ipv6_-and-set_ipv6_-functions
+#[cfg(any(linux_like, target_os = "cygwin", target_os = "fuchsia",))]
+#[inline]
+#[doc(alias = "IP_CHECKSUM")]
+pub fn ip_checksum<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
+    backend::net::sockopt::ip_checksum(fd.as_fd())
+}
+
+/// `setsockopt(fd, IPPROTO_IPV6, IPV6_CHECKSUM, value)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_ipv6_-and-set_ipv6_-functions
+#[cfg(any(
+    apple,
+    linux_like,
+    target_os = "cygwin",
+    target_os = "freebsd",
+    target_os = "fuchsia",
+))]
+#[inline]
+#[doc(alias = "IPV6_CHECKSUM")]
+pub fn set_ipv6_checksum<Fd: AsFd>(fd: Fd, value: u32) -> io::Result<()> {
+    backend::net::sockopt::set_ipv6_checksum(fd.as_fd(), value)
+}
+
+/// `getsockopt(fd, IPPROTO_IPV6, IPV6_CHECKSUM)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_ipv6_-and-set_ipv6_-functions
+#[cfg(any(
+    apple,
+    linux_like,
+    target_os = "cygwin",
+    target_os = "freebsd",
+    target_os = "fuchsia",
+))]
+#[inline]
+#[doc(alias = "IPV6_CHECKSUM")]
+pub fn ipv6_checksum<Fd: AsFd>(fd: Fd) -> io::Result<u32> {
+    backend::net::sockopt::ipv6_checksum(fd.as_fd())
+}
+
 /// `getsockopt(fd, IPPROTO_IP, SO_ORIGINAL_DST)`
 ///
 /// Even though this corresponds to a `SO_*` constant, it is an `IPPROTO_IP`
