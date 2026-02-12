@@ -65,10 +65,13 @@ jobs:
         cargo update --package=rayon-core --precise=1.12.1
         cargo update --package=windows-sys@0.61.2 --precise=0.60.2
         cargo update --package=quote --precise=1.0.41
-        cargo update --package=ryu --precise=1.0.20
         cargo update --package=itoa --precise=1.0.15
         cargo update --package=serde_json --precise=1.0.145
         cargo update --package=log --precise=0.4.28
+        cargo update --package=getrandom --precise=0.3.4
+        cargo update --package=proc-macro2 --precise=1.0.103
+        cargo update --package=unicode-ident --precise=1.0.22
+        cargo update --package=ryu --precise=1.0.20
 
     - run: >
         rustup target add
