@@ -35,7 +35,7 @@ rustc-std-workspace-alloc = { version = "1.0.0", optional = true } # not aliased
 [target.'cfg(all(not(rustix_use_libc), not(miri), target_os = "linux", any(target_endian = "little", any(target_arch = "s390x", target_arch = "powerpc")), any(target_arch = "arm", all(target_arch = "aarch64", target_pointer_width = "64"), target_arch = "riscv64", all(rustix_use_experimental_asm, target_arch = "powerpc"), all(rustix_use_experimental_asm, target_arch = "powerpc64"), all(rustix_use_experimental_asm, target_arch = "s390x"), all(rustix_use_experimental_asm, target_arch = "mips"), all(rustix_use_experimental_asm, target_arch = "mips32r6"), all(rustix_use_experimental_asm, target_arch = "mips64"), all(rustix_use_experimental_asm, target_arch = "mips64r6"), target_arch = "x86", all(target_arch = "x86_64", target_pointer_width = "64"))))'.dependencies]
 linux-raw-sys = { version = "0.11.0", default-features = false, features = ["auxvec", "general", "errno", "ioctl", "no_std", "elf"] }
 libc_errno = { package = "errno", version = "0.3.10", default-features = false, optional = true }
-libc = { version = "0.2.177", default-features = false, optional = true }
+libc = { version = "0.2.181", default-features = false, optional = true }
 
 # Dependencies for platforms where only libc is supported:
 #
@@ -43,7 +43,7 @@ libc = { version = "0.2.177", default-features = false, optional = true }
 # backend, so enable its dependencies unconditionally.
 [target.'cfg(all(not(windows), any(rustix_use_libc, miri, not(all(target_os = "linux", any(target_endian = "little", any(target_arch = "s390x", target_arch = "powerpc")), any(target_arch = "arm", all(target_arch = "aarch64", target_pointer_width = "64"), target_arch = "riscv64", all(rustix_use_experimental_asm, target_arch = "powerpc"), all(rustix_use_experimental_asm, target_arch = "powerpc64"), all(rustix_use_experimental_asm, target_arch = "s390x"), all(rustix_use_experimental_asm, target_arch = "mips"), all(rustix_use_experimental_asm, target_arch = "mips32r6"), all(rustix_use_experimental_asm, target_arch = "mips64"), all(rustix_use_experimental_asm, target_arch = "mips64r6"), target_arch = "x86", all(target_arch = "x86_64", target_pointer_width = "64")))))))'.dependencies]
 libc_errno = { package = "errno", version = "0.3.10", default-features = false }
-libc = { version = "0.2.177", default-features = false }
+libc = { version = "0.2.181", default-features = false }
 
 # Additional dependencies for Linux and Android with the libc backend:
 #
