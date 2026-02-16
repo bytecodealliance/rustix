@@ -448,7 +448,6 @@ pub(crate) fn rename(old_path: &CStr, new_path: &CStr) -> io::Result<()> {
     unsafe { ret(c::rename(c_str(old_path), c_str(new_path))) }
 }
 
-#[cfg(not(target_os = "redox"))]
 pub(crate) fn renameat(
     old_dirfd: BorrowedFd<'_>,
     old_path: &CStr,

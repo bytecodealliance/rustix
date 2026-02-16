@@ -34,7 +34,7 @@ fn test_rename() {
     access(tmp.path().join("bar"), Access::EXISTS).unwrap();
 }
 
-#[cfg(any(linux_kernel, apple))]
+#[cfg(any(linux_kernel, apple, target_os = "redox"))]
 #[test]
 fn test_renameat() {
     use rustix::fs::{accessat, openat, renameat, statat, Access, AtFlags, Mode, CWD};
@@ -58,7 +58,7 @@ fn test_renameat() {
 
 /// Like `test_renameat` but the file already exists, so `renameat`
 /// overwrites it.
-#[cfg(any(linux_kernel, apple))]
+#[cfg(any(linux_kernel, apple, target_os = "redox"))]
 #[test]
 fn test_renameat_overwrite() {
     use rustix::fs::{openat, renameat, statat, AtFlags, Mode, CWD};
