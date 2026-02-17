@@ -253,6 +253,7 @@ jobs:
     - run: cargo check -Z build-std --target=powerpc-unknown-linux-musl --features=all-apis
     - run: cargo check -Z build-std --target=powerpc64le-unknown-linux-musl --features=all-apis
     - run: cargo check -Z build-std --target=armv7k-apple-watchos --features=all-apis
+    - run: cargo check -Z build-std --target=aarch64_be-unknown-linux-musl --all-targets --features=all-apis
 
 
   test:
