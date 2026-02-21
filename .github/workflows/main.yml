@@ -63,7 +63,7 @@ jobs:
         cargo update --package=lock_api --precise=0.4.12
         cargo update --package=rayon --precise=1.10.0
         cargo update --package=rayon-core --precise=1.12.1
-        cargo update --package=windows-sys@0.61.2 --precise=0.60.2
+        cargo update --package=windows-sys --precise=0.60.2
         cargo update --package=quote --precise=1.0.41
         cargo update --package=itoa --precise=1.0.15
         cargo update --package=serde_json --precise=1.0.145
@@ -600,7 +600,7 @@ jobs:
         cargo update --package=lock_api --precise=0.4.12
         cargo update --package=rayon --precise=1.10.0
         cargo update --package=rayon-core --precise=1.12.1
-        cargo update --package=windows-sys@0.61.2 --precise=0.60.2
+        cargo update --package=windows-sys --precise=0.60.2
         cargo update --package=quote --precise=1.0.41
         cargo update --package=itoa --precise=1.0.15
         cargo update --package=serde_json --precise=1.0.145

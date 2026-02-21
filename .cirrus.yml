@@ -27,15 +27,21 @@ task:
     - . $HOME/.cargo/env
     - cargo test --workspace --features=all-apis
 
-task:
-  name: stable x86_64-unknown-freebsd-16
-  freebsd_instance:
-    image_family: freebsd-16-0-snap
-  setup_script:
-    - curl https://sh.rustup.rs -sSf --output rustup.sh
-    - sh rustup.sh --default-toolchain stable -y --profile=minimal
-    - . $HOME/.cargo/env
-    - rustup default stable
-  test_script:
-    - . $HOME/.cargo/env
-    - cargo test --workspace --features=all-apis
+
+# Temporarily disabled due to this error:
+#
+# ```
+# Failed to start an instance: INVALID_ARGUMENT: Snap images are not supported due to boot stability.
+# ```
+#task:
+#  name: stable x86_64-unknown-freebsd-16
+#  freebsd_instance:
+#    image_family: freebsd-16-0-snap
+#  setup_script:
+#    - curl https://sh.rustup.rs -sSf --output rustup.sh
+#    - sh rustup.sh --default-toolchain stable -y --profile=minimal
+#    - . $HOME/.cargo/env
+#    - rustup default stable
+#  test_script:
+#    - . $HOME/.cargo/env
+#    - cargo test --workspace --features=all-apis
