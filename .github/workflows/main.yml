@@ -70,9 +70,13 @@ jobs:
         cargo update --package=proc-macro2 --precise=1.0.103
         cargo update --package=unicode-ident --precise=1.0.22
         cargo update --package=ryu --precise=1.0.20
+        cargo update --package=futures --precise=0.3.31
         cargo update --package=futures-executor --precise=0.3.31
         cargo update --package=futures-util --precise=0.3.31
+        cargo update --package=futures-channel --precise=0.3.31
         cargo update --package=futures-core --precise=0.3.31
+        cargo update --package=futures-io --precise=0.3.31
+        cargo update --package=futures-sink --precise=0.3.31
         cargo update --package=futures-task --precise=0.3.31
 
     - run: >
@@ -601,9 +605,13 @@ jobs:
         cargo update --package=proc-macro2 --precise=1.0.103
         cargo update --package=unicode-ident --precise=1.0.22
         cargo update --package=ryu --precise=1.0.20
+        cargo update --package=futures --precise=0.3.31
         cargo update --package=futures-executor --precise=0.3.31
         cargo update --package=futures-util --precise=0.3.31
+        cargo update --package=futures-channel --precise=0.3.31
         cargo update --package=futures-core --precise=0.3.31
+        cargo update --package=futures-io --precise=0.3.31
+        cargo update --package=futures-sink --precise=0.3.31
         cargo update --package=futures-task --precise=0.3.31
 
     - run: |
