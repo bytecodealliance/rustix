@@ -4,7 +4,7 @@ fn same(a: &Stat, b: &Stat) -> bool {
     a.st_ino == b.st_ino && a.st_dev == b.st_dev
 }
 
-#[cfg(linux_kernel)]
+#[cfg(any(linux_kernel, target_os = "redox"))]
 const DIR_OPEN_FLAGS: OFlags = OFlags::RDONLY.union(OFlags::PATH);
 #[cfg(apple)]
 const DIR_OPEN_FLAGS: OFlags = OFlags::RDONLY;
@@ -34,7 +34,7 @@ fn test_rename() {
     access(tmp.path().join("bar"), Access::EXISTS).unwrap();
 }
 
-#[cfg(any(linux_kernel, apple))]
+#[cfg(any(linux_kernel, apple, target_os = "redox"))]
 #[test]
 fn test_renameat() {
     use rustix::fs::{accessat, openat, renameat, statat, Access, AtFlags, Mode, CWD};
@@ -58,7 +58,7 @@ fn test_renameat() {
 
 /// Like `test_renameat` but the file already exists, so `renameat`
 /// overwrites it.
-#[cfg(any(linux_kernel, apple))]
+#[cfg(any(linux_kernel, apple, target_os = "redox"))]
 #[test]
 fn test_renameat_overwrite() {
     use rustix::fs::{openat, renameat, statat, AtFlags, Mode, CWD};
@@ -74,7 +74,7 @@ fn test_renameat_overwrite() {
     assert!(same(&before, &renamed));
 }
 
-#[cfg(any(linux_kernel, apple))]
+#[cfg(any(linux_kernel, apple, target_os = "redox"))]
 #[test]
 fn test_renameat_with() {
     use rustix::fs::{openat, renameat_with, statat, AtFlags, Mode, RenameFlags, CWD};
