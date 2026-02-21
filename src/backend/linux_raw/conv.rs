@@ -666,6 +666,24 @@ impl<'a, Num: ArgNumber> From<crate::thread::Cpuid> for ArgReg<'a, Num> {
     }
 }
 
+#[cfg(feature = "thread")]
+impl<'a, Num: ArgNumber> From<super::thread::types::SeccompOperation> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(operation: super::thread::types::SeccompOperation) -> Self {
+        c_uint(operation as u32)
+    }
+}
+
+#[cfg(feature = "thread")]
+impl<'a, Num: ArgNumber> From<Option<crate::thread::SetSecureComputingFilterFlags>>
+    for ArgReg<'a, Num>
+{
+    #[inline]
+    fn from(operation: Option<crate::thread::SetSecureComputingFilterFlags>) -> Self {
+        c_uint(operation.map_or(0, |flags| flags.bits()))
+    }
+}
+
 #[cfg(target_pointer_width = "64")]
 #[inline]
 pub(super) fn dev_t<'a, Num: ArgNumber>(dev: u64) -> ArgReg<'a, Num> {

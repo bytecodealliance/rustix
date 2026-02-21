@@ -135,7 +135,7 @@ mount = []
 net = ["linux-raw-sys/net", "linux-raw-sys/netlink", "linux-raw-sys/if_ether", "linux-raw-sys/xdp"]
 
 # Enable `rustix::thread::*`.
-thread = ["linux-raw-sys/prctl"]
+thread = ["linux-raw-sys/prctl", "linux-raw-sys/ptrace"]
 
 # Enable `rustix::process::*`.
 process = ["linux-raw-sys/prctl"]
