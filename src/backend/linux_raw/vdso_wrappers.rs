@@ -127,7 +127,39 @@ pub(crate) fn clock_gettime_dynamic(id: DynamicClockId<'_>) -> io::Result<Timesp
     target_arch = "s390x",
 ))]
 #[inline]
+pub(crate) fn getcpu() -> (usize, usize) {
+    // SAFETY: `GETCPU` contains either null or the address of a function with
+    // an ABI like libc `getcpu`, and calling it has the side effect of writing
+    // to the result buffers, and no others.
+    unsafe {
+        let mut cpu = MaybeUninit::<u32>::uninit();
+        let mut numa_node = MaybeUninit::<u32>::uninit();
+        let callee = match transmute(GETCPU.load(Relaxed)) {
+            Some(callee) => callee,
+            None => init_getcpu(),
+        };
+        let r0 = callee(cpu.as_mut_ptr(), numa_node.as_mut_ptr(), null_mut());
+
+        debug_assert_eq!(r0, 0);
+
+        (cpu.assume_init() as usize, numa_node.assume_init() as usize)
+    }
+}
+
+#[cfg(feature = "thread")]
+#[cfg(any(
+    target_arch = "x86_64",
+    target_arch = "x86",
+    target_arch = "riscv64",
+    target_arch = "powerpc",
+    target_arch = "powerpc64",
+    target_arch = "s390x",
+))]
+#[inline]
 pub(crate) fn sched_getcpu() -> usize {
+    // We should not implement this function by using the `getcpu` function definded above
+    // because we want to provide exactly one pointer to the system call.
+
     // SAFETY: `GETCPU` contains either null or the address of a function with
     // an ABI like libc `getcpu`, and calling it has the side effect of writing
     // to the result buffers, and no others.
@@ -308,6 +340,7 @@ fn init_clock_gettime() -> ClockGettimeType {
     target_arch = "s390x",
 ))]
 #[cold]
+#[inline(never)]
 fn init_getcpu() -> GetcpuType {
     init();
     // SAFETY: Load the function address from static storage that we just
