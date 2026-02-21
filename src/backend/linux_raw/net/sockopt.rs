@@ -725,6 +725,26 @@ pub(crate) fn ipv6_freebind(fd: BorrowedFd<'_>) -> io::Result<bool> {
 }
 
 #[inline]
+pub(crate) fn set_ip_checksum(fd: BorrowedFd<'_>, value: u32) -> io::Result<()> {
+    setsockopt(fd, c::IPPROTO_IP, c::IP_CHECKSUM, value)
+}
+
+#[inline]
+pub(crate) fn ip_checksum(fd: BorrowedFd<'_>) -> io::Result<u32> {
+    getsockopt(fd, c::IPPROTO_IP, c::IP_CHECKSUM)
+}
+
+#[inline]
+pub(crate) fn set_ipv6_checksum(fd: BorrowedFd<'_>, value: u32) -> io::Result<()> {
+    setsockopt(fd, c::IPPROTO_IPV6, c::IPV6_CHECKSUM, value)
+}
+
+#[inline]
+pub(crate) fn ipv6_checksum(fd: BorrowedFd<'_>) -> io::Result<u32> {
+    getsockopt(fd, c::IPPROTO_IPV6, c::IPV6_CHECKSUM)
+}
+
+#[inline]
 pub(crate) fn ip_original_dst(fd: BorrowedFd<'_>) -> io::Result<SocketAddrV4> {
     let level = c::IPPROTO_IP;
     let optname = c::SO_ORIGINAL_DST;
