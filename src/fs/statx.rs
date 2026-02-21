@@ -3,6 +3,7 @@
 use crate::fd::AsFd;
 use crate::fs::AtFlags;
 use crate::{backend, io, path};
+#[cfg(any(linux_raw_dep, not(target_env = "musl")))]
 use backend::c;
 use bitflags::bitflags;
 
@@ -274,4 +275,35 @@ mod compat {
             Err(io::Errno::NOSYS)
         }
     }
+}
+
+// These are the actual values for the constants, needed for the fallback implementation.
+#[cfg(all(not(linux_raw_dep), target_env = "musl"))]
+mod c {
+    pub const STATX_TYPE: u32 = 0x00000001;
+    pub const STATX_MODE: u32 = 0x00000002;
+    pub const STATX_NLINK: u32 = 0x00000004;
+    pub const STATX_UID: u32 = 0x00000008;
+    pub const STATX_GID: u32 = 0x00000010;
+    pub const STATX_ATIME: u32 = 0x00000020;
+    pub const STATX_MTIME: u32 = 0x00000040;
+    pub const STATX_CTIME: u32 = 0x00000080;
+    pub const STATX_INO: u32 = 0x00000100;
+    pub const STATX_SIZE: u32 = 0x00000200;
+    pub const STATX_BLOCKS: u32 = 0x00000400;
+    pub const STATX_BASIC_STATS: u32 = 0x000007ff;
+    pub const STATX_BTIME: u32 = 0x00000800;
+    pub const STATX_MNT_ID: u32 = 0x00001000;
+    pub const STATX_DIOALIGN: u32 = 0x00002000; // Deprecated, but here for completeness
+    pub const STATX_ALL: u32 = 0x00000fff; // Note: Doesn't include newer flags
+
+    pub const STATX_ATTR_COMPRESSED: u64 = 0x00000004;
+    pub const STATX_ATTR_IMMUTABLE: u64 = 0x00000010;
+    pub const STATX_ATTR_APPEND: u64 = 0x00000020;
+    pub const STATX_ATTR_NODUMP: u64 = 0x00000040;
+    pub const STATX_ATTR_ENCRYPTED: u64 = 0x00000800;
+    pub const STATX_ATTR_AUTOMOUNT: u64 = 0x00001000;
+    pub const STATX_ATTR_MOUNT_ROOT: u64 = 0x00020000;
+    pub const STATX_ATTR_VERITY: u64 = 0x00100000;
+    pub const STATX_ATTR_DAX: u64 = 0x00200000;
 }

@@ -17,6 +17,14 @@ bitflags::bitflags! {
     }
 }
 
+const FUTEX2_SIZE_U8: u32 = 0;
+const FUTEX2_SIZE_U16: u32 = 1;
+const FUTEX2_SIZE_U32: u32 = 2;
+const FUTEX2_SIZE_U64: u32 = 3;
+const FUTEX2_SIZE_MASK: u32 = 3;
+const FUTEX2_NUMA: u32 = 4;
+const FUTEX2_PRIVATE: u32 = 128;
+
 bitflags::bitflags! {
     /// `FUTEX2_*` flags for use with the functions in [`Waitv`].
     ///
@@ -29,22 +37,19 @@ bitflags::bitflags! {
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct WaitFlags: u32 {
         /// `FUTEX_U8`
-        const SIZE_U8 = linux_raw_sys::general::FUTEX2_SIZE_U8;
+        const SIZE_U8 = FUTEX2_SIZE_U8;
         /// `FUTEX_U16`
-        const SIZE_U16 = linux_raw_sys::general::FUTEX2_SIZE_U16;
+        const SIZE_U16 = FUTEX2_SIZE_U16;
         /// `FUTEX_U32`
-        const SIZE_U32 = linux_raw_sys::general::FUTEX2_SIZE_U32;
+        const SIZE_U32 = FUTEX2_SIZE_U32;
         /// `FUTEX_U64`
-        const SIZE_U64 = linux_raw_sys::general::FUTEX2_SIZE_U64;
+        const SIZE_U64 = FUTEX2_SIZE_U64;
         /// `FUTEX_SIZE_MASK`
-        const SIZE_MASK = linux_raw_sys::general::FUTEX2_SIZE_MASK;
-
+        const SIZE_MASK = FUTEX2_SIZE_MASK;
         /// `FUTEX2_NUMA`
-        const NUMA = linux_raw_sys::general::FUTEX2_NUMA;
-
+        const NUMA = FUTEX2_NUMA;
         /// `FUTEX2_PRIVATE`
-        const PRIVATE = linux_raw_sys::general::FUTEX2_PRIVATE;
-
+        const PRIVATE = FUTEX2_PRIVATE;
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
@@ -85,7 +90,7 @@ pub(crate) enum Operation {
 }
 
 /// `FUTEX_WAITERS`
-pub const WAITERS: u32 = linux_raw_sys::general::FUTEX_WAITERS;
+pub const WAITERS: u32 = c::FUTEX_WAITERS;
 
 /// `FUTEX_OWNER_DIED`
-pub const OWNER_DIED: u32 = linux_raw_sys::general::FUTEX_OWNER_DIED;
+pub const OWNER_DIED: u32 = c::FUTEX_OWNER_DIED;
