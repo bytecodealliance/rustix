@@ -51,10 +51,12 @@ jobs:
     - name: Use specific dependency versions for Rust 1.63 compatibility.
       if: matrix.rust == '1.63'
       run: |
+        cargo update --package=dashmap --precise 5.4.0
         cargo update --package=regex --precise=1.9.0
         cargo update --package=half --precise=2.2.1
         cargo update --package=flate2 --precise=1.0.35
         cargo update --package=syn --precise=2.0.106
+        cargo update --package=textwrap --precise=0.16.1
         cargo update --package=once_cell --precise=1.20.3
         cargo update --package=parking_lot --precise=0.12.3
         cargo update --package=parking_lot_core --precise=0.9.10
@@ -586,10 +588,12 @@ jobs:
     - name: Use specific dependency versions for Rust 1.63 compatibility.
       if: matrix.rust == '1.63'
       run: |
+        cargo update --package=dashmap --precise 5.4.0
         cargo update --package=regex --precise=1.9.0
         cargo update --package=half --precise=2.2.1
         cargo update --package=flate2 --precise=1.0.35
         cargo update --package=syn --precise=2.0.106
+        cargo update --package=textwrap --precise=0.16.1
         cargo update --package=once_cell --precise=1.20.3
         cargo update --package=parking_lot --precise=0.12.3
         cargo update --package=parking_lot_core --precise=0.9.10
