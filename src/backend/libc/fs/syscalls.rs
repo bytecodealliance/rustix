@@ -31,6 +31,8 @@ use crate::fs::FallocateFlags;
     target_os = "wasi"
 )))]
 use crate::fs::FlockOperation;
+#[cfg(target_os = "linux")]
+use crate::fs::HandleFlags;
 #[cfg(any(linux_kernel, target_os = "freebsd"))]
 use crate::fs::MemfdFlags;
 #[cfg(any(linux_kernel, apple))]
@@ -1879,6 +1881,58 @@ pub(crate) fn openat2(
 const SYS_OPENAT2: i32 = 437;
 #[cfg(all(linux_kernel, target_pointer_width = "64"))]
 const SYS_OPENAT2: i64 = 437;
+
+#[cfg(target_os = "linux")]
+pub(crate) fn name_to_handle_at(
+    dirfd: BorrowedFd<'_>,
+    path: &CStr,
+    handle: *mut ffi::c_void,
+    mount_id: *mut ffi::c_void,
+    flags: HandleFlags,
+) -> io::Result<()> {
+    syscall! {
+        fn name_to_handle_at(
+            dir_fd: c::c_int,
+            path: *const ffi::c_char,
+            handle: *mut ffi::c_void,
+            mount_id: *mut ffi::c_void,
+            flags: u32
+        ) via SYS_name_to_handle_at -> c::c_int
+    }
+
+    unsafe {
+        ret(name_to_handle_at(
+            borrowed_fd(dirfd),
+            c_str(path),
+            handle,
+            mount_id,
+            flags.bits(),
+        ))
+    }
+}
+
+#[cfg(target_os = "linux")]
+pub(crate) fn open_by_handle_at(
+    mount_fd: BorrowedFd<'_>,
+    handle: *const core::ffi::c_void,
+    flags: OFlags,
+) -> io::Result<OwnedFd> {
+    syscall! {
+        fn open_by_handle_at(
+            mount_fd: c::c_int,
+            handle: *const ffi::c_void,
+            flags: u32
+        ) via SYS_open_by_handle_at -> c::c_int
+    }
+
+    unsafe {
+        ret_owned_fd(open_by_handle_at(
+            borrowed_fd(mount_fd),
+            handle,
+            flags.bits(),
+        ))
+    }
+}
 
 #[cfg(target_os = "linux")]
 pub(crate) fn sendfile(
