@@ -51,19 +51,17 @@ jobs:
     - name: Use specific dependency versions for Rust 1.63 compatibility.
       if: matrix.rust == '1.63'
       run: |
-        cargo update --package=dashmap --precise 5.4.0
         cargo update --package=regex --precise=1.9.0
         cargo update --package=half --precise=2.2.1
         cargo update --package=flate2 --precise=1.0.35
         cargo update --package=syn --precise=2.0.106
-        cargo update --package=textwrap --precise=0.16.1
         cargo update --package=once_cell --precise=1.20.3
         cargo update --package=parking_lot --precise=0.12.3
         cargo update --package=parking_lot_core --precise=0.9.10
         cargo update --package=lock_api --precise=0.4.12
         cargo update --package=rayon --precise=1.10.0
         cargo update --package=rayon-core --precise=1.12.1
-        cargo update --package=windows-sys@0.61.2 --precise=0.60.2
+        cargo update --package=windows-sys --precise=0.60.2
         cargo update --package=quote --precise=1.0.41
         cargo update --package=itoa --precise=1.0.15
         cargo update --package=serde_json --precise=1.0.145
@@ -72,13 +70,9 @@ jobs:
         cargo update --package=proc-macro2 --precise=1.0.103
         cargo update --package=unicode-ident --precise=1.0.22
         cargo update --package=ryu --precise=1.0.20
-        cargo update --package=futures --precise=0.3.31
         cargo update --package=futures-executor --precise=0.3.31
         cargo update --package=futures-util --precise=0.3.31
-        cargo update --package=futures-channel --precise=0.3.31
         cargo update --package=futures-core --precise=0.3.31
-        cargo update --package=futures-io --precise=0.3.31
-        cargo update --package=futures-sink --precise=0.3.31
         cargo update --package=futures-task --precise=0.3.31
 
     - run: >
@@ -588,19 +582,17 @@ jobs:
     - name: Use specific dependency versions for Rust 1.63 compatibility.
       if: matrix.rust == '1.63'
       run: |
-        cargo update --package=dashmap --precise 5.4.0
         cargo update --package=regex --precise=1.9.0
         cargo update --package=half --precise=2.2.1
         cargo update --package=flate2 --precise=1.0.35
         cargo update --package=syn --precise=2.0.106
-        cargo update --package=textwrap --precise=0.16.1
         cargo update --package=once_cell --precise=1.20.3
         cargo update --package=parking_lot --precise=0.12.3
         cargo update --package=parking_lot_core --precise=0.9.10
         cargo update --package=lock_api --precise=0.4.12
         cargo update --package=rayon --precise=1.10.0
         cargo update --package=rayon-core --precise=1.12.1
-        cargo update --package=windows-sys@0.61.2 --precise=0.60.2
+        cargo update --package=windows-sys --precise=0.60.2
         cargo update --package=quote --precise=1.0.41
         cargo update --package=itoa --precise=1.0.15
         cargo update --package=serde_json --precise=1.0.145
@@ -609,13 +601,9 @@ jobs:
         cargo update --package=proc-macro2 --precise=1.0.103
         cargo update --package=unicode-ident --precise=1.0.22
         cargo update --package=ryu --precise=1.0.20
-        cargo update --package=futures --precise=0.3.31
         cargo update --package=futures-executor --precise=0.3.31
         cargo update --package=futures-util --precise=0.3.31
-        cargo update --package=futures-channel --precise=0.3.31
         cargo update --package=futures-core --precise=0.3.31
-        cargo update --package=futures-io --precise=0.3.31
-        cargo update --package=futures-sink --precise=0.3.31
         cargo update --package=futures-task --precise=0.3.31
 
     - run: |
