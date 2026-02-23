@@ -340,7 +340,6 @@ fn init_clock_gettime() -> ClockGettimeType {
     target_arch = "s390x",
 ))]
 #[cold]
-#[inline(never)]
 fn init_getcpu() -> GetcpuType {
     init();
     // SAFETY: Load the function address from static storage that we just
