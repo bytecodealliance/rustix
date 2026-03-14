@@ -33,7 +33,7 @@ more portable APIs built on this functionality, see the [`cap-std`], [`memfd`],
 
  * linux_raw, which uses raw Linux system calls and vDSO calls, and is
    supported on Linux on x86-64, x86, aarch64, riscv64gc, powerpc64le,
-   arm (v5 onwards), mipsel, and mips64el, with stable, nightly, and 1.63 Rust.
+   arm (v5 onwards), mipsel, and mips64el, with stable, nightly, and 1.65 Rust.
     - By being implemented entirely in Rust, avoiding `libc`, `errno`, and pthread
       cancellation, and employing some specialized optimizations, most functions
       compile down to very efficient code, which can often be fully inlined into
@@ -157,10 +157,9 @@ safety types rather than `RawFd`, and the flags parameters to functions such as
 
 ## Minimum Supported Rust Version (MSRV)
 
-This crate currently works on the version of [Rust on Debian stable], which is
-currently [Rust 1.63]. This policy may change in the future, in minor version
-releases, so users using a fixed version of Rust should pin to a specific
-version of this crate.
+This crate currently works on [Rust 1.65]. This policy may change in the
+future, in minor version releases, so users using a fixed version of Rust
+should pin to a specific version of this crate.
 
 ## Minimum Linux Version
 
@@ -172,10 +171,9 @@ The specifics of this policy may change in the future, but we intend it to
 always reflect “very old” Linux versions.
 
 [MSRV]: #minimum-supported-rust-version-msrv
-[Rust 1.63]: https://blog.rust-lang.org/2022/08/11/Rust-1.63.0.html
+[Rust 1.65]: https://blog.rust-lang.org/2022/11/03/Rust-1.65.0/
 [any current Rust target]: https://doc.rust-lang.org/nightly/rustc/platform-support.html
 [kernel.org]: https://www.kernel.org/releases.html
-[Rust on Debian stable]: https://packages.debian.org/stable/rust/rustc
 [Windows Sockets 2]: https://learn.microsoft.com/en-us/windows/win32/winsock/windows-sockets-start-page-2
 [`nix`]: https://crates.io/crates/nix
 [`unix`]: https://crates.io/crates/unix
