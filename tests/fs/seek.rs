@@ -56,6 +56,7 @@ fn test_seek_holes() {
     );
 }
 
+#[cfg(not(target_os = "vxworks"))]
 #[test]
 fn test_seek_offsets() {
     use rustix::fs::{open, seek, Mode, OFlags, SeekFrom};

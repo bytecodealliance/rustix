@@ -6,6 +6,7 @@ use std::io::{IoSlice, IoSliceMut};
 #[cfg(not(target_os = "solaris"))] // no preadv/pwritev
 #[cfg(not(target_os = "haiku"))] // no preadv/pwritev
 #[cfg(not(target_os = "cygwin"))] // no preadv/pwritev
+#[cfg(not(target_os = "vxworks"))] // no preadv/pwritev
 #[test]
 fn test_readwrite_pv() {
     use rustix::fs::{openat, Mode, OFlags, CWD};
@@ -45,6 +46,7 @@ fn test_readwrite_pv() {
 }
 
 #[cfg(feature = "fs")]
+#[cfg(not(target_os = "vxworks"))] // VxWorks doesn't support pwrite
 #[test]
 fn test_readwrite_p() {
     use rustix::fs::{openat, Mode, OFlags, CWD};
@@ -70,6 +72,7 @@ fn test_readwrite_p() {
 }
 
 #[cfg(feature = "fs")]
+#[cfg(not(target_os = "vxworks"))] // VxWorks doesn't support pwrite
 #[test]
 fn test_readwrite_p_uninit() {
     use core::mem::MaybeUninit;

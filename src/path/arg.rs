@@ -19,8 +19,6 @@ use std::ffi::{OsStr, OsString};
 use std::os::hermit::ext::ffi::{OsStrExt, OsStringExt};
 #[cfg(all(feature = "std", unix))]
 use std::os::unix::ffi::{OsStrExt as _, OsStringExt as _};
-#[cfg(all(feature = "std", target_os = "vxworks"))]
-use std::os::vxworks::ext::ffi::{OsStrExt, OsStringExt};
 #[cfg(all(
     feature = "std",
     target_os = "wasi",

@@ -15,6 +15,7 @@ use backend::fd::AsFd;
     target_os = "nto",
     target_os = "redox",
     target_os = "vita",
+    target_os = "vxworks",
 )))]
 use backend::fs::types::FallocateFlags;
 #[cfg(not(any(
@@ -40,7 +41,7 @@ use backend::fs::types::Stat;
     target_os = "wasi",
 )))]
 use backend::fs::types::StatFs;
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "wasi", target_os = "vxworks")))]
 use backend::fs::types::StatVfs;
 
 /// Timestamps used by [`utimensat`] and [`futimens`].
@@ -196,7 +197,7 @@ pub fn fstatfs<Fd: AsFd>(fd: Fd) -> io::Result<StatFs> {
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/fstatvfs.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/fstatvfs.2.html
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "wasi", target_os = "vxworks")))]
 #[inline]
 pub fn fstatvfs<Fd: AsFd>(fd: Fd) -> io::Result<StatVfs> {
     backend::fs::syscalls::fstatvfs(fd.as_fd())
@@ -239,6 +240,7 @@ pub fn futimens<Fd: AsFd>(fd: Fd, times: &Timestamps) -> io::Result<()> {
     target_os = "nto",
     target_os = "redox",
     target_os = "vita",
+    target_os = "vxworks",
 )))] // not implemented in libc for NetBSD yet
 #[inline]
 #[doc(alias = "posix_fallocate")]
@@ -311,7 +313,8 @@ pub fn ftruncate<Fd: AsFd>(fd: Fd, length: u64) -> io::Result<()> {
     target_os = "horizon",
     target_os = "solaris",
     target_os = "vita",
-    target_os = "wasi"
+    target_os = "wasi",
+    target_os = "vxworks",
 )))]
 #[inline]
 pub fn flock<Fd: AsFd>(fd: Fd, operation: FlockOperation) -> io::Result<()> {

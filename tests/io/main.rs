@@ -1,12 +1,12 @@
 //! Tests for [`rustix::io`].
 
 mod close;
-#[cfg(not(windows))]
+#[cfg(not(any(windows, target_os = "vxworks")))]
 mod dup;
 mod error;
-#[cfg(not(windows))]
+#[cfg(not(any(windows, target_os = "vxworks")))]
 mod from_into;
-#[cfg(not(target_os = "redox"))]
+#[cfg(not(any(target_os = "redox", target_os = "vxworks")))]
 mod ioctl;
 #[cfg(not(windows))]
 #[cfg(not(target_os = "redox"))] // redox doesn't have cwd/openat

@@ -5,7 +5,7 @@
 #![cfg_attr(core_c_str, feature(core_c_str))]
 
 mod chmodat;
-#[cfg(not(target_os = "redox"))]
+#[cfg(not(any(target_os = "redox", target_os = "vxworks")))]
 mod dir;
 mod fcntl;
 #[cfg(not(any(
@@ -13,7 +13,8 @@ mod fcntl;
     target_os = "fuchsia",
     target_os = "redox",
     target_os = "solaris",
-    target_os = "wasi"
+    target_os = "wasi",
+    target_os = "vxworks"
 )))]
 mod fcntl_lock;
 mod file;
@@ -26,11 +27,14 @@ mod invalid_offset;
 #[cfg(not(target_os = "redox"))]
 mod ioctl;
 mod linkat;
+#[cfg(not(target_os = "vxworks"))]
 mod long_paths;
-#[cfg(not(any(target_os = "haiku", target_os = "wasi")))]
+#[cfg(not(any(target_os = "haiku", target_os = "wasi", target_os = "vxworks")))]
 mod makedev;
 mod mkdirat;
+#[cfg(not(target_os = "vxworks"))]
 mod mknodat;
+#[cfg(not(target_os = "vxworks"))]
 mod negative_timestamp;
 #[cfg(linux_kernel)]
 mod openat;
@@ -45,12 +49,22 @@ mod seals;
 mod seek;
 mod special;
 mod stat;
-#[cfg(not(any(target_os = "haiku", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "haiku",
+    target_os = "redox",
+    target_os = "wasi",
+    target_os = "vxworks"
+)))]
 mod statfs;
 #[cfg(linux_kernel)]
 mod statx;
 mod symlinkat;
-#[cfg(not(any(solarish, target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    solarish,
+    target_os = "redox",
+    target_os = "wasi",
+    target_os = "vxworks"
+)))]
 mod sync;
 mod utimensat;
 #[cfg(any(apple, linux_kernel))]

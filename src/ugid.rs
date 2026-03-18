@@ -6,9 +6,18 @@ use crate::backend::c;
 use crate::ffi;
 
 /// A group identifier as a raw integer.
+#[cfg(not(target_os = "vxworks"))]
 pub type RawGid = ffi::c_uint;
 /// A user identifier as a raw integer.
+#[cfg(not(target_os = "vxworks"))]
 pub type RawUid = ffi::c_uint;
+
+/// A group identifier as a raw integer.
+#[cfg(target_os = "vxworks")]
+pub type RawGid = ffi::c_ushort;
+/// A user identifier as a raw integer.
+#[cfg(target_os = "vxworks")]
+pub type RawUid = ffi::c_ushort;
 
 /// `uid_t`—A Unix user ID.
 #[repr(transparent)]
@@ -183,10 +192,20 @@ pub(crate) fn translate_fchown_args(
 mod tests {
     use super::*;
 
+    #[cfg(not(target_os = "vxworks"))]
     #[test]
     fn test_sizes() {
         assert_eq_size!(RawUid, u32);
         assert_eq_size!(RawGid, u32);
+        assert_eq_size!(RawUid, libc::uid_t);
+        assert_eq_size!(RawGid, libc::gid_t);
+    }
+
+    #[cfg(target_os = "vxworks")]
+    #[test]
+    fn test_sizes() {
+        assert_eq_size!(RawUid, u16);
+        assert_eq_size!(RawGid, u16);
         assert_eq_size!(RawUid, libc::uid_t);
         assert_eq_size!(RawGid, libc::gid_t);
     }

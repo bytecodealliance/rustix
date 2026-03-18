@@ -1,6 +1,7 @@
 use rustix::fd::IntoRawFd as _;
 
 #[cfg(any(unix, target_os = "wasi"))]
+#[cfg(not(target_os = "vxworks"))]
 #[test]
 fn test_close_file() {
     let file = std::fs::File::open("Cargo.toml").unwrap();

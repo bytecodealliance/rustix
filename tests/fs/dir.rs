@@ -1,3 +1,4 @@
+#[cfg(not(target_os = "vxworks"))]
 #[test]
 fn test_dir_read_from() {
     let t = rustix::fs::openat(
@@ -138,6 +139,7 @@ fn test_dir_seek() {
     assert_eq!(entries, entries2);
 }
 
+#[cfg(not(target_os = "vxworks"))]
 #[test]
 fn test_dir_new() {
     let t = rustix::fs::openat(
@@ -227,7 +229,10 @@ fn dir_iterator_handles_dir_removal() {
 
 // Like `dir_iterator_handles_dir_removal`, but close the directory after
 // `Dir::read_from`.
-#[cfg_attr(any(apple, freebsdlike, target_os = "cygwin"), ignore)]
+#[cfg_attr(
+    any(apple, freebsdlike, target_os = "cygwin", target_os = "vxworks"),
+    ignore
+)]
 #[test]
 fn dir_iterator_handles_dir_removal_after_open() {
     // create a dir, keep the FD, then delete the dir

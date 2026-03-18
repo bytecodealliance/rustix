@@ -260,6 +260,7 @@ pub fn unlinkat<P: path::Arg, Fd: AsFd>(dirfd: Fd, path: P, flags: AtFlags) -> i
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/renameat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/renameat.2.html
+#[cfg(not(target_os = "vxworks"))]
 #[inline]
 pub fn renameat<P: path::Arg, Q: path::Arg, PFd: AsFd, QFd: AsFd>(
     old_dirfd: PFd,
@@ -348,7 +349,7 @@ pub fn symlinkat<P: path::Arg, Q: path::Arg, Fd: AsFd>(
 /// [Linux]: https://man7.org/linux/man-pages/man2/fstatat.2.html
 /// [`Mode::from_raw_mode`]: crate::fs::Mode::from_raw_mode
 /// [`FileType::from_raw_mode`]: crate::fs::FileType::from_raw_mode
-#[cfg(not(any(target_os = "espidf", target_os = "redox")))]
+#[cfg(not(any(target_os = "espidf", target_os = "redox", target_os = "vxworks")))]
 #[inline]
 #[doc(alias = "fstatat")]
 pub fn statat<P: path::Arg, Fd: AsFd>(dirfd: Fd, path: P, flags: AtFlags) -> io::Result<Stat> {
@@ -375,7 +376,8 @@ pub fn statat<P: path::Arg, Fd: AsFd>(dirfd: Fd, path: P, flags: AtFlags) -> io:
     target_os = "espidf",
     target_os = "horizon",
     target_os = "vita",
-    target_os = "redox"
+    target_os = "redox",
+    target_os = "vxworks",
 )))]
 #[inline]
 #[doc(alias = "faccessat")]
@@ -424,7 +426,12 @@ pub fn utimensat<P: path::Arg, Fd: AsFd>(
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/fchmodat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/fchmodat.2.html
-#[cfg(not(any(target_os = "espidf", target_os = "wasi", target_os = "redox")))]
+#[cfg(not(any(
+    target_os = "espidf",
+    target_os = "wasi",
+    target_os = "redox",
+    target_os = "vxworks"
+)))]
 #[inline]
 #[doc(alias = "fchmodat")]
 pub fn chmodat<P: path::Arg, Fd: AsFd>(
@@ -470,6 +477,7 @@ pub fn fclonefileat<Fd: AsFd, DstFd: AsFd, P: path::Arg>(
     target_os = "vita",
     target_os = "wasi",
     target_os = "redox",
+    target_os = "vxworks",
 )))]
 #[inline]
 pub fn mknodat<P: path::Arg, Fd: AsFd>(
@@ -497,6 +505,7 @@ pub fn mknodat<P: path::Arg, Fd: AsFd>(
     target_os = "vita",
     target_os = "wasi",
     target_os = "redox",
+    target_os = "vxworks",
 )))]
 #[inline]
 pub fn mkfifoat<P: path::Arg, Fd: AsFd>(dirfd: Fd, path: P, mode: Mode) -> io::Result<()> {
@@ -512,7 +521,12 @@ pub fn mkfifoat<P: path::Arg, Fd: AsFd>(dirfd: Fd, path: P, mode: Mode) -> io::R
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/fchownat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/fchownat.2.html
-#[cfg(not(any(target_os = "espidf", target_os = "wasi", target_os = "redox")))]
+#[cfg(not(any(
+    target_os = "espidf",
+    target_os = "wasi",
+    target_os = "redox",
+    target_os = "vxworks"
+)))]
 #[inline]
 #[doc(alias = "fchownat")]
 pub fn chownat<P: path::Arg, Fd: AsFd>(

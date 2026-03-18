@@ -117,7 +117,8 @@ pub fn dup2<Fd: AsFd>(fd: Fd, new: &mut OwnedFd) -> io::Result<()> {
     target_os = "horizon",
     target_os = "nto",
     target_os = "vita",
-    target_os = "wasi"
+    target_os = "wasi",
+    target_os = "vxworks"
 )))]
 #[inline]
 pub fn dup3<Fd: AsFd>(fd: Fd, new: &mut OwnedFd, flags: DupFlags) -> io::Result<()> {

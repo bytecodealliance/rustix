@@ -17,6 +17,7 @@ mod dir;
     target_os = "redox",
     target_os = "solaris",
     target_os = "vita",
+    target_os = "vxworks",
 )))]
 mod fadvise;
 pub(crate) mod fcntl;
@@ -38,7 +39,8 @@ mod ioctl;
     target_os = "haiku",
     target_os = "horizon",
     target_os = "vita",
-    target_os = "wasi"
+    target_os = "wasi",
+    target_os = "vxworks",
 )))]
 mod makedev;
 #[cfg(any(linux_kernel, target_os = "freebsd"))]
@@ -59,7 +61,8 @@ mod statx;
     target_os = "horizon",
     target_os = "redox",
     target_os = "vita",
-    target_os = "wasi"
+    target_os = "wasi",
+    target_os = "vxworks",
 )))]
 mod sync;
 #[cfg(any(apple, linux_kernel, target_os = "hurd"))]
@@ -82,6 +85,7 @@ pub use dir::{Dir, DirEntry};
     target_os = "redox",
     target_os = "solaris",
     target_os = "vita",
+    target_os = "vxworks",
 )))]
 pub use fadvise::fadvise;
 pub use fcntl::*;
@@ -101,7 +105,8 @@ pub use ioctl::*;
     target_os = "haiku",
     target_os = "horizon",
     target_os = "vita",
-    target_os = "wasi"
+    target_os = "wasi",
+    target_os = "vxworks",
 )))]
 pub use makedev::*;
 #[cfg(any(linux_kernel, target_os = "freebsd"))]
@@ -122,7 +127,8 @@ pub use statx::*;
     target_os = "horizon",
     target_os = "redox",
     target_os = "vita",
-    target_os = "wasi"
+    target_os = "wasi",
+    target_os = "vxworks",
 )))]
 pub use sync::sync;
 #[cfg(any(apple, linux_kernel, target_os = "hurd"))]

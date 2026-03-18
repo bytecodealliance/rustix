@@ -41,7 +41,7 @@ bitflags! {
         const SYMLINK_NOFOLLOW = bitcast!(c::AT_SYMLINK_NOFOLLOW);
 
         /// `AT_EACCESS`
-        #[cfg(not(target_os = "android"))]
+        #[cfg(not(any(target_os = "android", target_os = "vxworks")))]
         const EACCESS = bitcast!(c::AT_EACCESS);
 
         /// `AT_REMOVEDIR`
@@ -259,7 +259,7 @@ bitflags! {
         const CREATE = bitcast!(c::O_CREAT);
 
         /// `O_DIRECTORY`
-        #[cfg(not(any(target_os = "espidf", target_os = "horizon")))]
+        #[cfg(not(any(target_os = "espidf", target_os = "horizon", target_os = "vxworks")))]
         const DIRECTORY = bitcast!(c::O_DIRECTORY);
 
         /// `O_DSYNC`
@@ -277,7 +277,7 @@ bitflags! {
         const FSYNC = bitcast!(c::O_FSYNC);
 
         /// `O_NOFOLLOW`
-        #[cfg(not(any(target_os = "espidf", target_os = "horizon")))]
+        #[cfg(not(any(target_os = "espidf", target_os = "horizon", target_os = "vxworks")))]
         const NOFOLLOW = bitcast!(c::O_NOFOLLOW);
 
         /// `O_NONBLOCK`
@@ -295,7 +295,7 @@ bitflags! {
         const RDWR = bitcast!(c::O_RDWR);
 
         /// `O_NOCTTY`
-        #[cfg(not(any(target_os = "espidf", target_os = "horizon", target_os = "l4re", target_os = "redox", target_os = "vita")))]
+        #[cfg(not(any(target_os = "espidf", target_os = "horizon", target_os = "l4re", target_os = "redox", target_os = "vita", target_os = "vxworks")))]
         const NOCTTY = bitcast!(c::O_NOCTTY);
 
         /// `O_RSYNC`
@@ -654,6 +654,7 @@ impl FileType {
     target_os = "redox",
     target_os = "solaris",
     target_os = "vita",
+    target_os = "vxworks",
 )))]
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 #[repr(u32)]
@@ -767,7 +768,8 @@ bitflags! {
     target_os = "horizon",
     target_os = "nto",
     target_os = "redox",
-    target_os = "vita"
+    target_os = "vita",
+    target_os = "vxworks",
 )))]
 bitflags! {
     /// `FALLOC_FL_*` constants for use with [`fallocate`].
@@ -861,7 +863,7 @@ bitflags! {
     }
 }
 
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "wasi", target_os = "vxworks")))]
 bitflags! {
     /// `ST_*` constants for use with [`StatVfs`].
     #[repr(transparent)]
@@ -924,7 +926,8 @@ bitflags! {
     target_os = "espidf",
     target_os = "horizon",
     target_os = "vita",
-    target_os = "wasi"
+    target_os = "wasi",
+    target_os = "vxworks",
 )))]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(u32)]
@@ -965,6 +968,26 @@ pub enum FlockOperation {
     /// `LOCK_UN | LOCK_NB`
     #[cfg(target_os = "solaris")]
     NonBlockingUnlock = bitcast!(8 | 4),
+}
+
+/// On Vxworks, we do not have flock or the flock enum.
+/// So here, we create the enum ourselves
+#[cfg(target_os = "vxworks")]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[repr(i32)]
+pub enum FlockOperation {
+    /// `LOCK_SH`
+    LockShared = 1,
+    /// `LOCK_EX`
+    LockExclusive = 2,
+    /// `LOCK_UN`
+    Unlock = 4,
+    /// `LOCK_SH | LOCK_NB`
+    NonBlockingLockShared = 1 | 8,
+    /// `LOCK_EX | LOCK_NB`
+    NonBlockingLockExclusive = 2 | 8,
+    /// `LOCK_UN | LOCK_NB`
+    NonBlockingUnlock = 4 | 8,
 }
 
 /// `struct stat` for use with [`statat`] and [`fstat`].
@@ -1093,7 +1116,7 @@ pub type Fsid = c::fsid_t;
 ///
 /// [`statvfs`]: crate::fs::statvfs
 /// [`fstatvfs`]: crate::fs::fstatvfs
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "wasi", target_os = "vxworks")))]
 #[allow(missing_docs)]
 pub struct StatVfs {
     pub f_bsize: u64,

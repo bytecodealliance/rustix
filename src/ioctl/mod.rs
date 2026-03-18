@@ -305,7 +305,7 @@ type _Opcode = c::c_ulong;
     not(linux_raw),
     target_os = "linux",
     not(target_env = "gnu"),
-    not(target_env = "uclibc")
+    not(target_env = "uclibc"),
 ))]
 type _Opcode = c::c_int;
 
@@ -324,7 +324,7 @@ type _Opcode = c::c_int;
 ))]
 type _Opcode = c::c_ulong;
 
-// AIX, Emscripten, Fuchsia, Solaris, and WASI use a `int`.
+// AIX, Emscripten, vxworks, Fuchsia, Solaris, and WASI use a `int`.
 #[cfg(any(
     solarish,
     target_os = "aix",
@@ -333,6 +333,7 @@ type _Opcode = c::c_ulong;
     target_os = "emscripten",
     target_os = "nto",
     target_os = "wasi",
+    target_os = "vxworks",
 ))]
 type _Opcode = c::c_int;
 

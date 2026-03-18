@@ -15,7 +15,7 @@ fn test_mkdir() {
     rmdir(tmp.path().join("file")).unwrap();
 }
 
-#[cfg(not(target_os = "redox"))]
+#[cfg(not(any(target_os = "redox", target_os = "vxworks")))]
 #[test]
 fn test_mkdirat() {
     use rustix::fs::{

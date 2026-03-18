@@ -1,4 +1,4 @@
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(target_os = "redox", target_os = "wasi", target_os = "vxworks")))]
 #[test]
 fn test_fcntl_dupfd_cloexec() {
     use rustix::fd::AsFd as _;

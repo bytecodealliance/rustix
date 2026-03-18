@@ -24,7 +24,12 @@ use crate::fs::{fstat, Stat};
     target_os = "wasi",
 )))]
 use crate::fs::{fstatfs, StatFs};
-#[cfg(not(any(solarish, target_os = "vita", target_os = "wasi")))]
+#[cfg(not(any(
+    solarish,
+    target_os = "vita",
+    target_os = "wasi",
+    target_os = "vxworks"
+)))]
 use crate::fs::{fstatvfs, StatVfs};
 use crate::io;
 #[cfg(not(any(target_os = "fuchsia", target_os = "vita", target_os = "wasi")))]
@@ -159,6 +164,7 @@ impl Dir {
     ///
     /// [`libc::seekdir`]: https://docs.rs/libc/*/arm-unknown-linux-gnueabihf/libc/fn.seekdir.html
     #[cfg(target_pointer_width = "64")]
+    #[cfg(not(target_os = "vxworks"))]
     #[cfg_attr(docsrs, doc(cfg(target_pointer_width = "64")))]
     #[doc(alias = "seekdir")]
     #[inline]
@@ -260,7 +266,8 @@ impl Dir {
         solarish,
         target_os = "horizon",
         target_os = "vita",
-        target_os = "wasi"
+        target_os = "wasi",
+        target_os = "vxworks",
     )))]
     #[inline]
     pub fn statvfs(&self) -> io::Result<StatVfs> {

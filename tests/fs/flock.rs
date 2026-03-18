@@ -1,4 +1,4 @@
-#[cfg(not(any(target_os = "redox", target_os = "solaris")))]
+#[cfg(not(any(target_os = "redox", target_os = "solaris", target_os = "vxworks")))]
 #[test]
 fn test_flock() {
     use rustix::fs::{flock, openat, FlockOperation, Mode, OFlags, CWD};

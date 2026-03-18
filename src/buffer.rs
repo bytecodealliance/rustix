@@ -322,6 +322,7 @@ mod private {
     }
 }
 
+#[cfg(not(target_os = "vxworks"))]
 #[cfg(test)]
 mod tests {
     #[allow(unused_imports)]

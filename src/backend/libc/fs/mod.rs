@@ -7,7 +7,8 @@ pub mod inotify;
     target_os = "haiku",
     target_os = "horizon",
     target_os = "vita",
-    target_os = "wasi"
+    target_os = "wasi",
+    target_os = "vxworks",
 )))]
 pub(crate) mod makedev;
 #[cfg(not(windows))]

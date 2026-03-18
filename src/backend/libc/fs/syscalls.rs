@@ -22,6 +22,7 @@ use crate::fs::AtFlags;
     target_os = "nto",
     target_os = "redox",
     target_os = "vita",
+    target_os = "vxworks",
 )))]
 use crate::fs::FallocateFlags;
 #[cfg(not(any(
@@ -60,7 +61,7 @@ use crate::fs::Timestamps;
 )))]
 use crate::fs::{Dev, FileType};
 use crate::fs::{Mode, OFlags, SeekFrom, Stat};
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "wasi", target_os = "vxworks")))]
 use crate::fs::{StatVfs, StatVfsMountFlags};
 use crate::io;
 #[cfg(all(target_env = "gnu", fix_y2038))]
@@ -85,6 +86,7 @@ use {
     target_os = "redox",
     target_os = "solaris",
     target_os = "vita",
+    target_os = "vxworks",
 )))]
 use {crate::fs::Advice, core::num::NonZeroU64};
 #[cfg(any(apple, linux_kernel, target_os = "hurd"))]
@@ -103,7 +105,7 @@ weak!(fn __futimens64(c::c_int, *const LibcTimespec) -> c::c_int);
 /// Use a direct syscall (via libc) for `open`.
 ///
 /// This is only currently necessary as a workaround for old glibc; see below.
-#[cfg(all(unix, target_env = "gnu"))]
+#[cfg(all(not(target_os = "vxworks"), unix, target_env = "gnu"))]
 fn open_via_syscall(path: &CStr, oflags: OFlags, mode: Mode) -> io::Result<OwnedFd> {
     // Linux on aarch64, loongarch64 and riscv64 has no `open` syscall so use
     // `openat`.
@@ -150,7 +152,8 @@ pub(crate) fn open(path: &CStr, oflags: OFlags, mode: Mode) -> io::Result<OwnedF
         unix,
         target_env = "gnu",
         not(target_os = "hurd"),
-        not(target_os = "freebsd")
+        not(target_os = "freebsd"),
+        not(target_os = "vxworks"),
     ))]
     if oflags.contains(OFlags::TMPFILE) && crate::backend::if_glibc_is_less_than_2_25() {
         return open_via_syscall(path, oflags, mode);
@@ -218,7 +221,8 @@ pub(crate) fn openat(
         unix,
         target_env = "gnu",
         not(target_os = "hurd"),
-        not(target_os = "freebsd")
+        not(target_os = "freebsd"),
+        not(target_os = "vxworks")
     ))]
     if oflags.contains(OFlags::TMPFILE) && crate::backend::if_glibc_is_less_than_2_25() {
         return openat_via_syscall(dirfd, path, oflags, mode);
@@ -271,7 +275,7 @@ pub(crate) fn statfs(filename: &CStr) -> io::Result<StatFs> {
     }
 }
 
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "wasi", target_os = "vxworks")))]
 #[inline]
 pub(crate) fn statvfs(filename: &CStr) -> io::Result<StatVfs> {
     unsafe {
@@ -448,6 +452,7 @@ pub(crate) fn rename(old_path: &CStr, new_path: &CStr) -> io::Result<()> {
     unsafe { ret(c::rename(c_str(old_path), c_str(new_path))) }
 }
 
+#[cfg(not(target_os = "vxworks"))]
 pub(crate) fn renameat(
     old_dirfd: BorrowedFd<'_>,
     old_path: &CStr,
@@ -481,7 +486,7 @@ pub(crate) fn renameat(
         ret(c::rename(c_str(old_path), c_str(new_path)))
     }
 
-    #[cfg(not(target_os = "macos"))]
+    #[cfg(not(any(target_os = "macos", target_os = "vxworks")))]
     unsafe {
         ret(c::renameat(
             borrowed_fd(old_dirfd),
@@ -729,7 +734,7 @@ pub(crate) fn lstat(path: &CStr) -> io::Result<Stat> {
     }
 }
 
-#[cfg(not(any(target_os = "espidf", target_os = "redox")))]
+#[cfg(not(any(target_os = "espidf", target_os = "redox", target_os = "vxworks")))]
 pub(crate) fn statat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::Result<Stat> {
     // See the comments in `fstat` about using `crate::fs::statx` here.
     #[cfg(all(
@@ -812,7 +817,8 @@ pub(crate) fn access(path: &CStr, access: Access) -> io::Result<()> {
     target_os = "espidf",
     target_os = "horizon",
     target_os = "redox",
-    target_os = "vita"
+    target_os = "vita",
+    target_os = "vxworks",
 )))]
 pub(crate) fn accessat(
     dirfd: BorrowedFd<'_>,
@@ -1096,7 +1102,8 @@ pub(crate) fn chmod(path: &CStr, mode: Mode) -> io::Result<()> {
     linux_kernel,
     target_os = "espidf",
     target_os = "redox",
-    target_os = "wasi"
+    target_os = "wasi",
+    target_os = "vxworks",
 )))]
 pub(crate) fn chmodat(
     dirfd: BorrowedFd<'_>,
@@ -1175,7 +1182,12 @@ pub(crate) fn fclonefileat(
     }
 }
 
-#[cfg(not(any(target_os = "espidf", target_os = "redox", target_os = "wasi")))]
+#[cfg(not(any(
+    target_os = "espidf",
+    target_os = "redox",
+    target_os = "wasi",
+    target_os = "vxworks"
+)))]
 pub(crate) fn chownat(
     dirfd: BorrowedFd<'_>,
     path: &CStr,
@@ -1201,7 +1213,8 @@ pub(crate) fn chownat(
     target_os = "horizon",
     target_os = "redox",
     target_os = "vita",
-    target_os = "wasi"
+    target_os = "wasi",
+    target_os = "vxworks",
 )))]
 pub(crate) fn mknodat(
     dirfd: BorrowedFd<'_>,
@@ -1283,6 +1296,7 @@ pub(crate) fn copy_file_range(
     target_os = "redox",
     target_os = "solaris",
     target_os = "vita",
+    target_os = "vxworks",
 )))]
 pub(crate) fn fadvise(
     fd: BorrowedFd<'_>,
@@ -1494,7 +1508,8 @@ pub(crate) fn fchown(fd: BorrowedFd<'_>, owner: Option<Uid>, group: Option<Gid>)
     target_os = "horizon",
     target_os = "solaris",
     target_os = "vita",
-    target_os = "wasi"
+    target_os = "wasi",
+    target_os = "vxworks",
 )))]
 pub(crate) fn flock(fd: BorrowedFd<'_>, operation: FlockOperation) -> io::Result<()> {
     unsafe { ret(c::flock(borrowed_fd(fd), operation as c::c_int)) }
@@ -1522,7 +1537,8 @@ pub(crate) fn syncfs(fd: BorrowedFd<'_>) -> io::Result<()> {
     target_os = "horizon",
     target_os = "redox",
     target_os = "vita",
-    target_os = "wasi"
+    target_os = "wasi",
+    target_os = "vxworks",
 )))]
 pub(crate) fn sync() {
     unsafe { c::sync() }
@@ -1609,7 +1625,7 @@ pub(crate) fn fstatfs(fd: BorrowedFd<'_>) -> io::Result<StatFs> {
     }
 }
 
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "wasi", target_os = "vxworks")))]
 pub(crate) fn fstatvfs(fd: BorrowedFd<'_>) -> io::Result<StatVfs> {
     let mut statvfs = MaybeUninit::<c::statvfs>::uninit();
     unsafe {
@@ -1618,7 +1634,7 @@ pub(crate) fn fstatvfs(fd: BorrowedFd<'_>) -> io::Result<StatVfs> {
     }
 }
 
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "wasi", target_os = "vxworks")))]
 fn libc_statvfs_to_statvfs(from: c::statvfs) -> StatVfs {
     StatVfs {
         f_bsize: from.f_bsize as u64,
@@ -1744,6 +1760,7 @@ fn futimens_old(fd: BorrowedFd<'_>, times: &Timestamps) -> io::Result<()> {
     target_os = "nto",
     target_os = "redox",
     target_os = "vita",
+    target_os = "vxworks",
 )))]
 pub(crate) fn fallocate(
     fd: BorrowedFd<'_>,

@@ -56,6 +56,7 @@ impl Errno {
         target_os = "l4re",
         target_os = "vita",
         target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const ADV: Self = Self(c::EADV);
     /// `EAFNOSUPPORT`
@@ -81,6 +82,7 @@ impl Errno {
         target_os = "l4re",
         target_os = "vita",
         target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const BADE: Self = Self(c::EBADE);
     /// `EBADF`
@@ -97,6 +99,7 @@ impl Errno {
         target_os = "l4re",
         target_os = "vita",
         target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const BADFD: Self = Self(c::EBADFD);
     /// `EBADMSG`
@@ -114,6 +117,7 @@ impl Errno {
         target_os = "l4re",
         target_os = "vita",
         target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const BADR: Self = Self(c::EBADR);
     /// `EBADRPC`
@@ -131,6 +135,7 @@ impl Errno {
         target_os = "l4re",
         target_os = "vita",
         target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const BADRQC: Self = Self(c::EBADRQC);
     /// `EBADSLT`
@@ -145,6 +150,7 @@ impl Errno {
         target_os = "l4re",
         target_os = "vita",
         target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const BADSLT: Self = Self(c::EBADSLT);
     /// `EBFONT`
@@ -159,6 +165,7 @@ impl Errno {
         target_os = "l4re",
         target_os = "vita",
         target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const BFONT: Self = Self(c::EBFONT);
     /// `EBUSY`
@@ -183,7 +190,8 @@ impl Errno {
         target_os = "hurd",
         target_os = "l4re",
         target_os = "vita",
-        target_os = "wasi"
+        target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const CHRNG: Self = Self(c::ECHRNG);
     /// `ECOMM`
@@ -198,6 +206,7 @@ impl Errno {
         target_os = "l4re",
         target_os = "vita",
         target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const COMM: Self = Self(c::ECOMM);
     /// `ECONNABORTED`
@@ -221,6 +230,7 @@ impl Errno {
         target_os = "hurd",
         target_os = "vita",
         target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const DEADLOCK: Self = Self(c::EDEADLOCK);
     /// `EDESTADDRREQ`
@@ -249,6 +259,7 @@ impl Errno {
         target_os = "nto",
         target_os = "vita",
         target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const DOTDOT: Self = Self(c::EDOTDOT);
     /// `EDQUOT`
@@ -286,6 +297,7 @@ impl Errno {
         target_os = "redox",
         target_os = "vita",
         target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const HWPOISON: Self = Self(c::EHWPOISON);
     /// `EIDRM`
@@ -336,6 +348,7 @@ impl Errno {
         target_os = "nto",
         target_os = "vita",
         target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const ISNAM: Self = Self(c::EISNAM);
     /// `EKEYEXPIRED`
@@ -353,6 +366,7 @@ impl Errno {
         target_os = "nto",
         target_os = "vita",
         target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const KEYEXPIRED: Self = Self(c::EKEYEXPIRED);
     /// `EKEYREJECTED`
@@ -370,6 +384,7 @@ impl Errno {
         target_os = "nto",
         target_os = "vita",
         target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const KEYREJECTED: Self = Self(c::EKEYREJECTED);
     /// `EKEYREVOKED`
@@ -387,6 +402,7 @@ impl Errno {
         target_os = "nto",
         target_os = "vita",
         target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const KEYREVOKED: Self = Self(c::EKEYREVOKED);
     /// `EL2HLT`
@@ -399,7 +415,8 @@ impl Errno {
         target_os = "hurd",
         target_os = "l4re",
         target_os = "vita",
-        target_os = "wasi"
+        target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const L2HLT: Self = Self(c::EL2HLT);
     /// `EL2NSYNC`
@@ -412,7 +429,8 @@ impl Errno {
         target_os = "hurd",
         target_os = "l4re",
         target_os = "vita",
-        target_os = "wasi"
+        target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const L2NSYNC: Self = Self(c::EL2NSYNC);
     /// `EL3HLT`
@@ -425,7 +443,8 @@ impl Errno {
         target_os = "hurd",
         target_os = "l4re",
         target_os = "vita",
-        target_os = "wasi"
+        target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const L3HLT: Self = Self(c::EL3HLT);
     /// `EL3RST`
@@ -438,7 +457,8 @@ impl Errno {
         target_os = "hurd",
         target_os = "l4re",
         target_os = "vita",
-        target_os = "wasi"
+        target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const L3RST: Self = Self(c::EL3RST);
     /// `ELIBACC`
@@ -453,6 +473,7 @@ impl Errno {
         target_os = "l4re",
         target_os = "vita",
         target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const LIBACC: Self = Self(c::ELIBACC);
     /// `ELIBBAD`
@@ -467,6 +488,7 @@ impl Errno {
         target_os = "l4re",
         target_os = "vita",
         target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const LIBBAD: Self = Self(c::ELIBBAD);
     /// `ELIBEXEC`
@@ -480,6 +502,7 @@ impl Errno {
         target_os = "l4re",
         target_os = "vita",
         target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const LIBEXEC: Self = Self(c::ELIBEXEC);
     /// `ELIBMAX`
@@ -494,6 +517,7 @@ impl Errno {
         target_os = "l4re",
         target_os = "vita",
         target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const LIBMAX: Self = Self(c::ELIBMAX);
     /// `ELIBSCN`
@@ -508,6 +532,7 @@ impl Errno {
         target_os = "l4re",
         target_os = "vita",
         target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const LIBSCN: Self = Self(c::ELIBSCN);
     /// `ELNRNG`
@@ -520,7 +545,8 @@ impl Errno {
         target_os = "hurd",
         target_os = "l4re",
         target_os = "vita",
-        target_os = "wasi"
+        target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const LNRNG: Self = Self(c::ELNRNG);
     /// `ELOOP`
@@ -540,6 +566,7 @@ impl Errno {
         target_os = "nto",
         target_os = "vita",
         target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const MEDIUMTYPE: Self = Self(c::EMEDIUMTYPE);
     /// `EMFILE`
@@ -570,6 +597,7 @@ impl Errno {
         target_os = "nto",
         target_os = "vita",
         target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const NAVAIL: Self = Self(c::ENAVAIL);
     /// `ENEEDAUTH`
@@ -597,6 +625,7 @@ impl Errno {
         target_os = "l4re",
         target_os = "vita",
         target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const NOANO: Self = Self(c::ENOANO);
     /// `ENOATTR`
@@ -615,7 +644,8 @@ impl Errno {
         target_os = "hurd",
         target_os = "l4re",
         target_os = "vita",
-        target_os = "wasi"
+        target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const NOCSI: Self = Self(c::ENOCSI);
     /// `ENODATA`
@@ -651,6 +681,7 @@ impl Errno {
         target_os = "nto",
         target_os = "vita",
         target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const NOKEY: Self = Self(c::ENOKEY);
     /// `ENOLCK`
@@ -673,6 +704,7 @@ impl Errno {
         target_os = "nto",
         target_os = "vita",
         target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const NOMEDIUM: Self = Self(c::ENOMEDIUM);
     /// `ENOMEM`
@@ -696,6 +728,7 @@ impl Errno {
         target_os = "l4re",
         target_os = "vita",
         target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const NONET: Self = Self(c::ENONET);
     /// `ENOPKG`
@@ -710,6 +743,7 @@ impl Errno {
         target_os = "l4re",
         target_os = "vita",
         target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const NOPKG: Self = Self(c::ENOPKG);
     /// `ENOPROTOOPT`
@@ -776,6 +810,7 @@ impl Errno {
         target_os = "nto",
         target_os = "vita",
         target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const NOTNAM: Self = Self(c::ENOTNAM);
     /// `ENOTRECOVERABLE`
@@ -808,6 +843,7 @@ impl Errno {
         target_os = "l4re",
         target_os = "vita",
         target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const NOTUNIQ: Self = Self(c::ENOTUNIQ);
     /// `ENXIO`
@@ -878,6 +914,7 @@ impl Errno {
         target_os = "l4re",
         target_os = "vita",
         target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const REMCHG: Self = Self(c::EREMCHG);
     /// `EREMOTE`
@@ -887,7 +924,8 @@ impl Errno {
         target_os = "horizon",
         target_os = "l4re",
         target_os = "vita",
-        target_os = "wasi"
+        target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const REMOTE: Self = Self(c::EREMOTE);
     /// `EREMOTEIO`
@@ -905,6 +943,7 @@ impl Errno {
         target_os = "nto",
         target_os = "vita",
         target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const REMOTEIO: Self = Self(c::EREMOTEIO);
     /// `ERESTART`
@@ -919,6 +958,7 @@ impl Errno {
         target_os = "l4re",
         target_os = "vita",
         target_os = "wasi",
+        target_os = "vxworks",
     )))]
     pub const RESTART: Self = Self(c::ERESTART);
     /// `ERFKILL`
@@ -938,6 +978,7 @@ impl Errno {
         target_os = "redox",
         target_os = "vita",
         target_os = "wasi",
+        target_os = "vxworks",
     )))]
     pub const RFKILL: Self = Self(c::ERFKILL);
     /// `EROFS`
@@ -952,7 +993,8 @@ impl Errno {
         target_os = "horizon",
         target_os = "l4re",
         target_os = "vita",
-        target_os = "wasi"
+        target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const SHUTDOWN: Self = Self(c::ESHUTDOWN);
     /// `ESOCKTNOSUPPORT`
@@ -983,6 +1025,7 @@ impl Errno {
         target_os = "l4re",
         target_os = "vita",
         target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const SRMNT: Self = Self(c::ESRMNT);
     /// `ESTALE`
@@ -999,6 +1042,7 @@ impl Errno {
         target_os = "l4re",
         target_os = "vita",
         target_os = "wasi",
+        target_os = "vxworks",
     )))]
     pub const STRPIPE: Self = Self(c::ESTRPIPE);
     /// `ETIME`
@@ -1037,6 +1081,7 @@ impl Errno {
         target_os = "nto",
         target_os = "vita",
         target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const UCLEAN: Self = Self(c::EUCLEAN);
     /// `EUNATCH`
@@ -1049,7 +1094,8 @@ impl Errno {
         target_os = "hurd",
         target_os = "l4re",
         target_os = "vita",
-        target_os = "wasi"
+        target_os = "wasi",
+        target_os = "vxworks",
     )))]
     pub const UNATCH: Self = Self(c::EUNATCH);
     /// `EUSERS`
@@ -1059,7 +1105,8 @@ impl Errno {
         target_os = "horizon",
         target_os = "l4re",
         target_os = "vita",
-        target_os = "wasi"
+        target_os = "wasi",
+        target_os = "vxworks",
     )))]
     pub const USERS: Self = Self(c::EUSERS);
     /// `EWOULDBLOCK`
@@ -1079,6 +1126,7 @@ impl Errno {
         target_os = "l4re",
         target_os = "vita",
         target_os = "wasi",
+        target_os = "vxworks"
     )))]
     pub const XFULL: Self = Self(c::EXFULL);
 }

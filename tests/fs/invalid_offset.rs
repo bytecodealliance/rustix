@@ -36,7 +36,8 @@ fn invalid_offset_seek() {
     netbsdlike,
     target_os = "dragonfly",
     target_os = "nto",
-    target_os = "redox"
+    target_os = "redox",
+    target_os = "vxworks",
 )))]
 #[test]
 fn invalid_offset_fallocate() {
@@ -65,6 +66,7 @@ fn invalid_offset_fallocate() {
     target_os = "haiku",
     target_os = "redox",
     target_os = "solaris",
+    target_os = "vxworks",
 )))]
 #[test]
 fn invalid_offset_fadvise() {

@@ -9,7 +9,7 @@
 )))]
 use core::num::NonZeroU64;
 
-#[cfg(not(target_os = "redox"))]
+#[cfg(not(any(target_os = "redox", target_os = "vxworks")))]
 #[test]
 fn test_file() {
     rustix::fs::accessat(

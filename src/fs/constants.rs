@@ -84,6 +84,7 @@ mod tests {
         // Ensure that seconds fields are 64-bit on non-y2038-bug platforms, and
         // on Linux where we use statx.
         #[cfg(any(linux_kernel, not(fix_y2038)))]
+        #[cfg(not(target_os = "vxworks"))]
         {
             assert_eq!(some_stat.st_atime, 0_i64);
             assert_eq!(some_stat.st_mtime, 0_i64);
@@ -97,7 +98,13 @@ mod tests {
         assert_eq!(some_stat.st_mode, 0 as RawMode);
         assert_eq!(some_stat.st_dev, 0 as Dev);
         assert_eq!(some_stat.st_rdev, 0 as Dev);
+        #[cfg(not(target_os = "vxworks"))]
         assert_eq!(some_stat.st_uid, 0 as crate::ugid::RawUid);
+        #[cfg(not(target_os = "vxworks"))]
+        assert_eq!(some_stat.st_gid, 0 as crate::ugid::RawGid);
+        #[cfg(target_os = "vxworks")]
+        assert_eq!(some_stat.st_uid, 0 as crate::ugid::RawUid);
+        #[cfg(target_os = "vxworks")]
         assert_eq!(some_stat.st_gid, 0 as crate::ugid::RawGid);
 
         // `Stat` should match `c::stat` or `c::stat64` unless we need y2038
@@ -157,18 +164,21 @@ mod tests {
                 ))]
                 check_renamed_struct_field!(Stat, stat, __pad2);
                 check_renamed_struct_field!(Stat, stat, st_blocks);
+                #[cfg(not(target_os = "vxworks"))]
                 check_renamed_struct_field!(Stat, stat, st_atime);
-                #[cfg(not(target_os = "netbsd"))]
+                #[cfg(not(any(target_os = "netbsd", target_os = "vxworks")))]
                 check_renamed_struct_field!(Stat, stat, st_atime_nsec);
                 #[cfg(target_os = "netbsd")]
                 check_renamed_struct_renamed_field!(Stat, stat, st_atime_nsec, st_atimensec);
+                #[cfg(not(target_os = "vxworks"))]
                 check_renamed_struct_field!(Stat, stat, st_mtime);
-                #[cfg(not(target_os = "netbsd"))]
+                #[cfg(not(any(target_os = "netbsd", target_os = "vxworks")))]
                 check_renamed_struct_field!(Stat, stat, st_mtime_nsec);
                 #[cfg(target_os = "netbsd")]
                 check_renamed_struct_renamed_field!(Stat, stat, st_mtime_nsec, st_mtimensec);
+                #[cfg(not(target_os = "vxworks"))]
                 check_renamed_struct_field!(Stat, stat, st_ctime);
-                #[cfg(not(target_os = "netbsd"))]
+                #[cfg(not(any(target_os = "netbsd", target_os = "vxworks")))]
                 check_renamed_struct_field!(Stat, stat, st_ctime_nsec);
                 #[cfg(target_os = "netbsd")]
                 check_renamed_struct_renamed_field!(Stat, stat, st_ctime_nsec, st_ctimensec);

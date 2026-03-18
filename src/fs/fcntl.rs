@@ -10,7 +10,7 @@
     target_os = "horizon",
     target_os = "redox",
     target_os = "vita",
-    target_os = "wasi"
+    target_os = "wasi",
 )))]
 use crate::fs::FlockOperation;
 use crate::{backend, io};
