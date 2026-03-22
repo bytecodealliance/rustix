@@ -6,6 +6,7 @@ task:
   freebsd_instance:
     image_family: freebsd-14-3
   setup_script:
+    - pkg install -y ca_root_nss # workaround for https://github.com/rust-lang/cargo/issues/16357
     - curl https://sh.rustup.rs -sSf --output rustup.sh
     - sh rustup.sh --default-toolchain stable -y --profile=minimal
     - . $HOME/.cargo/env
