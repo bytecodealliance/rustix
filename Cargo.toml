@@ -246,7 +246,6 @@ check-cfg = [
     'cfg(alloc_c_string)',
     'cfg(alloc_ffi)',
     'cfg(apple)',
-    'cfg(asm_experimental_arch)',
     'cfg(bsd)',
     'cfg(core_c_str)',
     'cfg(core_ffi_c)',

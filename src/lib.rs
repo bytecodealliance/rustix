@@ -114,7 +114,6 @@
     any(feature = "rustc-dep-of-std", core_intrinsics),
     feature(core_intrinsics)
 )]
-#![cfg_attr(asm_experimental_arch, feature(asm_experimental_arch))]
 #![cfg_attr(not(feature = "all-apis"), allow(dead_code))]
 // It is common in Linux and libc APIs for types to vary between platforms.
 #![allow(clippy::unnecessary_cast)]

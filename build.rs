@@ -127,9 +127,6 @@ fn main() {
         // Use the linux_raw backend.
         use_feature("linux_raw_dep");
         use_feature("linux_raw");
-        if rustix_use_experimental_asm {
-            use_feature("asm_experimental_arch");
-        }
     }
 
     // Detect whether the compiler requires us to use thumb mode on ARM.
