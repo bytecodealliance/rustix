@@ -76,12 +76,14 @@ jobs:
         cargo update --package=futures-executor --precise=0.3.31
         cargo update --package=futures-util --precise=0.3.31
         cargo update --package=futures-channel --precise=0.3.31
-        cargo update --package=futures-core --precise=0.3.31
-        cargo update --package=futures-io --precise=0.3.31
-        cargo update --package=futures-sink --precise=0.3.31
-        cargo update --package=futures-task --precise=0.3.31
+         cargo update --package=futures-core --precise=0.3.31
+         cargo update --package=futures-io --precise=0.3.31
+         cargo update --package=futures-sink --precise=0.3.31
+         cargo update --package=futures-task --precise=0.3.31
+         cargo update --package=libc --precise=0.2.182
 
     - run: >
+
         rustup target add
         x86_64-unknown-linux-musl
         x86_64-unknown-linux-gnux32
@@ -613,12 +615,14 @@ jobs:
         cargo update --package=futures-executor --precise=0.3.31
         cargo update --package=futures-util --precise=0.3.31
         cargo update --package=futures-channel --precise=0.3.31
-        cargo update --package=futures-core --precise=0.3.31
-        cargo update --package=futures-io --precise=0.3.31
-        cargo update --package=futures-sink --precise=0.3.31
-        cargo update --package=futures-task --precise=0.3.31
+         cargo update --package=futures-core --precise=0.3.31
+         cargo update --package=futures-io --precise=0.3.31
+         cargo update --package=futures-sink --precise=0.3.31
+         cargo update --package=futures-task --precise=0.3.31
+         cargo update --package=libc --precise=0.2.182
 
     - run: |
+
         cargo test --verbose --features=all-apis --release --workspace -- --nocapture
       env:
         RUST_BACKTRACE: full
