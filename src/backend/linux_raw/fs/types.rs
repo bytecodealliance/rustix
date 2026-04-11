@@ -67,9 +67,10 @@ bitflags! {
 }
 
 bitflags! {
-    /// `S_I*` constants for use with [`openat`], [`chmodat`], and [`fchmod`].
+    /// `S_I*` constants for use with [`openat`], [`openat2`], [`chmodat`], and [`fchmod`].
     ///
     /// [`openat`]: crate::fs::openat
+    /// [`openat2`]: crate::fs::openat2
     /// [`chmodat`]: crate::fs::chmodat
     /// [`fchmod`]: crate::fs::fchmod
     #[repr(transparent)]
