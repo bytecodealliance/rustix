@@ -773,6 +773,34 @@ jobs:
       env:
         RUST_BACKTRACE: full
 
+  test_vmactions:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - freebsd_version: "14.3"
+          - freebsd_version: "15.0"
+    name: FreeBSD ${{ matrix.freebsd_version }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Start VM
+        uses: vmactions/freebsd-vm@v1
+        with:
+          release: ${{ matrix.freebsd_version }}
+          usesh: true
+      - name: Install dependencies
+        shell: freebsd {0}
+        run: |
+          pkg install -y curl
+          fetch https://sh.rustup.rs -o rustup.sh
+          sh rustup.sh -y --profile=minimal
+      - name: Test
+        shell: freebsd {0}
+        run: |
+          . $HOME/.cargo/env
+          cargo test --verbose --features=all-apis --workspace -- --nocapture 
+
   test_rustix_use_experimental_asm:
     name: Test rustix_use_experimental_asm
     runs-on: ${{ matrix.os }}
