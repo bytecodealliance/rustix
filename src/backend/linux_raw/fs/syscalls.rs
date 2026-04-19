@@ -32,8 +32,8 @@ use crate::ffi::CStr;
 use crate::fs::CWD;
 use crate::fs::{
     inotify, Access, Advice, AtFlags, FallocateFlags, FileType, FlockOperation, Fsid, Gid,
-    MemfdFlags, Mode, OFlags, RenameFlags, ResolveFlags, SealFlags, SeekFrom, Stat, StatFs,
-    StatVfs, StatVfsMountFlags, Statx, StatxFlags, Timestamps, Uid, XattrFlags,
+    HandleFlags, MemfdFlags, Mode, OFlags, RenameFlags, ResolveFlags, SealFlags, SeekFrom, Stat,
+    StatFs, StatVfs, StatVfsMountFlags, Statx, StatxFlags, Timestamps, Uid, XattrFlags,
 };
 use crate::io;
 use core::mem::MaybeUninit;
@@ -1663,6 +1663,35 @@ pub(crate) fn lremovexattr(path: &CStr, name: &CStr) -> io::Result<()> {
 #[inline]
 pub(crate) fn fremovexattr(fd: BorrowedFd<'_>, name: &CStr) -> io::Result<()> {
     unsafe { ret(syscall_readonly!(__NR_fremovexattr, fd, name)) }
+}
+
+#[inline]
+pub(crate) fn name_to_handle_at(
+    dirfd: BorrowedFd<'_>,
+    path: &CStr,
+    file_handle: *mut core::ffi::c_void,
+    mount_id: *mut core::ffi::c_void,
+    flags: HandleFlags,
+) -> io::Result<()> {
+    unsafe {
+        ret(syscall!(
+            __NR_name_to_handle_at,
+            dirfd,
+            path,
+            file_handle,
+            mount_id,
+            flags
+        ))
+    }
+}
+
+#[inline]
+pub(crate) fn open_by_handle_at(
+    mount_fd: BorrowedFd<'_>,
+    handle: *const core::ffi::c_void,
+    flags: OFlags,
+) -> io::Result<OwnedFd> {
+    unsafe { ret_owned_fd(syscall!(__NR_open_by_handle_at, mount_fd, handle, flags)) }
 }
 
 // Some linux_raw_sys structs have unsigned types for values which are

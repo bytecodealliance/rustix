@@ -25,6 +25,8 @@ mod fcntl_apple;
 #[cfg(apple)]
 mod fcopyfile;
 pub(crate) mod fd;
+#[cfg(target_os = "linux")]
+mod filehandle;
 #[cfg(all(apple, feature = "alloc"))]
 mod getpath;
 #[cfg(not(target_os = "wasi"))] // WASI doesn't have get[gpu]id.
@@ -90,6 +92,8 @@ pub use fcntl_apple::*;
 #[cfg(apple)]
 pub use fcopyfile::*;
 pub use fd::*;
+#[cfg(target_os = "linux")]
+pub use filehandle::*;
 #[cfg(all(apple, feature = "alloc"))]
 pub use getpath::getpath;
 #[cfg(not(target_os = "wasi"))]
