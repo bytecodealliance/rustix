@@ -515,6 +515,16 @@ pub(crate) use statx_flags::*;
 #[cfg(target_os = "android")]
 pub(crate) use __fsid_t as fsid_t;
 
+// Android's libc crate is missing some constants.
+// TODO(https://github.com/bytecodealliance/rustix/issues/1589): try to upstream these
+// constants to libc.
+#[cfg(target_os = "android")]
+pub(crate) const CLONE_NEWTIME: c_int = 0x00000080;
+#[cfg(target_os = "android")]
+pub(crate) const FUTEX_WAITERS: u32 = 0x80000000;
+#[cfg(target_os = "android")]
+pub(crate) const FUTEX_OWNER_DIED: u32 = 0x40000000;
+
 // FreeBSD added `timerfd_*` in FreeBSD 14. NetBSD added then in NetBSD 10.
 #[cfg(all(feature = "time", any(target_os = "freebsd", target_os = "netbsd")))]
 syscall!(pub(crate) fn timerfd_create(
