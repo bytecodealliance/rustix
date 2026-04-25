@@ -161,15 +161,10 @@ extern crate rustc_std_workspace_alloc as alloc;
 #[cfg(all(feature = "alloc", not(feature = "rustc-dep-of-std")))]
 extern crate alloc;
 
-// Use `static_assertions` macros if we have them, or a polyfill otherwise.
-#[cfg(all(test, static_assertions))]
+#[cfg(test)]
 #[macro_use]
 #[allow(unused_imports)]
 extern crate static_assertions;
-#[cfg(all(test, not(static_assertions)))]
-#[macro_use]
-#[allow(unused_imports)]
-mod static_assertions;
 
 pub mod buffer;
 #[cfg(not(windows))]

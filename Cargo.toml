@@ -13,7 +13,7 @@ edition = "2021"
 keywords = ["api", "file", "network", "safe", "syscall"]
 categories = ["os::unix-apis", "date-and-time", "filesystem", "network-programming"]
 include = ["src", "build.rs", "Cargo.toml", "COPYRIGHT", "LICENSE*", "/*.md", "benches"]
-rust-version = "1.63"
+rust-version = "1.65"
 
 [hints]
 # Most users use a fraction of the rustix API surface area, so this reduces compilation times
@@ -268,7 +268,6 @@ check-cfg = [
     'cfg(rustc_diagnostics)',
     'cfg(solarish)',
     'cfg(staged_api)',
-    'cfg(static_assertions)',
     'cfg(thumb_mode)',
     'cfg(wasi)',
     'cfg(wasi_ext)',

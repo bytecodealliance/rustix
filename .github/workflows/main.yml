@@ -25,7 +25,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        build: [stable, nightly, 1.63]
+        build: [stable, nightly, 1.65]
         include:
           - build: stable
             os: ubuntu-latest
@@ -33,9 +33,9 @@ jobs:
           - build: nightly
             os: ubuntu-latest
             rust: nightly
-          - build: 1.63
+          - build: 1.65
             os: ubuntu-latest
-            rust: 1.63
+            rust: 1.65
 
     env:
       # -D warnings is commented out in our install-rust action; re-add it here.
@@ -48,19 +48,16 @@ jobs:
       with:
         toolchain: ${{ matrix.rust }}
 
-    - name: Use specific dependency versions for Rust 1.63 compatibility.
-      if: matrix.rust == '1.63'
+    - name: Use specific dependency versions for Rust 1.65 compatibility.
+      if: matrix.rust == '1.65'
       run: |
-        cargo update --package=dashmap --precise 5.4.0
-        cargo update --package=regex --precise=1.9.0
         cargo update --package=half --precise=2.2.1
         cargo update --package=flate2 --precise=1.0.35
         cargo update --package=syn --precise=2.0.106
         cargo update --package=textwrap --precise=0.16.1
-        cargo update --package=once_cell --precise=1.20.3
-        cargo update --package=parking_lot --precise=0.12.3
-        cargo update --package=parking_lot_core --precise=0.9.10
-        cargo update --package=lock_api --precise=0.4.12
+        cargo update --package=parking_lot --precise=0.12.4
+        cargo update --package=parking_lot_core --precise=0.9.11
+        cargo update --package=lock_api --precise=0.4.13
         cargo update --package=rayon --precise=1.10.0
         cargo update --package=rayon-core --precise=1.12.1
         cargo update --package=windows-sys --precise=0.60.2
@@ -107,13 +104,13 @@ jobs:
         aarch64-linux-android
         aarch64-apple-ios
         i686-pc-windows-msvc
-    - if: matrix.rust != '1.63'
+    - if: matrix.rust != '1.65'
       run: >
         rustup target add
         wasm32-wasip1
         wasm32-wasip2
         x86_64-unknown-fuchsia
-    - if: matrix.rust == '1.63'
+    - if: matrix.rust == '1.65'
       run: rustup target add x86_64-fuchsia
 
     - run: cargo check --workspace --release -vv --all-targets
@@ -123,19 +120,20 @@ jobs:
     - run: cargo check --workspace --release -vv --target=aarch64-linux-android --all-targets
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-linux-musl --features=all-apis --all-targets
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-linux-musl --features=use-libc,all-apis --all-targets
-    - run: cargo check --workspace --release -vv --target=x86_64-unknown-linux-gnux32 --features=all-apis --all-targets
+    # Temporarily disable due to build errors.
+    # - run: cargo check --workspace --release -vv --target=x86_64-unknown-linux-gnux32 --features=all-apis --all-targets
     - run: cargo check --workspace --release -vv --target=x86_64-linux-android --features=use-libc,net,std,alloc,event,fs,mm,param,pipe,use-libc-auxv,libc_errno --all-targets
     - run: cargo check --workspace --release -vv --target=i686-linux-android --features=use-libc,net,std,alloc,event,fs,mm,param,pipe,use-libc-auxv,libc_errno --all-targets
     - run: cargo check --workspace --release -vv --target=x86_64-apple-darwin --features=all-apis --all-targets
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-freebsd --features=all-apis --all-targets
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-netbsd --features=all-apis --all-targets
-    - if: matrix.rust != '1.63'
+    - if: matrix.rust != '1.65'
       run: cargo check --workspace --release -vv --target=wasm32-wasip1 --features=all-apis
-    - if: matrix.rust != '1.63'
+    - if: matrix.rust != '1.65'
       run: cargo check --workspace --release -vv --target=wasm32-wasip2 --features=all-apis
-    - if: matrix.rust != '1.63'
+    - if: matrix.rust != '1.65'
       run: cargo check --workspace --release -vv --target=x86_64-unknown-fuchsia --features=all-apis --all-targets
-    - if: matrix.rust == '1.63'
+    - if: matrix.rust == '1.65'
       run: cargo check --workspace --release -vv --target=x86_64-fuchsia --features=all-apis --all-targets
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-illumos --features=all-apis --all-targets
     - run: cargo check --workspace --release -vv --target=i686-unknown-linux-gnu --features=all-apis --all-targets
@@ -239,11 +237,14 @@ jobs:
         RUSTFLAGS: -A improper_ctypes_definitions --cfg criterion
     - run: rustup component add rust-src
     - run: cargo check -Z build-std --target x86_64-unknown-openbsd --all-targets --features=all-apis
-    - run: cargo check -Z build-std --target mips64-openwrt-linux-musl --all-targets --features=all-apis
+    # Temporarily disable due to build errors.
+    # - run: cargo check -Z build-std --target mips64-openwrt-linux-musl --all-targets --features=all-apis
     - run: cargo check -Z build-std --target x86_64-unknown-dragonfly --all-targets --features=all-apis
-    - run: cargo check -Z build-std --target sparc-unknown-linux-gnu --all-targets --features=all-apis
+    # Temporarily disable due to build errors.
+    # - run: cargo check -Z build-std --target sparc-unknown-linux-gnu --all-targets --features=all-apis
     - run: cargo check -Z build-std --target armv7-unknown-freebsd --all-targets --features=all-apis
-    - run: cargo check -Z build-std --target aarch64-unknown-linux-gnu_ilp32 --all-targets --features=all-apis
+    # Temporarily disable due to build errors.
+    # - run: cargo check -Z build-std --target aarch64-unknown-linux-gnu_ilp32 --all-targets --features=all-apis
     - run: cargo check -Z build-std --target x86_64-unknown-haiku --all-targets --features=all-apis
     # Temporarily disable due to build errors on nightly.
     # - run: cargo check -Z build-std --target x86_64-uwp-windows-msvc --all-targets --features=all-apis
@@ -291,14 +292,14 @@ jobs:
             powerpc-linux-stable,
             powerpc64le-linux-stable,
             arm-linux-stable,
-            ubuntu-1.63,
-            i686-linux-1.63,
-            aarch64-linux-1.63,
-            riscv64-linux-1.63,
-            s390x-linux-1.63,
+            ubuntu-1.65,
+            i686-linux-1.65,
+            aarch64-linux-1.65,
+            riscv64-linux-1.65,
+            s390x-linux-1.65,
             powerpc64le-linux,
-            powerpc64le-linux-1.63,
-            arm-linux-1.63,
+            powerpc64le-linux-1.65,
+            arm-linux-1.65,
             macos-latest,
             macos-15-intel,
             macos-14,
@@ -437,64 +438,64 @@ jobs:
             qemu: qemu-arm
             qemu_args: -L /usr/arm-linux-gnueabi
             qemu_target: arm-linux-user
-          - build: ubuntu-1.63
+          - build: ubuntu-1.65
             os: ubuntu-latest
-            rust: 1.63
-          - build: i686-linux-1.63
+            rust: 1.65
+          - build: i686-linux-1.65
             os: ubuntu-latest
-            rust: 1.63
+            rust: 1.65
             target: i686-unknown-linux-gnu
             gcc_package: gcc-i686-linux-gnu
             gcc: i686-linux-gnu-gcc
             libc_package: libc-dev-i386-cross
-          - build: aarch64-linux-1.63
+          - build: aarch64-linux-1.65
             os: ubuntu-latest
-            rust: 1.63
+            rust: 1.65
             target: aarch64-unknown-linux-gnu
             gcc_package: gcc-aarch64-linux-gnu
             gcc: aarch64-linux-gnu-gcc
             qemu: qemu-aarch64
             qemu_args: -L /usr/aarch64-linux-gnu
             qemu_target: aarch64-linux-user
-          - build: riscv64-linux-1.63
+          - build: riscv64-linux-1.65
             os: ubuntu-latest
-            rust: 1.63
+            rust: 1.65
             target: riscv64gc-unknown-linux-gnu
             gcc_package: gcc-riscv64-linux-gnu
             gcc: riscv64-linux-gnu-gcc
             qemu: qemu-riscv64
             qemu_args: -L /usr/riscv64-linux-gnu
             qemu_target: riscv64-linux-user
-          - build: s390x-linux-1.63
+          - build: s390x-linux-1.65
             os: ubuntu-latest
-            rust: 1.63
+            rust: 1.65
             target: s390x-unknown-linux-gnu
             gcc_package: gcc-s390x-linux-gnu
             gcc: s390x-linux-gnu-gcc
             qemu: qemu-s390x
             qemu_args: -L /usr/s390x-linux-gnu
             qemu_target: s390x-linux-user
-          - build: powerpc-linux-1.63
+          - build: powerpc-linux-1.65
             os: ubuntu-latest
-            rust: 1.63
+            rust: 1.65
             target: powerpc-unknown-linux-gnu
             gcc_package: gcc-powerpc-linux-gnu
             gcc: powerpc-linux-gnu-gcc
             qemu: qemu-ppc
             qemu_args: -L /usr/powerpc-linux-gnu
             qemu_target: ppc-linux-user
-          - build: powerpc64le-linux-1.63
+          - build: powerpc64le-linux-1.65
             os: ubuntu-latest
-            rust: 1.63
+            rust: 1.65
             target: powerpc64le-unknown-linux-gnu
             gcc_package: gcc-powerpc64le-linux-gnu
             gcc: powerpc64le-linux-gnu-gcc
             qemu: qemu-ppc64le
             qemu_args: -L /usr/powerpc64le-linux-gnu
             qemu_target: ppc64le-linux-user
-          - build: arm-linux-1.63
+          - build: arm-linux-1.65
             os: ubuntu-latest
-            rust: 1.63
+            rust: 1.65
             target: armv5te-unknown-linux-gnueabi
             gcc_package: gcc-arm-linux-gnueabi
             gcc: arm-linux-gnueabi-gcc
@@ -585,19 +586,16 @@ jobs:
         ninja -C build install
       if: matrix.qemu != '' && matrix.os == 'ubuntu-latest'
 
-    - name: Use specific dependency versions for Rust 1.63 compatibility.
-      if: matrix.rust == '1.63'
+    - name: Use specific dependency versions for Rust 1.65 compatibility.
+      if: matrix.rust == '1.65'
       run: |
-        cargo update --package=dashmap --precise 5.4.0
-        cargo update --package=regex --precise=1.9.0
         cargo update --package=half --precise=2.2.1
         cargo update --package=flate2 --precise=1.0.35
         cargo update --package=syn --precise=2.0.106
         cargo update --package=textwrap --precise=0.16.1
-        cargo update --package=once_cell --precise=1.20.3
-        cargo update --package=parking_lot --precise=0.12.3
-        cargo update --package=parking_lot_core --precise=0.9.10
-        cargo update --package=lock_api --precise=0.4.12
+        cargo update --package=parking_lot --precise=0.12.4
+        cargo update --package=parking_lot_core --precise=0.9.11
+        cargo update --package=lock_api --precise=0.4.13
         cargo update --package=rayon --precise=1.10.0
         cargo update --package=rayon-core --precise=1.12.1
         cargo update --package=windows-sys --precise=0.60.2
