@@ -155,11 +155,12 @@ safety types rather than `RawFd`, and the flags parameters to functions such as
 `tcsetattr` are `enum`s rather than bare integers. And, rustix calls its
 `tcgetattr` function `tcgetattr`, rather than `Termios::from_fd`.
 
-## Minimum Supported Rust Version (MSRV)
+## Minimum Supported Rust Version
 
-This crate currently works on [Rust 1.65]. This policy may change in the
-future, in minor version releases, so users using a fixed version of Rust
-should pin to a specific version of this crate.
+This crate has a Minimum Supported Rust Version (MSRV) of [Rust 1.65].
+
+The current policy is that the minimum Rust version required to use this crate
+may be increased in minor releases.
 
 ## Minimum Linux Version
 
@@ -170,7 +171,7 @@ oldest Linux version supported by:
 The specifics of this policy may change in the future, but we intend it to
 always reflect “very old” Linux versions.
 
-[MSRV]: #minimum-supported-rust-version-msrv
+[MSRV]: #minimum-supported-rust-version
 [Rust 1.65]: https://blog.rust-lang.org/2022/11/03/Rust-1.65.0/
 [any current Rust target]: https://doc.rust-lang.org/nightly/rustc/platform-support.html
 [kernel.org]: https://www.kernel.org/releases.html
