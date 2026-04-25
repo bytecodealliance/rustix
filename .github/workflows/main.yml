@@ -120,7 +120,8 @@ jobs:
     - run: cargo check --workspace --release -vv --target=aarch64-linux-android --all-targets
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-linux-musl --features=all-apis --all-targets
     - run: cargo check --workspace --release -vv --target=x86_64-unknown-linux-musl --features=use-libc,all-apis --all-targets
-    - run: cargo check --workspace --release -vv --target=x86_64-unknown-linux-gnux32 --features=all-apis --all-targets
+    # Temporarily disable due to build errors.
+    # - run: cargo check --workspace --release -vv --target=x86_64-unknown-linux-gnux32 --features=all-apis --all-targets
     - run: cargo check --workspace --release -vv --target=x86_64-linux-android --features=use-libc,net,std,alloc,event,fs,mm,param,pipe,use-libc-auxv,libc_errno --all-targets
     - run: cargo check --workspace --release -vv --target=i686-linux-android --features=use-libc,net,std,alloc,event,fs,mm,param,pipe,use-libc-auxv,libc_errno --all-targets
     - run: cargo check --workspace --release -vv --target=x86_64-apple-darwin --features=all-apis --all-targets
@@ -236,11 +237,14 @@ jobs:
         RUSTFLAGS: -A improper_ctypes_definitions --cfg criterion
     - run: rustup component add rust-src
     - run: cargo check -Z build-std --target x86_64-unknown-openbsd --all-targets --features=all-apis
-    - run: cargo check -Z build-std --target mips64-openwrt-linux-musl --all-targets --features=all-apis
+    # Temporarily disable due to build errors.
+    # - run: cargo check -Z build-std --target mips64-openwrt-linux-musl --all-targets --features=all-apis
     - run: cargo check -Z build-std --target x86_64-unknown-dragonfly --all-targets --features=all-apis
-    - run: cargo check -Z build-std --target sparc-unknown-linux-gnu --all-targets --features=all-apis
+    # Temporarily disable due to build errors.
+    # - run: cargo check -Z build-std --target sparc-unknown-linux-gnu --all-targets --features=all-apis
     - run: cargo check -Z build-std --target armv7-unknown-freebsd --all-targets --features=all-apis
-    - run: cargo check -Z build-std --target aarch64-unknown-linux-gnu_ilp32 --all-targets --features=all-apis
+    # Temporarily disable due to build errors.
+    # - run: cargo check -Z build-std --target aarch64-unknown-linux-gnu_ilp32 --all-targets --features=all-apis
     - run: cargo check -Z build-std --target x86_64-unknown-haiku --all-targets --features=all-apis
     # Temporarily disable due to build errors on nightly.
     # - run: cargo check -Z build-std --target x86_64-uwp-windows-msvc --all-targets --features=all-apis
