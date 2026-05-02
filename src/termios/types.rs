@@ -1453,8 +1453,8 @@ mod tests {
         check_renamed_type!(OutputModes, tcflag_t);
         check_renamed_type!(ControlModes, tcflag_t);
         check_renamed_type!(LocalModes, tcflag_t);
-        assert_eq_size!(u8, libc::cc_t);
-        assert_eq_size!(types::tcflag_t, libc::tcflag_t);
+        static_assertions::assert_eq_size!(u8, libc::cc_t);
+        static_assertions::assert_eq_size!(types::tcflag_t, libc::tcflag_t);
 
         check_renamed_struct!(Winsize, winsize, ws_row, ws_col, ws_xpixel, ws_ypixel);
 
@@ -1482,14 +1482,14 @@ mod tests {
             // On everything except PowerPC, `termios` matches `termios2` except
             // for the addition of `c_ispeed` and `c_ospeed`.
             #[cfg(not(any(target_arch = "powerpc", target_arch = "powerpc64")))]
-            const_assert_eq!(
+            static_assertions::const_assert_eq!(
                 memoffset::offset_of!(Termios, input_speed),
                 core::mem::size_of::<c::termios>()
             );
 
             // On PowerPC, `termios2` is `termios`.
             #[cfg(any(target_arch = "powerpc", target_arch = "powerpc64"))]
-            assert_eq_size!(c::termios2, c::termios);
+            static_assertions::assert_eq_size!(c::termios2, c::termios);
         }
 
         #[cfg(not(linux_raw))]
@@ -1525,7 +1525,9 @@ mod tests {
                 )),
                 not(all(libc, target_os = "android"))
             )))]
-            const_assert!(core::mem::size_of::<Termios>() >= core::mem::size_of::<c::termios>());
+            static_assertions::const_assert!(
+                core::mem::size_of::<Termios>() >= core::mem::size_of::<c::termios>()
+            );
 
             check_renamed_struct_renamed_field!(Termios, termios, input_modes, c_iflag);
             check_renamed_struct_renamed_field!(Termios, termios, output_modes, c_oflag);
@@ -1572,8 +1574,8 @@ mod tests {
     )))]
     fn termios_legacy() {
         // Check that our doc aliases above are correct.
-        const_assert_eq!(c::EXTA, c::B19200);
-        const_assert_eq!(c::EXTB, c::B38400);
+        static_assertions::const_assert_eq!(c::EXTA, c::B19200);
+        static_assertions::const_assert_eq!(c::EXTB, c::B38400);
     }
 
     #[cfg(bsd)]
@@ -1581,10 +1583,10 @@ mod tests {
     fn termios_bsd() {
         // On BSD platforms we can assume that the `B*` constants have their
         // arbitrary integer speed value. Confirm this.
-        const_assert_eq!(c::B0, 0);
-        const_assert_eq!(c::B50, 50);
-        const_assert_eq!(c::B19200, 19200);
-        const_assert_eq!(c::B38400, 38400);
+        static_assertions::const_assert_eq!(c::B0, 0);
+        static_assertions::const_assert_eq!(c::B50, 50);
+        static_assertions::const_assert_eq!(c::B19200, 19200);
+        static_assertions::const_assert_eq!(c::B38400, 38400);
     }
 
     #[test]
@@ -1612,13 +1614,13 @@ mod tests {
         // When using `termios2`, we assume that we can add the optional actions
         // value to the ioctl request code. Test this assumption.
 
-        const_assert_eq!(c::TCSETS2, c::TCSETS2 + 0);
-        const_assert_eq!(c::TCSETSW2, c::TCSETS2 + 1);
-        const_assert_eq!(c::TCSETSF2, c::TCSETS2 + 2);
+        static_assertions::const_assert_eq!(c::TCSETS2, c::TCSETS2 + 0);
+        static_assertions::const_assert_eq!(c::TCSETSW2, c::TCSETS2 + 1);
+        static_assertions::const_assert_eq!(c::TCSETSF2, c::TCSETS2 + 2);
 
-        const_assert_eq!(c::TCSANOW - c::TCSANOW, 0);
-        const_assert_eq!(c::TCSADRAIN - c::TCSANOW, 1);
-        const_assert_eq!(c::TCSAFLUSH - c::TCSANOW, 2);
+        static_assertions::const_assert_eq!(c::TCSANOW - c::TCSANOW, 0);
+        static_assertions::const_assert_eq!(c::TCSADRAIN - c::TCSANOW, 1);
+        static_assertions::const_assert_eq!(c::TCSAFLUSH - c::TCSANOW, 2);
 
         // MIPS is different here.
         #[cfg(any(
@@ -1639,9 +1641,9 @@ mod tests {
             target_arch = "mips64r6"
         )))]
         {
-            const_assert_eq!(c::TCSANOW, 0);
-            const_assert_eq!(c::TCSADRAIN, 1);
-            const_assert_eq!(c::TCSAFLUSH, 2);
+            static_assertions::const_assert_eq!(c::TCSANOW, 0);
+            static_assertions::const_assert_eq!(c::TCSADRAIN, 1);
+            static_assertions::const_assert_eq!(c::TCSAFLUSH, 2);
         }
     }
 
@@ -1649,6 +1651,6 @@ mod tests {
     #[test]
     fn termios_cibaud() {
         // Test an assumption.
-        const_assert_eq!(c::CIBAUD, c::CBAUD << c::IBSHIFT);
+        static_assertions::const_assert_eq!(c::CIBAUD, c::CBAUD << c::IBSHIFT);
     }
 }

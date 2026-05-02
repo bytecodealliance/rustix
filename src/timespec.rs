@@ -307,7 +307,7 @@ impl From<Timespec> for LibcTimespec {
 pub(crate) fn as_libc_timespec_ptr(timespec: &Timespec) -> *const c::timespec {
     #[cfg(test)]
     {
-        assert_eq_size!(Timespec, c::timespec);
+        static_assertions::assert_eq_size!(Timespec, c::timespec);
     }
     crate::utils::as_ptr(timespec).cast::<c::timespec>()
 }
@@ -318,7 +318,7 @@ pub(crate) fn as_libc_timespec_mut_ptr(
 ) -> *mut c::timespec {
     #[cfg(test)]
     {
-        assert_eq_size!(Timespec, c::timespec);
+        static_assertions::assert_eq_size!(Timespec, c::timespec);
     }
     timespec.as_mut_ptr().cast::<c::timespec>()
 }
@@ -376,9 +376,11 @@ mod tests {
 
     #[test]
     fn test_sizes() {
-        assert_eq_size!(Secs, u64);
-        const_assert!(core::mem::size_of::<Timespec>() >= core::mem::size_of::<(u64, u32)>());
-        const_assert!(core::mem::size_of::<Nsecs>() >= 4);
+        static_assertions::assert_eq_size!(Secs, u64);
+        static_assertions::const_assert!(
+            core::mem::size_of::<Timespec>() >= core::mem::size_of::<(u64, u32)>()
+        );
+        static_assertions::const_assert!(core::mem::size_of::<Nsecs>() >= 4);
 
         let mut t = Timespec {
             tv_sec: 0,
@@ -399,7 +401,7 @@ mod tests {
     #[test]
     #[allow(deprecated)]
     fn test_fix_y2038() {
-        assert_eq_size!(libc::time_t, u32);
+        static_assertions::assert_eq_size!(libc::time_t, u32);
     }
 
     // Test that our workarounds are not needed.
@@ -414,8 +416,8 @@ mod tests {
     #[cfg(linux_raw_dep)]
     #[test]
     fn test_against_kernel_timespec() {
-        assert_eq_size!(Timespec, linux_raw_sys::general::__kernel_timespec);
-        assert_eq_align!(Timespec, linux_raw_sys::general::__kernel_timespec);
+        static_assertions::assert_eq_size!(Timespec, linux_raw_sys::general::__kernel_timespec);
+        static_assertions::assert_eq_align!(Timespec, linux_raw_sys::general::__kernel_timespec);
         assert_eq!(
             memoffset::span_of!(Timespec, tv_sec),
             memoffset::span_of!(linux_raw_sys::general::__kernel_timespec, tv_sec)

@@ -2114,14 +2114,14 @@ mod tests {
 
         // Backend code needs to cast these to `c_int` so make sure that cast isn't
         // lossy.
-        assert_eq_size!(RawProtocol, c_int);
-        assert_eq_size!(Protocol, c_int);
-        assert_eq_size!(Option<RawProtocol>, c_int);
-        assert_eq_size!(Option<Protocol>, c_int);
-        assert_eq_size!(RawSocketType, c_int);
-        assert_eq_size!(SocketType, c_int);
-        assert_eq_size!(SocketFlags, c_int);
-        assert_eq_size!(SocketAddrStorage, c::sockaddr_storage);
+        static_assertions::assert_eq_size!(RawProtocol, c_int);
+        static_assertions::assert_eq_size!(Protocol, c_int);
+        static_assertions::assert_eq_size!(Option<RawProtocol>, c_int);
+        static_assertions::assert_eq_size!(Option<Protocol>, c_int);
+        static_assertions::assert_eq_size!(RawSocketType, c_int);
+        static_assertions::assert_eq_size!(SocketType, c_int);
+        static_assertions::assert_eq_size!(SocketFlags, c_int);
+        static_assertions::assert_eq_size!(SocketAddrStorage, c::sockaddr_storage);
 
         // Rustix doesn't depend on `Option<Protocol>` matching the ABI of a raw
         // integer for correctness, but it should work nonetheless.
@@ -2135,13 +2135,13 @@ mod tests {
         }
 
         #[cfg(linux_kernel)]
-        assert_eq_size!(UCred, libc::ucred);
+        static_assertions::assert_eq_size!(UCred, libc::ucred);
 
         #[cfg(target_os = "linux")]
-        assert_eq_size!(super::xdp::XdpUmemReg, c::xdp_umem_reg);
+        static_assertions::assert_eq_size!(super::xdp::XdpUmemReg, c::xdp_umem_reg);
         #[cfg(target_os = "linux")]
-        assert_eq_size!(super::xdp::XdpOptions, c::xdp_options);
+        static_assertions::assert_eq_size!(super::xdp::XdpOptions, c::xdp_options);
         #[cfg(target_os = "linux")]
-        assert_eq_size!(super::xdp::XdpDesc, c::xdp_desc);
+        static_assertions::assert_eq_size!(super::xdp::XdpDesc, c::xdp_desc);
     }
 }
