@@ -12,7 +12,10 @@ use {
 use bitflags::bitflags;
 
 #[cfg(all(linux_kernel, not(any(target_arch = "sparc", target_arch = "sparc64"))))]
-use crate::fd::{AsRawFd as _, BorrowedFd};
+use {
+    crate::fd::{AsRawFd as _, BorrowedFd, OwnedFd},
+    core::marker::PhantomData,
+};
 
 /// `ioctl(fd, BLKSSZGET)`—Returns the logical block size of a block device.
 ///
@@ -57,6 +60,38 @@ pub fn ioctl_ficlone<Fd: AsFd, SrcFd: AsFd>(fd: Fd, src_fd: SrcFd) -> io::Result
     unsafe { ioctl::ioctl(fd, Ficlone(src_fd.as_fd())) }
 }
 
+/// `ioctl(fd, FICLONERANGE, ...)`—share some the data of one file with another file.
+///
+/// This ioctl is not available on SPARC platforms.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/ioctl_ficlonerange.2.html
+#[cfg(all(linux_kernel, not(any(target_arch = "sparc", target_arch = "sparc64"))))]
+#[inline]
+#[doc(alias = "FICLONERANGE")]
+pub fn ioctl_ficlonerange<Fd: AsFd, SrcFd: AsFd>(
+    fd: Fd,
+    src_fd: SrcFd,
+    src_offset: u64,
+    src_length: u64,
+    dest_offset: u64,
+) -> io::Result<()> {
+    unsafe {
+        ioctl::ioctl(
+            fd,
+            Ficlonerange {
+                src_fd: i64::from(src_fd.as_fd().as_raw_fd()),
+                src_offset,
+                src_length,
+                dest_offset,
+                _phantom: PhantomData,
+            },
+        )
+    }
+}
+
 /// `ioctl(fd, EXT4_IOC_RESIZE_FS, blocks)`—Resize ext4 filesystem on fd.
 #[cfg(linux_raw_dep)]
 #[inline]
@@ -84,6 +119,39 @@ unsafe impl ioctl::Ioctl for Ficlone<'_> {
 
     fn as_ptr(&mut self) -> *mut c::c_void {
         self.0.as_raw_fd() as *mut c::c_void
+    }
+
+    unsafe fn output_from_ptr(
+        _: ioctl::IoctlOutput,
+        _: *mut c::c_void,
+    ) -> io::Result<Self::Output> {
+        Ok(())
+    }
+}
+
+#[cfg(all(linux_kernel, not(any(target_arch = "sparc", target_arch = "sparc64"))))]
+#[repr(C)]
+struct Ficlonerange<'a> {
+    // Since `src_fd` must be 64-bit, we cannot use `BorrowedFd` like we do in `Ficlone`.
+    src_fd: i64,
+    src_offset: u64,
+    src_length: u64,
+    dest_offset: u64,
+    _phantom: PhantomData<&'a OwnedFd>,
+}
+
+#[cfg(all(linux_kernel, not(any(target_arch = "sparc", target_arch = "sparc64"))))]
+unsafe impl ioctl::Ioctl for Ficlonerange<'_> {
+    type Output = ();
+
+    const IS_MUTATING: bool = false;
+
+    fn opcode(&self) -> ioctl::Opcode {
+        c::FICLONERANGE as ioctl::Opcode
+    }
+
+    fn as_ptr(&mut self) -> *mut c::c_void {
+        self as *mut Self as *mut c::c_void
     }
 
     unsafe fn output_from_ptr(
