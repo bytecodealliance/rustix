@@ -52,7 +52,6 @@ use crate::fs::StatFs;
 #[cfg(not(any(target_os = "espidf", target_os = "vita")))]
 use crate::fs::Timestamps;
 #[cfg(not(any(
-    apple,
     target_os = "espidf",
     target_os = "redox",
     target_os = "vita",
