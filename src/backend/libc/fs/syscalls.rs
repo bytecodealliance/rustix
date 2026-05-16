@@ -1196,7 +1196,6 @@ pub(crate) fn chownat(
 }
 
 #[cfg(not(any(
-    apple,
     target_os = "espidf",
     target_os = "horizon",
     target_os = "redox",
@@ -1210,6 +1209,37 @@ pub(crate) fn mknodat(
     mode: Mode,
     dev: Dev,
 ) -> io::Result<()> {
+    // macOS ≤ 13 lacks `mknodat`.
+    #[cfg(target_os = "macos")]
+    unsafe {
+        weak! {
+            fn mknodat(
+                c::c_int,
+                *const ffi::c_char,
+                c::mode_t,
+                c::dev_t
+            ) -> c::c_int
+        }
+        if let Some(libc_mknodat) = mknodat.get() {
+            return ret(libc_mknodat(
+                borrowed_fd(dirfd),
+                c_str(path),
+                (mode.bits() | file_type.as_raw_mode()) as c::mode_t,
+                dev.try_into().map_err(|_e| io::Errno::PERM)?,
+            ));
+        }
+        // Otherwise, see if we can emulate the `AT_FDCWD` case.
+        if borrowed_fd(dirfd) != c::AT_FDCWD {
+            return Err(io::Errno::NOSYS);
+        }
+        ret(c::mknod(
+            c_str(path),
+            (mode.bits() | file_type.as_raw_mode()) as c::mode_t,
+            dev.try_into().map_err(|_e| io::Errno::PERM)?,
+        ))
+    }
+
+    #[cfg(not(target_os = "macos"))]
     unsafe {
         ret(c::mknodat(
             borrowed_fd(dirfd),
