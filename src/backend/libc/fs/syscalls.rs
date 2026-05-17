@@ -1222,11 +1222,8 @@ pub(crate) fn mknodat(
                 c::dev_t
             ) -> c::c_int
         }
-        // If we have `mknodat`, use it.
-        if let Some(libc_mknodat) = mknodat.get() {
-            return ret(libc_mknodat(borrowed_fd(dirfd), c_str(path), mode, dev));
-        }
-        Err(io::Errno::NOSYS)
+        let libc_mknodat = mknodat.get().ok_or(io::Errno::NOSYS)?;
+        ret(libc_mknodat(borrowed_fd(dirfd), c_str(path), mode, dev))
     }
 
     #[cfg(not(apple))]
