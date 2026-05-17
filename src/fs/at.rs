@@ -460,9 +460,11 @@ pub fn fclonefileat<Fd: AsFd, DstFd: AsFd, P: path::Arg>(
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [Apple]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/mknodat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/mknodat.2.html
+/// [Apple]: https://github.com/apple-oss-distributions/xnu/blob/main/bsd/man/man2/mknodat.2
 #[cfg(not(any(
     target_os = "espidf",
     target_os = "horizon",
@@ -487,8 +489,10 @@ pub fn mknodat<P: path::Arg, Fd: AsFd>(
 ///
 /// # References
 ///  - [POSIX]
+///  - [Apple]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/mkfifoat.html
+/// [Apple]: https://github.com/apple-oss-distributions/xnu/blob/main/bsd/man/man2/mkfifoat.2
 #[cfg(not(any(
     target_os = "espidf",
     target_os = "horizon",
