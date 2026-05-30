@@ -2014,4 +2014,4 @@ jobs:
     - run: cd rust && ./x.py test library/std --stage=0
       # See <https://github.com/bytecodealliance/rustix/issues/76#issuecomment-962196433>
       env:
-        RUSTFLAGS: --cfg=linux_raw --cfg=asm --cfg=rustc_attrs
+        RUSTFLAGS: --cfg=linux_raw --cfg=asm

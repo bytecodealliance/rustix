@@ -62,10 +62,14 @@ fn main() {
     // If experimental features are enabled, auto-detect and use available
     // features.
     if rustc_dep_of_std {
-        use_feature("rustc_attrs");
+        if has_rustc_attrs() {
+            use_feature("rustc_attrs");
+        }
         use_feature("core_intrinsics");
     } else if rustix_use_experimental_features {
-        use_feature_or_nothing("rustc_attrs");
+        if has_rustc_attrs() {
+            use_feature("rustc_attrs");
+        }
         use_feature_or_nothing("core_intrinsics");
     }
 
@@ -211,6 +215,18 @@ fn has_lower_upper_exp_for_non_zero() -> bool {
     // LowerExp/UpperExp for NonZero* were added in Rust 1.84.
     // <https://doc.rust-lang.org/stable/std/fmt/trait.LowerExp.html#impl-LowerExp-for-NonZero%3CT%3E>
     can_compile("fn a(x: &core::num::NonZeroI32, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result { core::fmt::LowerExp::fmt(x, f) }")
+}
+
+fn has_rustc_attrs() -> bool {
+    can_compile(
+        "#![feature(rustc_attrs)]
+         #![allow(internal_features)]
+         #![allow(dead_code)]
+         #[rustc_layout_scalar_valid_range_start(1)]
+         #[rustc_layout_scalar_valid_range_end(10)]
+         #[rustc_nonnull_optimization_guaranteed]
+         pub struct Foo(u32);",
+    )
 }
 
 fn use_feature_or_nothing(feature: &str) {

@@ -8,6 +8,8 @@ fn dup2_to_replace_stdio() {
     // separate process so that it doesn't interfere with the test harness.
     assert!(Command::new(env::var("CARGO").unwrap())
         .arg("run")
+        .arg("--config")
+        .arg(r#"patch.crates-io.rustix.path=".""#)
         .arg("--example")
         .arg("dup2_to_replace_stdio")
         .arg("--features")

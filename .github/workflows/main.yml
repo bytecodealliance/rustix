@@ -68,6 +68,7 @@ jobs:
         cargo update --package=itoa --precise=1.0.15
         cargo update --package=serde_json --precise=1.0.145
         cargo update --package=log --precise=0.4.28
+        cargo update --package=libc --precise=0.2.183
         cargo update --package=getrandom --precise=0.3.4
         cargo update --package=proc-macro2 --precise=1.0.103
         cargo update --package=unicode-ident --precise=1.0.22
@@ -605,6 +606,7 @@ jobs:
         cargo update --package=itoa --precise=1.0.15
         cargo update --package=serde_json --precise=1.0.145
         cargo update --package=log --precise=0.4.28
+        cargo update --package=libc --precise=0.2.183
         cargo update --package=getrandom --precise=0.3.4
         cargo update --package=proc-macro2 --precise=1.0.103
         cargo update --package=unicode-ident --precise=1.0.22
@@ -619,7 +621,7 @@ jobs:
         cargo update --package=futures-task --precise=0.3.31
 
     - run: |
-        cargo test --verbose --features=all-apis --release --workspace -- --nocapture
+        cargo test --config 'patch.crates-io.rustix.path="."' --verbose --features=all-apis --release --workspace -- --nocapture
       env:
         RUST_BACKTRACE: full
         MACOSX_DEPLOYMENT_TARGET: 10.7
