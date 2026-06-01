@@ -179,9 +179,6 @@ bitflags! {
         /// `MOUNT_ATTR_NODIRATIME`
         const MOUNT_ATTR_NODIRATIME = linux_raw_sys::general::MOUNT_ATTR_NODIRATIME;
 
-        /// `MOUNT_ATTR_NOUSER`
-        const MOUNT_ATTR_IDMAP = linux_raw_sys::general::MOUNT_ATTR_IDMAP;
-
         /// `MOUNT_ATTR__ATIME_FLAGS`
         const MOUNT_ATTR_NOSYMFOLLOW = linux_raw_sys::general::MOUNT_ATTR_NOSYMFOLLOW;
 
