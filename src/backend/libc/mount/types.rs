@@ -190,9 +190,6 @@ bitflags! {
         /// `MOUNT_ATTR_NOSYMFOLLOW`
         const MOUNT_ATTR_NOSYMFOLLOW = c::MOUNT_ATTR_NOSYMFOLLOW as c::c_uint;
 
-        /// `MOUNT_ATTR_SIZE_VER0`
-        const MOUNT_ATTR_SIZE_VER0 = c::MOUNT_ATTR_SIZE_VER0 as c::c_uint;
-
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
