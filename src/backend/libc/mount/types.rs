@@ -161,40 +161,40 @@ bitflags! {
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct MountAttrFlags: ffi::c_uint {
         /// `MOUNT_ATTR_RDONLY`
-        const MOUNT_ATTR_RDONLY = 0x0000_0001;
+        const MOUNT_ATTR_RDONLY =  c::MOUNT_ATTR_RDONLY as c::c_uint;
 
         /// `MOUNT_ATTR_NOSUID`
-        const MOUNT_ATTR_NOSUID = 0x0000_0002;
+        const MOUNT_ATTR_NOSUID = c::MOUNT_ATTR_NOSUID as c::c_uint;
 
         /// `MOUNT_ATTR_NODEV`
-        const MOUNT_ATTR_NODEV = 0x0000_0004;
+        const MOUNT_ATTR_NODEV = c::MOUNT_ATTR_NODEV as c::c_uint;
 
         /// `MOUNT_ATTR_NOEXEC`
-        const MOUNT_ATTR_NOEXEC = 0x0000_0008;
+        const MOUNT_ATTR_NOEXEC = c::MOUNT_ATTR_NOEXEC as c::c_uint;
 
         /// `MOUNT_ATTR__ATIME`
-        const MOUNT_ATTR__ATIME = 0x0000_0070;
+        const MOUNT_ATTR__ATIME = c::MOUNT_ATTR__ATIME as c::c_uint;
 
         /// `MOUNT_ATTR_RELATIME`
-        const MOUNT_ATTR_RELATIME = 0x0000_0000;
+        const MOUNT_ATTR_RELATIME = c::MOUNT_ATTR_RELATIME as c::c_uint;
 
         /// `MOUNT_ATTR_NOATIME`
-        const MOUNT_ATTR_NOATIME = 0x0000_0010;
+        const MOUNT_ATTR_NOATIME = c::MOUNT_ATTR_NOATIME as c::c_uint;
 
         /// `MOUNT_ATTR_STRICTATIME`
-        const MOUNT_ATTR_STRICTATIME = 0x0000_0020;
+        const MOUNT_ATTR_STRICTATIME =c::MOUNT_ATTR_STRICTATIME as c::c_uint;
 
         /// `MOUNT_ATTR_NODIRATIME`
-        const MOUNT_ATTR_NODIRATIME = 0x0000_0080;
+        const MOUNT_ATTR_NODIRATIME = c::MOUNT_ATTR_NODIRATIME as c::c_uint;
 
-        /// `MOUNT_ATTR_NOUSER`
-        const MOUNT_ATTR_IDMAP = 0x0010_0000;
+        /// `MOUNT_ATTR_IDMAP`
+        const MOUNT_ATTR_IDMAP = c::MOUNT_ATTR_IDMAP as c::c_uint;
 
-        /// `MOUNT_ATTR__ATIME_FLAGS`
-        const MOUNT_ATTR_NOSYMFOLLOW = 0x0020_0000;
+        /// `MOUNT_ATTR_NOSYMFOLLOW`
+        const MOUNT_ATTR_NOSYMFOLLOW = c::MOUNT_ATTR_NOSYMFOLLOW as c::c_uint;
 
-        /// `MOUNT_ATTR__ATIME_FLAGS`
-        const MOUNT_ATTR_SIZE_VER0 = 32;
+        /// `MOUNT_ATTR_SIZE_VER0`
+        const MOUNT_ATTR_SIZE_VER0 = c::MOUNT_ATTR_SIZE_VER0 as c::c_uint;
 
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
