@@ -182,9 +182,6 @@ bitflags! {
         /// `MOUNT_ATTR__ATIME_FLAGS`
         const MOUNT_ATTR_NOSYMFOLLOW = linux_raw_sys::general::MOUNT_ATTR_NOSYMFOLLOW;
 
-        /// `MOUNT_ATTR__ATIME_FLAGS`
-        const MOUNT_ATTR_SIZE_VER0 = linux_raw_sys::general::MOUNT_ATTR_SIZE_VER0;
-
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
