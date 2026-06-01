@@ -187,9 +187,6 @@ bitflags! {
         /// `MOUNT_ATTR_NODIRATIME`
         const MOUNT_ATTR_NODIRATIME = c::MOUNT_ATTR_NODIRATIME as c::c_uint;
 
-        /// `MOUNT_ATTR_IDMAP`
-        const MOUNT_ATTR_IDMAP = c::MOUNT_ATTR_IDMAP as c::c_uint;
-
         /// `MOUNT_ATTR_NOSYMFOLLOW`
         const MOUNT_ATTR_NOSYMFOLLOW = c::MOUNT_ATTR_NOSYMFOLLOW as c::c_uint;
 
