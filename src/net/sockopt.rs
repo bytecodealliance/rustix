@@ -1814,6 +1814,6 @@ mod tests {
 
         // Backend code needs to cast these to `c_int` so make sure that cast
         // isn't lossy.
-        assert_eq_size!(Timeout, c_int);
+        static_assertions::assert_eq_size!(Timeout, c_int);
     }
 }

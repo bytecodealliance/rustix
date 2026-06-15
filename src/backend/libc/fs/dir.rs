@@ -421,8 +421,8 @@ fn check_dirent_layout(dirent: &c::dirent) {
     // Check that the basic layouts match.
     #[cfg(test)]
     {
-        assert_eq_size!(libc_dirent, c::dirent);
-        assert_eq_size!(libc_dirent, c::dirent);
+        static_assertions::assert_eq_size!(libc_dirent, c::dirent);
+        static_assertions::assert_eq_size!(libc_dirent, c::dirent);
     }
 
     // Check that the field offsets match.
