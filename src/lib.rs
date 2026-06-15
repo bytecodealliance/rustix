@@ -100,6 +100,7 @@
 #![allow(stable_features)]
 #![cfg_attr(linux_raw, deny(unsafe_code))]
 #![cfg_attr(rustc_attrs, feature(rustc_attrs))]
+#![cfg_attr(rustc_attrs, allow(internal_features))]
 #![cfg_attr(docsrs, feature(doc_cfg))]
 #![cfg_attr(all(wasi_ext, target_os = "wasi", feature = "std"), feature(wasi_ext))]
 #![cfg_attr(core_ffi_c, feature(core_ffi_c))]
