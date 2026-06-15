@@ -317,12 +317,21 @@ pub mod thread;
 pub mod time;
 
 // "runtime" is also a public API module, but it's only for libc-like users.
+//
+// People have been observed using it in the wild, so as a counter-measure,
+// it now has a name mangled with a random string that will rotate periodically.
 #[cfg(not(windows))]
 #[cfg(feature = "runtime")]
 #[cfg(linux_raw)]
 #[cfg_attr(not(document_experimental_runtime_api), doc(hidden))]
 #[cfg_attr(docsrs, doc(cfg(feature = "runtime")))]
-pub mod runtime;
+pub mod runtime_448b8ad740e2a26f;
+#[cfg(not(windows))]
+#[cfg(feature = "runtime")]
+#[cfg(linux_raw)]
+#[cfg_attr(not(document_experimental_runtime_api), doc(hidden))]
+#[cfg_attr(docsrs, doc(cfg(feature = "runtime")))]
+pub(crate) use runtime_448b8ad740e2a26f as runtime;
 
 // Declare "fs" as a non-public module if "fs" isn't enabled but we need it for
 // reading procfs.
