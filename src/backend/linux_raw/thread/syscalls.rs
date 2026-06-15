@@ -213,14 +213,6 @@ pub(crate) unsafe fn futex_val2(
     uaddr2: *const AtomicU32,
     val3: u32,
 ) -> io::Result<usize> {
-    // Pass `val2` in the least-significant bytes of the `timeout` argument.
-    // [“the kernel casts the timeout value first to unsigned long, then to
-    // uint32_t”], so we perform that exact conversion in reverse to create
-    // the pointer.
-    //
-    // [“the kernel casts the timeout value first to unsigned long, then to uint32_t”]: https://man7.org/linux/man-pages/man2/futex.2.html
-    let timeout = val2 as usize as *const Timespec;
-
     #[cfg(target_pointer_width = "32")]
     {
         // Linux 5.1 added `futex_time64`; if we have that, use it. We don't
@@ -234,7 +226,7 @@ pub(crate) unsafe fn futex_val2(
                 uaddr,
                 (op, flags),
                 c_uint(val),
-                timeout,
+                c_uint(val2),
                 uaddr2,
                 c_uint(val3)
             ))
@@ -248,7 +240,7 @@ pub(crate) unsafe fn futex_val2(
                 uaddr,
                 (op, flags),
                 c_uint(val),
-                timeout,
+                c_uint(val2),
                 uaddr2,
                 c_uint(val3)
             ))
@@ -260,7 +252,7 @@ pub(crate) unsafe fn futex_val2(
         uaddr,
         (op, flags),
         c_uint(val),
-        timeout,
+        c_uint(val2),
         uaddr2,
         c_uint(val3)
     ))
