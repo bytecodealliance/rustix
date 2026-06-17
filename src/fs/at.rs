@@ -20,7 +20,7 @@ use crate::fs::CloneFlags;
 use crate::fs::RenameFlags;
 #[cfg(not(target_os = "espidf"))]
 use crate::fs::Stat;
-#[cfg(not(any(apple, target_os = "espidf", target_os = "vita", target_os = "wasi")))]
+#[cfg(not(any(target_os = "espidf", target_os = "vita", target_os = "wasi")))]
 use crate::fs::{Dev, FileType};
 #[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
 use crate::fs::{Gid, Uid};
@@ -460,11 +460,12 @@ pub fn fclonefileat<Fd: AsFd, DstFd: AsFd, P: path::Arg>(
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [Apple]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/mknodat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/mknodat.2.html
+/// [Apple]: https://github.com/apple-oss-distributions/xnu/blob/main/bsd/man/man2/mknodat.2
 #[cfg(not(any(
-    apple,
     target_os = "espidf",
     target_os = "horizon",
     target_os = "vita",
@@ -488,10 +489,11 @@ pub fn mknodat<P: path::Arg, Fd: AsFd>(
 ///
 /// # References
 ///  - [POSIX]
+///  - [Apple]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/mkfifoat.html
+/// [Apple]: https://github.com/apple-oss-distributions/xnu/blob/main/bsd/man/man2/mkfifoat.2
 #[cfg(not(any(
-    apple,
     target_os = "espidf",
     target_os = "horizon",
     target_os = "vita",
