@@ -16,6 +16,8 @@ mod prctl;
 mod sched;
 mod sched_yield;
 #[cfg(linux_kernel)]
+mod seccomp;
+#[cfg(linux_kernel)]
 mod setns;
 
 #[cfg(not(target_os = "redox"))]
@@ -33,5 +35,7 @@ pub use prctl::*;
 #[cfg(any(freebsdlike, linux_kernel, target_os = "fuchsia"))]
 pub use sched::*;
 pub use sched_yield::sched_yield;
+#[cfg(linux_kernel)]
+pub use seccomp::*;
 #[cfg(linux_kernel)]
 pub use setns::*;

@@ -58,3 +58,12 @@ pub(crate) fn raw_cpu_set_new() -> RawCpuSet {
 
 #[cfg(any(freebsdlike, linux_kernel, target_os = "fuchsia"))]
 pub(crate) const CPU_SETSIZE: usize = c::CPU_SETSIZE as usize;
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(u32)]
+pub(crate) enum SeccompOperation {
+    SetModeStrict = libc::SECCOMP_SET_MODE_STRICT,
+    SetModeFilter = libc::SECCOMP_SET_MODE_FILTER,
+    GetActionAvailable = libc::SECCOMP_GET_ACTION_AVAIL,
+    GetNotifSizes = libc::SECCOMP_GET_NOTIF_SIZES,
+}

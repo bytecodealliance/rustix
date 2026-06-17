@@ -15,7 +15,8 @@ use crate::fd::BorrowedFd;
 use crate::io;
 use crate::pid::Pid;
 use crate::thread::{
-    futex, ClockId, Cpuid, MembarrierCommand, MembarrierQuery, NanosleepRelativeResult, Timespec,
+    futex, ClockId, Cpuid, MembarrierCommand, MembarrierQuery, NanosleepRelativeResult,
+    SetSecureComputingFilterFlags, Timespec,
 };
 use crate::utils::as_mut_ptr;
 use core::mem::MaybeUninit;
@@ -546,4 +547,13 @@ pub(crate) fn membarrier_cpu(cmd: MembarrierCommand, cpu: Cpuid) -> io::Result<(
             cpu
         ))
     }
+}
+
+#[cfg(linux_kernel)]
+pub(crate) fn seccomp(
+    operation: super::types::SeccompOperation,
+    flags: Option<SetSecureComputingFilterFlags>,
+    args: *mut c::c_void,
+) -> io::Result<c::c_int> {
+    unsafe { ret_c_int(syscall!(__NR_seccomp, operation, flags, args)) }
 }
