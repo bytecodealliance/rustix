@@ -4,6 +4,8 @@ use super::ext::{in6_addr_new, in_addr_new};
 use crate::backend::c;
 use crate::backend::conv::{borrowed_fd, ret};
 use crate::fd::BorrowedFd;
+#[cfg(all(linux_kernel, not(target_os = "android")))]
+use crate::fd::{FromRawFd, OwnedFd, RawFd};
 #[cfg(feature = "alloc")]
 #[cfg(any(
     linux_like,
@@ -1092,6 +1094,13 @@ pub(crate) fn tcp_cork(fd: BorrowedFd<'_>) -> io::Result<bool> {
 #[inline]
 pub(crate) fn socket_peercred(fd: BorrowedFd<'_>) -> io::Result<UCred> {
     getsockopt(fd, c::SOL_SOCKET, c::SO_PEERCRED)
+}
+
+#[cfg(all(linux_kernel, not(target_os = "android")))]
+#[inline]
+pub(crate) fn socket_peerpidfd(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
+    let raw = getsockopt::<RawFd>(fd, c::SOL_SOCKET, c::SO_PEERPIDFD)?;
+    Ok(unsafe { OwnedFd::from_raw_fd(raw) })
 }
 
 #[cfg(all(target_os = "linux", feature = "time"))]

@@ -89,6 +89,7 @@ fn test_select_with_pipes() {
 #[serial] // for `setrlimit` usage
 fn test_select_with_great_fds() {
     use core::cmp::max;
+    use rustix::fd::{FromRawFd as _, OwnedFd};
     use rustix::io::{read, write};
     use rustix::pipe::pipe;
     use rustix::process::{getrlimit, setrlimit, Resource};
@@ -278,6 +279,7 @@ fn test_select_with_sockets() {
 #[test]
 #[serial] // for `setrlimit` usage, and `crate::init`
 fn test_select_with_maxfd_sockets() {
+    use rustix::fd::{FromRawFd as _, OwnedFd};
     use rustix::net::{recv, send, AddressFamily, RecvFlags, SendFlags, SocketType};
     use rustix::process::{getrlimit, setrlimit, Resource};
     use std::net::{IpAddr, Ipv4Addr, SocketAddr};
