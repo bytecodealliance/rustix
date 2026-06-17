@@ -484,6 +484,14 @@ impl<'a, Num: ArgNumber> From<crate::backend::mount::types::MountAttrFlags> for 
 }
 
 #[cfg(feature = "mount")]
+impl<'a, Num: ArgNumber> From<crate::backend::mount::types::MountSetAttrFlags> for ArgReg<'a, Num> {
+    #[inline]
+    fn from(flags: crate::backend::mount::types::MountSetAttrFlags) -> Self {
+        c_uint(flags.bits())
+    }
+}
+
+#[cfg(feature = "mount")]
 impl<'a, Num: ArgNumber> From<crate::backend::mount::types::OpenTreeFlags> for ArgReg<'a, Num> {
     #[inline]
     fn from(flags: crate::backend::mount::types::OpenTreeFlags) -> Self {
