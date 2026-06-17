@@ -63,7 +63,7 @@ pub(crate) use linux_raw_sys::general::{
     XATTR_REPLACE,
 };
 
-pub(crate) use linux_raw_sys::ioctl::{BLKPBSZGET, BLKSSZGET, FICLONE};
+pub(crate) use linux_raw_sys::ioctl::{BLKPBSZGET, BLKSSZGET, FICLONE, FICLONERANGE};
 #[cfg(target_pointer_width = "32")]
 pub(crate) use linux_raw_sys::ioctl::{FS_IOC32_GETFLAGS, FS_IOC32_SETFLAGS};
 #[cfg(target_pointer_width = "64")]
