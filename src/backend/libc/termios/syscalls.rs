@@ -521,6 +521,38 @@ pub(crate) fn isatty(fd: BorrowedFd<'_>) -> bool {
 #[cfg(feature = "alloc")]
 #[cfg(not(any(target_os = "fuchsia", target_os = "wasi")))]
 pub(crate) fn ttyname(dirfd: BorrowedFd<'_>, buf: &mut [MaybeUninit<u8>]) -> io::Result<usize> {
+    // On Apple platforms, use `fcntl(F_GETPATH)` instead of `ttyname_r`.
+    //
+    // macOS's `ttyname_r` works by walking `/dev`, calling `stat` on each
+    // entry and comparing device and inode numbers until it finds a match.
+    // This directory scan can take several seconds on a typical macOS system.
+    //
+    // `fcntl(F_GETPATH)` is a Darwin-specific API that asks the kernel to
+    // fill a buffer with the path for any open file descriptor. It is a
+    // single kernel call and is dramatically faster.
+    //
+    // The Linux `linux_raw` backend uses an analogous approach, reading the
+    // path from `/proc/self/fd/<fd>` to avoid `ttyname_r` entirely.
+    #[cfg(apple)]
+    unsafe {
+        // `F_GETPATH` works on any open fd, not just ttys. Check `isatty`
+        // first so we return `ENOTTY` for non-terminal fds, matching the
+        // behavior of POSIX `ttyname`.
+        if !isatty(dirfd) {
+            return Err(io::Errno::NOTTY);
+        }
+
+        // From the macOS `fcntl(2)` man page: `F_GETPATH` requires a buffer
+        // of at least `MAXPATHLEN` bytes. `PATH_MAX` equals `MAXPATHLEN`.
+        if buf.len() < c::PATH_MAX as usize {
+            return Err(io::Errno::RANGE);
+        }
+
+        ret(c::fcntl(borrowed_fd(dirfd), c::F_GETPATH, buf.as_mut_ptr()))?;
+        Ok(CStr::from_ptr(buf.as_ptr().cast()).to_bytes().len())
+    }
+
+    #[cfg(not(apple))]
     unsafe {
         // `ttyname_r` returns its error status rather than using `errno`.
         match c::ttyname_r(borrowed_fd(dirfd), buf.as_mut_ptr().cast(), buf.len()) {
