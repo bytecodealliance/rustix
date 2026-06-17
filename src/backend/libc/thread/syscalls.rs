@@ -709,6 +709,28 @@ pub(crate) fn sched_getcpu() -> usize {
     r as usize
 }
 
+#[cfg(linux_kernel)]
+#[inline]
+pub(crate) fn getcpu() -> (usize, usize) {
+    let (mut cpu, mut node): (core::mem::MaybeUninit<u32>, core::mem::MaybeUninit<u32>) = (
+        core::mem::MaybeUninit::uninit(),
+        core::mem::MaybeUninit::uninit(),
+    );
+
+    let r = unsafe {
+        libc::syscall(
+            libc::SYS_getcpu,
+            cpu.as_mut_ptr(),
+            node.as_mut_ptr(),
+            core::ptr::null::<libc::c_void>(),
+        )
+    };
+
+    debug_assert!(r >= 0);
+
+    unsafe { (cpu.assume_init() as usize, node.assume_init() as usize) }
+}
+
 #[cfg(any(freebsdlike, linux_kernel, target_os = "fuchsia"))]
 #[inline]
 pub(crate) fn sched_getaffinity(pid: Option<Pid>, cpuset: &mut RawCpuSet) -> io::Result<()> {
