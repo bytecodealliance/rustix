@@ -1,10 +1,16 @@
-#[cfg(any(linux_kernel, target_os = "freebsd", target_os = "illumos"))]
+#[cfg(any(
+    linux_kernel,
+    target_os = "freebsd",
+    target_os = "illumos",
+    target_os = "redox"
+))]
 use crate::backend::c;
 #[cfg(any(
     linux_kernel,
     target_os = "freebsd",
     target_os = "illumos",
-    target_os = "espidf"
+    target_os = "espidf",
+    target_os = "redox"
 ))]
 use bitflags::bitflags;
 
@@ -12,7 +18,8 @@ use bitflags::bitflags;
     linux_kernel,
     target_os = "freebsd",
     target_os = "illumos",
-    target_os = "espidf"
+    target_os = "espidf",
+    target_os = "redox"
 ))]
 bitflags! {
     /// `EFD_*` flags for use with [`eventfd`].

@@ -14,14 +14,12 @@ use crate::pid::Pid;
     target_os = "espidf",
     target_os = "haiku",
     target_os = "openbsd",
-    target_os = "redox",
     target_os = "vita",
     target_os = "wasi",
 )))]
 use crate::thread::ClockId;
 #[cfg(linux_kernel)]
 use crate::thread::{Cpuid, MembarrierCommand, MembarrierQuery};
-#[cfg(not(target_os = "redox"))]
 use crate::thread::{NanosleepRelativeResult, Timespec};
 #[cfg(all(target_env = "gnu", fix_y2038))]
 use crate::timespec::LibcTimespec;
@@ -54,7 +52,6 @@ weak!(fn __nanosleep64(*const LibcTimespec, *mut LibcTimespec) -> c::c_int);
     target_os = "haiku",
     target_os = "horizon",
     target_os = "openbsd",
-    target_os = "redox",
     target_os = "vita",
     target_os = "wasi",
 )))]
