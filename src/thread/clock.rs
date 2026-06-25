@@ -9,7 +9,6 @@ pub use crate::timespec::{Nsecs, Secs, Timespec};
     target_os = "espidf",
     target_os = "freebsd", // FreeBSD 12 has clock_nanosleep, but libc targets FreeBSD 11.
     target_os = "openbsd",
-    target_os = "redox",
     target_os = "vita",
     target_os = "wasi",
 )))]

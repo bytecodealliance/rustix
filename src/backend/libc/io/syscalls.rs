@@ -98,7 +98,6 @@ pub(crate) fn writev(fd: BorrowedFd<'_>, bufs: &[IoSlice<'_>]) -> io::Result<usi
     target_os = "haiku",
     target_os = "horizon",
     target_os = "nto",
-    target_os = "redox",
     target_os = "solaris",
     target_os = "vita",
 )))]
@@ -129,7 +128,6 @@ pub(crate) fn preadv(
     target_os = "haiku",
     target_os = "nto",
     target_os = "horizon",
-    target_os = "redox",
     target_os = "solaris",
     target_os = "vita",
 )))]

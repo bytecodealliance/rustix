@@ -485,7 +485,7 @@ pub(crate) fn port_send(
     unsafe { ret(c::port_send(borrowed_fd(port), events, userdata)) }
 }
 
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[cfg(not(target_os = "wasi"))]
 pub(crate) fn pause() {
     let r = unsafe { c::pause() };
     let errno = libc_errno::errno().0;
