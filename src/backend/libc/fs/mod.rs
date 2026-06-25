@@ -1,6 +1,6 @@
 #[cfg(all(
     feature = "alloc",
-    not(any(target_os = "espidf", target_os = "horizon", target_os = "redox"))
+    not(any(target_os = "espidf", target_os = "horizon"))
 ))]
 pub(crate) mod dir;
 #[cfg(linux_kernel)]

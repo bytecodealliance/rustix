@@ -28,7 +28,7 @@ bitflags! {
     }
 }
 
-#[cfg(not(any(target_os = "espidf", target_os = "horizon", target_os = "redox")))]
+#[cfg(not(any(target_os = "espidf", target_os = "horizon")))]
 bitflags! {
     /// `AT_*` constants for use with [`openat`], [`statat`], and other `*at`
     /// functions.
@@ -630,7 +630,6 @@ impl FileType {
         target_os = "haiku",
         target_os = "horizon",
         target_os = "nto",
-        target_os = "redox",
         target_os = "vita"
     )))]
     #[inline]
