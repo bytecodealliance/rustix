@@ -7,7 +7,8 @@ use crate::backend::conv::ret;
     target_os = "freebsd",
     target_os = "fuchsia",
     target_os = "illumos",
-    target_os = "netbsd"
+    target_os = "netbsd",
+    target_os = "redox"
 ))]
 #[cfg(any(all(target_env = "gnu", fix_y2038), not(fix_y2038)))]
 use crate::backend::time::types::LibcItimerspec;
@@ -17,11 +18,7 @@ use crate::io;
 #[cfg(not(fix_y2038))]
 use crate::timespec::as_libc_timespec_mut_ptr;
 #[cfg(not(fix_y2038))]
-#[cfg(not(any(
-    target_os = "redox",
-    target_os = "wasi",
-    all(apple, not(target_os = "macos"))
-)))]
+#[cfg(not(any(target_os = "wasi", all(apple, not(target_os = "macos")))))]
 use crate::timespec::as_libc_timespec_ptr;
 #[cfg(all(target_env = "gnu", fix_y2038))]
 use crate::timespec::LibcTimespec;
@@ -32,7 +29,8 @@ use core::mem::MaybeUninit;
     target_os = "freebsd",
     target_os = "fuchsia",
     target_os = "illumos",
-    target_os = "netbsd"
+    target_os = "netbsd",
+    target_os = "redox"
 ))]
 use {
     crate::backend::conv::{borrowed_fd, ret_owned_fd},
@@ -53,7 +51,7 @@ weak!(fn __timerfd_gettime64(c::c_int, *mut LibcItimerspec) -> c::c_int);
 #[cfg(all(target_env = "gnu", fix_y2038))]
 weak!(fn __timerfd_settime64(c::c_int, c::c_int, *const LibcItimerspec, *mut LibcItimerspec) -> c::c_int);
 
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[cfg(not(target_os = "wasi"))]
 #[inline]
 #[must_use]
 pub(crate) fn clock_getres(id: ClockId) -> Timespec {
@@ -258,11 +256,7 @@ fn clock_gettime_dynamic_old(id: c::clockid_t) -> io::Result<Timespec> {
     })
 }
 
-#[cfg(not(any(
-    target_os = "redox",
-    target_os = "wasi",
-    all(apple, not(target_os = "macos"))
-)))]
+#[cfg(not(any(target_os = "wasi", all(apple, not(target_os = "macos")))))]
 #[inline]
 pub(crate) fn clock_settime(id: ClockId, timespec: Timespec) -> io::Result<()> {
     // Old 32-bit version: libc has `clock_gettime` but it is not y2038 safe by
@@ -292,11 +286,7 @@ pub(crate) fn clock_settime(id: ClockId, timespec: Timespec) -> io::Result<()> {
     }
 }
 
-#[cfg(not(any(
-    target_os = "redox",
-    target_os = "wasi",
-    all(apple, not(target_os = "macos"))
-)))]
+#[cfg(not(any(target_os = "wasi", all(apple, not(target_os = "macos")))))]
 #[cfg(fix_y2038)]
 fn clock_settime_old(id: ClockId, timespec: Timespec) -> io::Result<()> {
     let old_timespec = c::timespec {
@@ -315,7 +305,8 @@ fn clock_settime_old(id: ClockId, timespec: Timespec) -> io::Result<()> {
     target_os = "freebsd",
     target_os = "fuchsia",
     target_os = "illumos",
-    target_os = "netbsd"
+    target_os = "netbsd",
+    target_os = "redox"
 ))]
 pub(crate) fn timerfd_create(id: TimerfdClockId, flags: TimerfdFlags) -> io::Result<OwnedFd> {
     unsafe { ret_owned_fd(c::timerfd_create(id as c::clockid_t, bitflags_bits!(flags))) }
@@ -326,7 +317,8 @@ pub(crate) fn timerfd_create(id: TimerfdClockId, flags: TimerfdFlags) -> io::Res
     target_os = "freebsd",
     target_os = "fuchsia",
     target_os = "illumos",
-    target_os = "netbsd"
+    target_os = "netbsd",
+    target_os = "redox"
 ))]
 pub(crate) fn timerfd_settime(
     fd: BorrowedFd<'_>,
@@ -374,7 +366,8 @@ pub(crate) fn timerfd_settime(
     target_os = "freebsd",
     target_os = "fuchsia",
     target_os = "illumos",
-    target_os = "netbsd"
+    target_os = "netbsd",
+    target_os = "redox"
 ))]
 #[cfg(fix_y2038)]
 fn timerfd_settime_old(
@@ -447,7 +440,8 @@ fn timerfd_settime_old(
     target_os = "freebsd",
     target_os = "fuchsia",
     target_os = "illumos",
-    target_os = "netbsd"
+    target_os = "netbsd",
+    target_os = "redox"
 ))]
 pub(crate) fn timerfd_gettime(fd: BorrowedFd<'_>) -> io::Result<Itimerspec> {
     // Old 32-bit version: libc has `timerfd_gettime` but it is not y2038 safe
@@ -484,7 +478,8 @@ pub(crate) fn timerfd_gettime(fd: BorrowedFd<'_>) -> io::Result<Itimerspec> {
     target_os = "freebsd",
     target_os = "fuchsia",
     target_os = "illumos",
-    target_os = "netbsd"
+    target_os = "netbsd",
+    target_os = "redox"
 ))]
 #[cfg(fix_y2038)]
 fn timerfd_gettime_old(fd: BorrowedFd<'_>) -> io::Result<Itimerspec> {

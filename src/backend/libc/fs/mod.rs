@@ -1,4 +1,4 @@
-#[cfg(all(feature = "alloc", not(any(target_os = "espidf", target_os = "redox"))))]
+#[cfg(all(feature = "alloc", not(target_os = "espidf")))]
 pub(crate) mod dir;
 #[cfg(linux_kernel)]
 pub mod inotify;

@@ -4,17 +4,14 @@
     target_os = "emscripten",
     target_os = "haiku",
     target_os = "openbsd",
-    target_os = "redox",
     target_os = "wasi",
 )))]
 use rustix::thread::{clock_nanosleep_absolute, clock_nanosleep_relative, ClockId};
-#[cfg(not(target_os = "redox"))]
 use {
     rustix::io,
     rustix::thread::{nanosleep, NanosleepRelativeResult, Timespec},
 };
 
-#[cfg(not(target_os = "redox"))]
 #[test]
 fn test_invalid_nanosleep() {
     match nanosleep(&Timespec {
@@ -53,7 +50,6 @@ fn test_invalid_nanosleep() {
     target_os = "emscripten",
     target_os = "haiku",
     target_os = "openbsd",
-    target_os = "redox",
     target_os = "wasi",
 )))]
 #[cfg(not(target_os = "netbsd"))] // NetBSD doesn't seem to enforce valid timespecs.
@@ -107,7 +103,6 @@ fn test_invalid_nanosleep_absolute() {
     target_os = "emscripten",
     target_os = "haiku",
     target_os = "openbsd",
-    target_os = "redox",
     target_os = "wasi",
 )))]
 #[test]
@@ -154,7 +149,6 @@ fn test_invalid_nanosleep_relative() {
     }
 }
 
-#[cfg(not(target_os = "redox"))]
 #[test]
 fn test_zero_nanosleep() {
     match nanosleep(&Timespec {
@@ -172,7 +166,6 @@ fn test_zero_nanosleep() {
     target_os = "emscripten",
     target_os = "haiku",
     target_os = "openbsd",
-    target_os = "redox",
     target_os = "wasi",
 )))]
 #[test]
@@ -195,7 +188,6 @@ fn test_zero_nanosleep_absolute() {
     target_os = "emscripten",
     target_os = "haiku",
     target_os = "openbsd",
-    target_os = "redox",
     target_os = "wasi",
 )))]
 #[test]
