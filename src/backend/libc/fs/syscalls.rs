@@ -1211,7 +1211,7 @@ pub(crate) fn mknodat(
     let mode = (mode.bits() | file_type.as_raw_mode()) as c::mode_t;
     let dev = dev.try_into().map_err(|_e| io::Errno::PERM)?;
 
-    // Older Apple platforms lack `mknodat`.
+    // macOS < 13.0 lacks `mknodat`.
     #[cfg(apple)]
     unsafe {
         weak! {
