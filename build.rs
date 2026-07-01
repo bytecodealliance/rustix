@@ -251,7 +251,7 @@ fn can_compile<T: AsRef<str>>(test: T) -> bool {
         .arg("--target")
         .arg(target)
         .arg("-o")
-        .arg(out_file)
+        .arg(&out_file)
         .stdout(Stdio::null()); // We don't care about the output (only whether it builds or not)
 
     // If Cargo wants to set RUSTFLAGS, use that.
@@ -272,5 +272,12 @@ fn can_compile<T: AsRef<str>>(test: T) -> bool {
 
     writeln!(child.stdin.take().unwrap(), "{}", test.as_ref()).unwrap();
 
-    child.wait().unwrap().success()
+    let success = child.wait().unwrap().success();
+
+    // The emitted metadata file is never read; only the exit status
+    // matters. Remove it to ensure reproducible builds with build
+    // systems like Bazel.
+    let _ = std::fs::remove_file(&out_file);
+
+    success
 }
