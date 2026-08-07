@@ -240,7 +240,7 @@ pub(crate) fn set_socket_timeout(
                     .unwrap_or(crate::timespec::Secs::MAX),
                 tv_nsec: timeout.subsec_nanos() as _,
             };
-            let (sec, usec) = ts.to_sec_usec();
+            let (sec, usec) = ts.to_sec_usec().unwrap_or((crate::timespec::Secs::MAX, 0));
             #[allow(deprecated)]
             let tv_sec = sec.try_into().unwrap_or(c::time_t::MAX);
             let mut timeout = c::timeval {

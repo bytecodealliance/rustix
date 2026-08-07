@@ -319,7 +319,7 @@ fn duration_to_linux_old_timeval(timeout: Option<Duration>) -> io::Result<__kern
                     .unwrap_or(crate::timespec::Secs::MAX),
                 tv_nsec: timeout.subsec_nanos() as _,
             };
-            let (sec, usec) = ts.to_sec_usec();
+            let (sec, usec) = ts.to_sec_usec().unwrap_or((crate::timespec::Secs::MAX, 0));
             let mut timeout = __kernel_old_timeval {
                 tv_sec: sec.try_into().unwrap_or(c::c_long::MAX),
                 tv_usec: usec as _,

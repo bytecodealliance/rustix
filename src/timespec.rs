@@ -207,21 +207,21 @@ impl Timespec {
     /// Convert `Timespec` to seconds and microseconds, rounding up fractional
     /// microseconds and carrying any overflow into seconds.
     #[inline]
-    pub(crate) fn to_sec_usec(&self) -> (Secs, u32) {
+    pub(crate) fn to_sec_usec(&self) -> Option<(Secs, u32)> {
         let mut sec = self.tv_sec;
         let mut usec = (self.tv_nsec + 999) / 1000;
         if usec >= 1_000_000 {
-            sec = sec.saturating_add(1);
+            sec = sec.checked_add(1)?;
             usec -= 1_000_000;
         }
-        (sec, usec as u32)
+        Some((sec, usec as u32))
     }
 
     /// Convert from `Timespec` to `c::timeval`, rounding up fractional
     /// microseconds and carrying any overflow into seconds.
     #[cfg(any(libc, target_os = "wasi"))]
     pub(crate) fn to_timeval(&self) -> crate::io::Result<c::timeval> {
-        let (sec, usec) = self.to_sec_usec();
+        let (sec, usec) = self.to_sec_usec().ok_or(crate::io::Errno::INVAL)?;
         Ok(c::timeval {
             tv_sec: sec.try_into().map_err(|_| crate::io::Errno::INVAL)?,
             tv_usec: usec as _,
@@ -232,7 +232,7 @@ impl Timespec {
     /// microseconds and carrying any overflow into seconds.
     #[cfg(windows)]
     pub(crate) fn to_timeval(&self) -> crate::io::Result<c::TIMEVAL> {
-        let (sec, usec) = self.to_sec_usec();
+        let (sec, usec) = self.to_sec_usec().ok_or(crate::io::Errno::OPNOTSUPP)?;
         Ok(c::TIMEVAL {
             tv_sec: sec.try_into().map_err(|_| crate::io::Errno::OPNOTSUPP)?,
             tv_usec: usec as _,
