@@ -1208,6 +1208,8 @@ pub(crate) fn mknodat(
     mode: Mode,
     dev: Dev,
 ) -> io::Result<()> {
+    let dirfd = borrowed_fd(dirfd);
+    let pathname = c_str(path);
     let mode = (mode.bits() | file_type.as_raw_mode()) as c::mode_t;
     let dev = dev.try_into().map_err(|_e| io::Errno::PERM)?;
 
@@ -1223,12 +1225,12 @@ pub(crate) fn mknodat(
             ) -> c::c_int
         }
         let libc_mknodat = mknodat.get().ok_or(io::Errno::NOSYS)?;
-        ret(libc_mknodat(borrowed_fd(dirfd), c_str(path), mode, dev))
+        ret(libc_mknodat(dirfd, pathname, mode, dev))
     }
 
     #[cfg(not(apple))]
     unsafe {
-        ret(c::mknodat(borrowed_fd(dirfd), c_str(path), mode, dev))
+        ret(c::mknodat(dirfd, pathname, mode, dev))
     }
 }
 
