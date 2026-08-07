@@ -233,18 +233,19 @@ pub(crate) fn set_socket_timeout(
                 return Err(io::Errno::INVAL);
             }
 
-            // Rust's musl libc bindings deprecated `time_t` while they
-            // transition to 64-bit `time_t`. What we want here is just
-            // “whatever type `timeval`'s `tv_sec` is”, so we're ok using
-            // the deprecated type.
+            let ts = crate::timespec::Timespec {
+                tv_sec: timeout
+                    .as_secs()
+                    .try_into()
+                    .unwrap_or(crate::timespec::Secs::MAX),
+                tv_nsec: timeout.subsec_nanos() as _,
+            };
+            let (sec, usec) = ts.to_sec_usec();
             #[allow(deprecated)]
-            let tv_sec = timeout.as_secs().try_into().unwrap_or(c::time_t::MAX);
-
-            // `subsec_micros` rounds down, so we use `subsec_nanos` and
-            // manually round up.
+            let tv_sec = sec.try_into().unwrap_or(c::time_t::MAX);
             let mut timeout = c::timeval {
                 tv_sec,
-                tv_usec: ((timeout.subsec_nanos() + 999) / 1000) as _,
+                tv_usec: usec as _,
             };
             if timeout.tv_sec == 0 && timeout.tv_usec == 0 {
                 timeout.tv_usec = 1;

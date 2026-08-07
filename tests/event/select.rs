@@ -429,3 +429,33 @@ fn test_select_iter() {
 fn fd_set_contains(fds: &[FdSetElement], fd: RawFd) -> bool {
     FdSetIter::new(fds).any(|x| x == fd)
 }
+
+#[cfg(feature = "pipe")]
+#[cfg(not(windows))]
+#[test]
+fn test_select_near_second_boundary_timeout() {
+    use rustix::pipe::pipe;
+
+    let (reader, _writer) = pipe().unwrap();
+    let nfds = reader.as_raw_fd() + 1;
+    let mut readfds = vec![FdSetElement::default(); fd_set_num_elements(1, nfds)];
+    fd_set_insert(&mut readfds, reader.as_raw_fd());
+
+    // 999_999_500 ns will ceiling-divide to 1_000_000 microseconds.
+    // Ensure that it rolls over to tv_sec = 1, tv_usec = 0 instead of tv_usec = 1_000_000
+    // which fails on macOS with EINVAL.
+    let num = retry_on_intr(|| unsafe {
+        select(
+            nfds,
+            Some(&mut readfds),
+            None,
+            None,
+            Some(&Timespec {
+                tv_sec: 0,
+                tv_nsec: 999_999_500,
+            }),
+        )
+    })
+    .unwrap();
+    assert_eq!(num, 0);
+}

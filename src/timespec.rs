@@ -203,6 +203,41 @@ impl Timespec {
             })
             .and_then(|millis| c::c_int::try_from(millis).ok())
     }
+
+    /// Convert `Timespec` to seconds and microseconds, rounding up fractional
+    /// microseconds and carrying any overflow into seconds.
+    #[inline]
+    pub(crate) fn to_sec_usec(&self) -> (Secs, u32) {
+        let mut sec = self.tv_sec;
+        let mut usec = (self.tv_nsec + 999) / 1000;
+        if usec >= 1_000_000 {
+            sec = sec.saturating_add(1);
+            usec -= 1_000_000;
+        }
+        (sec, usec as u32)
+    }
+
+    /// Convert from `Timespec` to `c::timeval`, rounding up fractional
+    /// microseconds and carrying any overflow into seconds.
+    #[cfg(any(libc, target_os = "wasi"))]
+    pub(crate) fn to_timeval(&self) -> crate::io::Result<c::timeval> {
+        let (sec, usec) = self.to_sec_usec();
+        Ok(c::timeval {
+            tv_sec: sec.try_into().map_err(|_| crate::io::Errno::INVAL)?,
+            tv_usec: usec as _,
+        })
+    }
+
+    /// Convert from `Timespec` to `c::TIMEVAL`, rounding up fractional
+    /// microseconds and carrying any overflow into seconds.
+    #[cfg(windows)]
+    pub(crate) fn to_timeval(&self) -> crate::io::Result<c::TIMEVAL> {
+        let (sec, usec) = self.to_sec_usec();
+        Ok(c::TIMEVAL {
+            tv_sec: sec.try_into().map_err(|_| crate::io::Errno::OPNOTSUPP)?,
+            tv_usec: usec as _,
+        })
+    }
 }
 
 impl TryFrom<Timespec> for Duration {
@@ -394,6 +429,26 @@ mod tests {
         // `tv_sec` needs to be able to hold more than 32-bits of seconds.
         t.tv_sec = 0x1_0000_0000_u64 as _;
         assert_eq!(t.tv_sec as u64, 0x1_0000_0000_u64);
+    }
+
+    #[cfg(any(libc, target_os = "wasi", windows))]
+    #[test]
+    fn test_to_timeval() {
+        let ts = Timespec {
+            tv_sec: 4,
+            tv_nsec: 999_999_500,
+        };
+        let tv = ts.to_timeval().unwrap();
+        assert_eq!(tv.tv_sec, 5);
+        assert_eq!(tv.tv_usec, 0);
+
+        let ts2 = Timespec {
+            tv_sec: 2,
+            tv_nsec: 500_000_000,
+        };
+        let tv2 = ts2.to_timeval().unwrap();
+        assert_eq!(tv2.tv_sec, 2);
+        assert_eq!(tv2.tv_usec, 500_000);
     }
 
     // Test that our workarounds are needed.
