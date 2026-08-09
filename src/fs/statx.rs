@@ -124,6 +124,41 @@ bitflags! {
     }
 }
 
+/// A `statx` request mask containing only flags known to this definition of
+/// [`Statx`].
+#[repr(transparent)]
+#[derive(Copy, Clone)]
+pub(crate) struct StatxRequestFlags(u32);
+
+impl StatxRequestFlags {
+    // Keep this list to the elementary request flags; `STATX_BASIC_STATS` and
+    // `STATX_ALL` are composite sets, and the latter is deprecated.
+    const KNOWN_REQUEST_BITS: u32 = StatxFlags::TYPE.bits()
+        | StatxFlags::MODE.bits()
+        | StatxFlags::NLINK.bits()
+        | StatxFlags::UID.bits()
+        | StatxFlags::GID.bits()
+        | StatxFlags::ATIME.bits()
+        | StatxFlags::MTIME.bits()
+        | StatxFlags::CTIME.bits()
+        | StatxFlags::INO.bits()
+        | StatxFlags::SIZE.bits()
+        | StatxFlags::BLOCKS.bits()
+        | StatxFlags::BTIME.bits()
+        | StatxFlags::MNT_ID.bits()
+        | StatxFlags::DIOALIGN.bits();
+
+    #[inline]
+    const fn sanitize(mask: StatxFlags) -> Self {
+        Self(mask.bits() & Self::KNOWN_REQUEST_BITS)
+    }
+
+    #[inline]
+    pub(crate) const fn bits(self) -> u32 {
+        self.0
+    }
+}
+
 bitflags! {
     /// `STATX_ATTR_*` flags for use with [`Statx`].
     #[repr(transparent)]
@@ -208,14 +243,32 @@ pub fn statx<P: path::Arg, Fd: AsFd>(
     flags: AtFlags,
     mask: StatxFlags,
 ) -> io::Result<Statx> {
-    path.into_with_c_str(|path| _statx(dirfd.as_fd(), path, flags, mask))
+    path.into_with_c_str(|path| {
+        // `STATX__RESERVED` could take on arbitrary new meaning in the future.
+        // Linux currently rejects it with `EINVAL`, so do the same before
+        // sanitizing the request.
+        #[cfg(all(not(linux_raw), not(target_env = "musl")))]
+        const STATX__RESERVED: u32 = c::STATX__RESERVED as u32;
+        #[cfg(any(linux_raw, target_env = "musl"))]
+        const STATX__RESERVED: u32 = linux_raw_sys::general::STATX__RESERVED;
+        if (mask.bits() & STATX__RESERVED) == STATX__RESERVED {
+            return Err(io::Errno::INVAL);
+        }
+
+        _statx(
+            dirfd.as_fd(),
+            path,
+            flags,
+            StatxRequestFlags::sanitize(mask),
+        )
+    })
 }
 
 #[cfg(not(feature = "linux_4_11"))]
 mod compat {
     use crate::fd::BorrowedFd;
     use crate::ffi::CStr;
-    use crate::fs::{AtFlags, Statx, StatxFlags};
+    use crate::fs::{AtFlags, Statx, StatxRequestFlags};
     use crate::{backend, io};
     use core::sync::atomic::{AtomicU8, Ordering};
 
@@ -233,7 +286,7 @@ mod compat {
         dirfd: BorrowedFd<'_>,
         path: &CStr,
         flags: AtFlags,
-        mask: StatxFlags,
+        mask: StatxRequestFlags,
     ) -> io::Result<Statx> {
         match STATX_STATE.load(Ordering::Relaxed) {
             0 => statx_init(dirfd, path, flags, mask),
@@ -247,7 +300,7 @@ mod compat {
         dirfd: BorrowedFd<'_>,
         path: &CStr,
         flags: AtFlags,
-        mask: StatxFlags,
+        mask: StatxRequestFlags,
     ) -> io::Result<Statx> {
         match backend::fs::syscalls::statx(dirfd, path, flags, mask) {
             Err(err) => statx_error(err),
@@ -273,5 +326,23 @@ mod compat {
             STATX_STATE.store(1, Ordering::Relaxed);
             Err(io::Errno::NOSYS)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{StatxFlags, StatxRequestFlags};
+
+    #[test]
+    fn request_mask_is_exactly_the_named_flags() {
+        let named = StatxFlags::all()
+            .iter_names()
+            .fold(StatxFlags::empty(), |flags, (_, flag)| flags | flag);
+
+        assert_ne!(named, StatxFlags::all());
+        assert_eq!(
+            StatxRequestFlags::sanitize(StatxFlags::all()).bits(),
+            named.bits()
+        );
     }
 }
