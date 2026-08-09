@@ -41,8 +41,9 @@ use core::num::NonZeroU64;
 #[cfg(any(target_arch = "mips64", target_arch = "mips64r6"))]
 use linux_raw_sys::general::stat as linux_stat64;
 use linux_raw_sys::general::{
-    open_how, AT_EACCESS, AT_FDCWD, AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW, F_ADD_SEALS, F_GETFL,
-    F_GET_SEALS, F_SETFL, SEEK_CUR, SEEK_DATA, SEEK_END, SEEK_HOLE, SEEK_SET, STATX__RESERVED,
+    open_how, xattr_args, AT_EACCESS, AT_FDCWD, AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW, F_ADD_SEALS,
+    F_GETFL, F_GET_SEALS, F_SETFL, SEEK_CUR, SEEK_DATA, SEEK_END, SEEK_HOLE, SEEK_SET,
+    STATX__RESERVED,
 };
 #[cfg(target_pointer_width = "32")]
 use {
@@ -1576,6 +1577,40 @@ pub(crate) unsafe fn fgetxattr(
 }
 
 #[inline]
+pub(crate) unsafe fn getxattrat(
+    dirfd: BorrowedFd<'_>,
+    path: &CStr,
+    name: &CStr,
+    value: (*mut u8, usize),
+    flags: AtFlags,
+) -> io::Result<usize> {
+    let value_size = value.1.try_into().map_err(|_| io::Errno::OVERFLOW)?;
+    let value_addr = u64::try_from(value.0 as usize).map_err(|_| io::Errno::OVERFLOW)?;
+    let args = xattr_args {
+        value: value_addr,
+        size: value_size,
+        flags: 0,
+    };
+
+    let result = ret_usize(syscall!(
+        __NR_getxattrat,
+        dirfd,
+        path,
+        flags,
+        name,
+        by_ref(&args),
+        size_of::<xattr_args, _>()
+    ));
+
+    #[cfg(sanitize_memory)]
+    if let Ok(len) = result {
+        crate::msan::unpoison(value.0.cast(), len.min(value.1));
+    }
+
+    result
+}
+
+#[inline]
 pub(crate) fn setxattr(
     path: &CStr,
     name: &CStr,
@@ -1648,6 +1683,30 @@ pub(crate) unsafe fn llistxattr(path: &CStr, list: (*mut u8, usize)) -> io::Resu
 #[inline]
 pub(crate) unsafe fn flistxattr(fd: BorrowedFd<'_>, list: (*mut u8, usize)) -> io::Result<usize> {
     ret_usize(syscall!(__NR_flistxattr, fd, list.0, pass_usize(list.1)))
+}
+
+#[inline]
+pub(crate) unsafe fn listxattrat(
+    dirfd: BorrowedFd<'_>,
+    path: &CStr,
+    list: (*mut u8, usize),
+    flags: AtFlags,
+) -> io::Result<usize> {
+    let result = ret_usize(syscall!(
+        __NR_listxattrat,
+        dirfd,
+        path,
+        flags,
+        list.0,
+        pass_usize(list.1)
+    ));
+
+    #[cfg(sanitize_memory)]
+    if let Ok(len) = result {
+        crate::msan::unpoison(list.0.cast(), len.min(list.1));
+    }
+
+    result
 }
 
 #[inline]
