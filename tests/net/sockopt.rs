@@ -424,11 +424,8 @@ fn test_sockopts_ipv6() {
     }
     assert_ne!(sockopt::ipv6_unicast_hops(&s).unwrap(), 0);
 
-    // On NetBSD, `get_ipv6_multicasthops` returns 1 here. It's not evident
-    // why it differs from other OS's.
-    #[cfg(not(target_os = "netbsd"))]
     match sockopt::ipv6_multicast_hops(&s) {
-        Ok(hops) => assert_eq!(hops, 0),
+        Ok(hops) => assert_eq!(hops, 1),
         Err(io::Errno::OPNOTSUPP) => (),
         Err(io::Errno::NOPROTOOPT) => (),
         Err(io::Errno::INVAL) => (),
