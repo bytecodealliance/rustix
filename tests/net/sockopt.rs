@@ -429,8 +429,20 @@ fn test_sockopts_ipv6() {
     #[cfg(not(target_os = "netbsd"))]
     match sockopt::ipv6_multicast_hops(&s) {
         Ok(hops) => assert_eq!(hops, 0),
+        Err(io::Errno::OPNOTSUPP) => (),
         Err(io::Errno::NOPROTOOPT) => (),
         Err(io::Errno::INVAL) => (),
+        Err(err) => panic!("{:?}", err),
+    }
+
+    match sockopt::set_ipv6_multicast_hops(&s, 8) {
+        Ok(()) => match sockopt::ipv6_multicast_hops(&s) {
+            Ok(hops) => assert_eq!(hops, 8),
+            Err(err) => panic!("{:?}", err),
+        },
+        Err(io::Errno::OPNOTSUPP) => (),
+        Err(io::Errno::INVAL) => (),
+        Err(io::Errno::NOPROTOOPT) => (),
         Err(err) => panic!("{:?}", err),
     }
 
@@ -514,6 +526,20 @@ fn test_sockopts_ipv6() {
     }
 
     test_sockopts_tcp(&s);
+}
+
+#[test]
+fn test_ipv6_multicast_hops_dgram() {
+    crate::init();
+
+    let s = rustix::net::socket(AddressFamily::INET6, SocketType::DGRAM, None).unwrap();
+    match sockopt::set_ipv6_multicast_hops(&s, 8) {
+        Ok(()) => assert_eq!(sockopt::ipv6_multicast_hops(&s).unwrap(), 8),
+        Err(io::Errno::OPNOTSUPP) => (),
+        Err(io::Errno::INVAL) => (),
+        Err(io::Errno::NOPROTOOPT) => (),
+        Err(err) => panic!("{:?}", err),
+    }
 }
 
 #[cfg(linux_kernel)]
