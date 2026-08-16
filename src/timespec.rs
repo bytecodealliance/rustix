@@ -219,7 +219,7 @@ impl Timespec {
 
     /// Convert from `Timespec` to `c::timeval`, rounding up fractional
     /// microseconds and carrying any overflow into seconds.
-    #[cfg(any(libc, target_os = "wasi"))]
+    #[cfg(all(any(libc, target_os = "wasi"), not(windows)))]
     pub(crate) fn to_timeval(&self) -> crate::io::Result<c::timeval> {
         let (sec, usec) = self.to_sec_usec().ok_or(crate::io::Errno::INVAL)?;
         Ok(c::timeval {
