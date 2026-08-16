@@ -285,11 +285,18 @@ fn duration_to_linux_sock_timeval(timeout: Option<Duration>) -> io::Result<__ker
             if timeout == Duration::ZERO {
                 return Err(io::Errno::INVAL);
             }
-            // `subsec_micros` rounds down, so we use `subsec_nanos` and
-            // manually round up.
+
+            let ts = crate::timespec::Timespec {
+                tv_sec: timeout
+                    .as_secs()
+                    .try_into()
+                    .unwrap_or(crate::timespec::Secs::MAX),
+                tv_nsec: timeout.subsec_nanos() as _,
+            };
+            let (sec, usec) = ts.to_sec_usec().unwrap_or((crate::timespec::Secs::MAX, 0));
             let mut timeout = __kernel_sock_timeval {
-                tv_sec: timeout.as_secs().try_into().unwrap_or(i64::MAX),
-                tv_usec: ((timeout.subsec_nanos() + 999) / 1000) as _,
+                tv_sec: sec.try_into().unwrap_or(i64::MAX),
+                tv_usec: usec as _,
             };
             if timeout.tv_sec == 0 && timeout.tv_usec == 0 {
                 timeout.tv_usec = 1;
