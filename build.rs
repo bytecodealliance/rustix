@@ -62,10 +62,8 @@ fn main() {
     // If experimental features are enabled, auto-detect and use available
     // features.
     if rustc_dep_of_std {
-        use_feature("rustc_attrs");
         use_feature("core_intrinsics");
     } else if rustix_use_experimental_features {
-        use_feature_or_nothing("rustc_attrs");
         use_feature_or_nothing("core_intrinsics");
     }
 
