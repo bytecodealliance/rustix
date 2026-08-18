@@ -282,7 +282,7 @@ mod compat {
     static STATX_STATE: AtomicU8 = AtomicU8::new(0);
 
     #[inline]
-    pub fn statx(
+    pub(crate) fn statx(
         dirfd: BorrowedFd<'_>,
         path: &CStr,
         flags: AtFlags,
