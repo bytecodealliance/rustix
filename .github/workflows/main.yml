@@ -53,6 +53,7 @@ jobs:
       run: |
         cargo update --package=half --precise=2.2.1
         cargo update --package=flate2 --precise=1.0.35
+        cargo update --package=serde --precise=1.0.228
         cargo update --package=syn --precise=2.0.106
         cargo update --package=textwrap --precise=0.16.1
         cargo update --package=parking_lot --precise=0.12.4
@@ -591,6 +592,7 @@ jobs:
       run: |
         cargo update --package=half --precise=2.2.1
         cargo update --package=flate2 --precise=1.0.35
+        cargo update --package=serde --precise=1.0.228
         cargo update --package=syn --precise=2.0.106
         cargo update --package=textwrap --precise=0.16.1
         cargo update --package=parking_lot --precise=0.12.4
