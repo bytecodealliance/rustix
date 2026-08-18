@@ -1,0 +1,6 @@
+[wrap-file]
+directory = bitflags-2.9.1
+source_url = https://crates.io/api/v1/crates/bitflags/2.9.1/download
+source_filename = bitflags-2.9.1.tar.gz
+source_hash = 1b8e56985ec62d17e9c1001dc89c88ecd7dc08e47eba5ec7c29c7b5eeecde967
+patch_directory = bitflags-2-rs

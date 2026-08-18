@@ -344,6 +344,36 @@ type _Opcode = c::c_uint;
 #[cfg(windows)]
 type _Opcode = i32;
 
+/// Convenience macro for Rustix's ioctl write
+#[macro_export]
+macro_rules! ioctl_write_ptr {
+    ($name:ident, $ioty:expr, $nr:expr, $ty:ty) => {
+        pub unsafe fn $name(fd: std::os::fd::BorrowedFd, data: &$ty) -> std::io::Result<()> {
+            const OPCODE: $crate::ioctl::Opcode =
+                $crate::ioctl::opcode::write::<$ty>($ioty as u8, $nr as u8);
+            Ok(rustix::ioctl::ioctl(
+                fd,
+                $crate::ioctl::Setter::<OPCODE, $ty>::new(*data),
+            )?)
+        }
+    };
+}
+
+/// Convenience macro for Rustix's ioctl read
+#[macro_export]
+macro_rules! ioctl_readwrite {
+    ($name:ident, $ioty:expr, $nr:expr, $ty:ty) => {
+        pub unsafe fn $name(fd: std::os::fd::BorrowedFd, data: &mut $ty) -> std::io::Result<()> {
+            const OPCODE: $crate::ioctl::Opcode =
+                $crate::ioctl::opcode::read_write::<$ty>($ioty as u8, $nr as u8);
+            Ok($crate::ioctl::ioctl(
+                fd,
+                $crate::ioctl::Updater::<OPCODE, $ty>::new(data),
+            )?)
+        }
+    };
+}
+
 #[cfg(linux_raw_dep)]
 #[cfg(not(any(target_arch = "sparc", target_arch = "sparc64")))]
 #[cfg(test)]
