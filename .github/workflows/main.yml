@@ -271,7 +271,8 @@ jobs:
     env:
       QEMU_BUILD_VERSION: 9.2.0
       # Enabling testing of experimental features.
-      RUSTFLAGS: --cfg rustix_use_experimental_features
+      # TODO: Re-enable this once the fix for `rustc_attrs` is published.
+      # RUSTFLAGS: --cfg rustix_use_experimental_features
     strategy:
       matrix:
         build:
