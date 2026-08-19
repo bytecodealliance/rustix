@@ -13,15 +13,14 @@ use crate::pid::Pid;
     target_os = "emscripten",
     target_os = "espidf",
     target_os = "haiku",
-    target_os = "openbsd",
     target_os = "redox",
+    target_os = "openbsd",
     target_os = "vita",
     target_os = "wasi",
 )))]
 use crate::thread::ClockId;
 #[cfg(linux_kernel)]
 use crate::thread::{Cpuid, MembarrierCommand, MembarrierQuery};
-#[cfg(not(target_os = "redox"))]
 use crate::thread::{NanosleepRelativeResult, Timespec};
 #[cfg(all(target_env = "gnu", fix_y2038))]
 use crate::timespec::LibcTimespec;
@@ -52,9 +51,9 @@ weak!(fn __nanosleep64(*const LibcTimespec, *mut LibcTimespec) -> c::c_int);
     target_os = "espidf",
     target_os = "freebsd", // FreeBSD 12 has clock_nanosleep, but libc targets FreeBSD 11.
     target_os = "haiku",
+    target_os = "redox",
     target_os = "horizon",
     target_os = "openbsd",
-    target_os = "redox",
     target_os = "vita",
     target_os = "wasi",
 )))]
@@ -243,7 +242,6 @@ fn clock_nanosleep_absolute_old(id: crate::clockid::ClockId, request: &Timespec)
     }
 }
 
-#[cfg(not(target_os = "redox"))]
 #[inline]
 pub(crate) fn nanosleep(request: &Timespec) -> NanosleepRelativeResult {
     // Old 32-bit version: libc has `nanosleep` but it is not y2038 safe by

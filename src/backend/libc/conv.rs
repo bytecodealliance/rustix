@@ -33,10 +33,7 @@ pub(super) fn borrowed_fd(fd: BorrowedFd<'_>) -> LibcFd {
     fd.as_raw_fd() as LibcFd
 }
 
-#[cfg(all(
-    feature = "alloc",
-    not(any(windows, target_os = "espidf", target_os = "redox"))
-))]
+#[cfg(all(feature = "alloc", not(any(windows, target_os = "espidf"))))]
 #[inline]
 pub(super) fn owned_fd(fd: OwnedFd) -> LibcFd {
     fd.into_raw_fd() as LibcFd

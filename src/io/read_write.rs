@@ -219,7 +219,6 @@ pub fn writev<Fd: AsFd>(fd: Fd, bufs: &[IoSlice<'_>]) -> io::Result<usize> {
     target_os = "haiku",
     target_os = "horizon",
     target_os = "nto",
-    target_os = "redox",
     target_os = "solaris",
     target_os = "vita",
 )))]
@@ -258,7 +257,6 @@ pub fn preadv<Fd: AsFd>(fd: Fd, bufs: &mut [IoSliceMut<'_>], offset: u64) -> io:
     target_os = "haiku",
     target_os = "horizon",
     target_os = "nto",
-    target_os = "redox",
     target_os = "solaris",
     target_os = "vita",
 )))]
