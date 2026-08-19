@@ -25,3 +25,7 @@ Beyond that, rustix's CI tests many targets and configurations. Asking for
 help is always welcome, and it's especially encouraged when the issue is
 getting all the `cfg`s lined up to get everything compiling on all the
 configurations on CI.
+
+[Bytecode Alliance]: https://bytecodealliance.org/
+[Code of Conduct]: ./CODE_OF_CONDUCT.md
+[Organizational Code of Conduct]: ./ORG_CODE_OF_CONDUCT.md
