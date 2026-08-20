@@ -567,12 +567,12 @@ pub(crate) fn ipv6_multicast_loop(fd: BorrowedFd<'_>) -> io::Result<bool> {
 
 #[inline]
 pub(crate) fn set_ipv6_multicast_hops(fd: BorrowedFd<'_>, multicast_hops: u32) -> io::Result<()> {
-    setsockopt(fd, c::IPPROTO_IP, c::IPV6_MULTICAST_HOPS, multicast_hops)
+    setsockopt(fd, c::IPPROTO_IPV6, c::IPV6_MULTICAST_HOPS, multicast_hops)
 }
 
 #[inline]
 pub(crate) fn ipv6_multicast_hops(fd: BorrowedFd<'_>) -> io::Result<u32> {
-    getsockopt(fd, c::IPPROTO_IP, c::IPV6_MULTICAST_HOPS)
+    getsockopt(fd, c::IPPROTO_IPV6, c::IPV6_MULTICAST_HOPS)
 }
 
 #[inline]
