@@ -33,7 +33,7 @@ use crate::fs::CWD;
 use crate::fs::{
     inotify, Access, Advice, AtFlags, FallocateFlags, FileType, FlockOperation, Fsid, Gid,
     MemfdFlags, Mode, OFlags, RenameFlags, ResolveFlags, SealFlags, SeekFrom, Stat, StatFs,
-    StatVfs, StatVfsMountFlags, Statx, StatxFlags, Timestamps, Uid, XattrFlags,
+    StatVfs, StatVfsMountFlags, Statx, StatxFlags, StatxRequestFlags, Timestamps, Uid, XattrFlags,
 };
 use crate::io;
 use core::mem::MaybeUninit;
@@ -42,7 +42,7 @@ use core::num::NonZeroU64;
 use linux_raw_sys::general::stat as linux_stat64;
 use linux_raw_sys::general::{
     open_how, AT_EACCESS, AT_FDCWD, AT_REMOVEDIR, AT_SYMLINK_NOFOLLOW, F_ADD_SEALS, F_GETFL,
-    F_GET_SEALS, F_SETFL, SEEK_CUR, SEEK_DATA, SEEK_END, SEEK_HOLE, SEEK_SET, STATX__RESERVED,
+    F_GET_SEALS, F_SETFL, SEEK_CUR, SEEK_DATA, SEEK_END, SEEK_HOLE, SEEK_SET,
 };
 #[cfg(target_pointer_width = "32")]
 use {
@@ -819,26 +819,8 @@ pub(crate) fn statx(
     dirfd: BorrowedFd<'_>,
     path: &CStr,
     flags: AtFlags,
-    mask: StatxFlags,
+    mask: StatxRequestFlags,
 ) -> io::Result<Statx> {
-    // If a future Linux kernel adds more fields to `struct statx` and users
-    // passing flags unknown to rustix in `StatxFlags`, we could end up
-    // writing outside of the buffer. To prevent this possibility, we mask off
-    // any flags that we don't know about.
-    //
-    // This includes `STATX__RESERVED`, which has a value that we know, but
-    // which could take on arbitrary new meaning in the future. Linux currently
-    // rejects this flag with `EINVAL`, so we do the same.
-    //
-    // This doesn't rely on `STATX_ALL` because [it's deprecated] and already
-    // doesn't represent all the known flags.
-    //
-    // [it's deprecated]: https://patchwork.kernel.org/project/linux-fsdevel/patch/20200505095915.11275-7-mszeredi@redhat.com/
-    if (mask.bits() & STATX__RESERVED) == STATX__RESERVED {
-        return Err(io::Errno::INVAL);
-    }
-    let mask = mask & StatxFlags::all();
-
     unsafe {
         let mut statx_buf = MaybeUninit::<Statx>::uninit();
         ret(syscall!(
@@ -846,7 +828,7 @@ pub(crate) fn statx(
             dirfd,
             path,
             flags,
-            mask,
+            StatxFlags::from_bits_retain(mask.bits()),
             &mut statx_buf
         ))?;
         Ok(statx_buf.assume_init())
