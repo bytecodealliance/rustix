@@ -2475,6 +2475,46 @@ pub(crate) unsafe fn fgetxattr(
     }
 }
 
+#[cfg(linux_kernel)]
+pub(crate) unsafe fn getxattrat(
+    dirfd: BorrowedFd<'_>,
+    path: &CStr,
+    name: &CStr,
+    value: (*mut u8, usize),
+    flags: AtFlags,
+) -> io::Result<usize> {
+    use linux_raw_sys::general::xattr_args;
+
+    const SYS_GETXATTRAT: c::c_long = linux_raw_sys::general::__NR_getxattrat as c::c_long;
+    syscall! {
+        fn getxattrat_syscall(
+            base_dirfd: c::c_int,
+            path: *const ffi::c_char,
+            at_flags: c::c_uint,
+            name: *const ffi::c_char,
+            args: *const xattr_args,
+            args_size: usize
+        ) via SYS_GETXATTRAT -> c::ssize_t
+    }
+
+    let value_size = value.1.try_into().map_err(|_| io::Errno::OVERFLOW)?;
+    let value_addr = u64::try_from(value.0 as usize).map_err(|_| io::Errno::OVERFLOW)?;
+    let args = xattr_args {
+        value: value_addr,
+        size: value_size,
+        flags: 0,
+    };
+
+    ret_usize(getxattrat_syscall(
+        borrowed_fd(dirfd),
+        c_str(path),
+        flags.bits(),
+        c_str(name),
+        &args,
+        core::mem::size_of::<xattr_args>(),
+    ))
+}
+
 #[cfg(any(apple, linux_kernel, target_os = "hurd"))]
 pub(crate) fn setxattr(
     path: &CStr,
@@ -2625,6 +2665,33 @@ pub(crate) unsafe fn flistxattr(fd: BorrowedFd<'_>, list: (*mut u8, usize)) -> i
     {
         ret_usize(c::flistxattr(fd, list.0.cast::<ffi::c_char>(), list.1, 0))
     }
+}
+
+#[cfg(linux_kernel)]
+pub(crate) unsafe fn listxattrat(
+    dirfd: BorrowedFd<'_>,
+    path: &CStr,
+    list: (*mut u8, usize),
+    flags: AtFlags,
+) -> io::Result<usize> {
+    const SYS_LISTXATTRAT: c::c_long = linux_raw_sys::general::__NR_listxattrat as c::c_long;
+    syscall! {
+        fn listxattrat_syscall(
+            base_dirfd: c::c_int,
+            path: *const ffi::c_char,
+            at_flags: c::c_uint,
+            list: *mut ffi::c_char,
+            size: usize
+        ) via SYS_LISTXATTRAT -> c::ssize_t
+    }
+
+    ret_usize(listxattrat_syscall(
+        borrowed_fd(dirfd),
+        c_str(path),
+        flags.bits(),
+        list.0.cast::<ffi::c_char>(),
+        list.1,
+    ))
 }
 
 #[cfg(any(apple, linux_kernel, target_os = "hurd"))]
