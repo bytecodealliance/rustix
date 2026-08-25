@@ -361,6 +361,10 @@ bitflags! {
         #[cfg(target_os = "freebsd")]
         const EMPTY_PATH = bitcast!(c::O_EMPTY_PATH);
 
+        /// `O_SYMLINK`
+        #[cfg(any(apple, target_os = "redox"))]
+        const SYMLINK = bitcast!(c::O_SYMLINK);
+
         /// `O_LARGEFILE`
         ///
         /// Rustix and/or libc will automatically set this flag when
