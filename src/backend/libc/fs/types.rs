@@ -365,6 +365,10 @@ bitflags! {
         #[cfg(any(apple, target_os = "redox"))]
         const SYMLINK = bitcast!(c::O_SYMLINK);
 
+        /// `O_NOFOLLOW_ANY`
+        #[cfg(apple)]
+        const NOFOLLOW_ANY = bitcast!(c::O_NOFOLLOW_ANY);
+
         /// `O_LARGEFILE`
         ///
         /// Rustix and/or libc will automatically set this flag when
