@@ -231,7 +231,7 @@ fn can_compile<T: AsRef<str>>(test: T) -> bool {
     // [here]: https://doc.rust-lang.org/cargo/reference/environment-variables.html#environment-variables-cargo-reads
     let wrapper = var("RUSTC_WRAPPER")
         .ok()
-        .and_then(|w| if w.is_empty() { None } else { Some(w) });
+        .filter(|w| !w.is_empty());
 
     let mut cmd = if let Some(wrapper) = wrapper {
         let mut cmd = std::process::Command::new(wrapper);
