@@ -65,6 +65,8 @@ impl Event {
                 flags,
                 user_flags,
             } => (ident as _, 0, c::EVFILT_USER, flags.bits() | user_flags.0),
+            #[cfg(apple)]
+            EventFilter::MachPort { port } => (port as _, 0, c::EVFILT_MACHPORT, 0),
             EventFilter::Unknown => panic!("unknown filter"),
         };
 
@@ -150,6 +152,10 @@ impl Event {
                 flags: UserFlags::from_bits_retain(self.inner.fflags),
                 user_flags: UserDefinedFlags(self.inner.fflags & EVFILT_USER_FLAGS),
             },
+            #[cfg(apple)]
+            c::EVFILT_MACHPORT => EventFilter::MachPort {
+                port: self.inner.ident as _,
+            },
             _ => EventFilter::Unknown,
         }
     }
@@ -158,6 +164,13 @@ impl Event {
 /// Bottom 24 bits of a `u32`.
 #[cfg(any(apple, freebsdlike))]
 const EVFILT_USER_FLAGS: u32 = 0x00ff_ffff;
+
+/// The name of a Mach port, as `EVFILT_MACHPORT` identifies it.
+///
+/// This is a `mach_port_name_t` rather than a file descriptor, so it is kept
+/// distinct from `RawFd`.
+#[cfg(apple)]
+pub type RawMachPort = u32;
 
 /// The possible filters for a `kqueue`.
 #[repr(i16)]
@@ -208,6 +221,17 @@ pub enum EventFilter {
 
         /// The duration for this event.
         timer: Option<Duration>,
+    },
+
+    /// A Mach port filter.
+    ///
+    /// Reports that a message is waiting on a Mach port or port set, without
+    /// dequeuing it. The identifier is a port name rather than a file
+    /// descriptor, and the port must hold a receive right.
+    #[cfg(apple)]
+    MachPort {
+        /// The name of the port or port set to watch.
+        port: RawMachPort,
     },
 
     /// A user filter.
