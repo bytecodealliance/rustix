@@ -702,6 +702,28 @@ pub fn socket_cookie<Fd: AsFd>(fd: Fd) -> io::Result<u64> {
     backend::net::sockopt::socket_cookie(fd.as_fd())
 }
 
+/// `getsockopt(fd, SOL_SOCKET, SO_DONTROUTE)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_socket_-and-set_socket_-functions
+#[inline]
+#[doc(alias = "SO_DONTROUTE")]
+pub fn socket_dont_route<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
+    backend::net::sockopt::socket_dont_route(fd.as_fd())
+}
+
+/// `setsockopt(fd, SOL_SOCKET, SO_DONTROUTE, value)`
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_socket_-and-set_socket_-functions
+#[inline]
+#[doc(alias = "SO_DONTROUTE")]
+pub fn set_socket_dont_route<Fd: AsFd>(fd: Fd, value: bool) -> io::Result<()> {
+    backend::net::sockopt::set_socket_dont_route(fd.as_fd(), value)
+}
+
 /// `getsockopt(fd, SOL_SOCKET, SO_INCOMING_CPU)`
 ///
 /// See the [module-level documentation] for more.
