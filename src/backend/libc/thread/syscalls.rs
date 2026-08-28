@@ -790,3 +790,22 @@ pub(crate) fn membarrier_cpu(cmd: MembarrierCommand, cpu: Cpuid) -> io::Result<(
         ))
     }
 }
+
+#[cfg(linux_kernel)]
+pub(crate) fn seccomp(
+    operation: SeccompOperation,
+    flags: Option<SetSecureComputingModeFilterFlags>,
+    args: *mut c::c_void,
+) -> io::Result<()> {
+    syscall! {
+        fn seccomp(operation: SeccompOperation,  flags: c::c_uint, args: *mut c::c_void) via SYS_seccomp -> c::c_int
+    }
+
+    unsafe {
+        ret(seccomp(
+            operation,
+            flags.map_or(0, |flags| flags.bits()),
+            args,
+        ))
+    }
+}

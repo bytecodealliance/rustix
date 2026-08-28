@@ -60,3 +60,12 @@ pub(crate) fn raw_cpu_set_new() -> RawCpuSet {
 }
 
 pub(crate) const CPU_SETSIZE: usize = 8 * core::mem::size_of::<RawCpuSet>();
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[repr(u32)]
+pub(crate) enum SeccompOperation {
+    SetModeStrict = linux_raw_sys::ptrace::SECCOMP_SET_MODE_STRICT,
+    SetModeFilter = linux_raw_sys::ptrace::SECCOMP_SET_MODE_FILTER,
+    GetActionAvailable = linux_raw_sys::ptrace::SECCOMP_GET_ACTION_AVAIL,
+    GetNotifSizes = linux_raw_sys::ptrace::SECCOMP_GET_NOTIF_SIZES,
+}
