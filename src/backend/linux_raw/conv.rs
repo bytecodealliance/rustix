@@ -333,6 +333,13 @@ pub(crate) mod fs {
         }
     }
 
+    impl<'a, Num: ArgNumber> From<crate::fs::HandleFlags> for ArgReg<'a, Num> {
+        #[inline]
+        fn from(flags: crate::fs::HandleFlags) -> Self {
+            c_uint(flags.bits())
+        }
+    }
+
     impl<'a, Num: ArgNumber> From<crate::fs::XattrFlags> for ArgReg<'a, Num> {
         #[inline]
         fn from(flags: crate::fs::XattrFlags) -> Self {

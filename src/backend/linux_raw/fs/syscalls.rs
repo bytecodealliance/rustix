@@ -28,6 +28,8 @@ use crate::backend::conv::{
 use crate::backend::conv::{loff_t, loff_t_from_u64, ret_u64};
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::ffi::CStr;
+#[cfg(feature = "alloc")]
+use crate::fs::HandleFlags;
 #[cfg(any(target_arch = "aarch64", target_arch = "riscv64"))]
 use crate::fs::CWD;
 use crate::fs::{
@@ -1663,6 +1665,37 @@ pub(crate) fn lremovexattr(path: &CStr, name: &CStr) -> io::Result<()> {
 #[inline]
 pub(crate) fn fremovexattr(fd: BorrowedFd<'_>, name: &CStr) -> io::Result<()> {
     unsafe { ret(syscall_readonly!(__NR_fremovexattr, fd, name)) }
+}
+
+#[cfg(feature = "alloc")]
+#[inline]
+pub(crate) fn name_to_handle_at(
+    dirfd: BorrowedFd<'_>,
+    path: &CStr,
+    file_handle: *mut core::ffi::c_void,
+    mount_id: *mut core::ffi::c_void,
+    flags: HandleFlags,
+) -> io::Result<()> {
+    unsafe {
+        ret(syscall!(
+            __NR_name_to_handle_at,
+            dirfd,
+            path,
+            file_handle,
+            mount_id,
+            flags
+        ))
+    }
+}
+
+#[cfg(feature = "alloc")]
+#[inline]
+pub(crate) fn open_by_handle_at(
+    mount_fd: BorrowedFd<'_>,
+    handle: *const core::ffi::c_void,
+    flags: OFlags,
+) -> io::Result<OwnedFd> {
+    unsafe { ret_owned_fd(syscall!(__NR_open_by_handle_at, mount_fd, handle, flags)) }
 }
 
 // Some linux_raw_sys structs have unsigned types for values which are
