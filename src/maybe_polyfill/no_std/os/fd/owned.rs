@@ -101,7 +101,12 @@ impl BorrowedFd<'_> {
 impl OwnedFd {
     /// Creates a new `OwnedFd` instance that shares the same underlying file handle
     /// as the existing `OwnedFd` instance.
-    #[cfg(not(target_arch = "wasm32"))]
+    #[cfg(not(any(
+        target_os = "hermit",
+        target_os = "motor",
+        target_os = "trusty",
+        target_os = "wasi"
+    )))]
     pub fn try_clone(&self) -> crate::io::Result<Self> {
         // We want to atomically duplicate this file descriptor and set the
         // CLOEXEC flag, and currently that's done via F_DUPFD_CLOEXEC. This
@@ -121,7 +126,12 @@ impl OwnedFd {
 
     /// Creates a new `OwnedFd` instance that shares the same underlying file handle
     /// as the existing `OwnedFd` instance.
-    #[cfg(target_arch = "wasm32")]
+    #[cfg(any(
+        target_os = "hermit",
+        target_os = "motor",
+        target_os = "trusty",
+        target_os = "wasi"
+    ))]
     pub fn try_clone(&self) -> crate::io::Result<Self> {
         Err(crate::io::Errno::NOSYS)
     }
@@ -130,7 +140,12 @@ impl OwnedFd {
 impl BorrowedFd<'_> {
     /// Creates a new `OwnedFd` instance that shares the same underlying file
     /// description as the existing `BorrowedFd` instance.
-    #[cfg(not(any(target_arch = "wasm32", target_os = "hermit")))]
+    #[cfg(not(any(
+        target_os = "hermit",
+        target_os = "motor",
+        target_os = "trusty",
+        target_os = "wasi"
+    )))]
     #[cfg_attr(staged_api, stable(feature = "io_safety", since = "1.63.0"))]
     pub fn try_clone_to_owned(&self) -> crate::io::Result<OwnedFd> {
         // Avoid using file descriptors below 3 as they are used for stdio
@@ -153,7 +168,12 @@ impl BorrowedFd<'_> {
 
     /// Creates a new `OwnedFd` instance that shares the same underlying file
     /// description as the existing `BorrowedFd` instance.
-    #[cfg(any(target_arch = "wasm32", target_os = "hermit"))]
+    #[cfg(any(
+        target_os = "hermit",
+        target_os = "motor",
+        target_os = "trusty",
+        target_os = "wasi"
+    ))]
     #[cfg_attr(staged_api, stable(feature = "io_safety", since = "1.63.0"))]
     pub fn try_clone_to_owned(&self) -> crate::io::Result<OwnedFd> {
         Err(crate::io::Errno::NOSYS)
