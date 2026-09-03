@@ -21,7 +21,12 @@ pub mod os {
     pub mod fd {
         // Change to use `std::os::fd` when MSRV becomes Rust 1.66 or higher.
 
-        #[cfg(target_os = "wasi")]
+        #[cfg(any(
+            target_os = "hermit",
+            target_os = "motor",
+            target_os = "trusty",
+            target_os = "wasi"
+        ))]
         pub use std::os::fd::{AsFd, AsRawFd, BorrowedFd, FromRawFd, IntoRawFd, OwnedFd, RawFd};
         #[cfg(unix)]
         pub use std::os::unix::io::{

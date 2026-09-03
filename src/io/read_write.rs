@@ -92,7 +92,7 @@ pub fn write<Fd: AsFd>(fd: Fd, buf: &[u8]) -> io::Result<usize> {
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=pread&section=2
 /// [illumos]: https://illumos.org/man/2/pread
 /// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/I_002fO-Primitives.html#index-pread64
-#[cfg(not(windows))]
+#[cfg(not(any(windows, target_os = "hermit")))]
 #[inline]
 pub fn pread<Fd: AsFd, Buf: Buffer<u8>>(
     fd: Fd,
@@ -131,7 +131,7 @@ pub fn pread<Fd: AsFd, Buf: Buffer<u8>>(
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=pwrite&section=2
 /// [illumos]: https://illumos.org/man/2/pwrite
 /// [glibc]: https://sourceware.org/glibc/manual/latest/html_node/I_002fO-Primitives.html#index-pwrite64
-#[cfg(not(windows))]
+#[cfg(not(any(windows, target_os = "hermit")))]
 #[inline]
 pub fn pwrite<Fd: AsFd>(fd: Fd, buf: &[u8], offset: u64) -> io::Result<usize> {
     backend::io::syscalls::pwrite(fd.as_fd(), buf, offset)
@@ -217,6 +217,7 @@ pub fn writev<Fd: AsFd>(fd: Fd, bufs: &[IoSlice<'_>]) -> io::Result<usize> {
     target_os = "cygwin",
     target_os = "espidf",
     target_os = "haiku",
+    target_os = "hermit",
     target_os = "horizon",
     target_os = "nto",
     target_os = "redox",
@@ -256,6 +257,7 @@ pub fn preadv<Fd: AsFd>(fd: Fd, bufs: &mut [IoSliceMut<'_>], offset: u64) -> io:
     target_os = "cygwin",
     target_os = "espidf",
     target_os = "haiku",
+    target_os = "hermit",
     target_os = "horizon",
     target_os = "nto",
     target_os = "redox",

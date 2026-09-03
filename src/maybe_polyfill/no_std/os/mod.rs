@@ -1,4 +1,4 @@
-#[cfg(any(unix, target_os = "wasi"))]
+#[cfg(any(unix, target_os = "hermit", target_os = "wasi"))]
 pub mod fd;
 #[cfg(windows)]
 pub mod windows;

@@ -168,6 +168,15 @@ pub(super) use {pread64 as pread, pwrite64 as pwrite};
 #[cfg(any(target_os = "linux", target_os = "hurd", target_os = "emscripten"))]
 pub(super) use {preadv64 as preadv, pwritev64 as pwritev};
 
+// TODO: https://github.com/rust-lang/libc/pull/5460
+#[cfg(target_os = "hermit")]
+#[repr(C)]
+#[derive(Clone, Copy, Debug)]
+pub(crate) struct iovec {
+    pub iov_base: *mut c_void,
+    pub iov_len: usize,
+}
+
 #[cfg(all(target_os = "linux", any(target_env = "gnu", target_env = "uclibc")))]
 pub(super) unsafe fn prlimit(
     pid: pid_t,

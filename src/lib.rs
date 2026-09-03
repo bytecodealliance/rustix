@@ -185,7 +185,15 @@ pub(crate) mod msan;
 // versions of libc and not others.
 #[cfg(any(
     all(linux_raw, feature = "use-libc-auxv"),
-    all(libc, not(any(windows, target_os = "espidf", target_os = "wasi")))
+    all(
+        libc,
+        not(any(
+            windows,
+            target_os = "espidf",
+            target_os = "hermit",
+            target_os = "wasi"
+        ))
+    )
 ))]
 #[macro_use]
 mod weak;
