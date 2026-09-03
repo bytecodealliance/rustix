@@ -84,7 +84,7 @@ pub fn dup<Fd: AsFd>(fd: Fd) -> io::Result<OwnedFd> {
 /// [`stdio::dup2_stdin`]: crate::stdio::dup2_stdin
 /// [`stdio::dup2_stdout`]: crate::stdio::dup2_stdout
 /// [`stdio::dup2_stderr`]: crate::stdio::dup2_stderr
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "hermit", target_os = "wasi")))]
 #[inline]
 pub fn dup2<Fd: AsFd>(fd: Fd, new: &mut OwnedFd) -> io::Result<()> {
     backend::io::syscalls::dup2(fd.as_fd(), new)
@@ -114,6 +114,7 @@ pub fn dup2<Fd: AsFd>(fd: Fd, new: &mut OwnedFd) -> io::Result<()> {
 #[cfg(not(any(
     target_os = "aix",
     target_os = "espidf",
+    target_os = "hermit",
     target_os = "horizon",
     target_os = "nto",
     target_os = "vita",
