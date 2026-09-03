@@ -55,6 +55,7 @@ bitflags! {
             apple,
             target_os = "aix",
             target_os = "android",
+            target_os = "hermit",
             target_os = "redox",
         )))] // Android 5.0 has dup3, but libc doesn't have bindings
         const CLOEXEC = bitcast!(c::O_CLOEXEC);
