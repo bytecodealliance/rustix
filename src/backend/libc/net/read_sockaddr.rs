@@ -122,7 +122,7 @@ pub(crate) unsafe fn sockaddr_nonempty(storage: *const c::sockaddr, len: SocketA
     }
 
     assert!(len as usize >= size_of::<c::sa_family_t>());
-    let family: c::c_int = read_sa_family(storage.cast::<c::sockaddr>()).into();
+    let family: c::c_int = read_sa_family(storage.cast()).into();
     if family == c::AF_UNSPEC {
         return false;
     }
@@ -240,7 +240,7 @@ pub(crate) fn read_sockaddr_xdp(addr: &SocketAddrAny) -> Result<SocketAddrXdp, E
         return Err(Errno::AFNOSUPPORT);
     }
     assert!(addr.addr_len() as usize >= size_of::<c::sockaddr_xdp>());
-    let decode = unsafe { &*addr.as_ptr().cast::<c::sockaddr_xdp>() };
+    let decode: &c::sockaddr_xdp = unsafe { &*addr.as_ptr().cast() };
 
     // This ignores the `sxdp_shared_umem_fd` field, which is only expected to
     // be significant in `bind` calls, and not returned from `acceptfrom` or
@@ -259,6 +259,6 @@ pub(crate) fn read_sockaddr_netlink(addr: &SocketAddrAny) -> Result<SocketAddrNe
         return Err(Errno::AFNOSUPPORT);
     }
     assert!(addr.addr_len() as usize >= size_of::<c::sockaddr_nl>());
-    let decode = unsafe { &*addr.as_ptr().cast::<c::sockaddr_nl>() };
+    let decode: &c::sockaddr_nl = unsafe { &*addr.as_ptr().cast() };
     Ok(SocketAddrNetlink::new(decode.nl_pid, decode.nl_groups))
 }
