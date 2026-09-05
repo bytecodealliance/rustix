@@ -282,10 +282,7 @@ impl Vdso {
                 return false; // No definition.
             }
 
-            def = def
-                .cast::<u8>()
-                .add((*def).vd_next as usize)
-                .cast::<Elf_Verdef>();
+            def = def.cast::<u8>().add((*def).vd_next as usize).cast();
         }
 
         // Now figure out whether it matches.

@@ -109,7 +109,7 @@ pub(crate) fn as_libc_itimerspec_ptr(itimerspec: &Itimerspec) -> *const c::itime
     {
         static_assertions::assert_eq_size!(Itimerspec, c::itimerspec);
     }
-    crate::utils::as_ptr(itimerspec).cast::<c::itimerspec>()
+    crate::utils::as_ptr(itimerspec).cast()
 }
 
 #[cfg(any(
@@ -127,7 +127,7 @@ pub(crate) fn as_libc_itimerspec_mut_ptr(
     {
         static_assertions::assert_eq_size!(Itimerspec, c::itimerspec);
     }
-    itimerspec.as_mut_ptr().cast::<c::itimerspec>()
+    itimerspec.as_mut_ptr().cast()
 }
 
 #[cfg(any(
