@@ -176,7 +176,7 @@ impl<'a, T> private::Sealed<T> for &'a mut [MaybeUninit<T>] {
         let (init, uninit) = self.split_at_mut(len);
 
         // SAFETY: The user asserts that the slice is now initialized.
-        let init = slice::from_raw_parts_mut(init.as_mut_ptr().cast::<T>(), init.len());
+        let init = slice::from_raw_parts_mut(init.as_mut_ptr().cast(), init.len());
 
         (init, uninit)
     }
@@ -195,7 +195,7 @@ impl<'a, T, const N: usize> private::Sealed<T> for &'a mut [MaybeUninit<T>; N] {
         let (init, uninit) = self.split_at_mut(len);
 
         // SAFETY: The user asserts that the slice is now initialized.
-        let init = slice::from_raw_parts_mut(init.as_mut_ptr().cast::<T>(), init.len());
+        let init = slice::from_raw_parts_mut(init.as_mut_ptr().cast(), init.len());
 
         (init, uninit)
     }
@@ -215,7 +215,7 @@ impl<'a, T> private::Sealed<T> for &'a mut Vec<MaybeUninit<T>> {
         let (init, uninit) = self.split_at_mut(len);
 
         // SAFETY: The user asserts that the slice is now initialized.
-        let init = slice::from_raw_parts_mut(init.as_mut_ptr().cast::<T>(), init.len());
+        let init = slice::from_raw_parts_mut(init.as_mut_ptr().cast(), init.len());
 
         (init, uninit)
     }

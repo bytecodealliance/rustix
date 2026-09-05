@@ -537,7 +537,7 @@ pub(crate) unsafe fn recvfrom(
     // `recvfrom` does not write to the storage if the socket is
     // connection-oriented sockets, so we initialize the family field to
     // `AF_UNSPEC` so that we can detect this case.
-    initialize_family_to_unspec(addr.storage.as_mut_ptr().cast::<c::sockaddr>());
+    initialize_family_to_unspec(addr.storage.as_mut_ptr().cast());
 
     #[cfg(not(target_arch = "x86"))]
     let nread = ret_usize(syscall!(

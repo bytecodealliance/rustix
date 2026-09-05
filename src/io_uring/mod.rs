@@ -229,7 +229,7 @@ pub unsafe fn io_uring_enter_sigmask<Fd: AsFd>(
         to_submit,
         min_complete,
         flags,
-        option_as_ptr(sigmask).cast::<c_void>(),
+        option_as_ptr(sigmask).cast(),
         size_of::<KernelSigSet>(),
     )
 }
@@ -272,7 +272,7 @@ pub unsafe fn io_uring_enter_arg<Fd: AsFd>(
         to_submit,
         min_complete,
         flags,
-        option_as_ptr(arg).cast::<c_void>(),
+        option_as_ptr(arg).cast(),
         size_of::<io_uring_getevents_arg>(),
     )
 }
