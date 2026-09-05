@@ -7,7 +7,6 @@ use crate::fd::BorrowedFd;
 use crate::io;
 use core::ptr::addr_of_mut;
 use core::{slice, str};
-use linux_raw_sys::ctypes::c_char;
 use linux_raw_sys::ioctl::{SIOCGIFINDEX, SIOCGIFNAME};
 use linux_raw_sys::net::{ifreq, ifreq__bindgen_ty_1, ifreq__bindgen_ty_2, IFNAMSIZ};
 
@@ -21,9 +20,8 @@ pub(crate) fn name_to_index(fd: BorrowedFd<'_>, if_name: &str) -> io::Result<u32
     }
 
     // SAFETY: Convert `&[u8]` to `&[c_char]`.
-    let if_name_bytes = unsafe {
-        slice::from_raw_parts(if_name_bytes.as_ptr().cast::<c_char>(), if_name_bytes.len())
-    };
+    let if_name_bytes =
+        unsafe { slice::from_raw_parts(if_name_bytes.as_ptr().cast(), if_name_bytes.len()) };
 
     let mut ifreq = ifreq {
         ifr_ifrn: ifreq__bindgen_ty_1 { ifrn_name: [0; 16] },
@@ -54,7 +52,7 @@ pub(crate) fn index_to_name(fd: BorrowedFd<'_>, index: u32) -> io::Result<(usize
 
         // SAFETY: Convert `&[c_char]` to `&[u8]`.
         let ifrn_name =
-            unsafe { slice::from_raw_parts(ifrn_name.as_ptr().cast::<u8>(), ifrn_name.len()) };
+            unsafe { slice::from_raw_parts(ifrn_name.as_ptr().cast(), ifrn_name.len()) };
 
         let mut name_buf = [0; 16];
         name_buf[..ifrn_name.len()].copy_from_slice(ifrn_name);
