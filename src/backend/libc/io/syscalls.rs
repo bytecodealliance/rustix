@@ -76,7 +76,7 @@ pub(crate) fn readv(fd: BorrowedFd<'_>, bufs: &mut [IoSliceMut<'_>]) -> io::Resu
     unsafe {
         ret_usize(c::readv(
             borrowed_fd(fd),
-            bufs.as_ptr().cast::<c::iovec>(),
+            bufs.as_ptr().cast(),
             min(bufs.len(), MAX_IOV) as c::c_int,
         ))
     }
@@ -87,7 +87,7 @@ pub(crate) fn writev(fd: BorrowedFd<'_>, bufs: &[IoSlice<'_>]) -> io::Result<usi
     unsafe {
         ret_usize(c::writev(
             borrowed_fd(fd),
-            bufs.as_ptr().cast::<c::iovec>(),
+            bufs.as_ptr().cast(),
             min(bufs.len(), MAX_IOV) as c::c_int,
         ))
     }
@@ -117,7 +117,7 @@ pub(crate) fn preadv(
     unsafe {
         ret_usize(c::preadv(
             borrowed_fd(fd),
-            bufs.as_ptr().cast::<c::iovec>(),
+            bufs.as_ptr().cast(),
             min(bufs.len(), MAX_IOV) as c::c_int,
             offset,
         ))
@@ -144,7 +144,7 @@ pub(crate) fn pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice<'_>], offset: u64) -> 
     unsafe {
         ret_usize(c::pwritev(
             borrowed_fd(fd),
-            bufs.as_ptr().cast::<c::iovec>(),
+            bufs.as_ptr().cast(),
             min(bufs.len(), MAX_IOV) as c::c_int,
             offset,
         ))
@@ -163,7 +163,7 @@ pub(crate) fn preadv2(
     unsafe {
         ret_usize(c::preadv2(
             borrowed_fd(fd),
-            bufs.as_ptr().cast::<c::iovec>(),
+            bufs.as_ptr().cast(),
             min(bufs.len(), MAX_IOV) as c::c_int,
             offset,
             bitflags_bits!(flags),
@@ -183,7 +183,7 @@ pub(crate) fn pwritev2(
     unsafe {
         ret_usize(c::pwritev2(
             borrowed_fd(fd),
-            bufs.as_ptr().cast::<c::iovec>(),
+            bufs.as_ptr().cast(),
             min(bufs.len(), MAX_IOV) as c::c_int,
             offset,
             bitflags_bits!(flags),

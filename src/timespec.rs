@@ -344,7 +344,7 @@ pub(crate) fn as_libc_timespec_ptr(timespec: &Timespec) -> *const c::timespec {
     {
         static_assertions::assert_eq_size!(Timespec, c::timespec);
     }
-    crate::utils::as_ptr(timespec).cast::<c::timespec>()
+    crate::utils::as_ptr(timespec).cast()
 }
 
 #[cfg(not(fix_y2038))]
@@ -355,7 +355,7 @@ pub(crate) fn as_libc_timespec_mut_ptr(
     {
         static_assertions::assert_eq_size!(Timespec, c::timespec);
     }
-    timespec.as_mut_ptr().cast::<c::timespec>()
+    timespec.as_mut_ptr().cast()
 }
 
 #[cfg(not(fix_y2038))]

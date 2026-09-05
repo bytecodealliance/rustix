@@ -45,7 +45,7 @@ fn register_ring(fd: BorrowedFd<'_>) -> Result<BorrowedFd<'_>> {
         fd,
         false,
         IoringRegisterOp::RegisterRingFds,
-        (&mut update as *mut io_uring_rsrc_update).cast::<c_void>(),
+        (&mut update as *mut io_uring_rsrc_update).cast(),
         1,
     )?;
 
@@ -65,7 +65,7 @@ where
         fd,
         true,
         IoringRegisterOp::UnregisterRingFds,
-        (&update as *const io_uring_rsrc_update as *mut io_uring_rsrc_update).cast::<c_void>(),
+        (&update as *const io_uring_rsrc_update as *mut io_uring_rsrc_update).cast(),
         1,
     )?;
 
@@ -83,7 +83,7 @@ where
         fd,
         true,
         IoringRegisterOp::RegisterIowqMaxWorkers,
-        (&iowq_max_workers as *const [u32; 2] as *mut [u32; 2]).cast::<c_void>(),
+        (&iowq_max_workers as *const [u32; 2] as *mut [u32; 2]).cast(),
         2,
     )?;
 
@@ -98,7 +98,7 @@ where
         fd,
         false,
         IoringRegisterOp::RegisterPbufRing,
-        (reg as *const io_uring_buf_reg as *mut io_uring_buf_reg).cast::<c_void>(),
+        (reg as *const io_uring_buf_reg as *mut io_uring_buf_reg).cast(),
         1,
     )
 }

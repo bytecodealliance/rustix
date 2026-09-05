@@ -153,7 +153,7 @@ unsafe impl<const OPCODE: Opcode, Input> Ioctl for Setter<OPCODE, Input> {
     }
 
     fn as_ptr(&mut self) -> *mut c::c_void {
-        addr_of_mut!(self.input).cast::<c::c_void>()
+        addr_of_mut!(self.input).cast()
     }
 
     unsafe fn output_from_ptr(_: IoctlOutput, _: *mut c::c_void) -> Result<Self::Output> {
