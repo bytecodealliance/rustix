@@ -1,4 +1,6 @@
 use crate::ffi;
+#[allow(unused_imports)]
+use crate::types::Padding;
 use bitflags::bitflags;
 
 bitflags! {
@@ -640,7 +642,7 @@ pub struct Stat {
     pub st_mode: ffi::c_uint,
     pub st_uid: ffi::c_uint,
     pub st_gid: ffi::c_uint,
-    pub(crate) __pad0: ffi::c_uint,
+    pub(crate) __pad0: Padding<ffi::c_uint>,
     pub st_rdev: ffi::c_ulong,
     pub st_size: ffi::c_long,
     pub st_blksize: ffi::c_long,
@@ -651,7 +653,7 @@ pub struct Stat {
     pub st_mtime_nsec: ffi::c_ulong,
     pub st_ctime: ffi::c_long,
     pub st_ctime_nsec: ffi::c_ulong,
-    pub(crate) __unused: [ffi::c_long; 3],
+    pub(crate) __unused: Padding<[ffi::c_long; 3]>,
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -666,10 +668,10 @@ pub struct Stat {
     pub st_uid: ffi::c_uint,
     pub st_gid: ffi::c_uint,
     pub st_rdev: ffi::c_ulong,
-    pub(crate) __pad1: ffi::c_ulong,
+    pub(crate) __pad1: Padding<ffi::c_ulong>,
     pub st_size: ffi::c_long,
     pub st_blksize: ffi::c_int,
-    pub(crate) __pad2: ffi::c_int,
+    pub(crate) __pad2: Padding<ffi::c_int>,
     pub st_blocks: ffi::c_long,
     pub st_atime: ffi::c_long,
     pub st_atime_nsec: ffi::c_ulong,
@@ -677,8 +679,8 @@ pub struct Stat {
     pub st_mtime_nsec: ffi::c_ulong,
     pub st_ctime: ffi::c_long,
     pub st_ctime_nsec: ffi::c_ulong,
-    pub(crate) __unused4: ffi::c_uint,
-    pub(crate) __unused5: ffi::c_uint,
+    pub(crate) __unused4: Padding<ffi::c_uint>,
+    pub(crate) __unused5: Padding<ffi::c_uint>,
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -693,10 +695,10 @@ pub struct Stat {
     pub st_uid: ffi::c_uint,
     pub st_gid: ffi::c_uint,
     pub st_rdev: ffi::c_ulong,
-    pub(crate) __pad1: ffi::c_ulong,
+    pub(crate) __pad1: Padding<ffi::c_ulong>,
     pub st_size: ffi::c_long,
     pub st_blksize: ffi::c_int,
-    pub(crate) __pad2: ffi::c_int,
+    pub(crate) __pad2: Padding<ffi::c_int>,
     pub st_blocks: ffi::c_long,
     pub st_atime: ffi::c_long,
     pub st_atime_nsec: ffi::c_ulong,
@@ -704,8 +706,8 @@ pub struct Stat {
     pub st_mtime_nsec: ffi::c_ulong,
     pub st_ctime: ffi::c_long,
     pub st_ctime_nsec: ffi::c_ulong,
-    pub(crate) __unused4: ffi::c_uint,
-    pub(crate) __unused5: ffi::c_uint,
+    pub(crate) __unused4: Padding<ffi::c_uint>,
+    pub(crate) __unused5: Padding<ffi::c_uint>,
 }
 // This follows `stat`. powerpc64 defines a `stat64` but it's not used.
 #[repr(C)]
@@ -730,9 +732,9 @@ pub struct Stat {
     pub st_mtime_nsec: ffi::c_ulong,
     pub st_ctime: ffi::c_long,
     pub st_ctime_nsec: ffi::c_ulong,
-    pub(crate) __unused4: ffi::c_ulong,
-    pub(crate) __unused5: ffi::c_ulong,
-    pub(crate) __unused6: ffi::c_ulong,
+    pub(crate) __unused4: Padding<ffi::c_ulong>,
+    pub(crate) __unused5: Padding<ffi::c_ulong>,
+    pub(crate) __unused6: Padding<ffi::c_ulong>,
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -746,7 +748,7 @@ pub struct Stat {
     pub st_mode: ffi::c_uint,
     pub st_uid: ffi::c_uint,
     pub st_gid: ffi::c_uint,
-    pub(crate) __pad1: ffi::c_uint,
+    pub(crate) __pad1: Padding<ffi::c_uint>,
     pub st_rdev: ffi::c_ulong,
     pub st_size: ffi::c_long, // Linux has `c_ulong` but we make it signed.
     pub st_atime: ffi::c_long,
@@ -757,7 +759,7 @@ pub struct Stat {
     pub st_ctime_nsec: ffi::c_ulong,
     pub st_blksize: ffi::c_ulong,
     pub st_blocks: ffi::c_long,
-    pub(crate) __unused: [ffi::c_ulong; 3],
+    pub(crate) __unused: Padding<[ffi::c_ulong; 3]>,
 }
 
 /// `struct statfs` for use with [`statfs`] and [`fstatfs`].
@@ -795,9 +797,9 @@ pub struct StatFs {
     #[cfg(any(target_arch = "arm", target_arch = "s390x"))]
     pub f_flags: ffi::c_uint,
     #[cfg(not(target_arch = "s390x"))]
-    pub(crate) f_spare: [ffi::c_long; 4],
+    pub(crate) f_spare: Padding<[ffi::c_long; 4]>,
     #[cfg(target_arch = "s390x")]
-    pub(crate) f_spare: [ffi::c_uint; 5],
+    pub(crate) f_spare: Padding<[ffi::c_uint; 5]>,
 }
 
 /// `fsid_t` for use with [`StatFs`].
