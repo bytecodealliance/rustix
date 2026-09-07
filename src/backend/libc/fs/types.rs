@@ -1,6 +1,8 @@
 use crate::backend::c;
 #[cfg(not(target_os = "horizon"))]
 use crate::ffi;
+#[cfg(target_os = "netbsd")]
+use crate::types::Padding;
 use bitflags::bitflags;
 
 #[cfg(not(any(target_os = "espidf", target_os = "horizon", target_os = "vita")))]
@@ -1056,7 +1058,7 @@ pub struct Stat {
     pub st_blksize: c::blksize_t,
     pub st_flags: u32,
     pub st_gen: u32,
-    pub st_spare: [u32; 2],
+    pub(crate) st_spare: Padding<[u32; 2]>,
 }
 
 /// `struct statfs` for use with [`statfs`] and [`fstatfs`].
