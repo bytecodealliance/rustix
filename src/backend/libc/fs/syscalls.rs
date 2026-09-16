@@ -941,6 +941,7 @@ pub(crate) fn utimensat(
                 c::c_int
             ) -> c::c_int
         }
+        #[cfg(not(any(target_os = "tvos", target_os = "watchos")))]
         extern "C" {
             fn setattrlist(
                 path: *const ffi::c_char,
@@ -950,6 +951,7 @@ pub(crate) fn utimensat(
                 options: c::c_ulong,
             ) -> c::c_int;
         }
+        #[cfg(not(any(target_os = "tvos", target_os = "watchos")))]
         const FSOPT_NOFOLLOW: c::c_ulong = 0x0000_0001;
 
         // If we have `utimensat`, use it.
@@ -962,8 +964,14 @@ pub(crate) fn utimensat(
             ));
         }
 
+        // Return `NOSYS` on platforms where `utimensat` cannot be emulated
+        // because `fork` is unavailable.
+        #[cfg(any(target_os = "tvos", target_os = "watchos"))]
+        return Err(io::Errno::NOSYS);
+
         // Convert `times`. We only need this in the child, but do it before
         // calling `fork` because it might fail.
+        #[cfg(not(any(target_os = "tvos", target_os = "watchos")))]
         let (attrbuf_size, times, attrs) = times_to_attrlist(times)?;
 
         // `setattrlistat` was introduced in 10.13 along with `utimensat`, so
@@ -971,6 +979,7 @@ pub(crate) fn utimensat(
         // Emulate it using `fork`, and `fchdir` and [`setattrlist`].
         //
         // [`setattrlist`]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/setattrlist.2.html
+        #[cfg(not(any(target_os = "tvos", target_os = "watchos")))]
         match c::fork() {
             -1 => Err(io::Errno::IO),
             0 => {
