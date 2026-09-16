@@ -2,6 +2,8 @@ use crate::backend::c;
 use crate::backend::termios::types;
 #[cfg(target_os = "nto")]
 use crate::ffi;
+#[cfg(target_os = "nto")]
+use crate::types::Padding;
 use crate::{backend, io};
 use bitflags::bitflags;
 
@@ -46,7 +48,7 @@ pub struct Termios {
     pub special_codes: SpecialCodes,
 
     #[cfg(target_os = "nto")]
-    pub(crate) __reserved: [ffi::c_uint; 3],
+    pub(crate) __reserved: Padding<[ffi::c_uint; 3]>,
 
     /// Line discipline.
     // On PowerPC, this field comes after `c_cc`.
