@@ -361,13 +361,7 @@ pub(crate) fn capget(
         ) via SYS_capget -> c::c_int
     }
 
-    unsafe {
-        ret(capget(
-            as_mut_ptr(header),
-            data.as_mut_ptr()
-                .cast::<linux_raw_sys::general::__user_cap_data_struct>(),
-        ))
-    }
+    unsafe { ret(capget(as_mut_ptr(header), data.as_mut_ptr().cast())) }
 }
 
 #[cfg(linux_kernel)]
