@@ -49,11 +49,12 @@ use crate::fs::SealFlags;
     target_os = "wasi",
 )))]
 use crate::fs::StatFs;
-#[cfg(not(any(target_os = "espidf", target_os = "vita")))]
+#[cfg(not(any(target_os = "espidf", target_os = "horizon", target_os = "vita")))]
 use crate::fs::Timestamps;
 #[cfg(not(any(
     apple,
     target_os = "espidf",
+    target_os = "horizon",
     target_os = "redox",
     target_os = "vita",
     target_os = "wasi"
