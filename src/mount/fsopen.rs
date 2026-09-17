@@ -1,28 +1,29 @@
 //! `fsopen` and related functions in Linux's `mount` API.
 
 use crate::backend::mount::types::{
-    FsMountFlags, FsOpenFlags, FsPickFlags, MountAttrFlags, MoveMountFlags, OpenTreeFlags,
+    FsMountFlags, FsOpenFlags, FsPickFlags, MountAttr, MountAttrFlags, MountSetAttrFlags,
+    MoveMountFlags, OpenTreeFlags,
 };
 use crate::fd::{AsFd, OwnedFd};
 use crate::{backend, io, path};
 
-/// `fsopen(fs_name, flags)`
+/// `fsopen(fsname, flags)`
 ///
 /// # References
-///  - [Unfinished draft]
+///  - [Linux]
 ///
-/// [Unfinished draft]: https://github.com/sunfishcode/linux-mount-api-documentation/blob/main/fsopen.md
+/// [Linux]: https://man7.org/linux/man-pages/man2/fsopen.2.html
 #[inline]
 pub fn fsopen<Fs: path::Arg>(fs_name: Fs, flags: FsOpenFlags) -> io::Result<OwnedFd> {
     fs_name.into_with_c_str(|fs_name| backend::mount::syscalls::fsopen(fs_name, flags))
 }
 
-/// `fsmount(fs_fd, flags, attr_flags)`
+/// `fsmount(fsfd, flags, attr_flags)`
 ///
 /// # References
-///  - [Unfinished draft]
+///  - [Linux]
 ///
-/// [Unfinished draft]: https://github.com/sunfishcode/linux-mount-api-documentation/blob/main/fsmount.md
+/// [Linux]: https://man7.org/linux/man-pages/man2/fsmount.2.html
 #[inline]
 pub fn fsmount<Fd: AsFd>(
     fs_fd: Fd,
@@ -32,16 +33,16 @@ pub fn fsmount<Fd: AsFd>(
     backend::mount::syscalls::fsmount(fs_fd.as_fd(), flags, attr_flags)
 }
 
-/// `move_mount(from_dfd, from_pathname, to_dfd, to_pathname, flags)`
+/// `move_mount(from_dirfd, from_path, to_dirfd, to_path, flags)`
 ///
 /// This is not the same as `mount` with the `MS_MOVE` flag. If you want to
 /// use that, use [`mount_move`] instead.
 ///
 /// # References
-///  - [Unfinished draft]
+///  - [Linux]
 ///
 /// [`mount_move`]: crate::mount::mount_move
-/// [Unfinished draft]: https://github.com/sunfishcode/linux-mount-api-documentation/blob/main/move_mount.md
+/// [Linux]: https://man7.org/linux/man-pages/man2/move_mount.2.html
 #[inline]
 pub fn move_mount<From: path::Arg, To: path::Arg, FromFd: AsFd, ToFd: AsFd>(
     from_dfd: FromFd,
@@ -65,12 +66,12 @@ pub fn move_mount<From: path::Arg, To: path::Arg, FromFd: AsFd, ToFd: AsFd>(
     })
 }
 
-/// `open_tree(dfd, filename, flags)`
+/// `open_tree(dirfd, path, flags)`
 ///
 /// # References
-///  - [Unfinished draft]
+///  - [Linux]
 ///
-/// [Unfinished draft]: https://github.com/sunfishcode/linux-mount-api-documentation/blob/main/open_tree.md
+/// [Linux]: https://man7.org/linux/man-pages/man2/open_tree.2.html
 #[inline]
 pub fn open_tree<Path: path::Arg, Fd: AsFd>(
     dfd: Fd,
@@ -81,12 +82,12 @@ pub fn open_tree<Path: path::Arg, Fd: AsFd>(
     filename.into_with_c_str(|filename| backend::mount::syscalls::open_tree(dfd, filename, flags))
 }
 
-/// `fspick(dfd, path, flags)`
+/// `fspick(dirfd, path, flags)`
 ///
 /// # References
-///  - [Unfinished draft]
+///  - [Linux]
 ///
-/// [Unfinished draft]: https://github.com/sunfishcode/linux-mount-api-documentation/blob/main/fspick.md
+/// [Linux]: https://man7.org/linux/man-pages/man2/fspick.2.html
 #[inline]
 pub fn fspick<Path: path::Arg, Fd: AsFd>(
     dfd: Fd,
@@ -97,12 +98,12 @@ pub fn fspick<Path: path::Arg, Fd: AsFd>(
     path.into_with_c_str(|path| backend::mount::syscalls::fspick(dfd, path, flags))
 }
 
-/// `fsconfig(fs_fd, FSCONFIG_SET_FLAG, key, NULL, 0)`
+/// `fsconfig(fd, FSCONFIG_SET_FLAG, key, NULL, 0)`
 ///
 /// # References
-///  - [Unfinished draft]
+///  - [Linux]
 ///
-/// [Unfinished draft]: https://github.com/sunfishcode/linux-mount-api-documentation/blob/main/fsconfig.md
+/// [Linux]: https://man7.org/linux/man-pages/man2/fsconfig.2.html
 #[inline]
 #[doc(alias = "fsconfig")]
 pub fn fsconfig_set_flag<Key: path::Arg, Fd: AsFd>(fs_fd: Fd, key: Key) -> io::Result<()> {
@@ -110,12 +111,12 @@ pub fn fsconfig_set_flag<Key: path::Arg, Fd: AsFd>(fs_fd: Fd, key: Key) -> io::R
     key.into_with_c_str(|key| backend::mount::syscalls::fsconfig_set_flag(fs_fd, key))
 }
 
-/// `fsconfig(fs_fd, FSCONFIG_SET_STRING, key, value, 0)`
+/// `fsconfig(fd, FSCONFIG_SET_STRING, key, value, 0)`
 ///
 /// # References
-///  - [Unfinished draft]
+///  - [Linux]
 ///
-/// [Unfinished draft]: https://github.com/sunfishcode/linux-mount-api-documentation/blob/main/fsconfig.md
+/// [Linux]: https://man7.org/linux/man-pages/man2/fsconfig.2.html
 #[inline]
 #[doc(alias = "fsconfig")]
 pub fn fsconfig_set_string<Key: path::Arg, Value: path::Arg, Fd: AsFd>(
@@ -131,12 +132,12 @@ pub fn fsconfig_set_string<Key: path::Arg, Value: path::Arg, Fd: AsFd>(
     })
 }
 
-/// `fsconfig(fs_fd, FSCONFIG_SET_BINARY, key, value, value.len())`
+/// `fsconfig(fd, FSCONFIG_SET_BINARY, key, value, value.len())`
 ///
 /// # References
-///  - [Unfinished draft]
+///  - [Linux]
 ///
-/// [Unfinished draft]: https://github.com/sunfishcode/linux-mount-api-documentation/blob/main/fsconfig.md
+/// [Linux]: https://man7.org/linux/man-pages/man2/fsconfig.2.html
 #[inline]
 #[doc(alias = "fsconfig")]
 pub fn fsconfig_set_binary<Key: path::Arg, Fd: AsFd>(
@@ -148,12 +149,12 @@ pub fn fsconfig_set_binary<Key: path::Arg, Fd: AsFd>(
     key.into_with_c_str(|key| backend::mount::syscalls::fsconfig_set_binary(fs_fd, key, value))
 }
 
-/// `fsconfig(fs_fd, FSCONFIG_SET_PATH, key, path, fd)`
+/// `fsconfig(fd, FSCONFIG_SET_PATH, key, path, fd)`
 ///
 /// # References
-///  - [Unfinished draft]
+///  - [Linux]
 ///
-/// [Unfinished draft]: https://github.com/sunfishcode/linux-mount-api-documentation/blob/main/fsconfig.md
+/// [Linux]: https://man7.org/linux/man-pages/man2/fsconfig.2.html
 #[inline]
 #[doc(alias = "fsconfig")]
 pub fn fsconfig_set_path<Key: path::Arg, Path: path::Arg, Fd: AsFd, AuxFd: AsFd>(
@@ -171,12 +172,12 @@ pub fn fsconfig_set_path<Key: path::Arg, Path: path::Arg, Fd: AsFd, AuxFd: AsFd>
     })
 }
 
-/// `fsconfig(fs_fd, FSCONFIG_SET_PATH_EMPTY, key, "", fd)`
+/// `fsconfig(fd, FSCONFIG_SET_PATH_EMPTY, key, "", fd)`
 ///
 /// # References
-///  - [Unfinished draft]
+///  - [Linux]
 ///
-/// [Unfinished draft]: https://github.com/sunfishcode/linux-mount-api-documentation/blob/main/fsconfig.md
+/// [Linux]: https://man7.org/linux/man-pages/man2/fsconfig.2.html
 #[inline]
 #[doc(alias = "fsconfig")]
 pub fn fsconfig_set_path_empty<Key: path::Arg, Fd: AsFd, AuxFd: AsFd>(
@@ -189,12 +190,12 @@ pub fn fsconfig_set_path_empty<Key: path::Arg, Fd: AsFd, AuxFd: AsFd>(
     key.into_with_c_str(|key| backend::mount::syscalls::fsconfig_set_path_empty(fs_fd, key, fd))
 }
 
-/// `fsconfig(fs_fd, FSCONFIG_SET_FD, key, NULL, fd)`
+/// `fsconfig(fd, FSCONFIG_SET_FD, key, NULL, fd)`
 ///
 /// # References
-///  - [Unfinished draft]
+///  - [Linux]
 ///
-/// [Unfinished draft]: https://github.com/sunfishcode/linux-mount-api-documentation/blob/main/fsconfig.md
+/// [Linux]: https://man7.org/linux/man-pages/man2/fsconfig.2.html
 #[inline]
 #[doc(alias = "fsconfig")]
 pub fn fsconfig_set_fd<Key: path::Arg, Fd: AsFd, AuxFd: AsFd>(
@@ -207,40 +208,60 @@ pub fn fsconfig_set_fd<Key: path::Arg, Fd: AsFd, AuxFd: AsFd>(
     key.into_with_c_str(|key| backend::mount::syscalls::fsconfig_set_fd(fs_fd, key, fd))
 }
 
-/// `fsconfig(fs_fd, FSCONFIG_CMD_CREATE, key, NULL, 0)`
+/// `fsconfig(fd, FSCONFIG_CMD_CREATE, key, NULL, 0)`
 ///
 /// # References
-///  - [Unfinished draft]
+///  - [Linux]
 ///
-/// [Unfinished draft]: https://github.com/sunfishcode/linux-mount-api-documentation/blob/main/fsconfig.md
+/// [Linux]: https://man7.org/linux/man-pages/man2/fsconfig.2.html
 #[inline]
 #[doc(alias = "fsconfig")]
 pub fn fsconfig_create<Fd: AsFd>(fs_fd: Fd) -> io::Result<()> {
     backend::mount::syscalls::fsconfig_create(fs_fd.as_fd())
 }
 
-/// `fsconfig(fs_fd, FSCONFIG_CMD_RECONFIGURE, key, NULL, 0)`
+/// `fsconfig(fd, FSCONFIG_CMD_RECONFIGURE, key, NULL, 0)`
 ///
 /// # References
-///  - [Unfinished draft]
+///  - [Linux]
 ///
-/// [Unfinished draft]: https://github.com/sunfishcode/linux-mount-api-documentation/blob/main/fsconfig.md
+/// [Linux]: https://man7.org/linux/man-pages/man2/fsconfig.2.html
 #[inline]
 #[doc(alias = "fsconfig")]
 pub fn fsconfig_reconfigure<Fd: AsFd>(fs_fd: Fd) -> io::Result<()> {
     backend::mount::syscalls::fsconfig_reconfigure(fs_fd.as_fd())
 }
 
-/// `fsconfig(fs_fd, FSCONFIG_CMD_CREATE_EXCL, key, NULL, 0)`
+/// `fsconfig(fd, FSCONFIG_CMD_CREATE_EXCL, key, NULL, 0)`
 ///
 /// This function was added in Linux 6.6.
 ///
 /// # References
-///  - [Unfinished draft]
+///  - [Linux]
 ///
-/// [Unfinished draft]: https://github.com/sunfishcode/linux-mount-api-documentation/blob/main/fsconfig.md
+/// [Linux]: https://man7.org/linux/man-pages/man2/fsconfig.2.html
 #[inline]
 #[doc(alias = "fsconfig")]
 pub fn fsconfig_create_exclusive<Fd: AsFd>(fs_fd: Fd) -> io::Result<()> {
     backend::mount::syscalls::fsconfig_create_excl(fs_fd.as_fd())
+}
+
+/// `mount_setattr(dirfd, path, flags, attr, size)`
+///
+/// This function was added in Linux 5.12.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/mount_setattr.2.html
+#[inline]
+pub fn mount_setattr<Fd: AsFd, Path: path::Arg>(
+    fs_fd: Fd,
+    path: Path,
+    flags: MountSetAttrFlags,
+    attr: MountAttr<'_>,
+) -> io::Result<()> {
+    path.into_with_c_str(|path| {
+        backend::mount::syscalls::mount_setattr(fs_fd.as_fd(), path, flags, &attr)
+    })
 }
