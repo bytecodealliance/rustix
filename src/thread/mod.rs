@@ -1,6 +1,5 @@
 //! Thread-associated operations.
 
-#[cfg(not(target_os = "redox"))]
 mod clock;
 #[cfg(linux_kernel)]
 pub mod futex;
@@ -18,7 +17,6 @@ mod sched_yield;
 #[cfg(linux_kernel)]
 mod setns;
 
-#[cfg(not(target_os = "redox"))]
 pub use clock::*;
 #[cfg(linux_kernel)]
 pub use id::*;
