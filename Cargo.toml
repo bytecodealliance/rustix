@@ -274,3 +274,6 @@ check-cfg = [
     'cfg(target_arch, values("xtensa"))',
     'cfg(target_os, values("cygwin"))',
 ]
+
+[patch.crates-io]
+libc = { git = "https://github.com/rust-lang/libc", branch = "libc-0.2" }

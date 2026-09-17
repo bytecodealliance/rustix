@@ -151,13 +151,13 @@ unsafe fn init_from_auxp(mut auxp: *const Elf_auxv_t) {
             AT_HWCAP => HWCAP.store(a_val as usize, Ordering::Relaxed),
             AT_HWCAP2 => HWCAP2.store(a_val as usize, Ordering::Relaxed),
             AT_MINSIGSTKSZ => MINSIGSTKSZ.store(a_val as usize, Ordering::Relaxed),
-            AT_EXECFN => EXECFN.store(a_val.cast::<c::c_char>(), Ordering::Relaxed),
-            AT_SYSINFO_EHDR => SYSINFO_EHDR.store(a_val.cast::<Elf_Ehdr>(), Ordering::Relaxed),
+            AT_EXECFN => EXECFN.store(a_val.cast(), Ordering::Relaxed),
+            AT_SYSINFO_EHDR => SYSINFO_EHDR.store(a_val.cast(), Ordering::Relaxed),
 
             #[cfg(feature = "runtime")]
             AT_SECURE => SECURE.store(a_val as usize != 0, Ordering::Relaxed),
             #[cfg(feature = "runtime")]
-            AT_PHDR => PHDR.store(a_val.cast::<Elf_Phdr>(), Ordering::Relaxed),
+            AT_PHDR => PHDR.store(a_val.cast(), Ordering::Relaxed),
             #[cfg(feature = "runtime")]
             AT_PHNUM => PHNUM.store(a_val as usize, Ordering::Relaxed),
             #[cfg(feature = "runtime")]
@@ -165,7 +165,7 @@ unsafe fn init_from_auxp(mut auxp: *const Elf_auxv_t) {
             #[cfg(feature = "runtime")]
             AT_ENTRY => ENTRY.store(a_val as usize, Ordering::Relaxed),
             #[cfg(feature = "runtime")]
-            AT_RANDOM => RANDOM.store(a_val.cast::<[u8; 16]>(), Ordering::Relaxed),
+            AT_RANDOM => RANDOM.store(a_val.cast(), Ordering::Relaxed),
 
             AT_NULL => break,
             _ => (),

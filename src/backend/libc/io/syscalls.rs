@@ -43,6 +43,7 @@ pub(crate) fn write(fd: BorrowedFd<'_>, buf: &[u8]) -> io::Result<usize> {
     }
 }
 
+#[cfg(not(target_os = "hermit"))]
 pub(crate) unsafe fn pread(
     fd: BorrowedFd<'_>,
     buf: (*mut u8, usize),
@@ -59,6 +60,7 @@ pub(crate) unsafe fn pread(
     ret_usize(c::pread(borrowed_fd(fd), buf.0.cast(), len, offset))
 }
 
+#[cfg(not(target_os = "hermit"))]
 pub(crate) fn pwrite(fd: BorrowedFd<'_>, buf: &[u8], offset: u64) -> io::Result<usize> {
     let len = min(buf.len(), READ_LIMIT);
 
@@ -76,8 +78,8 @@ pub(crate) fn readv(fd: BorrowedFd<'_>, bufs: &mut [IoSliceMut<'_>]) -> io::Resu
     unsafe {
         ret_usize(c::readv(
             borrowed_fd(fd),
-            bufs.as_ptr().cast::<c::iovec>(),
-            min(bufs.len(), MAX_IOV) as c::c_int,
+            bufs.as_ptr().cast(),
+            min(bufs.len(), MAX_IOV) as _,
         ))
     }
 }
@@ -87,8 +89,8 @@ pub(crate) fn writev(fd: BorrowedFd<'_>, bufs: &[IoSlice<'_>]) -> io::Result<usi
     unsafe {
         ret_usize(c::writev(
             borrowed_fd(fd),
-            bufs.as_ptr().cast::<c::iovec>(),
-            min(bufs.len(), MAX_IOV) as c::c_int,
+            bufs.as_ptr().cast(),
+            min(bufs.len(), MAX_IOV) as _,
         ))
     }
 }
@@ -97,6 +99,7 @@ pub(crate) fn writev(fd: BorrowedFd<'_>, bufs: &[IoSlice<'_>]) -> io::Result<usi
     target_os = "cygwin",
     target_os = "espidf",
     target_os = "haiku",
+    target_os = "hermit",
     target_os = "horizon",
     target_os = "nto",
     target_os = "redox",
@@ -117,7 +120,7 @@ pub(crate) fn preadv(
     unsafe {
         ret_usize(c::preadv(
             borrowed_fd(fd),
-            bufs.as_ptr().cast::<c::iovec>(),
+            bufs.as_ptr().cast(),
             min(bufs.len(), MAX_IOV) as c::c_int,
             offset,
         ))
@@ -128,6 +131,7 @@ pub(crate) fn preadv(
     target_os = "cygwin",
     target_os = "espidf",
     target_os = "haiku",
+    target_os = "hermit",
     target_os = "nto",
     target_os = "horizon",
     target_os = "redox",
@@ -144,7 +148,7 @@ pub(crate) fn pwritev(fd: BorrowedFd<'_>, bufs: &[IoSlice<'_>], offset: u64) -> 
     unsafe {
         ret_usize(c::pwritev(
             borrowed_fd(fd),
-            bufs.as_ptr().cast::<c::iovec>(),
+            bufs.as_ptr().cast(),
             min(bufs.len(), MAX_IOV) as c::c_int,
             offset,
         ))
@@ -163,7 +167,7 @@ pub(crate) fn preadv2(
     unsafe {
         ret_usize(c::preadv2(
             borrowed_fd(fd),
-            bufs.as_ptr().cast::<c::iovec>(),
+            bufs.as_ptr().cast(),
             min(bufs.len(), MAX_IOV) as c::c_int,
             offset,
             bitflags_bits!(flags),
@@ -183,7 +187,7 @@ pub(crate) fn pwritev2(
     unsafe {
         ret_usize(c::pwritev2(
             borrowed_fd(fd),
-            bufs.as_ptr().cast::<c::iovec>(),
+            bufs.as_ptr().cast(),
             min(bufs.len(), MAX_IOV) as c::c_int,
             offset,
             bitflags_bits!(flags),
@@ -234,16 +238,18 @@ pub(crate) unsafe fn ioctl_readonly(
     ioctl(fd, request, arg)
 }
 
+#[cfg(not(target_os = "hermit"))]
 pub(crate) fn fcntl_getfd(fd: BorrowedFd<'_>) -> io::Result<FdFlags> {
     let flags = unsafe { ret_c_int(c::fcntl(borrowed_fd(fd), c::F_GETFD))? };
     Ok(FdFlags::from_bits_retain(bitcast!(flags)))
 }
 
+#[cfg(not(target_os = "hermit"))]
 pub(crate) fn fcntl_setfd(fd: BorrowedFd<'_>, flags: FdFlags) -> io::Result<()> {
     unsafe { ret(c::fcntl(borrowed_fd(fd), c::F_SETFD, flags.bits())) }
 }
 
-#[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
+#[cfg(not(any(target_os = "espidf", target_os = "hermit", target_os = "wasi")))]
 pub(crate) fn fcntl_dupfd_cloexec(fd: BorrowedFd<'_>, min: RawFd) -> io::Result<OwnedFd> {
     unsafe { ret_owned_fd(c::fcntl(borrowed_fd(fd), c::F_DUPFD_CLOEXEC, min)) }
 }
@@ -259,7 +265,7 @@ pub(crate) fn dup(fd: BorrowedFd<'_>) -> io::Result<OwnedFd> {
 }
 
 #[allow(clippy::needless_pass_by_ref_mut)]
-#[cfg(not(target_os = "wasi"))]
+#[cfg(not(any(target_os = "hermit", target_os = "wasi")))]
 pub(crate) fn dup2(fd: BorrowedFd<'_>, new: &mut OwnedFd) -> io::Result<()> {
     unsafe { ret_discarded_fd(c::dup2(borrowed_fd(fd), borrowed_fd(new.as_fd()))) }
 }
@@ -272,6 +278,7 @@ pub(crate) fn dup2(fd: BorrowedFd<'_>, new: &mut OwnedFd) -> io::Result<()> {
     target_os = "dragonfly",
     target_os = "espidf",
     target_os = "haiku",
+    target_os = "hermit",
     target_os = "horizon",
     target_os = "nto",
     target_os = "redox",
