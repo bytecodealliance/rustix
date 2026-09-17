@@ -156,6 +156,7 @@ use crate::net::xdp::{XdpMmapOffsets, XdpOptionsFlags, XdpStatistics, XdpUmemReg
     target_os = "emscripten",
     target_os = "espidf",
     target_os = "haiku",
+    target_os = "horizon",
     target_os = "netbsd",
     target_os = "nto",
     target_os = "vita",

@@ -5,7 +5,10 @@ mod at;
 mod constants;
 #[cfg(linux_kernel)]
 mod copy_file_range;
-#[cfg(all(feature = "alloc", not(any(target_os = "espidf", target_os = "redox"))))]
+#[cfg(all(
+    feature = "alloc",
+    not(any(target_os = "espidf", target_os = "horizon", target_os = "redox"))
+))]
 mod dir;
 #[cfg(not(any(
     apple,
@@ -70,7 +73,10 @@ pub use at::*;
 pub use constants::*;
 #[cfg(linux_kernel)]
 pub use copy_file_range::copy_file_range;
-#[cfg(all(feature = "alloc", not(any(target_os = "espidf", target_os = "redox"))))]
+#[cfg(all(
+    feature = "alloc",
+    not(any(target_os = "espidf", target_os = "horizon", target_os = "redox"))
+))]
 pub use dir::{Dir, DirEntry};
 #[cfg(not(any(
     apple,

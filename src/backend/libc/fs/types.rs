@@ -1,4 +1,5 @@
 use crate::backend::c;
+#[cfg(not(target_os = "horizon"))]
 use crate::ffi;
 use bitflags::bitflags;
 
@@ -627,6 +628,7 @@ impl FileType {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
+        target_os = "horizon",
         target_os = "nto",
         target_os = "redox",
         target_os = "vita"

@@ -20,7 +20,13 @@ use crate::fs::CloneFlags;
 use crate::fs::RenameFlags;
 #[cfg(not(target_os = "espidf"))]
 use crate::fs::Stat;
-#[cfg(not(any(apple, target_os = "espidf", target_os = "vita", target_os = "wasi")))]
+#[cfg(not(any(
+    apple,
+    target_os = "espidf",
+    target_os = "horizon",
+    target_os = "vita",
+    target_os = "wasi"
+)))]
 use crate::fs::{Dev, FileType};
 #[cfg(not(any(target_os = "espidf", target_os = "wasi")))]
 use crate::fs::{Gid, Uid};
@@ -34,7 +40,7 @@ use {
     alloc::vec::Vec,
     backend::fd::BorrowedFd,
 };
-#[cfg(not(any(target_os = "espidf", target_os = "vita")))]
+#[cfg(not(any(target_os = "espidf", target_os = "horizon", target_os = "vita")))]
 use {crate::fs::Timestamps, crate::timespec::Nsecs};
 
 /// `UTIME_NOW` for use with [`utimensat`].
