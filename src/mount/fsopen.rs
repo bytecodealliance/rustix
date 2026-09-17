@@ -1,10 +1,69 @@
 //! `fsopen` and related functions in Linux's `mount` API.
 
+#![allow(unsafe_code)]
+
 use crate::backend::mount::types::{
     FsMountFlags, FsOpenFlags, FsPickFlags, MountAttrFlags, MoveMountFlags, OpenTreeFlags,
 };
+use crate::buffer::Buffer;
 use crate::fd::{AsFd, OwnedFd};
 use crate::{backend, io, path};
+
+/// The value used with [`listmount`] to start at the root mount of the
+/// current mount namespace.
+pub const LISTMOUNT_ROOT: u64 = linux_raw_sys::general::LSMT_ROOT as u64;
+
+bitflags::bitflags! {
+    /// Flags for use with [`listmount`].
+    #[repr(transparent)]
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug, Default)]
+    pub struct ListMountFlags: u32 {
+        /// Return mounts in reverse order.
+        const REVERSE = linux_raw_sys::general::LISTMOUNT_REVERSE;
+
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
+        const _ = !0;
+    }
+}
+
+/// `listmount(req, mount_ids, mount_ids.len(), flags)`
+///
+/// Return mount IDs below `root_mount_id` in the caller's current mount
+/// namespace. Use [`LISTMOUNT_ROOT`] to start at the namespace root. Set
+/// `last_mount_id` to zero for the first call, or to the last ID returned by a
+/// previous call to continue iterating.
+///
+/// This function performs one kernel call and does not allocate or retry.
+/// Multiple calls are not an atomic snapshot, so callers are responsible for
+/// handling concurrent mount-tree changes while paginating.
+///
+/// # References
+///  - [`listmount(2)`]
+///
+/// [`listmount(2)`]: https://man7.org/linux/man-pages/man2/listmount.2.html
+#[inline]
+pub fn listmount<Buf: Buffer<u64>>(
+    root_mount_id: u64,
+    last_mount_id: u64,
+    mut mount_ids: Buf,
+    flags: ListMountFlags,
+) -> io::Result<Buf::Output> {
+    let parts = mount_ids.parts_mut();
+    let capacity = parts.1;
+
+    // SAFETY: `parts` points to `capacity` writable `u64` elements, and the
+    // backend reports how many of them the kernel initialized.
+    let initialized = unsafe {
+        backend::mount::syscalls::listmount(root_mount_id, last_mount_id, parts, flags.bits())?
+    };
+    if initialized > capacity {
+        return Err(io::Errno::RANGE);
+    }
+
+    // SAFETY: The backend initialized exactly `initialized` elements and the
+    // capacity check above proves that the prefix is within `mount_ids`.
+    unsafe { Ok(mount_ids.assume_init(initialized)) }
+}
 
 /// `fsopen(fs_name, flags)`
 ///
