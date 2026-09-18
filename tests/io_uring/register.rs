@@ -3,6 +3,8 @@ use std::ptr;
 use libc::c_void;
 use rustix::fd::{AsFd, AsRawFd, BorrowedFd};
 use rustix::io::{Errno, Result};
+#[cfg(feature = "mm")]
+use rustix::io_uring::IoringPbufRingFlags;
 use rustix::io_uring::{
     io_uring_buf, io_uring_buf_reg, io_uring_buf_ring, io_uring_params, io_uring_ptr,
     io_uring_register_with, io_uring_rsrc_update, io_uring_setup, IoringFeatureFlags,
@@ -160,7 +162,7 @@ fn io_uring_buf_ring_can_be_registered() {
     reg.ring_addr = br_ptr.cast::<c_void>().into();
     reg.ring_entries = ENTRIES as u32;
     reg.bgid = BGID;
-    reg.flags = 0;
+    reg.flags = IoringPbufRingFlags::default();
 
     assert_eq!(register_buf_ring(ring_fd, &reg), Ok(()));
 
