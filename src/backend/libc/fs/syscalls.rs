@@ -52,7 +52,6 @@ use crate::fs::StatFs;
 #[cfg(not(any(target_os = "espidf", target_os = "horizon", target_os = "vita")))]
 use crate::fs::Timestamps;
 #[cfg(not(any(
-    apple,
     target_os = "espidf",
     target_os = "horizon",
     target_os = "redox",
@@ -1206,7 +1205,6 @@ pub(crate) fn chownat(
 }
 
 #[cfg(not(any(
-    apple,
     target_os = "espidf",
     target_os = "horizon",
     target_os = "redox",
@@ -1220,13 +1218,30 @@ pub(crate) fn mknodat(
     mode: Mode,
     dev: Dev,
 ) -> io::Result<()> {
+    let dirfd = borrowed_fd(dirfd);
+    let pathname = c_str(path);
+    let mode = (mode.bits() | file_type.as_raw_mode()) as c::mode_t;
+    let dev = dev.try_into().map_err(|_e| io::Errno::PERM)?;
+
+    // Apple platforms before macOS 13.0, iOS 16.0, tvOS 16.0, and watchOS 9.0
+    // lack `mknodat`.
+    #[cfg(apple)]
     unsafe {
-        ret(c::mknodat(
-            borrowed_fd(dirfd),
-            c_str(path),
-            (mode.bits() | file_type.as_raw_mode()) as c::mode_t,
-            dev.try_into().map_err(|_e| io::Errno::PERM)?,
-        ))
+        weak! {
+            fn mknodat(
+                c::c_int,
+                *const ffi::c_char,
+                c::mode_t,
+                c::dev_t
+            ) -> c::c_int
+        }
+        let libc_mknodat = mknodat.get().ok_or(io::Errno::NOSYS)?;
+        ret(libc_mknodat(dirfd, pathname, mode, dev))
+    }
+
+    #[cfg(not(apple))]
+    unsafe {
+        ret(c::mknodat(dirfd, pathname, mode, dev))
     }
 }
 
