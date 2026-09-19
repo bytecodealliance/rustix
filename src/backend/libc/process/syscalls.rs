@@ -11,7 +11,6 @@ use crate::backend::conv::ret_discarded_char_ptr;
     target_os = "espidf",
     target_os = "fuchsia",
     target_os = "horizon",
-    target_os = "redox",
     target_os = "vita",
     target_os = "wasi"
 )))]
@@ -60,7 +59,6 @@ use crate::process::{RawPid, WaitOptions, WaitStatus};
     target_os = "espidf",
     target_os = "fuchsia",
     target_os = "horizon",
-    target_os = "redox",
     target_os = "vita",
     target_os = "wasi"
 )))]
@@ -264,7 +262,6 @@ pub(crate) fn setpriority_process(pid: Option<Pid>, priority: i32) -> io::Result
     target_os = "espidf",
     target_os = "fuchsia",
     target_os = "horizon",
-    target_os = "redox",
     target_os = "vita",
     target_os = "wasi"
 )))]
@@ -281,7 +278,6 @@ pub(crate) fn getrlimit(limit: Resource) -> Rlimit {
     target_os = "espidf",
     target_os = "fuchsia",
     target_os = "horizon",
-    target_os = "redox",
     target_os = "vita",
     target_os = "wasi"
 )))]
@@ -312,7 +308,6 @@ pub(crate) fn prlimit(pid: Option<Pid>, limit: Resource, new: Rlimit) -> io::Res
     target_os = "espidf",
     target_os = "fuchsia",
     target_os = "horizon",
-    target_os = "redox",
     target_os = "vita",
     target_os = "wasi"
 )))]
@@ -335,7 +330,6 @@ fn rlimit_from_libc(lim: c::rlimit) -> Rlimit {
     target_os = "espidf",
     target_os = "fuchsia",
     target_os = "horizon",
-    target_os = "redox",
     target_os = "vita",
     target_os = "wasi"
 )))]
