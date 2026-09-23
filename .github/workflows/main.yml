@@ -188,6 +188,8 @@ jobs:
     - run: cargo check --workspace --release --no-default-features --features all-apis,use-libc,alloc -vv
     - run: cargo check --workspace --release --no-default-features --features time -vv
     - run: cargo check --workspace --release --no-default-features --features time,use-libc -vv
+    - run: cargo check --workspace --release --no-default-features --features net -vv
+    - run: cargo check --workspace --release --no-default-features --features net,use-libc -vv
     - run: rustup component add rust-src
     - run: cargo check --workspace --release --no-default-features --target=i686-unknown-linux-gnu -Zbuild-std -vv
 
