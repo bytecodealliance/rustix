@@ -7,6 +7,8 @@
 mod chmodat;
 #[cfg(not(target_os = "redox"))]
 mod dir;
+#[cfg(apple)]
+mod fallocate;
 mod fcntl;
 #[cfg(not(any(
     target_os = "emscripten",

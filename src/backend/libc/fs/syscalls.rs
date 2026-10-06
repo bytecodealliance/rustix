@@ -1808,7 +1808,9 @@ pub(crate) fn fallocate(
 
     let new_len = offset.checked_add(len).ok_or(io::Errno::FBIG)?;
     let mut store = c::fstore_t {
-        fst_flags: c::F_ALLOCATECONTIG,
+        // `F_ALLOCATEALL` is required. Without it, `F_PREALLOCATE` may
+        // succeed after reserving only a fraction of `fst_length`.
+        fst_flags: c::F_ALLOCATECONTIG | c::F_ALLOCATEALL,
         fst_posmode: c::F_PEOFPOSMODE,
         fst_offset: 0,
         fst_length: new_len,
@@ -1817,9 +1819,9 @@ pub(crate) fn fallocate(
     unsafe {
         if c::fcntl(borrowed_fd(fd), c::F_PREALLOCATE, &store) == -1 {
             // Unable to allocate contiguous disk space; attempt to allocate
-            // non-contiguously.
+            // non-contiguously, still all-or-nothing.
             store.fst_flags = c::F_ALLOCATEALL;
-            let _ = ret_c_int(c::fcntl(borrowed_fd(fd), c::F_PREALLOCATE, &store))?;
+            ret_c_int(c::fcntl(borrowed_fd(fd), c::F_PREALLOCATE, &store))?;
         }
         ret(c::ftruncate(borrowed_fd(fd), new_len))
     }
