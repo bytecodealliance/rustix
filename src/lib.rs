@@ -391,6 +391,7 @@ mod signal;
 #[cfg(any(
     feature = "fs",
     feature = "event",
+    feature = "net",
     feature = "process",
     feature = "runtime",
     feature = "thread",
