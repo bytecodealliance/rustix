@@ -20,7 +20,7 @@ rust-version = "1.65"
 mostly-unused = true
 
 [dependencies]
-bitflags = { version = "2.4.0", default-features = false }
+bitflags = { version = "2.9.2", default-features = false }
 
 # Special dependencies used in rustc-dep-of-std mode.
 core = { version = "1.0.0", optional = true, package = "rustc-std-workspace-core" }
@@ -233,7 +233,6 @@ rustc-dep-of-std = [
     "core",
     "rustc-std-workspace-alloc",
     "linux-raw-sys/rustc-dep-of-std",
-    "bitflags/rustc-dep-of-std",
 ]
 
 # Enable `rustix::io::try_close`. The rustix developers do not intend the
