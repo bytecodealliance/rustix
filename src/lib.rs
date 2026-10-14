@@ -178,6 +178,8 @@ pub(crate) mod bitcast;
 #[cfg(sanitize_memory)]
 pub(crate) mod msan;
 
+mod types;
+
 // linux_raw: Weak symbols are used by the use-libc-auxv feature for
 // glibc 2.15 support.
 //
