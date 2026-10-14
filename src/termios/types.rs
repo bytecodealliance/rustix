@@ -738,13 +738,7 @@ pub mod speed {
     pub const B230400: u32 = 230_400;
 
     /// `B460800`
-    #[cfg(not(any(
-        apple,
-        target_os = "aix",
-        target_os = "dragonfly",
-        target_os = "haiku",
-        target_os = "openbsd"
-    )))]
+    #[cfg(not(any(apple, target_os = "aix", target_os = "haiku", target_os = "openbsd")))]
     pub const B460800: u32 = 460_800;
 
     /// `B500000`
@@ -756,13 +750,7 @@ pub mod speed {
     pub const B576000: u32 = 576_000;
 
     /// `B921600`
-    #[cfg(not(any(
-        apple,
-        target_os = "aix",
-        target_os = "dragonfly",
-        target_os = "haiku",
-        target_os = "openbsd"
-    )))]
+    #[cfg(not(any(apple, target_os = "aix", target_os = "haiku", target_os = "openbsd")))]
     pub const B921600: u32 = 921_600;
 
     /// `B1000000`
@@ -868,7 +856,6 @@ pub mod speed {
             #[cfg(not(any(
                 apple,
                 target_os = "aix",
-                target_os = "dragonfly",
                 target_os = "haiku",
                 target_os = "nto",
                 target_os = "openbsd"
@@ -893,7 +880,6 @@ pub mod speed {
             #[cfg(not(any(
                 apple,
                 target_os = "aix",
-                target_os = "dragonfly",
                 target_os = "haiku",
                 target_os = "nto",
                 target_os = "openbsd"
@@ -1007,7 +993,6 @@ pub mod speed {
             #[cfg(not(any(
                 apple,
                 target_os = "aix",
-                target_os = "dragonfly",
                 target_os = "haiku",
                 target_os = "nto",
                 target_os = "openbsd",
@@ -1032,7 +1017,6 @@ pub mod speed {
             #[cfg(not(any(
                 apple,
                 target_os = "aix",
-                target_os = "dragonfly",
                 target_os = "haiku",
                 target_os = "nto",
                 target_os = "openbsd"
