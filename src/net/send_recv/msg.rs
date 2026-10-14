@@ -300,20 +300,19 @@ impl<'buf, 'slice, 'fd> SendAncillaryBuffer<'buf, 'slice, 'fd> {
         match msg {
             SendAncillaryMessage::ScmRights(fds) => {
                 let fds_bytes =
-                    unsafe { slice::from_raw_parts(fds.as_ptr().cast::<u8>(), size_of_val(fds)) };
+                    unsafe { slice::from_raw_parts(fds.as_ptr().cast(), size_of_val(fds)) };
                 self.push_ancillary(fds_bytes, c::SOL_SOCKET as _, c::SCM_RIGHTS as _)
             }
             #[cfg(linux_kernel)]
             SendAncillaryMessage::ScmCredentials(ucred) => {
-                let ucred_bytes = unsafe {
-                    slice::from_raw_parts(addr_of!(ucred).cast::<u8>(), size_of_val(&ucred))
-                };
+                let ucred_bytes =
+                    unsafe { slice::from_raw_parts(addr_of!(ucred).cast(), size_of_val(&ucred)) };
                 self.push_ancillary(ucred_bytes, c::SOL_SOCKET as _, c::SCM_CREDENTIALS as _)
             }
             #[cfg(target_os = "linux")]
             SendAncillaryMessage::TxTime(tx_time) => {
                 let tx_time_bytes = unsafe {
-                    slice::from_raw_parts(addr_of!(tx_time).cast::<u8>(), size_of_val(&tx_time))
+                    slice::from_raw_parts(addr_of!(tx_time).cast(), size_of_val(&tx_time))
                 };
                 self.push_ancillary(tx_time_bytes, c::SOL_SOCKET as _, c::SO_TXTIME as _)
             }

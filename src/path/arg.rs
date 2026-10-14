@@ -963,7 +963,7 @@ where
     // Taken from
     // <https://github.com/rust-lang/rust/blob/a00f8ba7fcac1b27341679c51bf5a3271fa82df3/library/std/src/sys/common/small_c_string.rs>
     let mut buf = MaybeUninit::<[u8; SMALL_PATH_BUFFER_SIZE]>::uninit();
-    let buf_ptr = buf.as_mut_ptr().cast::<u8>();
+    let buf_ptr = buf.as_mut_ptr().cast();
 
     // This helps test our safety condition below.
     debug_assert!(bytes.len() + 1 <= SMALL_PATH_BUFFER_SIZE);
@@ -1024,7 +1024,7 @@ where
         // Taken from
         // <https://github.com/rust-lang/rust/blob/a00f8ba7fcac1b27341679c51bf5a3271fa82df3/library/std/src/sys/common/small_c_string.rs>
         let mut buf = MaybeUninit::<[u8; LARGE_PATH_BUFFER_SIZE]>::uninit();
-        let buf_ptr = buf.as_mut_ptr().cast::<u8>();
+        let buf_ptr = buf.as_mut_ptr().cast();
 
         // This helps test our safety condition below.
         if bytes.len() + 1 > LARGE_PATH_BUFFER_SIZE {
