@@ -536,35 +536,40 @@ bitflags! {
 
 bitflags! {
     /// `ST_*` constants for use with [`StatVfs`].
+    ///
+    /// These are the values the kernel reports in `statfs`'s `f_flags`,
+    /// which `statvfs` passes through unconverted. linux-raw-sys does not
+    /// define the `ST_*` names, and they are not all equal to the `MS_*`
+    /// ones: `ST_RELATIME` is `0x1000`, while `MS_RELATIME` is `1 << 21`.
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct StatVfsMountFlags: u64 {
         /// `ST_MANDLOCK`
-        const MANDLOCK = linux_raw_sys::general::MS_MANDLOCK as u64;
+        const MANDLOCK = 0x0040;
 
         /// `ST_NOATIME`
-        const NOATIME = linux_raw_sys::general::MS_NOATIME as u64;
+        const NOATIME = 0x0400;
 
         /// `ST_NODEV`
-        const NODEV = linux_raw_sys::general::MS_NODEV as u64;
+        const NODEV = 0x0004;
 
         /// `ST_NODIRATIME`
-        const NODIRATIME = linux_raw_sys::general::MS_NODIRATIME as u64;
+        const NODIRATIME = 0x0800;
 
         /// `ST_NOEXEC`
-        const NOEXEC = linux_raw_sys::general::MS_NOEXEC as u64;
+        const NOEXEC = 0x0008;
 
         /// `ST_NOSUID`
-        const NOSUID = linux_raw_sys::general::MS_NOSUID as u64;
+        const NOSUID = 0x0002;
 
         /// `ST_RDONLY`
-        const RDONLY = linux_raw_sys::general::MS_RDONLY as u64;
+        const RDONLY = 0x0001;
 
         /// `ST_RELATIME`
-        const RELATIME = linux_raw_sys::general::MS_RELATIME as u64;
+        const RELATIME = 0x1000;
 
         /// `ST_SYNCHRONOUS`
-        const SYNCHRONOUS = linux_raw_sys::general::MS_SYNCHRONOUS as u64;
+        const SYNCHRONOUS = 0x0010;
 
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
