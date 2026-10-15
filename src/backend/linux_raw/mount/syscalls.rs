@@ -6,7 +6,7 @@
 #![allow(unsafe_code)]
 #![allow(clippy::undocumented_unsafe_blocks)]
 
-use crate::backend::conv::{ret, ret_owned_fd, slice, zero};
+use crate::backend::conv::{pass_usize, ret, ret_owned_fd, slice, zero};
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::ffi::CStr;
 use crate::io;
@@ -232,6 +232,25 @@ pub(crate) fn fsconfig_create_excl(fs_fd: BorrowedFd<'_>) -> io::Result<()> {
             zero(),
             zero(),
             zero()
+        ))
+    }
+}
+
+#[inline]
+pub(crate) fn mount_setattr(
+    fs_fd: BorrowedFd<'_>,
+    path: &CStr,
+    flags: super::types::MountSetAttrFlags,
+    attr: &super::types::MountAttr<'_>,
+) -> io::Result<()> {
+    unsafe {
+        ret(syscall_readonly!(
+            __NR_mount_setattr,
+            fs_fd,
+            path,
+            flags,
+            &attr.raw as *const linux_raw_sys::general::mount_attr,
+            pass_usize(core::mem::size_of_val(&attr.raw))
         ))
     }
 }
