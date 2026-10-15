@@ -330,6 +330,7 @@ type _Opcode = c::c_ulong;
     target_os = "aix",
     target_os = "cygwin",
     target_os = "fuchsia",
+    target_os = "hermit",
     target_os = "emscripten",
     target_os = "nto",
     target_os = "wasi",
