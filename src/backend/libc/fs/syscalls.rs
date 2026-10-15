@@ -1807,20 +1807,22 @@ pub(crate) fn fallocate(
     assert!(mode.is_empty());
 
     let new_len = offset.checked_add(len).ok_or(io::Errno::FBIG)?;
-    let mut store = c::fstore_t {
-        fst_flags: c::F_ALLOCATECONTIG,
+    let store = c::fstore_t {
+        // Allocate the full length or fail; don't accept partial success.
+        fst_flags: c::F_ALLOCATEALL,
         fst_posmode: c::F_PEOFPOSMODE,
         fst_offset: 0,
         fst_length: new_len,
         fst_bytesalloc: 0,
     };
     unsafe {
-        if c::fcntl(borrowed_fd(fd), c::F_PREALLOCATE, &store) == -1 {
-            // Unable to allocate contiguous disk space; attempt to allocate
-            // non-contiguously.
-            store.fst_flags = c::F_ALLOCATEALL;
-            let _ = ret_c_int(c::fcntl(borrowed_fd(fd), c::F_PREALLOCATE, &store))?;
-        }
+        ret(c::fcntl(borrowed_fd(fd), c::F_PREALLOCATE, &store))?;
+
+        // Apple platforms have no way to perform the `posix_fallocate`
+        // behavior of increasing the file size if `new_len` is greater
+        // than the file's original size, but not decreasing if it's
+        // less, so we just use `ftruncate`, which does decrease the
+        // size, and document it.
         ret(c::ftruncate(borrowed_fd(fd), new_len))
     }
 }
