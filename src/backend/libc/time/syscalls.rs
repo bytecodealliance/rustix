@@ -17,11 +17,7 @@ use crate::io;
 #[cfg(not(fix_y2038))]
 use crate::timespec::as_libc_timespec_mut_ptr;
 #[cfg(not(fix_y2038))]
-#[cfg(not(any(
-    target_os = "redox",
-    target_os = "wasi",
-    all(apple, not(target_os = "macos"))
-)))]
+#[cfg(not(any(target_os = "wasi", all(apple, not(target_os = "macos")))))]
 use crate::timespec::as_libc_timespec_ptr;
 #[cfg(all(target_env = "gnu", fix_y2038))]
 use crate::timespec::LibcTimespec;
@@ -53,7 +49,7 @@ weak!(fn __timerfd_gettime64(c::c_int, *mut LibcItimerspec) -> c::c_int);
 #[cfg(all(target_env = "gnu", fix_y2038))]
 weak!(fn __timerfd_settime64(c::c_int, c::c_int, *const LibcItimerspec, *mut LibcItimerspec) -> c::c_int);
 
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[cfg(not(target_os = "wasi"))]
 #[inline]
 #[must_use]
 pub(crate) fn clock_getres(id: ClockId) -> Timespec {
@@ -258,11 +254,7 @@ fn clock_gettime_dynamic_old(id: c::clockid_t) -> io::Result<Timespec> {
     })
 }
 
-#[cfg(not(any(
-    target_os = "redox",
-    target_os = "wasi",
-    all(apple, not(target_os = "macos"))
-)))]
+#[cfg(not(any(target_os = "wasi", all(apple, not(target_os = "macos")))))]
 #[inline]
 pub(crate) fn clock_settime(id: ClockId, timespec: Timespec) -> io::Result<()> {
     // Old 32-bit version: libc has `clock_gettime` but it is not y2038 safe by
