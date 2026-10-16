@@ -398,6 +398,7 @@ fn test_sockopts_ipv6() {
     crate::init();
 
     let s = rustix::net::socket(AddressFamily::INET6, SocketType::STREAM, None).unwrap();
+    let ds = rustix::net::socket(AddressFamily::INET6, SocketType::DGRAM, None).unwrap();
 
     test_sockopts_socket(&s);
 
@@ -415,7 +416,7 @@ fn test_sockopts_ipv6() {
     assert_eq!(sockopt::socket_domain(&s).unwrap(), AddressFamily::INET6);
 
     assert_ne!(sockopt::ipv6_unicast_hops(&s).unwrap(), 0);
-    match sockopt::ipv6_multicast_loop(&s) {
+    match sockopt::ipv6_multicast_loop(&ds) {
         Ok(multicast_loop) => assert!(multicast_loop),
         Err(io::Errno::OPNOTSUPP) => (),
         Err(io::Errno::INVAL) => (),
@@ -424,13 +425,31 @@ fn test_sockopts_ipv6() {
     }
     assert_ne!(sockopt::ipv6_unicast_hops(&s).unwrap(), 0);
 
-    // On NetBSD, `get_ipv6_multicasthops` returns 1 here. It's not evident
-    // why it differs from other OS's.
-    #[cfg(not(target_os = "netbsd"))]
-    match sockopt::ipv6_multicast_hops(&s) {
-        Ok(hops) => assert_eq!(hops, 0),
+    match sockopt::ipv6_multicast_hops(&ds) {
+        Ok(hops) => assert_eq!(hops, 1),
         Err(io::Errno::NOPROTOOPT) => (),
-        Err(io::Errno::INVAL) => (),
+        Err(err) => panic!("{:?}", err),
+    }
+
+    // Test IPv6 multicast hops roundtrip, use a value that is not a default on a known system.
+    let before = sockopt::ipv6_multicast_hops(&ds).unwrap();
+    match sockopt::set_ipv6_multicast_hops(&ds, 200) {
+        Ok(()) => {
+            assert_eq!(sockopt::ipv6_multicast_hops(&ds).unwrap(), 200);
+            sockopt::set_ipv6_multicast_hops(&ds, before).unwrap();
+        }
+        Err(io::Errno::NOPROTOOPT) => (),
+        Err(err) => panic!("{:?}", err),
+    }
+
+    // Test IPv6 unicast hops roundtrip, use a value that is not a default on a known system.
+    let before = sockopt::ipv6_unicast_hops(&s).unwrap();
+    match sockopt::set_ipv6_unicast_hops(&s, Some(200)) {
+        Ok(()) => {
+            assert_eq!(sockopt::ipv6_unicast_hops(&s).unwrap(), 200);
+            sockopt::set_ipv6_unicast_hops(&s, Some(before)).unwrap();
+        }
+        Err(io::Errno::NOPROTOOPT) => (),
         Err(err) => panic!("{:?}", err),
     }
 
@@ -442,10 +461,10 @@ fn test_sockopts_ipv6() {
     assert_eq!(sockopt::ipv6_v6only(&s).unwrap(), !v6only);
 
     // Set the IPv6 multicast loop value.
-    match sockopt::set_ipv6_multicast_loop(&s, false) {
+    match sockopt::set_ipv6_multicast_loop(&ds, false) {
         Ok(()) => {
             // Check that the IPv6 multicast loop value is set.
-            match sockopt::ipv6_multicast_loop(&s) {
+            match sockopt::ipv6_multicast_loop(&ds) {
                 Ok(multicast_loop) => assert!(!multicast_loop),
                 Err(err) => panic!("{:?}", err),
             }
