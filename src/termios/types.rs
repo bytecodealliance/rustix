@@ -341,37 +341,72 @@ bitflags! {
         const ONLRET = c::ONLRET;
 
         /// `OFILL`
-        #[cfg(not(bsd))]
+        #[cfg(not(any(
+            freebsdlike,
+            netbsdlike,
+        )))]
         const OFILL = c::OFILL;
 
         /// `OFDEL`
-        #[cfg(not(bsd))]
+        #[cfg(not(any(
+            freebsdlike,
+            netbsdlike,
+        )))]
         const OFDEL = c::OFDEL;
 
         /// `NLDLY`
-        #[cfg(not(any(bsd, solarish, target_os = "redox")))]
+        #[cfg(not(any(
+            freebsdlike,
+            netbsdlike,
+            solarish,
+            target_os = "redox",
+        )))]
         const NLDLY = c::NLDLY;
 
         /// `NL0`
-        #[cfg(not(any(bsd, solarish, target_os = "fuchsia", target_os = "redox")))]
+        #[cfg(not(any(
+            freebsdlike,
+            netbsdlike,
+            solarish,
+            target_os = "fuchsia",
+            target_os = "redox",
+        )))]
         const NL0 = c::NL0;
 
         /// `NL1`
-        #[cfg(not(any(bsd, solarish, target_os = "fuchsia", target_os = "redox")))]
+        #[cfg(not(any(
+            freebsdlike,
+            netbsdlike,
+            solarish,
+            target_os = "fuchsia",
+            target_os = "redox",
+        )))]
         const NL1 = c::NL1;
 
         /// `CRDLY`
-        #[cfg(not(any(bsd, solarish, target_os = "redox")))]
+        #[cfg(not(any(
+            freebsdlike,
+            netbsdlike,
+            solarish,
+            target_os = "redox",
+        )))]
         const CRDLY = c::CRDLY;
 
         /// `CR0`
-        #[cfg(not(any(bsd, solarish, target_os = "fuchsia", target_os = "redox")))]
+        #[cfg(not(any(
+            freebsdlike,
+            netbsdlike,
+            solarish,
+            target_os = "fuchsia",
+            target_os = "redox",
+        )))]
         const CR0 = c::CR0;
 
         /// `CR1`
         #[cfg(not(any(
             target_env = "musl",
-            bsd,
+            freebsdlike,
+            netbsdlike,
             solarish,
             target_os = "emscripten",
             target_os = "fuchsia",
@@ -382,7 +417,8 @@ bitflags! {
         /// `CR2`
         #[cfg(not(any(
             target_env = "musl",
-            bsd,
+            freebsdlike,
+            netbsdlike,
             solarish,
             target_os = "emscripten",
             target_os = "fuchsia",
@@ -393,7 +429,8 @@ bitflags! {
         /// `CR3`
         #[cfg(not(any(
             target_env = "musl",
-            bsd,
+            freebsdlike,
+            netbsdlike,
             solarish,
             target_os = "emscripten",
             target_os = "fuchsia",
@@ -423,7 +460,8 @@ bitflags! {
         /// `TAB1`
         #[cfg(not(any(
             target_env = "musl",
-            bsd,
+            freebsdlike,
+            netbsdlike,
             solarish,
             target_os = "emscripten",
             target_os = "fuchsia",
@@ -434,7 +472,8 @@ bitflags! {
         /// `TAB2`
         #[cfg(not(any(
             target_env = "musl",
-            bsd,
+            freebsdlike,
+            netbsdlike,
             solarish,
             target_os = "emscripten",
             target_os = "fuchsia",
@@ -445,7 +484,8 @@ bitflags! {
         /// `TAB3`
         #[cfg(not(any(
             target_env = "musl",
-            bsd,
+            freebsdlike,
+            netbsdlike,
             solarish,
             target_os = "emscripten",
             target_os = "fuchsia",
@@ -457,24 +497,35 @@ bitflags! {
         #[cfg(not(any(
             bsd,
             solarish,
-            target_os = "aix",
             target_os = "haiku",
             target_os = "redox",
         )))]
         const XTABS = c::XTABS;
 
         /// `BSDLY`
-        #[cfg(not(any(bsd, solarish, target_os = "redox")))]
+        #[cfg(not(any(
+            freebsdlike,
+            netbsdlike,
+            solarish,
+            target_os = "redox",
+        )))]
         const BSDLY = c::BSDLY;
 
         /// `BS0`
-        #[cfg(not(any(bsd, solarish, target_os = "fuchsia", target_os = "redox")))]
+        #[cfg(not(any(
+            freebsdlike,
+            netbsdlike,
+            solarish,
+            target_os = "fuchsia",
+            target_os = "redox",
+        )))]
         const BS0 = c::BS0;
 
         /// `BS1`
         #[cfg(not(any(
             target_env = "musl",
-            bsd,
+            freebsdlike,
+            netbsdlike,
             solarish,
             target_os = "emscripten",
             target_os = "fuchsia",
@@ -483,17 +534,29 @@ bitflags! {
         const BS1 = c::BS1;
 
         /// `FFDLY`
-        #[cfg(not(any(bsd, solarish, target_os = "redox")))]
+        #[cfg(not(any(
+            freebsdlike,
+            netbsdlike,
+            solarish,
+            target_os = "redox",
+        )))]
         const FFDLY = c::FFDLY;
 
         /// `FF0`
-        #[cfg(not(any(bsd, solarish, target_os = "fuchsia", target_os = "redox")))]
+        #[cfg(not(any(
+            freebsdlike,
+            netbsdlike,
+            solarish,
+            target_os = "fuchsia",
+            target_os = "redox",
+        )))]
         const FF0 = c::FF0;
 
         /// `FF1`
         #[cfg(not(any(
             target_env = "musl",
-            bsd,
+            freebsdlike,
+            netbsdlike,
             solarish,
             target_os = "emscripten",
             target_os = "fuchsia",
@@ -502,17 +565,29 @@ bitflags! {
         const FF1 = c::FF1;
 
         /// `VTDLY`
-        #[cfg(not(any(bsd, solarish, target_os = "redox")))]
+        #[cfg(not(any(
+            freebsdlike,
+            netbsdlike,
+            solarish,
+            target_os = "redox",
+        )))]
         const VTDLY = c::VTDLY;
 
         /// `VT0`
-        #[cfg(not(any(bsd, solarish, target_os = "fuchsia", target_os = "redox")))]
+        #[cfg(not(any(
+            freebsdlike,
+            netbsdlike,
+            solarish,
+            target_os = "fuchsia",
+            target_os = "redox",
+        )))]
         const VT0 = c::VT0;
 
         /// `VT1`
         #[cfg(not(any(
             target_env = "musl",
-            bsd,
+            freebsdlike,
+            netbsdlike,
             solarish,
             target_os = "emscripten",
             target_os = "fuchsia",
