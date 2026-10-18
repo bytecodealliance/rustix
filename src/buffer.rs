@@ -173,6 +173,8 @@ impl<'a, T> private::Sealed<T> for &'a mut [MaybeUninit<T>] {
 
     #[inline]
     unsafe fn assume_init(self, len: usize) -> Self::Output {
+        // The syscall may report more than the buffer holds, as in an xattr size query.
+        let len = len.min(self.len());
         let (init, uninit) = self.split_at_mut(len);
 
         // SAFETY: The user asserts that the slice is now initialized.
@@ -192,6 +194,8 @@ impl<'a, T, const N: usize> private::Sealed<T> for &'a mut [MaybeUninit<T>; N] {
 
     #[inline]
     unsafe fn assume_init(self, len: usize) -> Self::Output {
+        // The syscall may report more than the buffer holds, as in an xattr size query.
+        let len = len.min(self.len());
         let (init, uninit) = self.split_at_mut(len);
 
         // SAFETY: The user asserts that the slice is now initialized.
@@ -212,6 +216,8 @@ impl<'a, T> private::Sealed<T> for &'a mut Vec<MaybeUninit<T>> {
 
     #[inline]
     unsafe fn assume_init(self, len: usize) -> Self::Output {
+        // The syscall may report more than the buffer holds, as in an xattr size query.
+        let len = len.min(self.len());
         let (init, uninit) = self.split_at_mut(len);
 
         // SAFETY: The user asserts that the slice is now initialized.
@@ -316,7 +322,8 @@ mod private {
         ///
         /// # Safety
         ///
-        /// At least `len` elements of the buffer must now be initialized.
+        /// At least `len` elements of the buffer, or the whole buffer if `len` is
+        /// larger, must now be initialized.
         #[must_use]
         unsafe fn assume_init(self, len: usize) -> Self::Output;
     }
