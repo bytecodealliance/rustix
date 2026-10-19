@@ -34,7 +34,7 @@ mod mknodat;
 mod negative_timestamp;
 #[cfg(linux_kernel)]
 mod openat;
-#[cfg(linux_raw_dep)]
+#[cfg(linux_kernel)]
 mod openat2;
 #[cfg(not(target_os = "redox"))]
 mod readdir;

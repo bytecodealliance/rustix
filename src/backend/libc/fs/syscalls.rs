@@ -1868,7 +1868,7 @@ pub(crate) fn memfd_create(name: &CStr, flags: MemfdFlags) -> io::Result<OwnedFd
     unsafe { ret_owned_fd(memfd_create(c_str(name), bitflags_bits!(flags))) }
 }
 
-#[cfg(linux_raw_dep)]
+#[cfg(linux_kernel)]
 pub(crate) fn openat2(
     dirfd: BorrowedFd<'_>,
     path: &CStr,
@@ -1876,7 +1876,17 @@ pub(crate) fn openat2(
     mode: Mode,
     resolve: ResolveFlags,
 ) -> io::Result<OwnedFd> {
+    #[cfg(linux_raw_dep)]
     use linux_raw_sys::general::open_how;
+
+    #[cfg(not(linux_raw_dep))]
+    #[repr(C)]
+    #[derive(Debug, Copy, Clone)]
+    struct open_how {
+        flags: u64,
+        mode: u64,
+        resolve: u64,
+    }
 
     syscall! {
         fn openat2(
