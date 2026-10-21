@@ -338,9 +338,11 @@ pub mod quite_yet {
     not_implemented!(execveat);
     not_implemented!(execve);
 
-    /// For now, use `rustix::process::uname().nodename()` instead.
+    /// For now, use [`Uname::nodename`] instead.
     ///
     /// See also the [module comment](self).
+    ///
+    /// [`Uname::nodename`]: crate::system::Uname::nodename
     pub fn gethostname() {
         unimplemented!()
     }
