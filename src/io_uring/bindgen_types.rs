@@ -18,12 +18,12 @@ impl<T> IncompleteArrayField<T> {
 
     #[inline]
     pub fn as_ptr(&self) -> *const T {
-        as_ptr(self).cast::<T>()
+        as_ptr(self).cast()
     }
 
     #[inline]
     pub fn as_mut_ptr(&mut self) -> *mut T {
-        as_mut_ptr(self).cast::<T>()
+        as_mut_ptr(self).cast()
     }
 
     #[inline]

@@ -3,8 +3,6 @@
 //! We can't easily test that it actually locks memory, but we can test that we
 //! can call it and either get success or a reasonable error message.
 
-use std::ffi::c_void;
-
 #[test]
 fn test_mlock() {
     let mut buf = vec![0_u8; 4096];
@@ -16,8 +14,8 @@ fn test_mlock() {
     let ptr = ((ptr as usize) & (-4096_isize) as usize) as *mut u8;
 
     unsafe {
-        match rustix::mm::mlock(ptr.cast::<c_void>(), buf.len()) {
-            Ok(()) => rustix::mm::munlock(ptr.cast::<c_void>(), buf.len()).unwrap(),
+        match rustix::mm::mlock(ptr.cast(), buf.len()) {
+            Ok(()) => rustix::mm::munlock(ptr.cast(), buf.len()).unwrap(),
             // Tests won't always have enough memory or permissions, and that's ok.
             Err(rustix::io::Errno::PERM | rustix::io::Errno::NOMEM) => {}
             // But they shouldn't fail otherwise.
@@ -33,11 +31,11 @@ fn test_mlock_with() {
 
     unsafe {
         match rustix::mm::mlock_with(
-            buf.as_mut_ptr().cast::<c_void>(),
+            buf.as_mut_ptr().cast(),
             buf.len(),
             rustix::mm::MlockFlags::empty(),
         ) {
-            Ok(()) => rustix::mm::munlock(buf.as_mut_ptr().cast::<c_void>(), buf.len()).unwrap(),
+            Ok(()) => rustix::mm::munlock(buf.as_mut_ptr().cast(), buf.len()).unwrap(),
             // Tests won't always have enough memory or permissions, and that's ok.
             Err(rustix::io::Errno::PERM | rustix::io::Errno::NOMEM | rustix::io::Errno::NOSYS) => {}
             // But they shouldn't fail otherwise.
@@ -67,11 +65,11 @@ fn test_mlock_with_onfault() {
 
     unsafe {
         match rustix::mm::mlock_with(
-            buf.as_mut_ptr().cast::<c_void>(),
+            buf.as_mut_ptr().cast(),
             buf.len(),
             rustix::mm::MlockFlags::ONFAULT,
         ) {
-            Ok(()) => rustix::mm::munlock(buf.as_mut_ptr().cast::<c_void>(), buf.len()).unwrap(),
+            Ok(()) => rustix::mm::munlock(buf.as_mut_ptr().cast(), buf.len()).unwrap(),
             // Tests won't always have enough memory or permissions, and that's ok.
             Err(rustix::io::Errno::PERM | rustix::io::Errno::NOMEM | rustix::io::Errno::NOSYS) => {}
             // But they shouldn't fail otherwise.
