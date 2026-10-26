@@ -52,6 +52,8 @@ mod statx;
 mod symlinkat;
 #[cfg(not(any(solarish, target_os = "redox", target_os = "wasi")))]
 mod sync;
+#[cfg(linux_kernel)]
+mod sync_file_range;
 mod utimensat;
 #[cfg(any(apple, linux_kernel))]
 mod xattr;

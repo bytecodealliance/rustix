@@ -508,6 +508,25 @@ bitflags! {
 }
 
 bitflags! {
+    /// `SYNC_FILE_RANGE_*` constants for use with [`sync_file_range`].
+    ///
+    /// [`sync_file_range`]: crate::fs::sync_file_range
+    #[repr(transparent)]
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct SyncFileRangeFlags: u32 {
+        /// `SYNC_FILE_RANGE_WAIT_BEFORE`
+        const WAIT_BEFORE = linux_raw_sys::general::SYNC_FILE_RANGE_WAIT_BEFORE;
+        /// `SYNC_FILE_RANGE_WRITE`
+        const WRITE = linux_raw_sys::general::SYNC_FILE_RANGE_WRITE;
+        /// `SYNC_FILE_RANGE_WAIT_AFTER`
+        const WAIT_AFTER = linux_raw_sys::general::SYNC_FILE_RANGE_WAIT_AFTER;
+
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
+        const _ = !0;
+    }
+}
+
+bitflags! {
     /// `FALLOC_FL_*` constants for use with [`fallocate`].
     ///
     /// [`fallocate`]: crate::fs::fallocate

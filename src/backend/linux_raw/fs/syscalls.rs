@@ -33,7 +33,7 @@ use crate::fs::CWD;
 use crate::fs::{
     inotify, Access, Advice, AtFlags, FallocateFlags, FileType, FlockOperation, Fsid, Gid,
     MemfdFlags, Mode, OFlags, RenameFlags, ResolveFlags, SealFlags, SeekFrom, Stat, StatFs,
-    StatVfs, StatVfsMountFlags, Statx, StatxFlags, Timestamps, Uid, XattrFlags,
+    StatVfs, StatVfsMountFlags, Statx, StatxFlags, SyncFileRangeFlags, Timestamps, Uid, XattrFlags,
 };
 use crate::io;
 use core::mem::MaybeUninit;
@@ -461,6 +461,90 @@ pub(crate) fn fsync(fd: BorrowedFd<'_>) -> io::Result<()> {
 #[inline]
 pub(crate) fn fdatasync(fd: BorrowedFd<'_>) -> io::Result<()> {
     unsafe { ret(syscall_readonly!(__NR_fdatasync, fd)) }
+}
+
+pub(crate) fn sync_file_range(
+    fd: BorrowedFd<'_>,
+    offset: u64,
+    nbytes: u64,
+    flags: SyncFileRangeFlags,
+) -> io::Result<()> {
+    // On ARM and PowerPC, the kernel entry point is `sync_file_range2`, which
+    // takes `flags` before the 64-bit arguments so that those stay aligned in
+    // register pairs.
+    #[cfg(any(target_arch = "arm", target_arch = "powerpc"))]
+    unsafe {
+        ret(syscall_readonly!(
+            __NR_sync_file_range2,
+            fd,
+            flags,
+            hi(offset),
+            lo(offset),
+            hi(nbytes),
+            lo(nbytes)
+        ))
+    }
+
+    #[cfg(target_arch = "powerpc64")]
+    unsafe {
+        ret(syscall_readonly!(
+            __NR_sync_file_range2,
+            fd,
+            flags,
+            loff_t_from_u64(offset),
+            loff_t_from_u64(nbytes)
+        ))
+    }
+
+    // On mips, the arguments are not reordered, and padding is inserted
+    // instead to ensure alignment.
+    #[cfg(any(target_arch = "mips", target_arch = "mips32r6"))]
+    unsafe {
+        ret(syscall_readonly!(
+            __NR_sync_file_range,
+            fd,
+            zero(),
+            hi(offset),
+            lo(offset),
+            hi(nbytes),
+            lo(nbytes),
+            flags
+        ))
+    }
+
+    // On the other 32-bit architectures, the 64-bit arguments take two
+    // registers each.
+    #[cfg(all(
+        target_pointer_width = "32",
+        not(any(
+            target_arch = "arm",
+            target_arch = "mips",
+            target_arch = "mips32r6",
+            target_arch = "powerpc"
+        )),
+    ))]
+    unsafe {
+        ret(syscall_readonly!(
+            __NR_sync_file_range,
+            fd,
+            hi(offset),
+            lo(offset),
+            hi(nbytes),
+            lo(nbytes),
+            flags
+        ))
+    }
+
+    #[cfg(all(target_pointer_width = "64", not(target_arch = "powerpc64")))]
+    unsafe {
+        ret(syscall_readonly!(
+            __NR_sync_file_range,
+            fd,
+            loff_t_from_u64(offset),
+            loff_t_from_u64(nbytes),
+            flags
+        ))
+    }
 }
 
 #[inline]
