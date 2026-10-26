@@ -1478,12 +1478,17 @@ pub(crate) fn fchown(fd: BorrowedFd<'_>, owner: Option<Uid>, group: Option<Gid>)
     // implementations, such as musl, add extra logic to `fchown` to emulate
     // support for `O_PATH`, which uses `/proc` outside our control and
     // interferes with our own use of `O_PATH`.
+    #[cfg(any(target_arch = "x86", target_arch = "arm", target_arch = "sparc"))]
+    const SYS: c::c_long = c::SYS_fchown32 as c::c_long;
+    #[cfg(not(any(target_arch = "x86", target_arch = "arm", target_arch = "sparc")))]
+    const SYS: c::c_long = c::SYS_fchown as c::c_long;
+
     syscall! {
         fn fchown(
             fd: c::c_int,
             owner: c::uid_t,
             group: c::gid_t
-        ) via SYS_fchown -> c::c_int
+        ) via SYS -> c::c_int
     }
     unsafe {
         let (ow, gr) = crate::ugid::translate_fchown_args(owner, group);
