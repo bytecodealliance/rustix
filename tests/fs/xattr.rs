@@ -131,6 +131,27 @@ fn xattr_basic() {
     );
 }
 
+#[test]
+fn xattr_size_query_uninit() {
+    use rustix::fs::XattrFlags;
+    use std::mem::MaybeUninit;
+
+    let tmp = tempfile::tempdir().unwrap();
+    let path = tmp.path().join("file");
+    std::fs::write(&path, b"").unwrap();
+    rustix::fs::setxattr(&path, "user.test", b"hello", XattrFlags::empty()).unwrap();
+
+    let empty: &mut [MaybeUninit<u8>] = &mut [];
+    let (init, uninit) = rustix::fs::getxattr(&path, "user.test", empty).unwrap();
+    assert!(init.is_empty());
+    assert!(uninit.is_empty());
+
+    let empty: &mut [MaybeUninit<u8>] = &mut [];
+    let (init, uninit) = rustix::fs::listxattr(&path, empty).unwrap();
+    assert!(init.is_empty());
+    assert!(uninit.is_empty());
+}
+
 /// To check the correctness of the tested implementations of *listxattr(), their output can be
 /// compared to an external implementation, in this case listxattr() from the libc crate.
 fn libc_listxattr(path: &str) -> usize {
