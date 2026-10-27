@@ -213,7 +213,12 @@ fn empty_buffers() {
     assert_eq!(rustix::fs::listxattr(&file_path, &mut empty), Ok(0));
     assert_eq!(rustix::fs::llistxattr(&file_path, &mut empty), Ok(0));
     assert_eq!(rustix::fs::flistxattr(&file, &mut empty), Ok(0));
-    match rustix::fs::setxattr(&file_path, "my neat attribute", value, XattrFlags::empty()) {
+    match rustix::fs::setxattr(
+        &file_path,
+        "user.my fun attribute",
+        value,
+        XattrFlags::empty(),
+    ) {
         Ok(()) => {}
         Err(rustix::io::Errno::NOTSUP) => return,
         Err(err) => Err(err).unwrap(),
