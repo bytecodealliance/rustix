@@ -65,6 +65,8 @@ mod statx;
     target_os = "wasi"
 )))]
 mod sync;
+#[cfg(linux_kernel)]
+mod sync_file_range;
 #[cfg(any(apple, linux_kernel, target_os = "hurd"))]
 mod xattr;
 
@@ -131,6 +133,8 @@ pub use statx::*;
     target_os = "wasi"
 )))]
 pub use sync::sync;
+#[cfg(linux_kernel)]
+pub use sync_file_range::sync_file_range;
 #[cfg(any(apple, linux_kernel, target_os = "hurd"))]
 pub use xattr::*;
 

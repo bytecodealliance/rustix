@@ -781,6 +781,7 @@ bitflags! {
     target_os = "redox",
     target_os = "vita"
 )))]
+
 bitflags! {
     /// `FALLOC_FL_*` constants for use with [`fallocate`].
     ///
@@ -867,6 +868,38 @@ bitflags! {
             target_os = "wasi",
         )))]
         const UNSHARE_RANGE = bitcast!(c::FALLOC_FL_UNSHARE_RANGE);
+
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
+        const _ = !0;
+    }
+}
+
+#[cfg(linux_kernel)]
+bitflags! {
+    /// `SYNC_FILE_RANGE_*` constants for use with [`sync_file_range`].
+    ///
+    /// [`sync_file_range`]: crate::fs::sync_file_range
+    #[repr(transparent)]
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct SyncFileRangeFlags: u32 {
+        /// `SYNC_FILE_RANGE_WAIT_BEFORE`
+        #[cfg(not(target_os = "android"))]
+        const WAIT_BEFORE = bitcast!(c::SYNC_FILE_RANGE_WAIT_BEFORE);
+        /// `SYNC_FILE_RANGE_WAIT_BEFORE`
+        #[cfg(target_os = "android")]
+        const WAIT_BEFORE = 1;
+        /// `SYNC_FILE_RANGE_WRITE`
+        #[cfg(not(target_os = "android"))]
+        const WRITE = bitcast!(c::SYNC_FILE_RANGE_WRITE);
+        /// `SYNC_FILE_RANGE_WRITE`
+        #[cfg(target_os = "android")]
+        const WRITE = 2;
+        /// `SYNC_FILE_RANGE_WAIT_AFTER`
+        #[cfg(not(target_os = "android"))]
+        const WAIT_AFTER = bitcast!(c::SYNC_FILE_RANGE_WAIT_AFTER);
+        /// `SYNC_FILE_RANGE_WAIT_AFTER`
+        #[cfg(target_os = "android")]
+        const WAIT_AFTER = 4;
 
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;

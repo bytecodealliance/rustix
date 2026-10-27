@@ -413,6 +413,13 @@ pub(crate) mod fs {
         }
     }
 
+    impl<'a, Num: ArgNumber> From<crate::fs::SyncFileRangeFlags> for ArgReg<'a, Num> {
+        #[inline]
+        fn from(flags: crate::fs::SyncFileRangeFlags) -> Self {
+            c_uint(flags.bits())
+        }
+    }
+
     impl<'a, Num: ArgNumber> From<crate::fs::Advice> for ArgReg<'a, Num> {
         #[inline]
         fn from(advice: crate::fs::Advice) -> Self {
