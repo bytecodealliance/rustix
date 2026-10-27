@@ -135,7 +135,7 @@ unsafe fn clock_nanosleep_absolute_old(id: ClockId, req: &Timespec) -> io::Resul
     ret(syscall_readonly!(
         __NR_clock_nanosleep,
         id,
-        c_int(0),
+        c_uint(TIMER_ABSTIME),
         by_ref(&old_req),
         zero()
     ))
