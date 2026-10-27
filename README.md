@@ -109,7 +109,7 @@ API modules are conditional with cargo feature flags.
 [`rustix::io`]: https://docs.rs/rustix/*/rustix/io/index.html
 [`rustix::fd`]: https://docs.rs/rustix/*/rustix/fd/index.html
 [`rustix::ffi`]: https://docs.rs/rustix/*/rustix/ffi/index.html
-[`rustix::ioctl`]: https://docs.rs/rustix/*/rustix/ffi/ioctl.html
+[`rustix::ioctl`]: https://docs.rs/rustix/*/rustix/ioctl/index.html
 
 ## 64-bit Large File Support (LFS) and Year 2038 (y2038) support
 
