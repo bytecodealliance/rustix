@@ -77,19 +77,21 @@ unsafe fn clock_nanosleep_relative_old(
         tv_nsec: req.tv_nsec.try_into().map_err(|_| io::Errno::INVAL)?,
     };
     let mut old_rem = MaybeUninit::<__kernel_old_timespec>::uninit();
-    ret(syscall!(
+    let result = ret(syscall!(
         __NR_clock_nanosleep,
         id,
         c_int(0),
         by_ref(&old_req),
         &mut old_rem
-    ))?;
-    let old_rem = old_rem.assume_init();
-    rem.write(Timespec {
-        tv_sec: old_rem.tv_sec.into(),
-        tv_nsec: old_rem.tv_nsec.into(),
-    });
-    Ok(())
+    ));
+    if result == Err(io::Errno::INTR) {
+        let old_rem = old_rem.assume_init();
+        rem.write(Timespec {
+            tv_sec: old_rem.tv_sec.into(),
+            tv_nsec: old_rem.tv_nsec.into(),
+        });
+    }
+    result
 }
 
 #[inline]
@@ -182,13 +184,15 @@ unsafe fn nanosleep_old(req: &Timespec, rem: &mut MaybeUninit<Timespec>) -> io::
         tv_nsec: req.tv_nsec.try_into().map_err(|_| io::Errno::INVAL)?,
     };
     let mut old_rem = MaybeUninit::<__kernel_old_timespec>::uninit();
-    ret(syscall!(__NR_nanosleep, by_ref(&old_req), &mut old_rem))?;
-    let old_rem = old_rem.assume_init();
-    rem.write(Timespec {
-        tv_sec: old_rem.tv_sec.into(),
-        tv_nsec: old_rem.tv_nsec.into(),
-    });
-    Ok(())
+    let result = ret(syscall!(__NR_nanosleep, by_ref(&old_req), &mut old_rem));
+    if result == Err(io::Errno::INTR) {
+        let old_rem = old_rem.assume_init();
+        rem.write(Timespec {
+            tv_sec: old_rem.tv_sec.into(),
+            tv_nsec: old_rem.tv_nsec.into(),
+        });
+    }
+    result
 }
 
 #[inline]
