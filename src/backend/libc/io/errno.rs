@@ -791,7 +791,7 @@ impl Errno {
     #[cfg(not(target_os = "l4re"))]
     pub const NOTSOCK: Self = Self(c::ENOTSOCK);
     /// `ENOTSUP`
-    #[cfg(not(any(windows, target_os = "redox")))]
+    #[cfg(not(any(windows, target_os = "hermit", target_os = "redox")))]
     pub const NOTSUP: Self = Self(c::ENOTSUP);
     /// `ENOTTY`
     #[cfg(not(windows))]
