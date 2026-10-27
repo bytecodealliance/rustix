@@ -277,7 +277,7 @@ bitflags! {
         const ICRNL = c::ICRNL;
 
         /// `IUCLC`
-        #[cfg(any(linux_raw_dep, solarish, target_os = "aix", target_os = "haiku", target_os = "nto"))]
+        #[cfg(any(linux_raw_dep, solarish, target_os = "haiku", target_os = "nto"))]
         const IUCLC = c::IUCLC;
 
         /// `IXON`
@@ -324,7 +324,6 @@ bitflags! {
         #[cfg(not(any(
             apple,
             freebsdlike,
-            target_os = "aix",
             target_os = "netbsd",
             target_os = "redox",
         )))]
@@ -370,20 +369,18 @@ bitflags! {
             freebsdlike,
             netbsdlike,
             solarish,
-            target_os = "fuchsia",
             target_os = "redox",
         )))]
-        const NL0 = c::NL0;
+        const NL0 = bitcast!(c::NL0);
 
         /// `NL1`
         #[cfg(not(any(
             freebsdlike,
             netbsdlike,
             solarish,
-            target_os = "fuchsia",
             target_os = "redox",
         )))]
-        const NL1 = c::NL1;
+        const NL1 = bitcast!(c::NL1);
 
         /// `CRDLY`
         #[cfg(not(any(
@@ -399,46 +396,36 @@ bitflags! {
             freebsdlike,
             netbsdlike,
             solarish,
-            target_os = "fuchsia",
             target_os = "redox",
         )))]
-        const CR0 = c::CR0;
+        const CR0 = bitcast!(c::CR0);
 
         /// `CR1`
         #[cfg(not(any(
-            target_env = "musl",
             freebsdlike,
             netbsdlike,
             solarish,
-            target_os = "emscripten",
-            target_os = "fuchsia",
             target_os = "redox",
         )))]
-        const CR1 = c::CR1;
+        const CR1 = bitcast!(c::CR1);
 
         /// `CR2`
         #[cfg(not(any(
-            target_env = "musl",
             freebsdlike,
             netbsdlike,
             solarish,
-            target_os = "emscripten",
-            target_os = "fuchsia",
             target_os = "redox",
         )))]
-        const CR2 = c::CR2;
+        const CR2 = bitcast!(c::CR2);
 
         /// `CR3`
         #[cfg(not(any(
-            target_env = "musl",
             freebsdlike,
             netbsdlike,
             solarish,
-            target_os = "emscripten",
-            target_os = "fuchsia",
             target_os = "redox",
         )))]
-        const CR3 = c::CR3;
+        const CR3 = bitcast!(c::CR3);
 
         /// `TABDLY`
         #[cfg(not(any(
@@ -454,46 +441,36 @@ bitflags! {
             netbsdlike,
             solarish,
             target_os = "dragonfly",
-            target_os = "fuchsia",
             target_os = "redox",
         )))]
-        const TAB0 = c::TAB0;
+        const TAB0 = bitcast!(c::TAB0);
 
         /// `TAB1`
         #[cfg(not(any(
-            target_env = "musl",
             freebsdlike,
             netbsdlike,
             solarish,
-            target_os = "emscripten",
-            target_os = "fuchsia",
             target_os = "redox",
         )))]
-        const TAB1 = c::TAB1;
+        const TAB1 = bitcast!(c::TAB1);
 
         /// `TAB2`
         #[cfg(not(any(
-            target_env = "musl",
             freebsdlike,
             netbsdlike,
             solarish,
-            target_os = "emscripten",
-            target_os = "fuchsia",
             target_os = "redox",
         )))]
-        const TAB2 = c::TAB2;
+        const TAB2 = bitcast!(c::TAB2);
 
         /// `TAB3`
         #[cfg(not(any(
-            target_env = "musl",
             freebsdlike,
             netbsdlike,
             solarish,
-            target_os = "emscripten",
-            target_os = "fuchsia",
             target_os = "redox",
         )))]
-        const TAB3 = c::TAB3;
+        const TAB3 = bitcast!(c::TAB3);
 
         /// `XTABS`
         #[cfg(not(any(
@@ -502,7 +479,7 @@ bitflags! {
             target_os = "haiku",
             target_os = "redox",
         )))]
-        const XTABS = c::XTABS;
+        const XTABS = bitcast!(c::XTABS);
 
         /// `BSDLY`
         #[cfg(not(any(
@@ -518,22 +495,18 @@ bitflags! {
             freebsdlike,
             netbsdlike,
             solarish,
-            target_os = "fuchsia",
             target_os = "redox",
         )))]
-        const BS0 = c::BS0;
+        const BS0 = bitcast!(c::BS0);
 
         /// `BS1`
         #[cfg(not(any(
-            target_env = "musl",
             freebsdlike,
             netbsdlike,
             solarish,
-            target_os = "emscripten",
-            target_os = "fuchsia",
             target_os = "redox",
         )))]
-        const BS1 = c::BS1;
+        const BS1 = bitcast!(c::BS1);
 
         /// `FFDLY`
         #[cfg(not(any(
@@ -549,22 +522,18 @@ bitflags! {
             freebsdlike,
             netbsdlike,
             solarish,
-            target_os = "fuchsia",
             target_os = "redox",
         )))]
-        const FF0 = c::FF0;
+        const FF0 = bitcast!(c::FF0);
 
         /// `FF1`
         #[cfg(not(any(
-            target_env = "musl",
             freebsdlike,
             netbsdlike,
             solarish,
-            target_os = "emscripten",
-            target_os = "fuchsia",
             target_os = "redox",
         )))]
-        const FF1 = c::FF1;
+        const FF1 = bitcast!(c::FF1);
 
         /// `VTDLY`
         #[cfg(not(any(
@@ -580,22 +549,18 @@ bitflags! {
             freebsdlike,
             netbsdlike,
             solarish,
-            target_os = "fuchsia",
             target_os = "redox",
         )))]
-        const VT0 = c::VT0;
+        const VT0 = bitcast!(c::VT0);
 
         /// `VT1`
         #[cfg(not(any(
-            target_env = "musl",
             freebsdlike,
             netbsdlike,
             solarish,
-            target_os = "emscripten",
-            target_os = "fuchsia",
             target_os = "redox",
         )))]
-        const VT1 = c::VT1;
+        const VT1 = bitcast!(c::VT1);
 
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
@@ -1606,6 +1571,7 @@ mod tests {
             #[cfg(not(any(
                 linux_kernel,
                 solarish,
+                target_os = "aix",
                 target_os = "emscripten",
                 target_os = "fuchsia"
             )))]
