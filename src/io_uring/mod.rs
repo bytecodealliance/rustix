@@ -27,6 +27,7 @@
 mod bindgen_types;
 
 use crate::fd::{AsFd, BorrowedFd, OwnedFd, RawFd};
+use crate::pipe::PipeFlags;
 use crate::utils::option_as_ptr;
 use crate::{backend, io};
 use bindgen_types::*;
@@ -350,6 +351,22 @@ bitflags::bitflags! {
         /// `IORING_ENTER_EXT_ARG_REG` (since Linux 6.12)
         const EXT_ARG_REG = sys::IORING_ENTER_EXT_ARG_REG;
 
+        /// `IORING_ENTER_NO_IOWAIT`
+        const NO_IOWAIT = sys::IORING_ENTER_NO_IOWAIT;
+
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
+        const _ = !0;
+    }
+}
+
+bitflags::bitflags! {
+    /// `IORING_REG_WAIT_*` flags for use with [`io_uring_reg_wait`].
+    #[repr(transparent)]
+    #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct IoringRegWaitFlags: u32 {
+        /// `IORING_REG_WAIT_TS`
+        const TS = sys::IORING_REG_WAIT_TS as _;
+
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
@@ -459,6 +476,9 @@ pub enum IoringRegisterOp {
 
     /// `IORING_REGISTER_RESIZE_RINGS`(since Linux 6.13)
     RegisterResizeRings = sys::io_uring_register_op::IORING_REGISTER_RESIZE_RINGS as _,
+
+    /// `IORING_REGISTER_MEM_REGION` (since Linux 6.13)
+    RegisterMemRegion = sys::io_uring_register_op::IORING_REGISTER_MEM_REGION as _,
 }
 
 bitflags::bitflags! {
@@ -468,6 +488,22 @@ bitflags::bitflags! {
     pub struct IoringRegisterFlags: u32 {
         /// `IORING_REGISTER_USE_REGISTERED_RING`
         const USE_REGISTERED_RING = sys::io_uring_register_op::IORING_REGISTER_USE_REGISTERED_RING as u32;
+
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
+        const _ = !0;
+    }
+}
+
+bitflags::bitflags! {
+    /// `IORING_REGISTER_*` flags for use with [`io_uring_clone_buffers`].
+    #[repr(transparent)]
+    #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct IoringCloneBuffersFlags: u32 {
+        /// `IORING_REGISTER_SRC_REGISTERED`
+        const SRC_REGISTERED = sys::IORING_REGISTER_SRC_REGISTERED as _;
+
+        /// `IORING_REGISTER_DST_REPLACE`
+        const DST_REPLACE = sys::IORING_REGISTER_DST_REPLACE as _;
 
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
@@ -652,6 +688,21 @@ pub enum IoringOp {
 
     /// `IORING_OP_LISTEN` (since Linux 6.11)
     Listen = sys::io_uring_op::IORING_OP_LISTEN as _,
+
+    /// `IORING_OP_RECV_ZC` (since Linux 6.15)
+    RecvZc = sys::io_uring_op::IORING_OP_RECV_ZC as _,
+
+    /// `IORING_OP_EPOLL_WAIT` (since Linux 6.15)
+    EpollWait = sys::io_uring_op::IORING_OP_EPOLL_WAIT as _,
+
+    /// `IORING_OP_READV_FIXED` (since Linux 6.15)
+    ReadvFixed = sys::io_uring_op::IORING_OP_READV_FIXED as _,
+
+    /// `IORING_OP_WRITEV_FIXED` (since Linux 6.15)
+    WritevFixed = sys::io_uring_op::IORING_OP_WRITEV_FIXED as _,
+
+    /// `IORING_OP_PIPE` (since Linux 6.16)
+    Pipe = sys::io_uring_op::IORING_OP_PIPE as _,
 }
 
 impl Default for IoringOp {
@@ -659,6 +710,28 @@ impl Default for IoringOp {
     fn default() -> Self {
         Self::Nop
     }
+}
+
+/// `SOCKET_URING_OP_*` constants for use with [`IoringOp::UringCmd`] on socket
+/// files, stored in `io_uring_sqe.cmd_op`.
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
+#[repr(u32)]
+#[non_exhaustive]
+pub enum IoringSocketOp {
+    /// `SOCKET_URING_OP_SIOCINQ`
+    Siocinq = sys::io_uring_socket_op::SOCKET_URING_OP_SIOCINQ as _,
+
+    /// `SOCKET_URING_OP_SIOCOUTQ`
+    Siocoutq = sys::io_uring_socket_op::SOCKET_URING_OP_SIOCOUTQ as _,
+
+    /// `SOCKET_URING_OP_GETSOCKOPT`
+    Getsockopt = sys::io_uring_socket_op::SOCKET_URING_OP_GETSOCKOPT as _,
+
+    /// `SOCKET_URING_OP_SETSOCKOPT`
+    Setsockopt = sys::io_uring_socket_op::SOCKET_URING_OP_SETSOCKOPT as _,
+
+    /// `SOCKET_URING_OP_TX_TIMESTAMP`
+    TxTimestamp = sys::io_uring_socket_op::SOCKET_URING_OP_TX_TIMESTAMP as _,
 }
 
 /// `IORING_RESTRICTION_*` constants for use with [`io_uring_restriction`].
@@ -699,6 +772,44 @@ pub enum IoringMsgringCmds {
 
     /// `IORING_MSG_SEND_FD`
     SendFd = sys::io_uring_msg_ring_flags::IORING_MSG_SEND_FD as _,
+}
+
+/// `IO_URING_NAPI_*` operation values for use with [`io_uring_napi`].
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
+#[repr(u8)]
+#[non_exhaustive]
+pub enum IoringNapiOp {
+    /// `IO_URING_NAPI_REGISTER_OP`
+    Register = sys::io_uring_napi_op::IO_URING_NAPI_REGISTER_OP as _,
+
+    /// `IO_URING_NAPI_STATIC_ADD_ID`
+    StaticAddId = sys::io_uring_napi_op::IO_URING_NAPI_STATIC_ADD_ID as _,
+
+    /// `IO_URING_NAPI_STATIC_DEL_ID`
+    StaticDelId = sys::io_uring_napi_op::IO_URING_NAPI_STATIC_DEL_ID as _,
+}
+
+impl Default for IoringNapiOp {
+    #[inline]
+    fn default() -> Self {
+        Self::Register
+    }
+}
+
+/// `IO_URING_NAPI_TRACKING_*` values for `io_uring_napi.op_param`
+/// when `io_uring_napi.opcode` is [`IoringNapiOp::Register`].
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
+#[repr(u32)]
+#[non_exhaustive]
+pub enum IoringNapiTrackingStrategy {
+    /// `IO_URING_NAPI_TRACKING_DYNAMIC`
+    Dynamic = sys::io_uring_napi_tracking_strategy::IO_URING_NAPI_TRACKING_DYNAMIC as _,
+
+    /// `IO_URING_NAPI_TRACKING_STATIC`
+    Static = sys::io_uring_napi_tracking_strategy::IO_URING_NAPI_TRACKING_STATIC as _,
+
+    /// `IO_URING_NAPI_TRACKING_INACTIVE`
+    Inactive = sys::io_uring_napi_tracking_strategy::IO_URING_NAPI_TRACKING_INACTIVE as _,
 }
 
 bitflags::bitflags! {
@@ -757,6 +868,9 @@ bitflags::bitflags! {
         /// `IORING_SETUP_NO_SQARRAY`
         const NO_SQARRAY = sys::IORING_SETUP_NO_SQARRAY;
 
+        /// `IORING_SETUP_HYBRID_IOPOLL`
+        const HYBRID_IOPOLL = sys::IORING_SETUP_HYBRID_IOPOLL;
+
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
@@ -794,6 +908,19 @@ bitflags::bitflags! {
 }
 
 bitflags::bitflags! {
+    /// `IORING_RW_ATTR_*` flags for use with `io_uring_sqe.attr_type_mask`.
+    #[repr(transparent)]
+    #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct IoringRwAttrFlags: u64 {
+        /// `IORING_RW_ATTR_FLAG_PI`
+        const PI = sys::IORING_RW_ATTR_FLAG_PI as _;
+
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
+        const _ = !0;
+    }
+}
+
+bitflags::bitflags! {
     /// `IORING_CQE_F_*` flags for use with [`io_uring_cqe`].
     #[repr(transparent)]
     #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
@@ -809,6 +936,9 @@ bitflags::bitflags! {
 
         /// `IORING_CQE_F_NOTIF`
         const NOTIF = bitcast!(sys::IORING_CQE_F_NOTIF);
+
+        /// `IORING_CQE_F_BUF_MORE`
+        const BUF_MORE = bitcast!(sys::IORING_CQE_F_BUF_MORE);
 
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
@@ -925,6 +1055,12 @@ bitflags::bitflags! {
         /// `IORING_ASYNC_CANCEL_FD`
         const FD_FIXED = sys::IORING_ASYNC_CANCEL_FD_FIXED;
 
+        /// `IORING_ASYNC_CANCEL_USERDATA`
+        const USERDATA = sys::IORING_ASYNC_CANCEL_USERDATA;
+
+        /// `IORING_ASYNC_CANCEL_OP`
+        const OP = sys::IORING_ASYNC_CANCEL_OP;
+
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
@@ -937,6 +1073,31 @@ bitflags::bitflags! {
     pub struct IoringFixedFdFlags: u32 {
         /// `IORING_FIXED_FD_NO_CLOEXEC`
         const NO_CLOEXEC = sys::IORING_FIXED_FD_NO_CLOEXEC;
+
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
+        const _ = !0;
+    }
+}
+
+bitflags::bitflags! {
+    /// `IORING_NOP_FD_*` flags for use with [`io_uring_sqe`].
+    #[repr(transparent)]
+    #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct IoringNopFlags: u32 {
+        /// `IORING_NOP_INJECT_RESULT`
+        const INJECT_RESULT = sys::IORING_NOP_INJECT_RESULT;
+
+        /// `IORING_NOP_FILE`
+        const FILE = sys::IORING_NOP_FILE;
+
+        /// `IORING_NOP_FIXED_FILE`
+        const FIXED_FILE = sys::IORING_NOP_FIXED_FILE;
+
+        /// `IORING_NOP_FIXED_BUFFER`
+        const FIXED_BUFFER = sys::IORING_NOP_FIXED_BUFFER;
+
+        /// `IORING_NOP_TW`
+        const TW = sys::IORING_NOP_TW;
 
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
@@ -993,6 +1154,15 @@ bitflags::bitflags! {
         /// `IORING_FEAT_RECVSEND_BUNDLE`
         const RECVSEND_BUNDLE = sys::IORING_FEAT_RECVSEND_BUNDLE;
 
+        /// `IORING_FEAT_MIN_TIMEOUT`
+        const MIN_TIMEOUT = sys::IORING_FEAT_MIN_TIMEOUT;
+
+        /// `IORING_FEAT_RW_ATTR`
+        const RW_ATTR = sys::IORING_FEAT_RW_ATTR;
+
+        /// `IORING_FEAT_NO_IOWAIT`
+        const NO_IOWAIT = sys::IORING_FEAT_NO_IOWAIT;
+
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
@@ -1018,6 +1188,35 @@ bitflags::bitflags! {
     pub struct IoringRsrcFlags: u32 {
         /// `IORING_RSRC_REGISTER_SPARSE`
         const REGISTER_SPARSE = sys::IORING_RSRC_REGISTER_SPARSE as _;
+
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
+        const _ = !0;
+    }
+}
+
+bitflags::bitflags! {
+    /// `IOU_PBUF_RING_*` flags for use with [`io_uring_buf_reg`].
+    #[repr(transparent)]
+    #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct IoringPbufRingFlags: u16 {
+        /// `IOU_PBUF_RING_MMAP`
+        const MMAP = sys::io_uring_register_pbuf_ring_flags::IOU_PBUF_RING_MMAP as _;
+
+        /// `IOU_PBUF_RING_INC`
+        const INC = sys::io_uring_register_pbuf_ring_flags::IOU_PBUF_RING_INC as _;
+
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
+        const _ = !0;
+    }
+}
+
+bitflags::bitflags! {
+    /// `IORING_ZCRX_AREA_*` flags for use with [`io_uring_zcrx_area_reg`].
+    #[repr(transparent)]
+    #[derive(Default, Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct IoringZcrxAreaFlags: u32 {
+        /// `IORING_ZCRX_AREA_DMABUF`
+        const DMABUF = sys::io_uring_zcrx_area_flags::IORING_ZCRX_AREA_DMABUF as _;
 
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
@@ -1101,6 +1300,9 @@ bitflags::bitflags! {
         /// See also [`IoringRecvFlags::BUNDLE`].
         const BUNDLE = sys::IORING_RECVSEND_BUNDLE as _;
 
+        /// `IORING_SEND_VECTORIZED`
+        const VECTORIZED = sys::IORING_SEND_VECTORIZED as _;
+
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
@@ -1142,6 +1344,12 @@ bitflags::bitflags! {
         /// `IORING_ACCEPT_MULTISHOT`
         const MULTISHOT = sys::IORING_ACCEPT_MULTISHOT as _;
 
+        /// `IORING_ACCEPT_DONTWAIT`
+        const DONTWAIT = sys::IORING_ACCEPT_DONTWAIT as _;
+
+        /// `IORING_ACCEPT_POLL_FIRST`
+        const POLL_FIRST = sys::IORING_ACCEPT_POLL_FIRST as _;
+
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
@@ -1173,9 +1381,24 @@ bitflags::bitflags! {
 }
 
 #[allow(missing_docs)]
+pub const IORING_FILE_INDEX_ALLOC: u32 = sys::IORING_FILE_INDEX_ALLOC as _;
+
+#[allow(missing_docs)]
 pub const IORING_CQE_BUFFER_SHIFT: u32 = sys::IORING_CQE_BUFFER_SHIFT as _;
 #[allow(missing_docs)]
-pub const IORING_FILE_INDEX_ALLOC: i32 = sys::IORING_FILE_INDEX_ALLOC as _;
+pub const IORING_TIMESTAMP_HW_SHIFT: u32 = sys::IORING_TIMESTAMP_HW_SHIFT as _;
+#[allow(missing_docs)]
+pub const IORING_TIMESTAMP_TYPE_SHIFT: u32 = sys::IORING_TIMESTAMP_TYPE_SHIFT as _;
+
+#[allow(missing_docs)]
+pub const IORING_MEM_REGION_TYPE_USER: u32 = sys::IORING_MEM_REGION_TYPE_USER as _;
+#[allow(missing_docs)]
+pub const IORING_MEM_REGION_REG_WAIT_ARG: u64 = sys::IORING_MEM_REGION_REG_WAIT_ARG as _;
+
+#[allow(missing_docs)]
+pub const IORING_ZCRX_AREA_SHIFT: u32 = sys::IORING_ZCRX_AREA_SHIFT as _;
+#[allow(missing_docs)]
+pub const IORING_ZCRX_AREA_MASK: u64 = !((1_u64 << sys::IORING_ZCRX_AREA_SHIFT) - 1);
 
 // Re-export these as `u64`, which is the `offset` type in `rustix::io::mmap`.
 #[allow(missing_docs)]
@@ -1184,6 +1407,12 @@ pub const IORING_OFF_SQ_RING: u64 = sys::IORING_OFF_SQ_RING as _;
 pub const IORING_OFF_CQ_RING: u64 = sys::IORING_OFF_CQ_RING as _;
 #[allow(missing_docs)]
 pub const IORING_OFF_SQES: u64 = sys::IORING_OFF_SQES as _;
+#[allow(missing_docs)]
+pub const IORING_OFF_PBUF_RING: u64 = sys::IORING_OFF_PBUF_RING as _;
+#[allow(missing_docs)]
+pub const IORING_OFF_PBUF_SHIFT: u64 = sys::IORING_OFF_PBUF_SHIFT as _;
+#[allow(missing_docs)]
+pub const IORING_OFF_MMAP_MASK: u64 = sys::IORING_OFF_MMAP_MASK as _;
 
 /// `IORING_REGISTER_FILES_SKIP`
 // SAFETY: `IORING_REGISTER_FILES_SKIP` is a reserved value that is never
@@ -1460,6 +1689,8 @@ pub union len_union {
 #[derive(Copy, Clone)]
 pub union addr3_or_cmd_union {
     pub addr3: addr3_struct,
+    pub attr: attr_struct,
+    pub optval: io_uring_ptr,
     pub cmd: [u8; 0],
 }
 
@@ -1471,6 +1702,15 @@ pub struct addr3_struct {
     pub addr3: u64,
     #[doc(hidden)]
     pub __pad2: [u64; 1],
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Copy, Clone, Default)]
+#[non_exhaustive]
+pub struct attr_struct {
+    pub attr_ptr: io_uring_ptr,
+    pub attr_type_mask: IoringRwAttrFlags,
 }
 
 #[allow(missing_docs)]
@@ -1499,8 +1739,18 @@ pub struct cmd_op_struct {
 pub union addr_or_splice_off_in_union {
     pub addr: io_uring_ptr,
     pub splice_off_in: u64,
+    pub level_optname: level_optname_struct,
     pub msgring_cmd: IoringMsgringCmds,
     pub user_data: io_uring_user_data,
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Copy, Clone, Default)]
+#[non_exhaustive]
+pub struct level_optname_struct {
+    pub level: u32,
+    pub optname: u32,
 }
 
 #[allow(missing_docs)]
@@ -1533,6 +1783,8 @@ pub union op_flags_union {
     pub uring_cmd_flags: IoringUringCmdFlags,
     pub futex_flags: FutexWaitvFlags,
     pub install_fd_flags: IoringFixedFdFlags,
+    pub nop_flags: IoringNopFlags,
+    pub pipe_flags: PipeFlags,
 }
 
 #[allow(missing_docs)]
@@ -1549,7 +1801,10 @@ pub union buf_union {
 pub union splice_fd_in_or_file_index_or_addr_len_union {
     pub splice_fd_in: i32,
     pub file_index: u32,
+    pub zcrx_ifq_idx: u32,
+    pub optlen: u32,
     pub addr_len: addr_len_struct,
+    pub write_stream: write_stream_struct,
 }
 
 #[allow(missing_docs)]
@@ -1560,6 +1815,30 @@ pub struct addr_len_struct {
     pub addr_len: u16,
     #[doc(hidden)]
     pub __pad3: [u16; 1],
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Copy, Clone, Default)]
+#[non_exhaustive]
+pub struct write_stream_struct {
+    pub write_stream: u8,
+    #[doc(hidden)]
+    pub __pad4: [u8; 3],
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Copy, Clone, Default)]
+#[non_exhaustive]
+pub struct io_uring_attr_pi {
+    pub flags: u16,
+    pub app_tag: u16,
+    pub len: u32,
+    pub addr: io_uring_ptr,
+    pub seed: u64,
+    #[doc(hidden)]
+    pub rsvd: u64,
 }
 
 #[allow(missing_docs)]
@@ -1723,6 +2002,31 @@ pub struct io_uring_files_update {
 }
 
 #[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Copy, Clone, Default)]
+#[non_exhaustive]
+pub struct io_uring_region_desc {
+    pub user_addr: io_uring_ptr,
+    pub size: u64,
+    pub flags: u32,
+    pub id: u32,
+    pub mmap_offset: u64,
+    #[doc(hidden)]
+    pub __resv: [u64; 4],
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Copy, Clone, Default)]
+#[non_exhaustive]
+pub struct io_uring_mem_region_reg {
+    pub region_uptr: io_uring_ptr,
+    pub flags: u64,
+    #[doc(hidden)]
+    pub __resv: [u64; 2],
+}
+
+#[allow(missing_docs)]
 #[repr(C, align(8))]
 #[derive(Debug, Copy, Clone, Default)]
 #[non_exhaustive]
@@ -1764,11 +2068,32 @@ pub struct io_uring_rsrc_update2 {
 #[allow(missing_docs)]
 #[repr(C)]
 #[derive(Debug, Copy, Clone, Default)]
+#[non_exhaustive]
+pub struct io_uring_clock_register {
+    pub clockid: u32,
+    #[doc(hidden)]
+    pub __resv: [u32; 3],
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Copy, Clone, Default)]
 pub struct io_uring_getevents_arg {
     pub sigmask: io_uring_ptr,
     pub sigmask_sz: u32,
     pub min_wait_usec: u32,
     pub ts: io_uring_ptr,
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Copy, Clone, Default)]
+#[non_exhaustive]
+pub struct io_uring_file_index_range {
+    pub off: u32,
+    pub len: u32,
+    #[doc(hidden)]
+    pub resv: u64,
 }
 
 #[allow(missing_docs)]
@@ -1779,6 +2104,83 @@ pub struct io_uring_recvmsg_out {
     pub controllen: u32,
     pub payloadlen: u32,
     pub flags: RecvmsgOutFlags,
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Copy, Clone, Default)]
+#[non_exhaustive]
+pub struct io_timespec {
+    pub tv_sec: u64,
+    pub tv_nsec: u64,
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Copy, Clone, Default)]
+#[non_exhaustive]
+pub struct io_uring_zcrx_rqe {
+    pub off: u64,
+    pub len: u32,
+    #[doc(hidden)]
+    pub __pad: u32,
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Copy, Clone, Default)]
+#[non_exhaustive]
+pub struct io_uring_zcrx_cqe {
+    pub off: u64,
+    #[doc(hidden)]
+    pub __pad: u64,
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Copy, Clone, Default)]
+#[non_exhaustive]
+pub struct io_uring_zcrx_offsets {
+    pub head: u32,
+    pub tail: u32,
+    pub rqes: u32,
+    #[doc(hidden)]
+    pub __resv2: u32,
+    #[doc(hidden)]
+    pub __resv: [u64; 2],
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Copy, Clone, Default)]
+#[non_exhaustive]
+pub struct io_uring_zcrx_area_reg {
+    pub addr: io_uring_ptr,
+    pub len: u64,
+    pub rq_area_token: u64,
+    pub flags: IoringZcrxAreaFlags,
+    pub dmabuf_fd: RawFd,
+    #[doc(hidden)]
+    pub __resv2: [u64; 2],
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Copy, Clone, Default)]
+#[non_exhaustive]
+pub struct io_uring_zcrx_ifq_reg {
+    pub if_idx: u32,
+    pub if_rxq: u32,
+    pub rq_entries: u32,
+    pub flags: u32,
+    pub area_ptr: io_uring_ptr,
+    pub region_ptr: io_uring_ptr,
+    pub offsets: io_uring_zcrx_offsets,
+    pub zcrx_id: u32,
+    #[doc(hidden)]
+    pub __resv2: u32,
+    #[doc(hidden)]
+    pub __resv: [u64; 3],
 }
 
 #[allow(missing_docs)]
@@ -1822,9 +2224,20 @@ pub struct io_uring_buf_reg {
     pub ring_addr: io_uring_ptr,
     pub ring_entries: u32,
     pub bgid: u16,
-    pub flags: u16,
+    pub flags: IoringPbufRingFlags,
     #[doc(hidden)]
     pub resv: [u64; 3_usize],
+}
+
+#[allow(missing_docs)]
+#[repr(C)]
+#[derive(Debug, Copy, Clone, Default)]
+#[non_exhaustive]
+pub struct io_uring_buf_status {
+    pub buf_group: u32,
+    pub head: u32,
+    #[doc(hidden)]
+    pub resv: [u32; 8],
 }
 
 #[allow(missing_docs)]
@@ -1883,7 +2296,7 @@ pub struct io_uring_buf_ring {
 pub struct io_uring_napi {
     pub busy_poll_to: u32,
     pub prefer_busy_poll: u8,
-    pub opcode: u8,
+    pub opcode: IoringNapiOp,
     #[doc(hidden)]
     pub pad: [u8; 2],
     pub op_param: u32,
@@ -1897,7 +2310,7 @@ pub struct io_uring_napi {
 #[non_exhaustive]
 pub struct io_uring_clone_buffers {
     pub src_fd: u32,
-    pub flags: u32,
+    pub flags: IoringCloneBuffersFlags,
     pub src_off: u32,
     pub dst_off: u32,
     pub nr: u32,
@@ -1912,7 +2325,7 @@ pub struct io_uring_clone_buffers {
 pub struct io_uring_reg_wait {
     pub ts: Timespec,
     pub min_wait_usec: u32,
-    pub flags: u32,
+    pub flags: IoringRegWaitFlags,
     pub sigmask: io_uring_ptr,
     pub sigmask_sz: u32,
     #[doc(hidden)]
@@ -2035,6 +2448,17 @@ mod tests {
             );
         }
 
+        static_assertions::assert_eq_size!(IoringSocketOp, u32);
+        static_assertions::assert_eq_align!(IoringSocketOp, u32);
+        static_assertions::assert_eq_size!(IoringNapiOp, u8);
+        static_assertions::assert_eq_align!(IoringNapiOp, u8);
+        static_assertions::assert_eq_size!(IoringNapiTrackingStrategy, u32);
+        static_assertions::assert_eq_align!(IoringNapiTrackingStrategy, u32);
+        static_assertions::assert_eq_size!(IoringPbufRingFlags, u16);
+        static_assertions::assert_eq_align!(IoringPbufRingFlags, u16);
+        static_assertions::assert_eq_size!(IoringZcrxAreaFlags, u32);
+        static_assertions::assert_eq_align!(IoringZcrxAreaFlags, u32);
+
         check_renamed_type!(off_or_addr2_union, io_uring_sqe__bindgen_ty_1);
         check_renamed_type!(addr_or_splice_off_in_union, io_uring_sqe__bindgen_ty_2);
         check_renamed_type!(addr3_or_cmd_union, io_uring_sqe__bindgen_ty_6);
@@ -2051,7 +2475,16 @@ mod tests {
         );
 
         check_renamed_type!(addr3_struct, io_uring_sqe__bindgen_ty_6__bindgen_ty_1);
+        check_renamed_type!(attr_struct, io_uring_sqe__bindgen_ty_6__bindgen_ty_2);
         check_renamed_type!(cmd_op_struct, io_uring_sqe__bindgen_ty_1__bindgen_ty_1);
+        check_renamed_type!(
+            level_optname_struct,
+            io_uring_sqe__bindgen_ty_2__bindgen_ty_1
+        );
+        check_renamed_type!(
+            write_stream_struct,
+            io_uring_sqe__bindgen_ty_5__bindgen_ty_2
+        );
 
         check_type!(io_uring_sqe);
         check_struct_field!(io_uring_sqe, opcode);
@@ -2083,6 +2516,7 @@ mod tests {
         check_struct_field!(io_uring_restriction, resv2);
 
         check_struct!(io_uring_cqe, user_data, res, flags, big_cqe);
+        check_struct!(io_uring_attr_pi, flags, app_tag, len, addr, seed, rsvd);
         check_struct!(
             io_uring_params,
             sq_entries,
@@ -2124,9 +2558,21 @@ mod tests {
         check_struct!(io_uring_probe, last_op, ops_len, resv, resv2, ops);
         check_struct!(io_uring_probe_op, op, resv, flags, resv2);
         check_struct!(io_uring_files_update, offset, resv, fds);
+        check_struct!(
+            io_uring_region_desc,
+            user_addr,
+            size,
+            flags,
+            id,
+            mmap_offset,
+            __resv
+        );
+        check_struct!(io_uring_mem_region_reg, region_uptr, flags, __resv);
         check_struct!(io_uring_rsrc_register, nr, flags, resv2, data, tags);
         check_struct!(io_uring_rsrc_update, offset, resv, data);
         check_struct!(io_uring_rsrc_update2, offset, resv, data, tags, nr, resv2);
+        check_struct!(io_uring_clock_register, clockid, __resv);
+
         check_struct!(
             io_uring_getevents_arg,
             sigmask,
@@ -2134,9 +2580,38 @@ mod tests {
             min_wait_usec,
             ts
         );
+        check_struct!(io_uring_file_index_range, off, len, resv);
+        check_struct!(io_uring_zcrx_rqe, off, len, __pad);
+        check_struct!(io_uring_zcrx_cqe, off, __pad);
+        check_struct!(io_uring_zcrx_offsets, head, tail, rqes, __resv2, __resv);
+        check_struct!(
+            io_uring_zcrx_area_reg,
+            addr,
+            len,
+            rq_area_token,
+            flags,
+            dmabuf_fd,
+            __resv2
+        );
+        check_struct!(
+            io_uring_zcrx_ifq_reg,
+            if_idx,
+            if_rxq,
+            rq_entries,
+            flags,
+            area_ptr,
+            region_ptr,
+            offsets,
+            zcrx_id,
+            __resv2,
+            __resv
+        );
+
+        check_struct!(io_timespec, tv_sec, tv_nsec);
         check_struct!(iovec, iov_base, iov_len);
         check_struct!(open_how, flags, mode, resolve);
         check_struct!(io_uring_buf_reg, ring_addr, ring_entries, bgid, flags, resv);
+        check_struct!(io_uring_buf_status, buf_group, head, resv);
         check_struct!(io_uring_buf, addr, len, bid, resv);
         check_struct!(
             io_uring_sync_cancel_reg,
