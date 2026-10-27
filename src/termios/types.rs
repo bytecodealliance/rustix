@@ -502,7 +502,7 @@ bitflags! {
             target_os = "haiku",
             target_os = "redox",
         )))]
-        const XTABS = c::XTABS;
+        const XTABS = bitcast!(c::XTABS);
 
         /// `BSDLY`
         #[cfg(not(any(
@@ -1606,6 +1606,7 @@ mod tests {
             #[cfg(not(any(
                 linux_kernel,
                 solarish,
+                target_os = "aix",
                 target_os = "emscripten",
                 target_os = "fuchsia"
             )))]
