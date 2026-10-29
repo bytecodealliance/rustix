@@ -10,12 +10,12 @@ mod cpu_set;
 mod futex;
 #[cfg(linux_kernel)]
 mod id;
-#[cfg(linux_kernel)]
+#[cfg(all(linux_kernel, linux_raw_dep))]
 mod libcap;
 #[cfg(linux_kernel)]
 mod membarrier;
-#[cfg(linux_kernel)]
+#[cfg(all(linux_kernel, linux_raw_dep))]
 mod prctl;
 mod sched;
-#[cfg(linux_kernel)]
+#[cfg(all(linux_kernel, linux_raw_dep))]
 mod setns;
