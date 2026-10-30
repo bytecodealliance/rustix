@@ -1,7 +1,7 @@
 //! Linux `statx`.
 
 use crate::fd::AsFd;
-use crate::fs::AtFlags;
+use crate::fs::{AtFlags, FileType, Mode};
 use crate::types::Padding;
 use crate::{backend, io, path};
 use backend::c;
@@ -210,6 +210,32 @@ pub fn statx<P: path::Arg, Fd: AsFd>(
     mask: StatxFlags,
 ) -> io::Result<Statx> {
     path.into_with_c_str(|path| _statx(dirfd.as_fd(), path, flags, mask))
+}
+
+impl Statx {
+    /// Returns the [`FileType`] if it is available in the [`Statx`] value.
+    ///
+    /// Returns `None` if [`StatxFlags::TYPE`] is not set in `stx_mask`.
+    #[inline]
+    pub const fn filetype(&self) -> Option<FileType> {
+        if self.stx_mask & StatxFlags::TYPE.bits() != 0 {
+            Some(FileType::from_raw_mode(self.stx_mode as u32))
+        } else {
+            None
+        }
+    }
+
+    /// Returns the [`Mode`] if it is available in the [`Statx`] value.
+    ///
+    /// Returns `None` if [`StatxFlags::MODE`] is not set in `stx_mask`.
+    #[inline]
+    pub const fn mode(&self) -> Option<Mode> {
+        if self.stx_mask & StatxFlags::MODE.bits() != 0 {
+            Some(Mode::from_raw_mode(self.stx_mode as u32))
+        } else {
+            None
+        }
+    }
 }
 
 #[cfg(not(feature = "linux_4_11"))]
