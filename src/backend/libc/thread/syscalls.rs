@@ -477,14 +477,6 @@ pub(crate) unsafe fn futex_val2(
     uaddr2: *const AtomicU32,
     val3: u32,
 ) -> io::Result<usize> {
-    // Pass `val2` in the least-significant bytes of the `timeout` argument.
-    // [“the kernel casts the timeout value first to unsigned long, then to
-    // uint32_t”], so we perform that exact conversion in reverse to create
-    // the pointer.
-    //
-    // [“the kernel casts the timeout value first to unsigned long, then to uint32_t”]: https://man7.org/linux/man-pages/man2/futex.2.html
-    let timeout = val2 as usize as *const Timespec;
-
     #[cfg(all(
         target_pointer_width = "32",
         not(any(target_arch = "aarch64", target_arch = "x86_64"))
@@ -499,7 +491,7 @@ pub(crate) unsafe fn futex_val2(
                 uaddr: *const AtomicU32,
                 futex_op: c::c_int,
                 val: u32,
-                timeout: *const Timespec,
+                val2: u32,
                 uaddr2: *const AtomicU32,
                 val3: u32
             ) via SYS_futex_time64 -> c::ssize_t
@@ -509,7 +501,7 @@ pub(crate) unsafe fn futex_val2(
             uaddr,
             op as i32 | flags.bits() as i32,
             val,
-            timeout,
+            val2,
             uaddr2,
             val3,
         ))
@@ -526,7 +518,7 @@ pub(crate) unsafe fn futex_val2(
                 uaddr: *const AtomicU32,
                 futex_op: c::c_int,
                 val: u32,
-                timeout: *const Timespec,
+                val2: u32,
                 uaddr2: *const AtomicU32,
                 val3: u32
             ) via SYS_futex -> c::c_long
@@ -536,7 +528,7 @@ pub(crate) unsafe fn futex_val2(
             uaddr,
             op as i32 | flags.bits() as i32,
             val,
-            timeout.cast(),
+            val2,
             uaddr2,
             val3,
         ) as isize)
