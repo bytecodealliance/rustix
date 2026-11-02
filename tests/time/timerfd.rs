@@ -141,9 +141,8 @@ fn test_timerfd_it_value() {
     let cur = timerfd_gettime(&fd).unwrap();
     check("timerfd_gettime", &cur);
 
-    // Re-arm; the returned old value should be the pending timer, and since
-    // it's on the monotonic clock, it can't have more time remaining than we
-    // observed above.
+    // Re-arm: the returned old value should be the pending timer and
+    // it can't have more time remaining than observed above.
     let old = timerfd_settime(&fd, TimerfdTimerFlags::empty(), &set).unwrap();
     check("timerfd_settime old value", &old);
     assert!(
