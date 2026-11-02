@@ -174,7 +174,7 @@ fn main() {
             || (os == "freebsd" && arch == "x86")
             || os == "haiku"
             || env == "gnu"
-            || (env == "musl" && arch == "x86")
+            || env == "musl"
             || (arch == "aarch64" && os == "linux" && abi == Ok("ilp32".to_string())))
     {
         use_feature("fix_y2038");

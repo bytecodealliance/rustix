@@ -433,11 +433,11 @@ fn timerfd_settime_old(
         },
         it_value: Timespec {
             tv_sec: old_result
-                .it_interval
+                .it_value
                 .tv_sec
                 .try_into()
                 .map_err(|_| io::Errno::OVERFLOW)?,
-            tv_nsec: old_result.it_interval.tv_nsec as _,
+            tv_nsec: old_result.it_value.tv_nsec as _,
         },
     })
 }
@@ -506,11 +506,11 @@ fn timerfd_gettime_old(fd: BorrowedFd<'_>) -> io::Result<Itimerspec> {
         },
         it_value: Timespec {
             tv_sec: old_result
-                .it_interval
+                .it_value
                 .tv_sec
                 .try_into()
                 .map_err(|_| io::Errno::OVERFLOW)?,
-            tv_nsec: old_result.it_interval.tv_nsec as _,
+            tv_nsec: old_result.it_value.tv_nsec as _,
         },
     })
 }
