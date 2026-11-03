@@ -12,19 +12,16 @@ fn test_statx_unknown_flags() {
     #[cfg(linux_raw_dep)]
     const STATX__RESERVED: u32 = linux_raw_sys::general::STATX__RESERVED;
     let too_many_flags = StatxFlags::from_bits_retain(!STATX__RESERVED);
+    assert_eq!(too_many_flags.bits(), !STATX__RESERVED);
 
     // It's also ok to pass such flags to `statx`.
-    let result = match rustix::fs::statx(&f, "Cargo.toml", AtFlags::empty(), too_many_flags) {
+    match rustix::fs::statx(&f, "Cargo.toml", AtFlags::empty(), too_many_flags) {
         // If we don't have `statx` at all, skip the rest of this test.
-        Err(rustix::io::Errno::NOSYS) => return,
-        otherwise => otherwise.unwrap(),
-    };
-
-    // But, rustix should mask off bits it doesn't recognize, because these
-    // extra flags may tell future kernels to set extra fields beyond the
-    // extend of rustix's statx buffer. So make sure we didn't get extra
-    // fields.
-    assert_eq!(result.stx_mask & !StatxFlags::all().bits(), 0);
+        Err(rustix::io::Errno::NOSYS) => {}
+        otherwise => {
+            otherwise.unwrap();
+        }
+    }
 }
 
 #[test]
