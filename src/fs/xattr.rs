@@ -3,6 +3,8 @@
 #![allow(unsafe_code)]
 
 use crate::buffer::Buffer;
+#[cfg(linux_kernel)]
+use crate::fs::AtFlags;
 use crate::{backend, ffi, io, path};
 use backend::c;
 use backend::fd::AsFd;
@@ -203,6 +205,50 @@ pub fn fgetxattr_query<Fd: AsFd, Name: path::Arg>(fd: Fd, name: Name) -> io::Res
     name.into_with_c_str(|name| {
         // SAFETY: `fgetxattr` behaves.
         unsafe { backend::fs::syscalls::fgetxattr(fd.as_fd(), name, (null_mut(), 0)) }
+    })
+}
+
+/// `getxattrat(dirfd, path, name, value, flags)`—Get extended filesystem
+/// attributes relative to an open directory.
+///
+/// `flags` may include [`AtFlags::SYMLINK_NOFOLLOW`] to operate on a symlink
+/// itself, or [`AtFlags::EMPTY_PATH`] to operate on `dirfd` when `path` is
+/// empty. Linux rejects [`AtFlags::EMPTY_PATH`] with [`io::Errno::BADF`] when
+/// `dirfd` is an `O_PATH` descriptor.
+///
+/// # Errors
+///
+/// This returns [`io::Errno::RANGE`] if the syscall reports a required length
+/// larger than the supplied buffer capacity, including a size-zero query for
+/// a nonempty value.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/fs/xattr.c?h=v6.13
+#[cfg(linux_kernel)]
+#[inline]
+pub fn getxattrat<Fd: AsFd, P: path::Arg, Name: path::Arg, Buf: Buffer<u8>>(
+    dirfd: Fd,
+    path: P,
+    name: Name,
+    mut value: Buf,
+    flags: AtFlags,
+) -> io::Result<Buf::Output> {
+    path.into_with_c_str(|path| {
+        name.into_with_c_str(|name| {
+            let value_parts = value.parts_mut();
+            let value_capacity = value_parts.1;
+            // SAFETY: `getxattrat` initializes the returned number of bytes.
+            let len = unsafe {
+                backend::fs::syscalls::getxattrat(dirfd.as_fd(), path, name, value_parts, flags)?
+            };
+            if len > value_capacity {
+                return Err(io::Errno::RANGE);
+            }
+            // SAFETY: `getxattrat` returned the number of initialized bytes.
+            unsafe { Ok(value.assume_init(len)) }
+        })
     })
 }
 
@@ -417,6 +463,46 @@ pub fn flistxattr<Fd: AsFd, Buf: Buffer<u8>>(fd: Fd, mut list: Buf) -> io::Resul
 pub fn flistxattr_query<Fd: AsFd>(fd: Fd) -> io::Result<usize> {
     // SAFETY: `flistxattr` behaves.
     unsafe { backend::fs::syscalls::flistxattr(fd.as_fd(), (null_mut(), 0)) }
+}
+
+/// `listxattrat(dirfd, path, list, flags)`—List extended filesystem
+/// attributes relative to an open directory.
+///
+/// `flags` may include [`AtFlags::SYMLINK_NOFOLLOW`] to operate on a symlink
+/// itself, or [`AtFlags::EMPTY_PATH`] to operate on `dirfd` when `path` is
+/// empty. Linux rejects [`AtFlags::EMPTY_PATH`] with [`io::Errno::BADF`] when
+/// `dirfd` is an `O_PATH` descriptor.
+///
+/// # Errors
+///
+/// This returns [`io::Errno::RANGE`] if the syscall reports a required length
+/// larger than the supplied buffer capacity, including a size-zero query for
+/// a nonempty list.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/fs/xattr.c?h=v6.13
+#[cfg(linux_kernel)]
+#[inline]
+pub fn listxattrat<Fd: AsFd, P: path::Arg, Buf: Buffer<u8>>(
+    dirfd: Fd,
+    path: P,
+    mut list: Buf,
+    flags: AtFlags,
+) -> io::Result<Buf::Output> {
+    path.into_with_c_str(|path| {
+        let list_parts = list.parts_mut();
+        let list_capacity = list_parts.1;
+        // SAFETY: `listxattrat` initializes the returned number of bytes.
+        let len =
+            unsafe { backend::fs::syscalls::listxattrat(dirfd.as_fd(), path, list_parts, flags)? };
+        if len > list_capacity {
+            return Err(io::Errno::RANGE);
+        }
+        // SAFETY: `listxattrat` returned the number of initialized bytes.
+        unsafe { Ok(list.assume_init(len)) }
+    })
 }
 
 /// `removexattr(path, name)`—Remove an extended filesystem attribute.
