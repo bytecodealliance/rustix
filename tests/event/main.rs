@@ -13,6 +13,8 @@ mod epoll_timeout;
 #[cfg(not(windows))]
 #[cfg(not(target_os = "wasi"))]
 mod eventfd;
+#[cfg(apple)]
+mod kqueue_machport;
 mod poll;
 #[cfg(solarish)]
 mod port;
