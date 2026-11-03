@@ -464,6 +464,16 @@ pub(crate) fn socket_cookie(fd: BorrowedFd<'_>) -> io::Result<u64> {
     getsockopt(fd, c::SOL_SOCKET, c::SO_COOKIE)
 }
 
+#[inline]
+pub(crate) fn socket_dont_route(fd: BorrowedFd<'_>) -> io::Result<bool> {
+    getsockopt(fd, c::SOL_SOCKET, c::SO_DONTROUTE).map(to_bool)
+}
+
+#[inline]
+pub(crate) fn set_socket_dont_route(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
+    setsockopt(fd, c::SOL_SOCKET, c::SO_DONTROUTE, from_bool(value))
+}
+
 #[cfg(target_os = "linux")]
 #[inline]
 pub(crate) fn socket_incoming_cpu(fd: BorrowedFd<'_>) -> io::Result<u32> {

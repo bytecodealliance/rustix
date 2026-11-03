@@ -166,6 +166,11 @@ fn test_sockopts_socket(s: &OwnedFd) {
         );
     }
 
+    // Check the initial value of `SO_DONTROUTE`, set it, and check it.
+    assert_eq!(sockopt::socket_dont_route(s).unwrap(), false);
+    sockopt::set_socket_dont_route(s, true).unwrap();
+    assert_eq!(sockopt::socket_dont_route(s).unwrap(), true);
+
     // Check the initial value of `SO_INCOMING_CPU`, set it, and check it.
     #[cfg(target_os = "linux")]
     {
