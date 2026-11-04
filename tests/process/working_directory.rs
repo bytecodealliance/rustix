@@ -48,3 +48,23 @@ fn test_changing_working_directory() {
         "The cwd wasn't changed back to the its original position"
     );
 }
+
+#[test]
+fn test_getcwd_raw() {
+    let mut buf = [0u8; 4096];
+    if rustix::process::GETCWD_RAW_SUPPORTED {
+        let len = rustix::process::getcwd_raw(&mut buf[..]).expect("getcwd_raw should succeed");
+        let expected = rustix::process::getcwd(Vec::new()).expect("getcwd should succeed");
+        assert_eq!(&buf[..len], expected.to_bytes_with_nul());
+        let mut short = [0u8; 1];
+        assert_eq!(
+            rustix::process::getcwd_raw(&mut short[..]),
+            Err(rustix::io::Errno::RANGE)
+        );
+    } else {
+        assert_eq!(
+            rustix::process::getcwd_raw(&mut buf[..]),
+            Err(rustix::io::Errno::NOSYS)
+        );
+    }
+}
