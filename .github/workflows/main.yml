@@ -239,6 +239,7 @@ jobs:
         RUSTFLAGS: -A improper_ctypes_definitions --cfg criterion
     - run: rustup component add rust-src
     - run: cargo check -Z build-std --target x86_64-unknown-openbsd --all-targets --features=all-apis
+    - run: cargo check -Z build-std --target riscv32gc-unknown-linux-gnu --features=all-apis
     # Temporarily disable due to build errors.
     # - run: cargo check -Z build-std --target mips64-openwrt-linux-musl --all-targets --features=all-apis
     - run: cargo check -Z build-std --target x86_64-unknown-dragonfly --all-targets --features=all-apis
