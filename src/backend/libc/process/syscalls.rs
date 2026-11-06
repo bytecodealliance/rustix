@@ -693,8 +693,28 @@ pub(crate) fn getgroups(buf: &mut [Gid]) -> io::Result<usize> {
 )))]
 #[inline]
 pub(crate) fn fcntl_getlk(fd: BorrowedFd<'_>, lock: &Flock) -> io::Result<Option<Flock>> {
+    fcntl_getlk_impl(fd, lock, c::F_GETLK)
+}
+
+#[cfg(linux_kernel)]
+#[inline]
+pub(crate) fn fcntl_ofd_getlk(fd: BorrowedFd<'_>, lock: &Flock) -> io::Result<Option<Flock>> {
+    fcntl_getlk_impl(fd, lock, c::F_OFD_GETLK)
+}
+
+#[cfg(not(any(
+    target_os = "emscripten",
+    target_os = "espidf",
+    target_os = "fuchsia",
+    target_os = "horizon",
+    target_os = "redox",
+    target_os = "vita",
+    target_os = "wasi"
+)))]
+#[inline]
+fn fcntl_getlk_impl(fd: BorrowedFd<'_>, lock: &Flock, cmd: c::c_int) -> io::Result<Option<Flock>> {
     let mut curr_lock: c::flock = lock.as_raw();
-    unsafe { ret(c::fcntl(borrowed_fd(fd), c::F_GETLK, &mut curr_lock))? };
+    unsafe { ret(c::fcntl(borrowed_fd(fd), cmd, &mut curr_lock))? };
 
     // If no blocking lock is found, `fcntl(GETLK, ..)` sets `l_type` to
     // `F_UNLCK`.

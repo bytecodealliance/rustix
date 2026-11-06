@@ -1383,15 +1383,40 @@ pub(crate) fn fcntl_add_seals(fd: BorrowedFd<'_>, seals: SealFlags) -> io::Resul
 )))]
 #[inline]
 pub(crate) fn fcntl_lock(fd: BorrowedFd<'_>, operation: FlockOperation) -> io::Result<()> {
-    use c::{flock, F_RDLCK, F_SETLK, F_SETLKW, F_UNLCK, F_WRLCK, SEEK_SET};
+    fcntl_lock_impl(fd, operation, c::F_SETLK, c::F_SETLKW)
+}
+
+#[cfg(linux_kernel)]
+#[inline]
+pub(crate) fn fcntl_ofd_lock(fd: BorrowedFd<'_>, operation: FlockOperation) -> io::Result<()> {
+    fcntl_lock_impl(fd, operation, c::F_OFD_SETLK, c::F_OFD_SETLKW)
+}
+
+#[cfg(not(any(
+    target_os = "emscripten",
+    target_os = "espidf",
+    target_os = "fuchsia",
+    target_os = "horizon",
+    target_os = "redox",
+    target_os = "vita",
+    target_os = "wasi"
+)))]
+#[inline]
+fn fcntl_lock_impl(
+    fd: BorrowedFd<'_>,
+    operation: FlockOperation,
+    setlk: c::c_int,
+    setlkw: c::c_int,
+) -> io::Result<()> {
+    use c::{flock, F_RDLCK, F_UNLCK, F_WRLCK, SEEK_SET};
 
     let (cmd, l_type) = match operation {
-        FlockOperation::LockShared => (F_SETLKW, F_RDLCK),
-        FlockOperation::LockExclusive => (F_SETLKW, F_WRLCK),
-        FlockOperation::Unlock => (F_SETLKW, F_UNLCK),
-        FlockOperation::NonBlockingLockShared => (F_SETLK, F_RDLCK),
-        FlockOperation::NonBlockingLockExclusive => (F_SETLK, F_WRLCK),
-        FlockOperation::NonBlockingUnlock => (F_SETLK, F_UNLCK),
+        FlockOperation::LockShared => (setlkw, F_RDLCK),
+        FlockOperation::LockExclusive => (setlkw, F_WRLCK),
+        FlockOperation::Unlock => (setlkw, F_UNLCK),
+        FlockOperation::NonBlockingLockShared => (setlk, F_RDLCK),
+        FlockOperation::NonBlockingLockExclusive => (setlk, F_WRLCK),
+        FlockOperation::NonBlockingUnlock => (setlk, F_UNLCK),
     };
 
     unsafe {

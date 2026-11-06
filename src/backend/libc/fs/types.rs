@@ -929,6 +929,8 @@ bitflags! {
 ///
 /// [`flock`]: crate::fs::flock
 /// [`fcntl_lock`]: crate::fs::fcntl_lock
+///
+/// On Linux, these operations may also be used with `fcntl_ofd_lock`.
 // Solaris doesn't support `flock` and doesn't define `LOCK_SH` etc., but we
 // reuse this `FlockOperation` enum for `fcntl_lock`, so on Solaris we use
 // our own made-up integer values.

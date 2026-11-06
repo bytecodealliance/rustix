@@ -26,6 +26,8 @@ mod fcntl;
     target_os = "wasi"
 )))]
 mod fcntl_lock;
+#[cfg(linux_kernel)]
+mod fcntl_ofd_lock;
 mod file;
 #[cfg(not(target_os = "wasi"))]
 mod flock;
