@@ -7,7 +7,7 @@
 //! These tests are disabled on iOS/macOS since those platforms kill the
 //! process with `Signal::XFSZ` instead of returning an error.
 
-#![cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#![cfg(not(target_os = "wasi"))]
 
 use rustix::fs::SeekFrom;
 

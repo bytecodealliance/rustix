@@ -24,7 +24,7 @@ pub use crate::clockid::{ClockId, DynamicClockId};
 /// [OpenBSD]: https://man.openbsd.org/clock_getres.2
 /// [DragonFly BSD]: https://man.dragonflybsd.org/?command=clock_getres&section=2
 /// [illumos]: https://illumos.org/man/3C/clock_getres
-#[cfg(not(any(target_os = "redox", target_os = "wasi")))]
+#[cfg(not(target_os = "wasi"))]
 #[inline]
 #[must_use]
 pub fn clock_getres(id: ClockId) -> Timespec {

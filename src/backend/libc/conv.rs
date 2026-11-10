@@ -38,12 +38,7 @@ pub(super) fn borrowed_fd(fd: BorrowedFd<'_>) -> LibcFd {
 
 #[cfg(all(
     feature = "alloc",
-    not(any(
-        windows,
-        target_os = "espidf",
-        target_os = "horizon",
-        target_os = "redox"
-    ))
+    not(any(windows, target_os = "espidf", target_os = "horizon"))
 ))]
 #[inline]
 pub(super) fn owned_fd(fd: OwnedFd) -> LibcFd {

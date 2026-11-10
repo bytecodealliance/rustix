@@ -7,7 +7,7 @@ mod constants;
 mod copy_file_range;
 #[cfg(all(
     feature = "alloc",
-    not(any(target_os = "espidf", target_os = "horizon", target_os = "redox"))
+    not(any(target_os = "espidf", target_os = "horizon"))
 ))]
 mod dir;
 #[cfg(not(any(
@@ -75,7 +75,7 @@ pub use constants::*;
 pub use copy_file_range::copy_file_range;
 #[cfg(all(
     feature = "alloc",
-    not(any(target_os = "espidf", target_os = "horizon", target_os = "redox"))
+    not(any(target_os = "espidf", target_os = "horizon"))
 ))]
 pub use dir::{Dir, DirEntry};
 #[cfg(not(any(

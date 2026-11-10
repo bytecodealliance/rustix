@@ -8,7 +8,6 @@ pub use crate::timespec::{Nsecs, Secs, Timespec};
     target_os = "dragonfly",
     target_os = "espidf",
     target_os = "openbsd",
-    target_os = "redox",
     target_os = "vita",
     target_os = "wasi",
 )))]
