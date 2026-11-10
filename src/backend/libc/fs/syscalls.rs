@@ -49,6 +49,8 @@ use crate::fs::SealFlags;
     target_os = "wasi",
 )))]
 use crate::fs::StatFs;
+#[cfg(linux_kernel)]
+use crate::fs::SyncFileRangeFlags;
 #[cfg(not(any(target_os = "espidf", target_os = "horizon", target_os = "vita")))]
 use crate::fs::Timestamps;
 #[cfg(not(any(
@@ -1847,6 +1849,44 @@ pub(crate) fn fsync(fd: BorrowedFd<'_>) -> io::Result<()> {
 )))]
 pub(crate) fn fdatasync(fd: BorrowedFd<'_>) -> io::Result<()> {
     unsafe { ret(c::fdatasync(borrowed_fd(fd))) }
+}
+
+#[cfg(linux_kernel)]
+pub(crate) fn sync_file_range(
+    fd: BorrowedFd<'_>,
+    offset: u64,
+    nbytes: u64,
+    flags: SyncFileRangeFlags,
+) -> io::Result<()> {
+    // Silently cast; we'll get `EINVAL` if the value is negative.
+    let offset = offset as i64;
+    let nbytes = nbytes as i64;
+
+    // glibc and musl provide `sync_file_range` on every architecture and
+    // call `sync_file_range2` where that is the kernel's entry point.
+    #[cfg(not(target_os = "android"))]
+    unsafe {
+        ret(c::sync_file_range(
+            borrowed_fd(fd),
+            offset as _,
+            nbytes as _,
+            bitflags_bits!(flags),
+        ))
+    }
+
+    // The libc crate doesn't declare `sync_file_range` for Android. Bionic
+    // has had it since API level 26; before that, report `ENOSYS`.
+    #[cfg(target_os = "android")]
+    unsafe {
+        weak! {
+            fn sync_file_range(c::c_int, c::off64_t, c::off64_t, c::c_uint) -> c::c_int
+        }
+        if let Some(fun) = sync_file_range.get() {
+            ret(fun(borrowed_fd(fd), offset, nbytes, bitflags_bits!(flags)))
+        } else {
+            Err(io::Errno::NOSYS)
+        }
+    }
 }
 
 pub(crate) fn ftruncate(fd: BorrowedFd<'_>, length: u64) -> io::Result<()> {
