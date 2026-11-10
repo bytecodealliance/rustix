@@ -77,6 +77,75 @@ fn test_statvfs() {
     assert_ne!(f_frsize, 0);
 }
 
+/// `StatVfsMountFlags` has the `ST_*` values, not the `MS_*` ones.
+#[cfg(all(linux_kernel, target_env = "gnu"))]
+#[test]
+fn test_statvfs_mount_flags_abi() {
+    use rustix::fs::StatVfsMountFlags as Flags;
+
+    assert_eq!(Flags::MANDLOCK.bits(), libc::ST_MANDLOCK as u64);
+    assert_eq!(Flags::NOATIME.bits(), libc::ST_NOATIME as u64);
+    assert_eq!(Flags::NODEV.bits(), libc::ST_NODEV as u64);
+    assert_eq!(Flags::NODIRATIME.bits(), libc::ST_NODIRATIME as u64);
+    assert_eq!(Flags::NOEXEC.bits(), libc::ST_NOEXEC as u64);
+    assert_eq!(Flags::NOSUID.bits(), libc::ST_NOSUID as u64);
+    assert_eq!(Flags::RDONLY.bits(), libc::ST_RDONLY as u64);
+    assert_eq!(Flags::RELATIME.bits(), libc::ST_RELATIME as u64);
+    assert_eq!(Flags::SYNCHRONOUS.bits(), libc::ST_SYNCHRONOUS as u64);
+}
+
+/// The flags `statvfs` reports for a mount are the per-mount options its
+/// `/proc/self/mountinfo` line lists.
+#[cfg(linux_kernel)]
+#[test]
+fn test_statvfs_mount_flags_match_mountinfo() {
+    use rustix::fs::StatVfsMountFlags as Flags;
+
+    let table = std::fs::read_to_string("/proc/self/mountinfo").unwrap();
+    let mut checked = 0;
+    for point in ["/", "/proc"] {
+        // The last line at a path is the mount on top, which the path
+        // reaches. Field 5 is the mount point, field 6 the per-mount options.
+        let Some(options) = table
+            .lines()
+            .map(|line| line.split(' ').collect::<Vec<_>>())
+            .filter(|fields| fields.len() > 5 && fields[4] == point)
+            .map(|fields| fields[5].to_owned())
+            .next_back()
+        else {
+            continue;
+        };
+        let options: Vec<&str> = options.split(',').collect();
+        let flags = rustix::fs::statvfs(point).unwrap().f_flag;
+        #[allow(unused_mut)]
+        let mut pairs = vec![
+            ("ro", Flags::RDONLY),
+            ("nosuid", Flags::NOSUID),
+            ("nodev", Flags::NODEV),
+            ("noexec", Flags::NOEXEC),
+            ("noatime", Flags::NOATIME),
+            ("nodiratime", Flags::NODIRATIME),
+        ];
+        // The libc backend has `RELATIME` only where libc defines
+        // `ST_RELATIME`.
+        #[cfg(any(
+            linux_raw,
+            target_os = "android",
+            all(target_os = "linux", target_env = "gnu")
+        ))]
+        pairs.push(("relatime", Flags::RELATIME));
+        for (option, flag) in pairs {
+            assert_eq!(
+                flags.contains(flag),
+                options.contains(&option),
+                "{point}: {option} in {options:?}, statvfs says {flags:?}"
+            );
+        }
+        checked += 1;
+    }
+    assert_ne!(checked, 0, "neither / nor /proc is in the mount table");
+}
+
 #[test]
 fn test_fstatvfs() {
     let file = std::fs::File::open("Cargo.toml").unwrap();

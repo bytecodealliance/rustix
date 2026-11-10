@@ -33,15 +33,15 @@ fn pgrp_pseudoterminal() {
         Err(err) => panic!("{:?}", err),
     };
 
-    // Linux's `tcgetpgrp` returns 0 here, which is not documented, so rustix
-    // translates it into `OPNOTSUPP`.
-    #[cfg(linux_kernel)]
+    // Linux's and Apple's `tcgetpgrp` return 0 here, which is not documented,
+    // so rustix translates it into `OPNOTSUPP`.
+    #[cfg(any(linux_kernel, apple))]
     assert_eq!(tcgetpgrp(&pty), Err(rustix::io::Errno::OPNOTSUPP));
 
     // FreeBSD's `tcgetpgrp` returns 100000 here, or presumably some other
     // number if that number is already taken, which is documented behavior,
     // but impossible to test for reliably.
-    #[cfg(not(linux_kernel))]
+    #[cfg(not(any(linux_kernel, apple)))]
     assert!(matches!(tcgetpgrp(&pty), Ok(_)));
 
     // We shouldn't be able to set the process group to [`Pid::INIT`].

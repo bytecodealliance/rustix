@@ -7,6 +7,16 @@
 mod chmodat;
 #[cfg(not(target_os = "redox"))]
 mod dir;
+#[cfg(not(any(
+    netbsdlike,
+    target_os = "dragonfly",
+    target_os = "espidf",
+    target_os = "horizon",
+    target_os = "nto",
+    target_os = "redox",
+    target_os = "vita",
+)))] // not implemented in libc for NetBSD yet
+mod fallocate;
 mod fcntl;
 #[cfg(not(any(
     target_os = "emscripten",

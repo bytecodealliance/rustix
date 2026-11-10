@@ -36,6 +36,23 @@ fn test_getegid() {
     }
 }
 
+#[cfg(feature = "alloc")]
+#[test]
+fn test_getgroups() {
+    let groups = process::getgroups().unwrap();
+    assert_eq!(groups, process::getgroups().unwrap());
+    unsafe {
+        let ngroups = libc::getgroups(0, core::ptr::null_mut());
+        assert!(ngroups >= 0);
+        let mut libc_groups = vec![0 as libc::gid_t; ngroups as usize];
+        if ngroups > 0 {
+            assert_eq!(libc::getgroups(ngroups, libc_groups.as_mut_ptr()), ngroups);
+        }
+        let raw_groups: Vec<libc::gid_t> = groups.iter().map(|g| g.as_raw()).collect();
+        assert_eq!(raw_groups, libc_groups);
+    }
+}
+
 #[test]
 fn test_getpid() {
     assert_eq!(process::getpid(), process::getpid());
