@@ -574,22 +574,25 @@ pub(crate) unsafe fn futex_timeout(
             ) via SYS_futex_time64 -> c::ssize_t
         }
 
-        ret_usize(futex_time64(
+        let result = ret_usize(futex_time64(
             uaddr,
             op as i32 | flags.bits() as i32,
             val,
             option_as_ptr(timeout),
             uaddr2,
             val3,
-        ))
-        .or_else(|err| {
+        ));
+        // RISC-V's 32-bit ABI has no legacy time32 futex syscall.
+        #[cfg(not(target_arch = "riscv32"))]
+        let result = result.or_else(|err| {
             // See the comments in `clock_gettime_via_syscall` about emulation.
             if err == io::Errno::NOSYS {
                 futex_old_timespec(uaddr, op, flags, val, timeout, uaddr2, val3)
             } else {
                 Err(err)
             }
-        })
+        });
+        result
     }
 
     #[cfg(any(
@@ -626,7 +629,11 @@ pub(crate) unsafe fn futex_timeout(
 #[cfg(linux_kernel)]
 #[cfg(all(
     target_pointer_width = "32",
-    not(any(target_arch = "aarch64", target_arch = "x86_64"))
+    not(any(
+        target_arch = "aarch64",
+        target_arch = "x86_64",
+        target_arch = "riscv32"
+    ))
 ))]
 unsafe fn futex_old_timespec(
     uaddr: *const AtomicU32,
