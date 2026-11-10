@@ -76,9 +76,20 @@ impl Errno {
     }
 
     /// Construct an `Errno` from a raw OS error number.
+    ///
+    /// Linux error numbers are in the range `1..4096`. Values outside this
+    /// range are mapped to [`Errno::INVAL`].
     #[inline]
     pub const fn from_raw_os_error(raw: i32) -> Self {
-        Self::from_errno(raw as u32)
+        debug_assert!(
+            raw >= 1 && raw < 4096,
+            "raw OS error is outside Linux's `1..4096` range",
+        );
+        Self::from_errno(if raw < 1 || raw >= 4096 {
+            errno::EINVAL
+        } else {
+            raw as u32
+        })
     }
 
     /// Convert from a C `errno` value (which is positive) to an `Errno`.
@@ -549,4 +560,20 @@ impl Errno {
     pub const XDEV: Self = Self::from_errno(errno::EXDEV);
     /// `EXFULL`
     pub const XFULL: Self = Self::from_errno(errno::EXFULL);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Errno;
+
+    #[test]
+    fn test_error_out_of_range() {
+        for raw in [0, 4096, -1, -22, i32::MIN, i32::MAX, 0x1_0001, 0x1_0016] {
+            if cfg!(debug_assertions) {
+                assert!(std::panic::catch_unwind(|| Errno::from_raw_os_error(raw)).is_err());
+            } else {
+                assert_eq!(Errno::from_raw_os_error(raw), Errno::INVAL);
+            }
+        }
+    }
 }
