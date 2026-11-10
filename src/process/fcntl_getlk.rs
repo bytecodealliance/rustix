@@ -21,3 +21,25 @@ use crate::{backend, io};
 pub fn fcntl_getlk<Fd: AsFd>(fd: Fd, lock: &Flock) -> io::Result<Option<Flock>> {
     backend::process::syscalls::fcntl_getlk(fd.as_fd(), lock)
 }
+
+/// `fcntl(fd, F_OFD_GETLK)`—Get the first lock that blocks an open file
+/// description lock described by `lock`. If no such lock is found, then `None`
+/// is returned.
+///
+/// The blocking lock may be an open file description lock or a
+/// process-associated lock. For an open file description lock, the returned
+/// [`Flock::pid`] is `None`.
+///
+/// `lock.pid` must be `None`, and `lock.typ` must be `FlockType::ReadLock` or
+/// `FlockType::WriteLock`.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/F_OFD_GETLK.2const.html
+#[cfg(linux_kernel)]
+#[inline]
+#[doc(alias = "F_OFD_GETLK")]
+pub fn fcntl_ofd_getlk<Fd: AsFd>(fd: Fd, lock: &Flock) -> io::Result<Option<Flock>> {
+    backend::process::syscalls::fcntl_ofd_getlk(fd.as_fd(), lock)
+}

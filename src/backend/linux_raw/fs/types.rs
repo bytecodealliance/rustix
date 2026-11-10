@@ -580,6 +580,8 @@ bitflags! {
 ///
 /// [`flock`]: crate::fs::flock
 /// [`fcntl_lock`]: crate::fs::fcntl_lock
+///
+/// On Linux, these operations may also be used with `fcntl_ofd_lock`.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(u32)]
 pub enum FlockOperation {

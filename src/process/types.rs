@@ -13,6 +13,8 @@ use core::mem::transmute;
 
 /// File lock data structure used in [`fcntl_getlk`].
 ///
+/// On Linux, this is also used in `fcntl_ofd_getlk`.
+///
 /// [`fcntl_getlk`]: crate::process::fcntl_getlk()
 #[cfg(not(target_os = "horizon"))]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -21,8 +23,9 @@ pub struct Flock {
     pub start: u64,
     /// Number of bytes to lock
     pub length: u64,
-    /// PID of process blocking our lock. If set to `None`, it refers to the
-    /// current process
+    /// PID of the process blocking our lock. On input, `None` refers to the
+    /// current process. On output, `None` indicates an open file description
+    /// lock, which has no owning process.
     pub pid: Option<Pid>,
     /// Type of lock
     pub typ: FlockType,
@@ -33,12 +36,19 @@ pub struct Flock {
 #[cfg(not(target_os = "horizon"))]
 impl Flock {
     pub(crate) const unsafe fn from_raw_unchecked(raw_fl: c::flock) -> Self {
+        // Open file description locks have no owning process; the kernel
+        // reports these with `l_pid` set to -1.
+        let pid = if raw_fl.l_pid == -1 {
+            None
+        } else {
+            Pid::from_raw(raw_fl.l_pid)
+        };
         #[cfg(not(all(target_os = "hurd", target_arch = "x86")))]
         {
             Self {
                 start: raw_fl.l_start as _,
                 length: raw_fl.l_len as _,
-                pid: Pid::from_raw(raw_fl.l_pid),
+                pid,
                 typ: transmute::<i16, FlockType>(raw_fl.l_type),
                 offset_type: transmute::<i16, FlockOffsetType>(raw_fl.l_whence),
             }
@@ -48,7 +58,7 @@ impl Flock {
             Self {
                 start: raw_fl.l_start as _,
                 length: raw_fl.l_len as _,
-                pid: Pid::from_raw(raw_fl.l_pid),
+                pid,
                 typ: transmute::<i32, FlockType>(raw_fl.l_type),
                 offset_type: transmute::<i32, FlockOffsetType>(raw_fl.l_whence),
             }

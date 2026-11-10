@@ -539,13 +539,28 @@ pub(crate) fn getgroups(buf: &mut [Gid]) -> io::Result<usize> {
 
 #[inline]
 pub(crate) fn fcntl_getlk(fd: BorrowedFd<'_>, lock: &Flock) -> io::Result<Option<Flock>> {
+    #[cfg(target_pointer_width = "32")]
+    let cmd = c::F_GETLK64;
+    #[cfg(target_pointer_width = "64")]
+    let cmd = c::F_GETLK;
+
+    fcntl_getlk_impl(fd, lock, cmd)
+}
+
+#[inline]
+pub(crate) fn fcntl_ofd_getlk(fd: BorrowedFd<'_>, lock: &Flock) -> io::Result<Option<Flock>> {
+    fcntl_getlk_impl(fd, lock, c::F_OFD_GETLK)
+}
+
+#[inline]
+fn fcntl_getlk_impl(fd: BorrowedFd<'_>, lock: &Flock, cmd: c::c_uint) -> io::Result<Option<Flock>> {
     let mut curr_lock: c::flock = lock.as_raw();
     #[cfg(target_pointer_width = "32")]
     unsafe {
         ret(syscall!(
             __NR_fcntl64,
             fd,
-            c_uint(c::F_GETLK64),
+            c_uint(cmd),
             by_mut(&mut curr_lock)
         ))?
     }
@@ -554,7 +569,7 @@ pub(crate) fn fcntl_getlk(fd: BorrowedFd<'_>, lock: &Flock) -> io::Result<Option
         ret(syscall!(
             __NR_fcntl,
             fd,
-            c_uint(c::F_GETLK),
+            c_uint(cmd),
             by_mut(&mut curr_lock)
         ))?
     }

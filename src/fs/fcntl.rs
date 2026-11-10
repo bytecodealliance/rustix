@@ -105,3 +105,27 @@ pub fn fcntl_add_seals<Fd: AsFd>(fd: Fd, seals: SealFlags) -> io::Result<()> {
 pub fn fcntl_lock<Fd: AsFd>(fd: Fd, operation: FlockOperation) -> io::Result<()> {
     backend::fs::syscalls::fcntl_lock(fd.as_fd(), operation)
 }
+
+/// `fcntl(fd, F_OFD_SETLK)`—Acquire or release an open file description lock.
+///
+/// Like [`fcntl_lock`], this locks the entire file, including as it grows.
+/// Blocking operations use `F_OFD_SETLKW`, and nonblocking operations use
+/// `F_OFD_SETLK`.
+///
+/// These locks are associated with the open file description, so duplicated
+/// file descriptors share the same lock. The lock is released when the last
+/// file descriptor referring to that open file description is closed.
+/// Independently opened file descriptions can conflict even within one process.
+/// These locks also conflict with process-associated [`fcntl_lock`] locks.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man2/F_OFD_SETLK.2const.html
+#[cfg(linux_kernel)]
+#[inline]
+#[doc(alias = "F_OFD_SETLK")]
+#[doc(alias = "F_OFD_SETLKW")]
+pub fn fcntl_ofd_lock<Fd: AsFd>(fd: Fd, operation: FlockOperation) -> io::Result<()> {
+    backend::fs::syscalls::fcntl_ofd_lock(fd.as_fd(), operation)
+}
