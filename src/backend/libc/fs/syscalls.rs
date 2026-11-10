@@ -266,7 +266,7 @@ pub(crate) fn openat(
 #[inline]
 pub(crate) fn statfs(filename: &CStr) -> io::Result<StatFs> {
     unsafe {
-        let mut result = MaybeUninit::<StatFs>::uninit();
+        let mut result = MaybeUninit::<StatFs>::zeroed();
         ret(c::statfs(c_str(filename), result.as_mut_ptr()))?;
         Ok(result.assume_init())
     }
@@ -276,7 +276,7 @@ pub(crate) fn statfs(filename: &CStr) -> io::Result<StatFs> {
 #[inline]
 pub(crate) fn statvfs(filename: &CStr) -> io::Result<StatVfs> {
     unsafe {
-        let mut result = MaybeUninit::<c::statvfs>::uninit();
+        let mut result = MaybeUninit::<c::statvfs>::zeroed();
         ret(c::statvfs(c_str(filename), result.as_mut_ptr()))?;
         Ok(libc_statvfs_to_statvfs(result.assume_init()))
     }
@@ -675,7 +675,7 @@ pub(crate) fn stat(path: &CStr) -> io::Result<Stat> {
         #[cfg(test)]
         static_assertions::assert_eq_size!(Stat, c::stat);
 
-        let mut stat = MaybeUninit::<Stat>::uninit();
+        let mut stat = MaybeUninit::<Stat>::zeroed();
         ret(c::stat(c_str(path), stat.as_mut_ptr().cast()))?;
         let stat = stat.assume_init();
         #[cfg(apple)]
@@ -721,7 +721,7 @@ pub(crate) fn lstat(path: &CStr) -> io::Result<Stat> {
         #[cfg(test)]
         static_assertions::assert_eq_size!(Stat, c::stat);
 
-        let mut stat = MaybeUninit::<Stat>::uninit();
+        let mut stat = MaybeUninit::<Stat>::zeroed();
         ret(c::lstat(c_str(path), stat.as_mut_ptr().cast()))?;
         let stat = stat.assume_init();
         #[cfg(apple)]
@@ -763,7 +763,7 @@ pub(crate) fn statat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::
         #[cfg(test)]
         static_assertions::assert_eq_size!(Stat, c::stat);
 
-        let mut stat = MaybeUninit::<Stat>::uninit();
+        let mut stat = MaybeUninit::<Stat>::zeroed();
         ret(c::fstatat(
             borrowed_fd(dirfd),
             c_str(path),
@@ -787,7 +787,7 @@ pub(crate) fn statat(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::
 ))]
 fn statat_old(dirfd: BorrowedFd<'_>, path: &CStr, flags: AtFlags) -> io::Result<Stat> {
     unsafe {
-        let mut result = MaybeUninit::<c::stat64>::uninit();
+        let mut result = MaybeUninit::<c::stat64>::zeroed();
         ret(c::fstatat(
             borrowed_fd(dirfd),
             c_str(path),
@@ -1580,7 +1580,7 @@ pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
         #[cfg(test)]
         static_assertions::assert_eq_size!(Stat, c::stat);
 
-        let mut stat = MaybeUninit::<Stat>::uninit();
+        let mut stat = MaybeUninit::<Stat>::zeroed();
         ret(c::fstat(borrowed_fd(fd), stat.as_mut_ptr().cast()))?;
         let stat = stat.assume_init();
         #[cfg(apple)]
@@ -1599,7 +1599,7 @@ pub(crate) fn fstat(fd: BorrowedFd<'_>) -> io::Result<Stat> {
 ))]
 fn fstat_old(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     unsafe {
-        let mut result = MaybeUninit::<c::stat64>::uninit();
+        let mut result = MaybeUninit::<c::stat64>::zeroed();
         ret(c::fstat(borrowed_fd(fd), result.as_mut_ptr()))?;
         stat64_to_stat(result.assume_init())
     }
@@ -1617,7 +1617,7 @@ fn fstat_old(fd: BorrowedFd<'_>) -> io::Result<Stat> {
     target_os = "wasi",
 )))]
 pub(crate) fn fstatfs(fd: BorrowedFd<'_>) -> io::Result<StatFs> {
-    let mut statfs = MaybeUninit::<StatFs>::uninit();
+    let mut statfs = MaybeUninit::<StatFs>::zeroed();
     unsafe {
         ret(c::fstatfs(borrowed_fd(fd), statfs.as_mut_ptr()))?;
         Ok(statfs.assume_init())
@@ -1626,7 +1626,7 @@ pub(crate) fn fstatfs(fd: BorrowedFd<'_>) -> io::Result<StatFs> {
 
 #[cfg(not(target_os = "wasi"))]
 pub(crate) fn fstatvfs(fd: BorrowedFd<'_>) -> io::Result<StatVfs> {
-    let mut statvfs = MaybeUninit::<c::statvfs>::uninit();
+    let mut statvfs = MaybeUninit::<c::statvfs>::zeroed();
     unsafe {
         ret(c::fstatvfs(borrowed_fd(fd), statvfs.as_mut_ptr()))?;
         Ok(libc_statvfs_to_statvfs(statvfs.assume_init()))
@@ -2097,7 +2097,7 @@ pub(crate) fn statx(
     }
     let mask = mask & StatxFlags::all();
 
-    let mut statx_buf = MaybeUninit::<Statx>::uninit();
+    let mut statx_buf = MaybeUninit::<Statx>::zeroed();
     unsafe {
         ret(sys::statx(
             dirfd,
