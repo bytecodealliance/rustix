@@ -21,7 +21,6 @@ use crate::fs::RenameFlags;
 #[cfg(not(target_os = "espidf"))]
 use crate::fs::Stat;
 #[cfg(not(any(
-    apple,
     target_os = "espidf",
     target_os = "horizon",
     target_os = "vita",
@@ -439,16 +438,23 @@ pub fn fclonefileat<Fd: AsFd, DstFd: AsFd, P: path::Arg>(
 
 /// `mknodat(dirfd, path, mode, dev)`—Creates special or normal files.
 ///
+/// # Platform support
+///
+/// On Apple platforms, this function requires macOS 13.0, iOS 16.0,
+/// tvOS 16.0, or watchOS 9.0 or later. On older versions, it returns
+/// [`io::Errno::NOSYS`].
+///
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [Apple]
 ///  - [FreeBSD]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/mknodat.html
 /// [Linux]: https://man7.org/linux/man-pages/man2/mknodat.2.html
+/// [Apple]: https://github.com/apple-oss-distributions/xnu/blob/main/bsd/man/man2/mknodat.2
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=mknodat&sektion=2
 #[cfg(not(any(
-    apple,
     target_os = "espidf",
     target_os = "horizon",
     target_os = "vita",
@@ -469,16 +475,23 @@ pub fn mknodat<P: path::Arg, Fd: AsFd>(
 
 /// `mkfifoat(dirfd, path, mode)`—Make a FIFO special file.
 ///
+/// # Platform support
+///
+/// On Apple platforms, this function requires macOS 13.0, iOS 16.0,
+/// tvOS 16.0, or watchOS 9.0 or later. On older versions, it returns
+/// [`io::Errno::NOSYS`].
+///
 /// # References
 ///  - [POSIX]
 ///  - [Linux]
+///  - [Apple]
 ///  - [FreeBSD]
 ///
 /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/mkfifoat.html
 /// [Linux]: https://www.man7.org/linux/man-pages/man3/mkfifo.3.html
+/// [Apple]: https://github.com/apple-oss-distributions/xnu/blob/main/bsd/man/man2/mkfifoat.2
 /// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=mkfifoat&sektion=2
 #[cfg(not(any(
-    apple,
     target_os = "espidf",
     target_os = "horizon",
     target_os = "vita",
