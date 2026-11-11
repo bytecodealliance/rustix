@@ -96,3 +96,48 @@ fn _getcwd(mut buffer: Vec<u8>) -> io::Result<CString> {
         }
     }
 }
+
+/// Whether `getcwd_raw` uses the existing allocation-free Linux-raw syscall.
+///
+/// This is build availability only, not a cwd, resource, or authority witness.
+#[cfg(all(feature = "alloc", feature = "fs"))]
+pub const GETCWD_RAW_SUPPORTED: bool = cfg!(linux_raw);
+
+/// Read the current directory into caller-provided storage without allocating.
+///
+/// On Linux-raw, returns the sealed buffer output for bytes including the NUL.
+/// Initialized byte slices return their initialized byte count.
+/// Empty or insufficient storage is an error. This never grows the buffer or
+/// falls back through libc or procfs. Other backends return `Errno::NOSYS`.
+#[cfg(all(feature = "alloc", feature = "fs"))]
+#[allow(unsafe_code)]
+#[inline]
+pub fn getcwd_raw<Buf: crate::buffer::Buffer<u8>>(buf: Buf) -> io::Result<Buf::Output> {
+    #[cfg(linux_raw)]
+    {
+        let mut buf = buf;
+        let (ptr, capacity) = buf.parts_mut();
+        if capacity == 0 {
+            return Err(io::Errno::RANGE);
+        }
+        // SAFETY: the sealed Buffer implementation supplies a valid uniquely
+        // borrowed byte region for capacity bytes. MaybeUninit<u8> has the same
+        // layout/alignment as u8; this borrow neither reads nor owns its bytes.
+        let uninit = unsafe {
+            core::slice::from_raw_parts_mut(ptr.cast::<core::mem::MaybeUninit<u8>>(), capacity)
+        };
+        let initialized = backend::process::syscalls::getcwd(uninit)?;
+        if initialized == 0 || initialized > capacity {
+            return Err(io::Errno::IO);
+        }
+        // SAFETY: successful Linux getcwd initialized exactly this bounded
+        // prefix, including NUL. The syscall borrow ended before this sealed
+        // Buffer operation publishes its initialized prefix; no growth occurs.
+        unsafe { Ok(buf.assume_init(initialized)) }
+    }
+    #[cfg(not(linux_raw))]
+    {
+        let _ = buf;
+        Err(io::Errno::NOSYS)
+    }
+}
