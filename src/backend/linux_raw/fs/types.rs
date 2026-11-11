@@ -1,6 +1,6 @@
-use crate::ffi;
 #[allow(unused_imports)]
 use crate::types::Padding;
+use crate::{ffi, fs::Timespec};
 use bitflags::bitflags;
 
 bitflags! {
@@ -856,3 +856,44 @@ pub type FsWord = i64;
 /// `__fsword_t`
 #[cfg(target_arch = "s390x")]
 pub type FsWord = u32;
+
+impl Stat {
+    /// Returns the [`FileType`] in the [`Stat`] value.
+    #[inline]
+    pub const fn filetype(&self) -> FileType {
+        FileType::from_raw_mode(self.st_mode)
+    }
+
+    /// Returns the [`Mode`] in the [`Stat`] value.
+    #[inline]
+    pub const fn mode(&self) -> Mode {
+        Mode::from_raw_mode(self.st_mode)
+    }
+
+    /// Returns the access time in the [`Stat`] value.
+    #[inline]
+    pub const fn atime(&self) -> Timespec {
+        Timespec {
+            tv_sec: self.st_atime,
+            tv_nsec: self.st_atime_nsec as i64,
+        }
+    }
+
+    /// Returns the modified time in the [`Stat`] value.
+    #[inline]
+    pub const fn mtime(&self) -> Timespec {
+        Timespec {
+            tv_sec: self.st_mtime,
+            tv_nsec: self.st_mtime_nsec as i64,
+        }
+    }
+
+    /// Returns the change time in the [`Stat`] value.
+    #[inline]
+    pub const fn ctime(&self) -> Timespec {
+        Timespec {
+            tv_sec: self.st_ctime,
+            tv_nsec: self.st_ctime_nsec as i64,
+        }
+    }
+}
