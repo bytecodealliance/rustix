@@ -76,7 +76,7 @@ impl Errno {
     /// # Panics
     ///
     /// Panics if the value of `raw` is outside the range of values that
-    /// Linux returns. Use `try_from_raw_os_error` for explicit error handling.
+    /// the OS returns. Use `try_from_raw_os_error` for explicit error handling.
     #[inline]
     pub const fn from_raw_os_error(raw: i32) -> Self {
         Self::from_errno(raw as u32)
@@ -84,7 +84,7 @@ impl Errno {
 
     /// Construct an `Errno` from a value that might be a raw OS error number.
     ///
-    /// Returns `None` if the value is outside the range of values that Linux
+    /// Returns `None` if the value is outside the range of values that the OS
     /// returns.
     #[inline]
     pub fn try_from_raw_os_error(raw: i32) -> Option<Self> {
