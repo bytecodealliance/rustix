@@ -260,7 +260,7 @@ fn test_invalid() {
     use std::borrow::Borrow;
 
     let t: &[u8] = b"hello\xc0world";
-    assert_eq!(t.as_str().unwrap_err(), io::Errno::INVAL);
+    assert_eq!(t.as_str().unwrap_err(), io::Errno::NOENT);
     assert_eq!("hello\u{fffd}world".to_owned(), Arg::to_string_lossy(&t));
     assert_eq!(
         b"hello\xc0world\0",
@@ -277,6 +277,6 @@ fn test_embedded_nul() {
     let t: &[u8] = b"hello\0world";
     assert_eq!("hello\0world", t.as_str().unwrap());
     assert_eq!("hello\0world".to_owned(), Arg::to_string_lossy(&t));
-    assert_eq!(t.as_cow_c_str().unwrap_err(), io::Errno::INVAL);
-    assert_eq!(t.into_c_str().unwrap_err(), io::Errno::INVAL);
+    assert_eq!(t.as_cow_c_str().unwrap_err(), io::Errno::NOENT);
+    assert_eq!(t.into_c_str().unwrap_err(), io::Errno::NOENT);
 }

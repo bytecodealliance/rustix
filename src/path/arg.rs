@@ -121,7 +121,7 @@ impl Arg for &str {
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Owned(
-            CString::new(*self).map_err(|_cstr_err| io::Errno::INVAL)?,
+            CString::new(*self).map_err(|_cstr_err| io::Errno::NOENT)?,
         ))
     }
 
@@ -132,7 +132,7 @@ impl Arg for &str {
         Self: 'b,
     {
         Ok(Cow::Owned(
-            CString::new(self).map_err(|_cstr_err| io::Errno::INVAL)?,
+            CString::new(self).map_err(|_cstr_err| io::Errno::NOENT)?,
         ))
     }
 
@@ -163,7 +163,7 @@ impl Arg for &String {
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Owned(
-            CString::new(String::as_str(self)).map_err(|_cstr_err| io::Errno::INVAL)?,
+            CString::new(String::as_str(self)).map_err(|_cstr_err| io::Errno::NOENT)?,
         ))
     }
 
@@ -203,7 +203,7 @@ impl Arg for String {
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Owned(
-            CString::new(self.as_str()).map_err(|_cstr_err| io::Errno::INVAL)?,
+            CString::new(self.as_str()).map_err(|_cstr_err| io::Errno::NOENT)?,
         ))
     }
 
@@ -214,7 +214,7 @@ impl Arg for String {
         Self: 'b,
     {
         Ok(Cow::Owned(
-            CString::new(self).map_err(|_cstr_err| io::Errno::INVAL)?,
+            CString::new(self).map_err(|_cstr_err| io::Errno::NOENT)?,
         ))
     }
 
@@ -224,7 +224,7 @@ impl Arg for String {
         Self: Sized,
         F: FnOnce(&CStr) -> io::Result<T>,
     {
-        f(&CString::new(self).map_err(|_cstr_err| io::Errno::INVAL)?)
+        f(&CString::new(self).map_err(|_cstr_err| io::Errno::NOENT)?)
     }
 }
 
@@ -232,7 +232,7 @@ impl Arg for String {
 impl Arg for &OsStr {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        self.to_str().ok_or(io::Errno::INVAL)
+        self.to_str().ok_or(io::Errno::NOENT)
     }
 
     #[inline]
@@ -251,7 +251,7 @@ impl Arg for &OsStr {
         Self: 'b,
     {
         #[cfg(all(target_os = "wasi", target_env = "p2", not(wasip2)))]
-        return self.to_str().ok_or(io::Errno::INVAL)?.into_c_str();
+        return self.to_str().ok_or(io::Errno::NOENT)?.into_c_str();
         #[cfg(any(wasip2, not(all(target_os = "wasi", target_env = "p2"))))]
         return self.as_bytes().into_c_str();
     }
@@ -274,7 +274,7 @@ impl Arg for &OsStr {
 impl Arg for &OsString {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        OsString::as_os_str(self).to_str().ok_or(io::Errno::INVAL)
+        OsString::as_os_str(self).to_str().ok_or(io::Errno::NOENT)
     }
 
     #[inline]
@@ -309,7 +309,7 @@ impl Arg for &OsString {
 impl Arg for OsString {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        self.as_os_str().to_str().ok_or(io::Errno::INVAL)
+        self.as_os_str().to_str().ok_or(io::Errno::NOENT)
     }
 
     #[inline]
@@ -330,7 +330,7 @@ impl Arg for OsString {
         #[cfg(all(target_os = "wasi", target_env = "p2", not(wasip2)))]
         return self
             .into_string()
-            .map_err(|_strng_err| io::Errno::INVAL)?
+            .map_err(|_strng_err| io::Errno::NOENT)?
             .into_c_str();
         #[cfg(any(wasip2, not(all(target_os = "wasi", target_env = "p2"))))]
         self.into_vec().into_c_str()
@@ -350,7 +350,7 @@ impl Arg for OsString {
 impl Arg for &Path {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        self.as_os_str().to_str().ok_or(io::Errno::INVAL)
+        self.as_os_str().to_str().ok_or(io::Errno::NOENT)
     }
 
     #[inline]
@@ -385,7 +385,7 @@ impl Arg for &Path {
 impl Arg for &PathBuf {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        self.as_os_str().to_str().ok_or(io::Errno::INVAL)
+        self.as_os_str().to_str().ok_or(io::Errno::NOENT)
     }
 
     #[inline]
@@ -420,7 +420,7 @@ impl Arg for &PathBuf {
 impl Arg for PathBuf {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        self.as_os_str().to_str().ok_or(io::Errno::INVAL)
+        self.as_os_str().to_str().ok_or(io::Errno::NOENT)
     }
 
     #[inline]
@@ -454,7 +454,7 @@ impl Arg for PathBuf {
 impl Arg for &CStr {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        self.to_str().map_err(|_utf8_err| io::Errno::INVAL)
+        self.to_str().map_err(|_utf8_err| io::Errno::NOENT)
     }
 
     #[cfg(feature = "alloc")]
@@ -492,7 +492,7 @@ impl Arg for &CStr {
 impl Arg for &CString {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        self.to_str().map_err(|_utf8_err| io::Errno::INVAL)
+        self.to_str().map_err(|_utf8_err| io::Errno::NOENT)
     }
 
     #[inline]
@@ -527,7 +527,7 @@ impl Arg for &CString {
 impl Arg for CString {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        self.to_str().map_err(|_utf8_err| io::Errno::INVAL)
+        self.to_str().map_err(|_utf8_err| io::Errno::NOENT)
     }
 
     #[inline]
@@ -573,7 +573,7 @@ impl<'a> Arg for Cow<'a, str> {
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Owned(
-            CString::new(self.as_ref()).map_err(|_cstr_err| io::Errno::INVAL)?,
+            CString::new(self.as_ref()).map_err(|_cstr_err| io::Errno::NOENT)?,
         ))
     }
 
@@ -587,7 +587,7 @@ impl<'a> Arg for Cow<'a, str> {
                 Cow::Owned(s) => CString::new(s),
                 Cow::Borrowed(s) => CString::new(s),
             }
-            .map_err(|_cstr_err| io::Errno::INVAL)?,
+            .map_err(|_cstr_err| io::Errno::NOENT)?,
         ))
     }
 
@@ -605,7 +605,7 @@ impl<'a> Arg for Cow<'a, str> {
 impl<'a> Arg for Cow<'a, OsStr> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        (**self).to_str().ok_or(io::Errno::INVAL)
+        (**self).to_str().ok_or(io::Errno::NOENT)
     }
 
     #[inline]
@@ -643,7 +643,7 @@ impl<'a> Arg for Cow<'a, OsStr> {
 impl<'a> Arg for Cow<'a, CStr> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        self.to_str().map_err(|_utf8_err| io::Errno::INVAL)
+        self.to_str().map_err(|_utf8_err| io::Errno::NOENT)
     }
 
     #[inline]
@@ -679,7 +679,7 @@ impl<'a> Arg for Cow<'a, CStr> {
 impl<'a> Arg for Component<'a> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        self.as_os_str().to_str().ok_or(io::Errno::INVAL)
+        self.as_os_str().to_str().ok_or(io::Errno::NOENT)
     }
 
     #[inline]
@@ -714,7 +714,7 @@ impl<'a> Arg for Component<'a> {
 impl<'a> Arg for Components<'a> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        self.as_path().to_str().ok_or(io::Errno::INVAL)
+        self.as_path().to_str().ok_or(io::Errno::NOENT)
     }
 
     #[inline]
@@ -749,7 +749,7 @@ impl<'a> Arg for Components<'a> {
 impl<'a> Arg for Iter<'a> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        self.as_path().to_str().ok_or(io::Errno::INVAL)
+        self.as_path().to_str().ok_or(io::Errno::NOENT)
     }
 
     #[inline]
@@ -783,7 +783,7 @@ impl<'a> Arg for Iter<'a> {
 impl Arg for &[u8] {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        str::from_utf8(self).map_err(|_utf8_err| io::Errno::INVAL)
+        str::from_utf8(self).map_err(|_utf8_err| io::Errno::NOENT)
     }
 
     #[cfg(feature = "alloc")]
@@ -796,7 +796,7 @@ impl Arg for &[u8] {
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Owned(
-            CString::new(*self).map_err(|_cstr_err| io::Errno::INVAL)?,
+            CString::new(*self).map_err(|_cstr_err| io::Errno::NOENT)?,
         ))
     }
 
@@ -807,7 +807,7 @@ impl Arg for &[u8] {
         Self: 'b,
     {
         Ok(Cow::Owned(
-            CString::new(self).map_err(|_cstr_err| io::Errno::INVAL)?,
+            CString::new(self).map_err(|_cstr_err| io::Errno::NOENT)?,
         ))
     }
 
@@ -825,7 +825,7 @@ impl Arg for &[u8] {
 impl Arg for &Vec<u8> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        str::from_utf8(self).map_err(|_utf8_err| io::Errno::INVAL)
+        str::from_utf8(self).map_err(|_utf8_err| io::Errno::NOENT)
     }
 
     #[cfg(feature = "alloc")]
@@ -838,7 +838,7 @@ impl Arg for &Vec<u8> {
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Owned(
-            CString::new(self.as_slice()).map_err(|_cstr_err| io::Errno::INVAL)?,
+            CString::new(self.as_slice()).map_err(|_cstr_err| io::Errno::NOENT)?,
         ))
     }
 
@@ -849,7 +849,7 @@ impl Arg for &Vec<u8> {
         Self: 'b,
     {
         Ok(Cow::Owned(
-            CString::new(self.as_slice()).map_err(|_cstr_err| io::Errno::INVAL)?,
+            CString::new(self.as_slice()).map_err(|_cstr_err| io::Errno::NOENT)?,
         ))
     }
 
@@ -867,7 +867,7 @@ impl Arg for &Vec<u8> {
 impl Arg for Vec<u8> {
     #[inline]
     fn as_str(&self) -> io::Result<&str> {
-        str::from_utf8(self).map_err(|_utf8_err| io::Errno::INVAL)
+        str::from_utf8(self).map_err(|_utf8_err| io::Errno::NOENT)
     }
 
     #[cfg(feature = "alloc")]
@@ -880,7 +880,7 @@ impl Arg for Vec<u8> {
     #[inline]
     fn as_cow_c_str(&self) -> io::Result<Cow<'_, CStr>> {
         Ok(Cow::Owned(
-            CString::new(self.as_slice()).map_err(|_cstr_err| io::Errno::INVAL)?,
+            CString::new(self.as_slice()).map_err(|_cstr_err| io::Errno::NOENT)?,
         ))
     }
 
@@ -891,7 +891,7 @@ impl Arg for Vec<u8> {
         Self: 'b,
     {
         Ok(Cow::Owned(
-            CString::new(self).map_err(|_cstr_err| io::Errno::INVAL)?,
+            CString::new(self).map_err(|_cstr_err| io::Errno::NOENT)?,
         ))
     }
 
@@ -901,7 +901,7 @@ impl Arg for Vec<u8> {
         Self: Sized,
         F: FnOnce(&CStr) -> io::Result<T>,
     {
-        f(&CString::new(self).map_err(|_cstr_err| io::Errno::INVAL)?)
+        f(&CString::new(self).map_err(|_cstr_err| io::Errno::NOENT)?)
     }
 }
 
@@ -980,7 +980,7 @@ where
     // function.
     match CStr::from_bytes_with_nul(unsafe { slice::from_raw_parts(buf_ptr, bytes.len() + 1) }) {
         Ok(s) => f(s),
-        Err(_) => Err(io::Errno::INVAL),
+        Err(_) => Err(io::Errno::NOENT),
     }
 }
 
@@ -994,7 +994,7 @@ where
 {
     #[cfg(feature = "alloc")]
     {
-        f(&CString::new(bytes).map_err(|_cstr_err| io::Errno::INVAL)?)
+        f(&CString::new(bytes).map_err(|_cstr_err| io::Errno::NOENT)?)
     }
 
     #[cfg(not(feature = "alloc"))]
@@ -1044,7 +1044,7 @@ where
         match CStr::from_bytes_with_nul(unsafe { slice::from_raw_parts(buf_ptr, bytes.len() + 1) })
         {
             Ok(s) => f(s),
-            Err(_) => Err(io::Errno::INVAL),
+            Err(_) => Err(io::Errno::NOENT),
         }
     }
 }
