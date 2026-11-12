@@ -1103,9 +1103,25 @@ impl Errno {
     }
 
     /// Construct an `Errno` from a raw OS error number.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value of `raw` is outside the range of values that
+    /// the OS returns. Use `try_from_raw_os_error` for explicit error handling.
     #[inline]
     pub const fn from_raw_os_error(raw: i32) -> Self {
         Self(raw)
+    }
+
+    /// Construct an `Errno` from a raw OS error number.
+    ///
+    /// Returns `None` if the value is outside the range of values that the OS
+    /// returns.
+    #[inline]
+    pub const fn try_from_raw_os_error(raw: i32) -> Option<Self> {
+        // Unlike the linux_raw backend, we don't know the range of errno
+        // values that libc might use, so we assume any value is valid.
+        Some(Self(raw))
     }
 
     pub(crate) fn last_os_error() -> Self {
