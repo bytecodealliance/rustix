@@ -61,11 +61,7 @@ impl Errno {
         io_err.raw_os_error().and_then(|raw| {
             // `std::io::Error` could theoretically have arbitrary OS error
             // values, so check that they're in Linux's range.
-            if (1..4096).contains(&raw) {
-                Some(Self::from_errno(raw as u32))
-            } else {
-                None
-            }
+            Self::try_from_errno(raw as u32)
         })
     }
 
@@ -76,23 +72,52 @@ impl Errno {
     }
 
     /// Construct an `Errno` from a raw OS error number.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value of `raw` is outside the range of values that
+    /// Linux returns. Use `try_from_raw_os_error` for explicit error handling.
     #[inline]
     pub const fn from_raw_os_error(raw: i32) -> Self {
         Self::from_errno(raw as u32)
     }
 
+    /// Construct an `Errno` from a value that might be a raw OS error number.
+    ///
+    /// Returns `None` if the value is outside the range of values that Linux
+    /// returns.
+    #[inline]
+    pub fn try_from_raw_os_error(raw: i32) -> Option<Self> {
+        Self::try_from_errno(raw as u32)
+    }
+
     /// Convert from a C `errno` value (which is positive) to an `Errno`.
     const fn from_errno(raw: u32) -> Self {
+        // TODO: Use Range::contains, once that's `const`.
+        assert!(raw != 0 && raw < 4096);
+
         // We store error values in negated form, so that we don't have to
         // negate them after every syscall.
         let encoded = raw.wrapping_neg() as u16;
 
-        // TODO: Use Range::contains, once that's `const`.
-        assert!(encoded >= 0xf001);
-
         // SAFETY: Linux syscalls return negated error values in the range
         // `-4095..0`, which we just asserted.
         unsafe { Self(encoded) }
+    }
+
+    /// Convert from a C `errno` value (which is positive) to an `Errno`.
+    fn try_from_errno(raw: u32) -> Option<Self> {
+        if raw == 0 || raw >= 4096 {
+            return None;
+        }
+
+        // We store error values in negated form, so that we don't have to
+        // negate them after every syscall.
+        let encoded = raw.wrapping_neg() as u16;
+
+        // SAFETY: Linux syscalls return negated error values in the range
+        // `-4095..0`, which we just checked.
+        Some(unsafe { Self(encoded) })
     }
 }
 
@@ -549,4 +574,21 @@ impl Errno {
     pub const XDEV: Self = Self::from_errno(errno::EXDEV);
     /// `EXFULL`
     pub const XFULL: Self = Self::from_errno(errno::EXFULL);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_errno_out_of_range() {
+        for raw in [0, 4096, -1, -22, i32::MIN, i32::MAX, 0x1_0001, 0x1_0016] {
+            assert_eq!(Errno::try_from_raw_os_error(raw), None);
+            assert!(std::panic::catch_unwind(|| Errno::from_raw_os_error(raw)).is_err());
+        }
+        for raw in [1, 4095, 256, 1023, 1024] {
+            assert!(Errno::try_from_raw_os_error(raw).is_some());
+            let _ok = Errno::from_raw_os_error(raw);
+        }
+    }
 }
