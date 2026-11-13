@@ -2,7 +2,6 @@
     target_os = "espidf",
     target_os = "fuchsia",
     target_os = "horizon",
-    target_os = "redox",
     target_os = "vita",
     target_os = "wasi"
 )))]
@@ -18,7 +17,6 @@ use crate::backend::c;
     target_os = "espidf",
     target_os = "fuchsia",
     target_os = "horizon",
-    target_os = "redox",
     target_os = "vita",
     target_os = "wasi"
 )))]
@@ -125,6 +123,7 @@ pub enum Resource {
         target_os = "haiku",
         target_os = "hurd",
         target_os = "nto",
+        target_os = "redox",
     )))]
     Rttime = bitcast!(c::RLIMIT_RTTIME),
 }
