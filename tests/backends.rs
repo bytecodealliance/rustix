@@ -82,7 +82,7 @@ fn test_backends() {
 
     #[cfg(windows)]
     let libc_dep = "windows-sys";
-    #[cfg(any(unix, target_os = "wasi"))]
+    #[cfg(not(windows))]
     let libc_dep = "libc";
 
     // Test the use-libc crate, which enables the "use-libc" cargo feature.
