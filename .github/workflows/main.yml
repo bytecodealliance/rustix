@@ -158,6 +158,23 @@ jobs:
     - run: cargo check --workspace --release -vv --target=aarch64-apple-ios --features=all-apis --all-targets
     - run: cargo check --workspace --release -vv --target=aarch64-linux-android --features=use-libc,net,std,alloc,event,fs,mm,param,pipe,use-libc-auxv,libc_errno --all-targets
     - run: cargo check --workspace --release -vv --target=i686-pc-windows-msvc --features=all-apis --all-targets
+    - name: Check Android and musl builds without linux-raw-sys to protect AOSP Rustix use
+      env:
+        RUSTFLAGS: >-
+          -D warnings -D elided-lifetimes-in-paths
+          --cfg criterion --cfg rustix_no_linux_raw
+      run: |
+        FEATURES="use-libc,net,std,alloc,event,fs,mm,param,pipe,thread,use-libc-auxv,libc_errno"
+        cargo check --workspace --release -vv --all-targets --features=$FEATURES \
+          --target=x86_64-unknown-linux-musl
+        cargo check --workspace --release -vv --all-targets --features=$FEATURES \
+          --target=x86_64-linux-android
+        cargo check --workspace --release -vv --all-targets --features=$FEATURES \
+          --target=i686-linux-android
+        cargo check --workspace --release -vv --all-targets --features=$FEATURES \
+          --target=arm-linux-androideabi
+        cargo check --workspace --release -vv --all-targets --features=$FEATURES \
+          --target=aarch64-linux-android
 
   check_no_default_features:
     name: Check --no-default-features

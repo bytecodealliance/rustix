@@ -100,6 +100,7 @@ fn main() {
     // install the toolchain for it.
     let libc = feature_use_libc
         || cfg_use_libc
+        || cfg_no_linux_raw
         || os != "linux"
         || !inline_asm_name_present
         || is_unsupported_abi
@@ -182,6 +183,7 @@ fn main() {
 
     println!("cargo:rerun-if-env-changed=CARGO_CFG_RUSTIX_USE_EXPERIMENTAL_ASM");
     println!("cargo:rerun-if-env-changed=CARGO_CFG_RUSTIX_USE_LIBC");
+    println!("cargo:rerun-if-env-changed=CARGO_CFG_RUSTIX_NO_LINUX_RAW");
 
     // Rerun this script if any of our features or configuration flags change,
     // or if the toolchain we used for feature detection changes.
