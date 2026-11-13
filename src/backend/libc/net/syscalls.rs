@@ -64,14 +64,14 @@ pub(crate) unsafe fn recvfrom(
     // `recvfrom` does not write to the storage if the socket is
     // connection-oriented sockets, so we initialize the family field to
     // `AF_UNSPEC` so that we can detect this case.
-    initialize_family_to_unspec(addr.storage.as_mut_ptr().cast::<c::sockaddr>());
+    initialize_family_to_unspec(addr.storage.as_mut_ptr().cast());
 
     let nread = ret_send_recv(c::recvfrom(
         borrowed_fd(fd),
         buf.0.cast(),
         send_recv_len(buf.1),
         bitflags_bits!(flags),
-        addr.storage.as_mut_ptr().cast::<c::sockaddr>(),
+        addr.storage.as_mut_ptr().cast(),
         &mut addr.len,
     ))?;
 
@@ -309,7 +309,7 @@ pub(crate) fn acceptfrom(sockfd: BorrowedFd<'_>) -> io::Result<(OwnedFd, Option<
         let mut addr = SocketAddrBuf::new();
         let owned_fd = ret_owned_fd(c::accept(
             borrowed_fd(sockfd),
-            addr.storage.as_mut_ptr().cast::<c::sockaddr>(),
+            addr.storage.as_mut_ptr().cast(),
             &mut addr.len,
         ))?;
         Ok((owned_fd, addr.into_any_option()))
@@ -335,7 +335,7 @@ pub(crate) fn acceptfrom_with(
         let mut addr = SocketAddrBuf::new();
         let owned_fd = ret_owned_fd(c::accept4(
             borrowed_fd(sockfd),
-            addr.storage.as_mut_ptr().cast::<c::sockaddr>(),
+            addr.storage.as_mut_ptr().cast(),
             &mut addr.len,
             flags.bits() as c::c_int,
         ))?;
@@ -389,7 +389,7 @@ pub(crate) fn getsockname(sockfd: BorrowedFd<'_>) -> io::Result<SocketAddrAny> {
         let mut addr = SocketAddrBuf::new();
         ret(c::getsockname(
             borrowed_fd(sockfd),
-            addr.storage.as_mut_ptr().cast::<c::sockaddr>(),
+            addr.storage.as_mut_ptr().cast(),
             &mut addr.len,
         ))?;
         Ok(addr.into_any())
@@ -401,7 +401,7 @@ pub(crate) fn getpeername(sockfd: BorrowedFd<'_>) -> io::Result<Option<SocketAdd
         let mut addr = SocketAddrBuf::new();
         ret(c::getpeername(
             borrowed_fd(sockfd),
-            addr.storage.as_mut_ptr().cast::<c::sockaddr>(),
+            addr.storage.as_mut_ptr().cast(),
             &mut addr.len,
         ))?;
         Ok(addr.into_any_option())
@@ -425,7 +425,7 @@ pub(crate) fn socketpair(
             c::c_int::from(domain.0),
             (type_.0 | flags.bits()) as c::c_int,
             raw_protocol as c::c_int,
-            fds.as_mut_ptr().cast::<c::c_int>(),
+            fds.as_mut_ptr().cast(),
         ))?;
 
         let [fd0, fd1] = fds.assume_init();

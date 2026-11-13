@@ -27,7 +27,7 @@ use {
 pub(crate) fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
     unsafe {
         let mut result = MaybeUninit::<[OwnedFd; 2]>::uninit();
-        ret(c::pipe(result.as_mut_ptr().cast::<i32>()))?;
+        ret(c::pipe(result.as_mut_ptr().cast()))?;
         let [p0, p1] = result.assume_init();
         Ok((p0, p1))
     }
@@ -45,10 +45,7 @@ pub(crate) fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
 pub(crate) fn pipe_with(flags: PipeFlags) -> io::Result<(OwnedFd, OwnedFd)> {
     unsafe {
         let mut result = MaybeUninit::<[OwnedFd; 2]>::uninit();
-        ret(c::pipe2(
-            result.as_mut_ptr().cast::<i32>(),
-            bitflags_bits!(flags),
-        ))?;
+        ret(c::pipe2(result.as_mut_ptr().cast(), bitflags_bits!(flags)))?;
         let [p0, p1] = result.assume_init();
         Ok((p0, p1))
     }
@@ -88,7 +85,7 @@ pub(crate) unsafe fn vmsplice(
 ) -> io::Result<usize> {
     ret_usize(c::vmsplice(
         borrowed_fd(fd),
-        bufs.as_ptr().cast::<c::iovec>(),
+        bufs.as_ptr().cast(),
         min(bufs.len(), MAX_IOV),
         flags.bits(),
     ))
