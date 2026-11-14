@@ -121,7 +121,11 @@ pub(crate) fn read_sockaddr_unix(addr: &SocketAddrAny) -> Result<SocketAddrUnix,
         // SAFETY: Convert `&[c_char]` to `&[u8]`.
         let bytes = unsafe { slice::from_raw_parts(bytes.as_ptr().cast::<u8>(), bytes.len()) };
 
-        assert_eq!(decode.sun_path[len - 1 - offsetof_sun_path], 0);
+        // A path that fills all of `sun_path` has no room for the NUL
+        // terminator; Linux stores it just past `sun_path`.
+        if bytes.len() < decode.sun_path.len() {
+            assert_eq!(decode.sun_path[bytes.len()], 0);
+        }
         SocketAddrUnix::new(bytes)
     }
 }

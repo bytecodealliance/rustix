@@ -1012,3 +1012,29 @@ fn test_long_named_address() {
         assert!(!name.is_unnamed());
     }
 }
+
+/// Test that a bound pathname that fills all of `sun_path` can be read back.
+/// Linux stores the NUL terminator just past `sun_path` and includes it in
+/// the returned address length.
+#[cfg(linux_kernel)]
+#[test]
+fn test_getsockname_long_named_address() {
+    let tmpdir = tempfile::tempdir().unwrap();
+    let mut path = tmpdir.path().to_path_buf().into_os_string();
+    path.push("/");
+    let fill = 108 - path.len();
+    path.push("a".repeat(fill));
+    let path = std::path::PathBuf::from(path);
+    assert_eq!(path.as_os_str().len(), 108);
+
+    let sock = socket(AddressFamily::UNIX, SocketType::DGRAM, None).unwrap();
+    bind(&sock, &SocketAddrUnix::new(&path).unwrap()).unwrap();
+
+    let address = rustix::net::getsockname(&sock).unwrap();
+    let _ = format!("{address:?}");
+    let address = SocketAddrUnix::try_from(address).unwrap();
+    assert_eq!(
+        address.path_bytes(),
+        Some(std::os::unix::ffi::OsStrExt::as_bytes(path.as_os_str()))
+    );
+}
