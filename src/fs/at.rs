@@ -496,7 +496,6 @@ pub fn mknodat<P: path::Arg, Fd: AsFd>(
     target_os = "horizon",
     target_os = "vita",
     target_os = "wasi",
-    target_os = "redox",
 )))]
 #[inline]
 pub fn mkfifoat<P: path::Arg, Fd: AsFd>(dirfd: Fd, path: P, mode: Mode) -> io::Result<()> {
