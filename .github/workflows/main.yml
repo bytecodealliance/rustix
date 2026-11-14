@@ -307,7 +307,7 @@ jobs:
             arm-linux-1.65,
             macos-latest,
             macos-15-intel,
-            macos-14,
+            macos-15,
             windows,
             musl,
           ]
@@ -513,8 +513,8 @@ jobs:
           - build: macos-15-intel
             os: macos-15-intel
             rust: stable
-          - build: macos-14
-            os: macos-14
+          - build: macos-15
+            os: macos-15
             rust: stable
           - build: windows
             os: windows-latest
