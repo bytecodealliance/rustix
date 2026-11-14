@@ -217,15 +217,19 @@ pub(crate) fn read_sockaddr_unix(addr: &SocketAddrAny) -> Result<SocketAddrUnix,
         } else {
             // Otherwise, use the provided length.
             let provided_len = len - 1 - offsetof_sun_path;
-            if decode.sun_path[provided_len] != 0 {
-                return Err(Errno::INVAL);
+            // A path that fills all of `sun_path` has no room for the NUL
+            // terminator; Linux stores it just past `sun_path`.
+            if provided_len < decode.sun_path.len() {
+                if decode.sun_path[provided_len] != 0 {
+                    return Err(Errno::INVAL);
+                }
+                debug_assert_eq!(
+                    unsafe { CStr::from_ptr(decode.sun_path.as_ptr().cast()) }
+                        .to_bytes()
+                        .len(),
+                    provided_len
+                );
             }
-            debug_assert_eq!(
-                unsafe { CStr::from_ptr(decode.sun_path.as_ptr().cast()) }
-                    .to_bytes()
-                    .len(),
-                provided_len
-            );
             &decode.sun_path[..provided_len]
         };
 
