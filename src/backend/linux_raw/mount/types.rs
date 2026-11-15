@@ -200,7 +200,7 @@ bitflags! {
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct MoveMountFlags: ffi::c_uint {
-        /// `MOVE_MOUNT_F_EMPTY_PATH`
+        /// `MOVE_MOUNT_F_SYMLINKS`
         const MOVE_MOUNT_F_SYMLINKS = linux_raw_sys::general::MOVE_MOUNT_F_SYMLINKS;
 
         /// `MOVE_MOUNT_F_AUTOMOUNTS`
@@ -218,7 +218,7 @@ bitflags! {
         /// `MOVE_MOUNT_T_EMPTY_PATH`
         const MOVE_MOUNT_T_EMPTY_PATH = linux_raw_sys::general::MOVE_MOUNT_T_EMPTY_PATH;
 
-        /// `MOVE_MOUNT__MASK`
+        /// `MOVE_MOUNT_SET_GROUP`
         const MOVE_MOUNT_SET_GROUP = linux_raw_sys::general::MOVE_MOUNT_SET_GROUP;
 
         /// `MOVE_MOUNT_BENEATH` (since Linux 6.5)
