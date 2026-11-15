@@ -707,3 +707,32 @@ fn test_sockopts_txtime() {
         Err(e) => panic!("{e}"),
     }
 }
+
+#[cfg(linux_kernel)]
+#[test]
+fn test_sockopts_ipv6_checksum() {
+    crate::init();
+
+    // Raw sockets require `CAP_NET_RAW`.
+    let s = match rustix::net::socket(AddressFamily::INET6, SocketType::RAW, Some(ipproto::UDP)) {
+        Ok(s) => s,
+        Err(io::Errno::PERM | io::Errno::ACCESS) => return,
+        Err(e) => panic!("{e}"),
+    };
+
+    assert_eq!(sockopt::ipv6_checksum(&s), Ok(None));
+
+    sockopt::set_ipv6_checksum(&s, Some(4)).unwrap();
+    assert_eq!(sockopt::ipv6_checksum(&s), Ok(Some(4)));
+
+    // Offsets which don't fit in a `c_int` are rejected rather than being
+    // treated as `-1`.
+    assert_eq!(
+        sockopt::set_ipv6_checksum(&s, Some(u32::MAX)),
+        Err(io::Errno::INVAL)
+    );
+    assert_eq!(sockopt::ipv6_checksum(&s), Ok(Some(4)));
+
+    sockopt::set_ipv6_checksum(&s, None).unwrap();
+    assert_eq!(sockopt::ipv6_checksum(&s), Ok(None));
+}

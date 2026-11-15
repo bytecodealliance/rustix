@@ -1360,6 +1360,58 @@ pub fn ipv6_freebind<Fd: AsFd>(fd: Fd) -> io::Result<bool> {
     backend::net::sockopt::ipv6_freebind(fd.as_fd())
 }
 
+/// `setsockopt(fd, IPPROTO_IPV6, IPV6_CHECKSUM, value)`
+///
+/// On a raw IPv6 socket, `Some(offset)` asks the kernel to compute and store
+/// a checksum at byte offset `offset` in outgoing payloads, and to verify it
+/// on incoming payloads. `None` disables this. ICMPv6 sockets always use the
+/// kernel-computed checksum and setting this option on them fails.
+///
+/// The behavior of this option is specified in [RFC 3542 Section 3.1].
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_ipv6_-and-set_ipv6_-functions
+/// [RFC 3542 Section 3.1]: https://datatracker.ietf.org/doc/html/rfc3542#section-3.1
+#[cfg(any(
+    apple,
+    freebsdlike,
+    linux_like,
+    target_os = "aix",
+    target_os = "cygwin",
+    target_os = "nto",
+))]
+#[inline]
+#[doc(alias = "IPV6_CHECKSUM")]
+pub fn set_ipv6_checksum<Fd: AsFd>(fd: Fd, value: Option<u32>) -> io::Result<()> {
+    backend::net::sockopt::set_ipv6_checksum(fd.as_fd(), value)
+}
+
+/// `getsockopt(fd, IPPROTO_IPV6, IPV6_CHECKSUM)`
+///
+/// Returns the checksum offset on a raw IPv6 socket, or `None` if checksum
+/// computation is disabled.
+///
+/// The behavior of this option is specified in [RFC 3542 Section 3.1].
+///
+/// See the [module-level documentation] for more.
+///
+/// [module-level documentation]: self#references-for-get_ipv6_-and-set_ipv6_-functions
+/// [RFC 3542 Section 3.1]: https://datatracker.ietf.org/doc/html/rfc3542#section-3.1
+#[cfg(any(
+    apple,
+    freebsdlike,
+    linux_like,
+    target_os = "aix",
+    target_os = "cygwin",
+    target_os = "nto",
+))]
+#[inline]
+#[doc(alias = "IPV6_CHECKSUM")]
+pub fn ipv6_checksum<Fd: AsFd>(fd: Fd) -> io::Result<Option<u32>> {
+    backend::net::sockopt::ipv6_checksum(fd.as_fd())
+}
+
 /// `getsockopt(fd, IPPROTO_IP, SO_ORIGINAL_DST)`
 ///
 /// Even though this corresponds to a `SO_*` constant, it is an `IPPROTO_IP`
