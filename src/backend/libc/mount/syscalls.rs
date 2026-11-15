@@ -1,5 +1,5 @@
 use crate::backend::c;
-use crate::backend::conv::{borrowed_fd, c_str, ret, ret_owned_fd};
+use crate::backend::conv::{borrowed_fd, c_str, ret, ret_owned_fd, ret_usize};
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::ffi::CStr;
 use crate::io;
@@ -27,6 +27,40 @@ pub(crate) fn mount(
 #[cfg(linux_kernel)]
 pub(crate) fn unmount(target: &CStr, flags: super::types::UnmountFlags) -> io::Result<()> {
     unsafe { ret(c::umount2(target.as_ptr(), bitflags_bits!(flags))) }
+}
+
+#[cfg(linux_kernel)]
+pub(crate) unsafe fn listmount(
+    root_mount_id: u64,
+    last_mount_id: u64,
+    mount_ids: (*mut u64, usize),
+    flags: u32,
+) -> io::Result<usize> {
+    use linux_raw_sys::general::{mnt_id_req, MNT_ID_REQ_SIZE_VER0};
+
+    const SYS_LISTMOUNT: c::c_long = linux_raw_sys::general::__NR_listmount as c::c_long;
+    syscall! {
+        fn listmount_syscall(
+            request: *const mnt_id_req,
+            mount_id_list: *mut u64,
+            mount_id_count: c::size_t,
+            listmount_flags: c::c_uint
+        ) via SYS_LISTMOUNT -> c::ssize_t
+    }
+
+    let request = mnt_id_req {
+        size: MNT_ID_REQ_SIZE_VER0,
+        spare: 0,
+        mnt_id: root_mount_id,
+        param: last_mount_id,
+        mnt_ns_id: 0,
+    };
+    let initialized = ret_usize(listmount_syscall(&request, mount_ids.0, mount_ids.1, flags))?;
+    if initialized > mount_ids.1 {
+        return Err(io::Errno::RANGE);
+    }
+
+    Ok(initialized)
 }
 
 #[cfg(linux_kernel)]

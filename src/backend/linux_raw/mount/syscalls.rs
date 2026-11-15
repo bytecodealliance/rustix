@@ -6,10 +6,11 @@
 #![allow(unsafe_code)]
 #![allow(clippy::undocumented_unsafe_blocks)]
 
-use crate::backend::conv::{ret, ret_owned_fd, slice, zero};
+use crate::backend::conv::{by_ref, c_uint, pass_usize, ret, ret_owned_fd, ret_usize, slice, zero};
 use crate::fd::{BorrowedFd, OwnedFd};
 use crate::ffi::CStr;
 use crate::io;
+use linux_raw_sys::general::{mnt_id_req, MNT_ID_REQ_SIZE_VER0};
 
 #[inline]
 pub(crate) fn mount(
@@ -34,6 +35,42 @@ pub(crate) fn mount(
 #[inline]
 pub(crate) fn unmount(target: &CStr, flags: super::types::UnmountFlags) -> io::Result<()> {
     unsafe { ret(syscall_readonly!(__NR_umount2, target, flags)) }
+}
+
+#[inline]
+pub(crate) unsafe fn listmount(
+    root_mount_id: u64,
+    last_mount_id: u64,
+    mount_ids: (*mut u64, usize),
+    flags: u32,
+) -> io::Result<usize> {
+    let request = mnt_id_req {
+        size: MNT_ID_REQ_SIZE_VER0,
+        spare: 0,
+        mnt_id: root_mount_id,
+        param: last_mount_id,
+        mnt_ns_id: 0,
+    };
+    let initialized = ret_usize(syscall!(
+        __NR_listmount,
+        by_ref(&request),
+        mount_ids.0,
+        pass_usize(mount_ids.1),
+        c_uint(flags)
+    ))?;
+    if initialized > mount_ids.1 {
+        return Err(io::Errno::RANGE);
+    }
+
+    #[cfg(sanitize_memory)]
+    {
+        let initialized_bytes = initialized
+            .checked_mul(core::mem::size_of::<u64>())
+            .ok_or(io::Errno::OVERFLOW)?;
+        crate::msan::unpoison(mount_ids.0.cast(), initialized_bytes);
+    }
+
+    Ok(initialized)
 }
 
 #[inline]
