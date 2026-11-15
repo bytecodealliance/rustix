@@ -17,6 +17,8 @@ use crate::fs::Access;
 use crate::fs::StatFs;
 #[cfg(not(any(target_os = "wasi")))]
 use crate::fs::StatVfs;
+#[cfg(not(target_os = "wasi"))]
+use crate::fs::{Dev, FileType};
 use crate::fs::{Mode, OFlags, Stat};
 #[cfg(not(target_os = "wasi"))]
 use crate::ugid::{Gid, Uid};
@@ -229,6 +231,20 @@ pub fn symlink<P: path::Arg, Q: path::Arg>(old_path: P, new_path: Q) -> io::Resu
 #[inline]
 pub fn mkdir<P: path::Arg>(path: P, mode: Mode) -> io::Result<()> {
     path.into_with_c_str(|path| backend::fs::syscalls::mkdir(path, mode))
+}
+
+/// `mknod(path, mode, dev)`—Creates a special or normal file.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/mknod.html
+/// [Linux]: https://man7.org/linux/man-pages/man2/mknod.2.html
+#[cfg(not(target_os = "wasi"))]
+#[inline]
+pub fn mknod<P: path::Arg>(path: P, file_type: FileType, mode: Mode, dev: Dev) -> io::Result<()> {
+    path.into_with_c_str(|path| backend::fs::syscalls::mknod(path, file_type, mode, dev))
 }
 
 /// `access(path, access)`—Tests permissions for a file or directory.

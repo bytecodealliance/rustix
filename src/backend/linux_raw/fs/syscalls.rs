@@ -248,6 +248,11 @@ pub(crate) fn mknodat(
 }
 
 #[inline]
+pub(crate) fn mknod(path: &CStr, file_type: FileType, mode: Mode, dev: u64) -> io::Result<()> {
+    mknodat(crate::fs::CWD, path, file_type, mode, dev)
+}
+
+#[inline]
 pub(crate) fn seek(fd: BorrowedFd<'_>, pos: SeekFrom) -> io::Result<u64> {
     let (whence, offset) = match pos {
         SeekFrom::Start(pos) => {

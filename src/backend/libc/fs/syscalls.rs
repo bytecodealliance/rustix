@@ -51,12 +51,7 @@ use crate::fs::SealFlags;
 use crate::fs::StatFs;
 #[cfg(not(any(target_os = "espidf", target_os = "horizon", target_os = "vita")))]
 use crate::fs::Timestamps;
-#[cfg(not(any(
-    target_os = "espidf",
-    target_os = "horizon",
-    target_os = "vita",
-    target_os = "wasi"
-)))]
+#[cfg(not(target_os = "wasi"))]
 use crate::fs::{Dev, FileType};
 use crate::fs::{Mode, OFlags, SeekFrom, Stat};
 #[cfg(not(target_os = "wasi"))]
@@ -1187,6 +1182,13 @@ pub(crate) fn chownat(
         ))
     }
 }
+#[cfg(not(target_os = "wasi"))]
+pub(crate) fn mknod(path: &CStr, file_type: FileType, mode: Mode, dev: Dev) -> io::Result<()> {
+    let pathname = c_str(path);
+    let mode = (mode.bits() | file_type.as_raw_mode()) as c::mode_t;
+    let dev = dev.try_into().map_err(|_| io::Errno::PERM)?;
+    unsafe { ret(c::mknod(pathname, mode, dev)) }
+}
 
 #[cfg(not(any(
     target_os = "espidf",
@@ -1204,7 +1206,7 @@ pub(crate) fn mknodat(
     let dirfd = borrowed_fd(dirfd);
     let pathname = c_str(path);
     let mode = (mode.bits() | file_type.as_raw_mode()) as c::mode_t;
-    let dev = dev.try_into().map_err(|_e| io::Errno::PERM)?;
+    let dev = dev.try_into().map_err(|_| io::Errno::PERM)?;
 
     // Apple platforms before macOS 13.0, iOS 16.0, tvOS 16.0, and watchOS 9.0
     // lack `mknodat`.

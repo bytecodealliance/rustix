@@ -1,3 +1,16 @@
+#[test]
+fn test_mknod() {
+    use rustix::fs::{mknod, stat, unlink, FileType, Mode};
+
+    let tmp = tempfile::tempdir().unwrap();
+    let path = tmp.path().join("file");
+
+    mknod(&path, FileType::Fifo, Mode::empty(), 0).unwrap();
+    let stat = stat(&path).unwrap();
+    assert_eq!(FileType::from_raw_mode(stat.st_mode), FileType::Fifo);
+    unlink(&path).unwrap();
+}
+
 #[cfg(not(any(apple, target_os = "wasi")))]
 #[test]
 fn test_mknodat() {
