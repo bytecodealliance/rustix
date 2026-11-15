@@ -1,6 +1,12 @@
-use crate::backend::c;
-use crate::ffi;
+use core::marker::PhantomData;
+
 use bitflags::bitflags;
+
+use crate::{
+    backend::c,
+    fd::{AsRawFd, BorrowedFd},
+    ffi,
+};
 
 #[cfg(linux_kernel)]
 bitflags! {
@@ -154,47 +160,42 @@ pub(crate) enum FsConfigCmd {
 
 #[cfg(linux_kernel)]
 bitflags! {
-    /// `MOUNT_ATTR_*` constants for use with [`fsmount`].
+    /// `MOUNT_ATTR_*` constants for use with [`fsmount`] and [`mount_setattr`].
     ///
     /// [`fsmount`]: crate::mount::fsmount
+    /// [`mount_setattr`]: crate::mount::mount_setattr
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct MountAttrFlags: ffi::c_uint {
         /// `MOUNT_ATTR_RDONLY`
-        const MOUNT_ATTR_RDONLY = 0x0000_0001;
+        const MOUNT_ATTR_RDONLY =  c::MOUNT_ATTR_RDONLY as c::c_uint;
 
         /// `MOUNT_ATTR_NOSUID`
-        const MOUNT_ATTR_NOSUID = 0x0000_0002;
+        const MOUNT_ATTR_NOSUID = c::MOUNT_ATTR_NOSUID as c::c_uint;
 
         /// `MOUNT_ATTR_NODEV`
-        const MOUNT_ATTR_NODEV = 0x0000_0004;
+        const MOUNT_ATTR_NODEV = c::MOUNT_ATTR_NODEV as c::c_uint;
 
         /// `MOUNT_ATTR_NOEXEC`
-        const MOUNT_ATTR_NOEXEC = 0x0000_0008;
+        const MOUNT_ATTR_NOEXEC = c::MOUNT_ATTR_NOEXEC as c::c_uint;
 
         /// `MOUNT_ATTR__ATIME`
-        const MOUNT_ATTR__ATIME = 0x0000_0070;
+        const MOUNT_ATTR__ATIME = c::MOUNT_ATTR__ATIME as c::c_uint;
 
         /// `MOUNT_ATTR_RELATIME`
-        const MOUNT_ATTR_RELATIME = 0x0000_0000;
+        const MOUNT_ATTR_RELATIME = c::MOUNT_ATTR_RELATIME as c::c_uint;
 
         /// `MOUNT_ATTR_NOATIME`
-        const MOUNT_ATTR_NOATIME = 0x0000_0010;
+        const MOUNT_ATTR_NOATIME = c::MOUNT_ATTR_NOATIME as c::c_uint;
 
         /// `MOUNT_ATTR_STRICTATIME`
-        const MOUNT_ATTR_STRICTATIME = 0x0000_0020;
+        const MOUNT_ATTR_STRICTATIME =c::MOUNT_ATTR_STRICTATIME as c::c_uint;
 
         /// `MOUNT_ATTR_NODIRATIME`
-        const MOUNT_ATTR_NODIRATIME = 0x0000_0080;
+        const MOUNT_ATTR_NODIRATIME = c::MOUNT_ATTR_NODIRATIME as c::c_uint;
 
-        /// `MOUNT_ATTR_NOUSER`
-        const MOUNT_ATTR_IDMAP = 0x0010_0000;
-
-        /// `MOUNT_ATTR__ATIME_FLAGS`
-        const MOUNT_ATTR_NOSYMFOLLOW = 0x0020_0000;
-
-        /// `MOUNT_ATTR__ATIME_FLAGS`
-        const MOUNT_ATTR_SIZE_VER0 = 32;
+        /// `MOUNT_ATTR_NOSYMFOLLOW`
+        const MOUNT_ATTR_NOSYMFOLLOW = c::MOUNT_ATTR_NOSYMFOLLOW as c::c_uint;
 
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
@@ -295,6 +296,104 @@ bitflags! {
         /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
         const _ = !0;
     }
+}
+
+#[cfg(linux_kernel)]
+bitflags! {
+    /// `AT_*` flags accepted by [`mount_setattr`].
+    ///
+    /// [`mount_setattr`]: crate::mount::mount_setattr
+    #[repr(transparent)]
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct MountSetAttrFlags: ffi::c_uint {
+        /// `AT_EMPTY_PATH`
+        const AT_EMPTY_PATH = c::AT_EMPTY_PATH as c::c_uint;
+
+        /// `AT_RECURSIVE`
+        const AT_RECURSIVE = c::AT_RECURSIVE as c::c_uint;
+
+        /// `AT_SYMLINK_NOFOLLOW`
+        const AT_SYMLINK_NOFOLLOW = c::AT_SYMLINK_NOFOLLOW as c::c_uint;
+
+        /// `AT_NO_AUTOMOUNT`
+        const AT_NO_AUTOMOUNT = c::AT_NO_AUTOMOUNT as c::c_uint;
+    }
+}
+
+/// `MOUNT_ATTR_*` flags that also carry a parameter.
+#[cfg(linux_kernel)]
+pub enum MountAttrParamFlags<'a> {
+    /// `MOUNT_ATTR_IDMAP`, which carries the descriptor of a user namespace.
+    IdMap(BorrowedFd<'a>),
+}
+
+#[cfg(linux_kernel)]
+impl<'a> MountAttrParamFlags<'a> {
+    fn apply(self, attr: MountAttr<'a>, operation: MountAttrOperation) -> MountAttr<'a> {
+        let mut raw = attr.raw;
+        let flags = match operation {
+            MountAttrOperation::Set => &mut raw.attr_set,
+            MountAttrOperation::Clear => &mut raw.attr_clr,
+        };
+
+        match self {
+            Self::IdMap(userns_fd) => {
+                *flags |=
+                    MountAttrFlags::from_bits_retain(c::MOUNT_ATTR_IDMAP as u32).bits() as u64;
+                raw.userns_fd = userns_fd.as_raw_fd() as u64;
+            }
+        }
+
+        MountAttr {
+            raw,
+            userns_fd: PhantomData::<BorrowedFd<'a>>,
+        }
+    }
+}
+
+/// `struct mount_attr`
+#[cfg(linux_kernel)]
+#[derive(Clone)]
+#[doc(alias = "mount_attr")]
+pub struct MountAttr<'a> {
+    pub(crate) raw: c::mount_attr,
+    userns_fd: PhantomData<BorrowedFd<'a>>,
+}
+
+#[cfg(linux_kernel)]
+impl<'a> MountAttr<'a> {
+    /// Create a `MountAttr` with the given simple fields.
+    pub fn new(
+        attr_set: MountAttrFlags,
+        attr_clr: MountAttrFlags,
+        propagation: MountPropagationFlags,
+    ) -> Self {
+        Self {
+            raw: c::mount_attr {
+                attr_set: attr_set.bits() as u64,
+                attr_clr: attr_clr.bits() as u64,
+                propagation: propagation.bits() as u64,
+                userns_fd: 0,
+            },
+            userns_fd: PhantomData,
+        }
+    }
+
+    /// Set a parameterized flag.
+    pub fn set_param_flag(self, param: MountAttrParamFlags<'a>) -> Self {
+        param.apply(self, MountAttrOperation::Set)
+    }
+
+    /// Clear a parameterized flag.
+    pub fn clear_param_flag(self, param: MountAttrParamFlags<'a>) -> Self {
+        param.apply(self, MountAttrOperation::Clear)
+    }
+}
+
+#[cfg(linux_kernel)]
+enum MountAttrOperation {
+    Set,
+    Clear,
 }
 
 #[cfg(linux_kernel)]
