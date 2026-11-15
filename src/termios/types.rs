@@ -32,7 +32,10 @@ pub struct Termios {
 
     /// Line discipline.
     #[doc(alias = "c_line")]
-    #[cfg(not(all(linux_raw, any(target_arch = "powerpc", target_arch = "powerpc64"))))]
+    #[cfg(not(all(
+        any(linux_raw, target_env = "musl"),
+        any(target_arch = "powerpc", target_arch = "powerpc64")
+    )))]
     #[cfg(any(
         linux_like,
         target_env = "newlib",
@@ -53,7 +56,10 @@ pub struct Termios {
     /// Line discipline.
     // On PowerPC, this field comes after `c_cc`.
     #[doc(alias = "c_line")]
-    #[cfg(all(linux_raw, any(target_arch = "powerpc", target_arch = "powerpc64")))]
+    #[cfg(all(
+        any(linux_raw, target_env = "musl"),
+        any(target_arch = "powerpc", target_arch = "powerpc64")
+    ))]
     pub line_discipline: c::cc_t,
 
     /// See the `input_speed` and `set_input_seed` functions.
