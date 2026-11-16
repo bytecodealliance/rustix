@@ -233,6 +233,20 @@ pub fn mkdir<P: path::Arg>(path: P, mode: Mode) -> io::Result<()> {
     path.into_with_c_str(|path| backend::fs::syscalls::mkdir(path, mode))
 }
 
+/// `mkfifo(path, mode)`—Creates a FIFO special file.
+///
+/// # References
+///  - [POSIX]
+///  - [Linux]
+///
+/// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/mkfifo.html
+/// [Linux]: https://man7.org/linux/man-pages/man3/mkfifo.3.html
+#[cfg(not(target_os = "wasi"))]
+#[inline]
+pub fn mkfifo<P: path::Arg>(path: P, mode: Mode) -> io::Result<()> {
+    mknod(path, FileType::Fifo, mode, 0)
+}
+
 /// `mknod(path, mode, dev)`—Creates a special or normal file.
 ///
 /// # References
