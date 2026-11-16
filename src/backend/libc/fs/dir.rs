@@ -87,6 +87,7 @@ impl Dir {
     ///   - [POSIX]
     ///
     /// [POSIX]: https://pubs.opengroup.org/onlinepubs/9799919799/functions/dirfd.html
+    #[cfg(not(target_os = "vita"))]
     #[inline]
     #[doc(alias = "dirfd")]
     pub fn fd<'a>(&'a self) -> io::Result<BorrowedFd<'a>> {
