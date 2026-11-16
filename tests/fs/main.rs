@@ -40,6 +40,7 @@ mod long_paths;
 #[cfg(not(any(target_os = "haiku", target_os = "wasi")))]
 mod makedev;
 mod mkdirat;
+#[cfg(not(target_os = "wasi"))]
 mod mknodat;
 mod negative_timestamp;
 #[cfg(linux_kernel)]
