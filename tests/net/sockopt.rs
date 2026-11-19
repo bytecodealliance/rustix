@@ -194,17 +194,12 @@ fn test_sockopts_tcp(s: &OwnedFd) {
 
     assert!(!sockopt::tcp_nodelay(s).unwrap());
 
-    #[cfg(not(any(
-        target_os = "haiku",
-        target_os = "nto",
-        target_os = "openbsd",
-        target_os = "redox"
-    )))]
+    #[cfg(not(any(target_os = "haiku", nto, target_os = "openbsd", target_os = "redox")))]
     {
         assert!(sockopt::tcp_keepcnt(s).is_ok());
         assert!(sockopt::tcp_keepintvl(s).is_ok());
     }
-    #[cfg(not(any(target_os = "haiku", target_os = "nto", target_os = "openbsd")))]
+    #[cfg(not(any(target_os = "haiku", nto, target_os = "openbsd")))]
     {
         assert!(sockopt::tcp_keepidle(s).is_ok());
     }
@@ -221,7 +216,7 @@ fn test_sockopts_tcp(s: &OwnedFd) {
     // Check that the nodelay flag is cleared.
     assert!(!sockopt::tcp_nodelay(s).unwrap());
 
-    #[cfg(not(any(target_os = "haiku", target_os = "nto", target_os = "openbsd")))]
+    #[cfg(not(any(target_os = "haiku", nto, target_os = "openbsd")))]
     {
         #[cfg(not(target_os = "redox"))]
         {
@@ -314,7 +309,7 @@ fn test_sockopts_ipv4() {
         target_os = "espidf",
         target_os = "haiku",
         target_os = "netbsd",
-        target_os = "nto",
+        nto,
     )))]
     assert_eq!(sockopt::socket_domain(&s).unwrap(), AddressFamily::INET);
     assert_ne!(sockopt::ip_ttl(&s).unwrap(), 0);
@@ -346,13 +341,13 @@ fn test_sockopts_ipv4() {
         target_os = "aix",
         target_os = "fuchsia",
         target_os = "haiku",
-        target_os = "nto",
+        nto,
         target_env = "newlib"
     ))]
     {
         assert_eq!(sockopt::ip_tos(&s).unwrap(), 0);
 
-        #[cfg(any(linux_like, target_os = "aix", target_os = "nto"))]
+        #[cfg(any(linux_like, target_os = "aix", nto))]
         {
             sockopt::set_ip_tos(&s, libc::IPTOS_THROUGHPUT).unwrap();
             assert_eq!(sockopt::ip_tos(&s).unwrap(), libc::IPTOS_THROUGHPUT);
@@ -411,7 +406,7 @@ fn test_sockopts_ipv6() {
         target_os = "espidf",
         target_os = "haiku",
         target_os = "netbsd",
-        target_os = "nto",
+        nto,
     )))]
     assert_eq!(sockopt::socket_domain(&s).unwrap(), AddressFamily::INET6);
 
@@ -488,13 +483,7 @@ fn test_sockopts_ipv6() {
     assert_eq!(sockopt::ipv6_unicast_hops(&s).unwrap(), 8);
 
     // Check the initial value of `IPV6_RECVTCLASS`, set it, and check it.
-    #[cfg(any(
-        bsd,
-        linux_like,
-        target_os = "aix",
-        target_os = "fuchsia",
-        target_os = "nto"
-    ))]
+    #[cfg(any(bsd, linux_like, target_os = "aix", target_os = "fuchsia", nto))]
     {
         assert!(!sockopt::ipv6_recvtclass(&s).unwrap());
         sockopt::set_ipv6_recvtclass(&s, true).unwrap();

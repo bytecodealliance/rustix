@@ -276,7 +276,7 @@ mod tests {
             solarish,
             target_os = "cygwin",
             target_os = "haiku",
-            target_os = "nto",
+            nto,
             target_os = "redox",
             target_os = "wasi",
         )))]

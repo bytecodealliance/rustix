@@ -32,12 +32,7 @@ fn invalid_offset_seek() {
     seek(&file, SeekFrom::Current(i64::MIN)).unwrap_err();
 }
 
-#[cfg(not(any(
-    netbsdlike,
-    target_os = "dragonfly",
-    target_os = "nto",
-    target_os = "redox"
-)))]
+#[cfg(not(any(netbsdlike, target_os = "dragonfly", nto, target_os = "redox")))]
 #[test]
 fn invalid_offset_fallocate() {
     use rustix::fs::{fallocate, openat, FallocateFlags, Mode, OFlags, CWD};

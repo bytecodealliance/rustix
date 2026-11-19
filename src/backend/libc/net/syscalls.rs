@@ -288,7 +288,7 @@ pub(crate) fn sendmmsg(
     target_os = "espidf",
     target_os = "haiku",
     target_os = "horizon",
-    target_os = "nto",
+    nto,
     target_os = "redox",
     target_os = "vita",
 )))]
@@ -323,7 +323,7 @@ pub(crate) fn acceptfrom(sockfd: BorrowedFd<'_>) -> io::Result<(OwnedFd, Option<
     target_os = "espidf",
     target_os = "haiku",
     target_os = "horizon",
-    target_os = "nto",
+    nto,
     target_os = "redox",
     target_os = "vita",
 )))]
@@ -352,7 +352,7 @@ pub(crate) fn acceptfrom_with(
     target_os = "espidf",
     target_os = "haiku",
     target_os = "horizon",
-    target_os = "nto",
+    nto,
     target_os = "redox",
     target_os = "vita",
 ))]
@@ -369,7 +369,7 @@ pub(crate) fn accept_with(sockfd: BorrowedFd<'_>, _flags: SocketFlags) -> io::Re
     target_os = "espidf",
     target_os = "haiku",
     target_os = "horizon",
-    target_os = "nto",
+    nto,
     target_os = "redox",
     target_os = "vita",
 ))]

@@ -631,7 +631,7 @@ impl FileType {
         target_os = "espidf",
         target_os = "haiku",
         target_os = "horizon",
-        target_os = "nto",
+        nto,
         target_os = "vita"
     )))]
     #[inline]
@@ -776,7 +776,7 @@ bitflags! {
     netbsdlike,
     target_os = "espidf",
     target_os = "horizon",
-    target_os = "nto",
+    nto,
     target_os = "redox",
     target_os = "vita"
 )))]
@@ -1071,7 +1071,7 @@ pub struct Stat {
     target_os = "haiku",
     target_os = "horizon",
     target_os = "netbsd",
-    target_os = "nto",
+    nto,
     target_os = "redox",
     target_os = "vita",
     target_os = "wasi",
@@ -1093,7 +1093,7 @@ pub type StatFs = c::statfs64;
     target_os = "espidf",
     target_os = "haiku",
     target_os = "horizon",
-    target_os = "nto",
+    nto,
     target_os = "redox",
     target_os = "vita",
     target_os = "wasi",

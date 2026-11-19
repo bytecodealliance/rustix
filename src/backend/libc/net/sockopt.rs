@@ -29,7 +29,7 @@ use crate::net::xdp::{XdpMmapOffsets, XdpOptionsFlags, XdpRingOffset, XdpStatist
     target_os = "haiku",
     target_os = "horizon",
     target_os = "netbsd",
-    target_os = "nto",
+    nto,
     target_os = "vita",
 )))]
 use crate::net::AddressFamily;
@@ -79,7 +79,7 @@ use alloc::borrow::ToOwned as _;
 use alloc::string::String;
 #[cfg(apple)]
 use c::TCP_KEEPALIVE as TCP_KEEPIDLE;
-#[cfg(not(any(apple, target_os = "haiku", target_os = "nto", target_os = "openbsd")))]
+#[cfg(not(any(apple, target_os = "haiku", nto, target_os = "openbsd")))]
 use c::TCP_KEEPIDLE;
 use core::mem::{size_of, MaybeUninit};
 use core::time::Duration;
@@ -394,7 +394,7 @@ pub(crate) fn socket_send_buffer_size(fd: BorrowedFd<'_>) -> io::Result<usize> {
     target_os = "horizon",
     target_os = "hurd",
     target_os = "netbsd",
-    target_os = "nto",
+    nto,
     target_os = "vita",
 )))]
 pub(crate) fn socket_domain(fd: BorrowedFd<'_>) -> io::Result<AddressFamily> {
@@ -684,21 +684,9 @@ pub(crate) fn set_ipv6_add_membership(
     multiaddr: &Ipv6Addr,
     interface: u32,
 ) -> io::Result<()> {
-    #[cfg(not(any(
-        bsd,
-        solarish,
-        target_os = "haiku",
-        target_os = "l4re",
-        target_os = "nto"
-    )))]
+    #[cfg(not(any(bsd, solarish, target_os = "haiku", target_os = "l4re", nto)))]
     use c::IPV6_ADD_MEMBERSHIP;
-    #[cfg(any(
-        bsd,
-        solarish,
-        target_os = "haiku",
-        target_os = "l4re",
-        target_os = "nto"
-    ))]
+    #[cfg(any(bsd, solarish, target_os = "haiku", target_os = "l4re", nto))]
     use c::IPV6_JOIN_GROUP as IPV6_ADD_MEMBERSHIP;
 
     let mreq = to_ipv6mr(multiaddr, interface);
@@ -739,21 +727,9 @@ pub(crate) fn set_ipv6_drop_membership(
     multiaddr: &Ipv6Addr,
     interface: u32,
 ) -> io::Result<()> {
-    #[cfg(not(any(
-        bsd,
-        solarish,
-        target_os = "haiku",
-        target_os = "l4re",
-        target_os = "nto"
-    )))]
+    #[cfg(not(any(bsd, solarish, target_os = "haiku", target_os = "l4re", nto)))]
     use c::IPV6_DROP_MEMBERSHIP;
-    #[cfg(any(
-        bsd,
-        solarish,
-        target_os = "haiku",
-        target_os = "l4re",
-        target_os = "nto"
-    ))]
+    #[cfg(any(bsd, solarish, target_os = "haiku", target_os = "l4re", nto))]
     use c::IPV6_LEAVE_GROUP as IPV6_DROP_MEMBERSHIP;
 
     let mreq = to_ipv6mr(multiaddr, interface);
@@ -780,7 +756,7 @@ pub(crate) fn set_ipv6_unicast_hops(fd: BorrowedFd<'_>, hops: Option<u8>) -> io:
     target_os = "aix",
     target_os = "fuchsia",
     target_os = "haiku",
-    target_os = "nto",
+    nto,
     target_env = "newlib"
 ))]
 #[inline]
@@ -794,7 +770,7 @@ pub(crate) fn set_ip_tos(fd: BorrowedFd<'_>, value: u8) -> io::Result<()> {
     target_os = "aix",
     target_os = "fuchsia",
     target_os = "haiku",
-    target_os = "nto",
+    nto,
     target_env = "newlib"
 ))]
 #[inline]
@@ -827,25 +803,13 @@ pub(crate) fn ip_recvtos(fd: BorrowedFd<'_>) -> io::Result<bool> {
     getsockopt(fd, c::IPPROTO_IP, c::IP_RECVTOS).map(to_bool)
 }
 
-#[cfg(any(
-    bsd,
-    linux_like,
-    target_os = "aix",
-    target_os = "fuchsia",
-    target_os = "nto"
-))]
+#[cfg(any(bsd, linux_like, target_os = "aix", target_os = "fuchsia", nto))]
 #[inline]
 pub(crate) fn set_ipv6_recvtclass(fd: BorrowedFd<'_>, value: bool) -> io::Result<()> {
     setsockopt(fd, c::IPPROTO_IPV6, c::IPV6_RECVTCLASS, from_bool(value))
 }
 
-#[cfg(any(
-    bsd,
-    linux_like,
-    target_os = "aix",
-    target_os = "fuchsia",
-    target_os = "nto"
-))]
+#[cfg(any(bsd, linux_like, target_os = "aix", target_os = "fuchsia", nto))]
 #[inline]
 pub(crate) fn ipv6_recvtclass(fd: BorrowedFd<'_>) -> io::Result<bool> {
     getsockopt(fd, c::IPPROTO_IPV6, c::IPV6_RECVTCLASS).map(to_bool)
@@ -936,60 +900,40 @@ pub(crate) fn tcp_nodelay(fd: BorrowedFd<'_>) -> io::Result<bool> {
 }
 
 #[inline]
-#[cfg(not(any(
-    target_os = "haiku",
-    target_os = "nto",
-    target_os = "openbsd",
-    target_os = "redox"
-)))]
+#[cfg(not(any(target_os = "haiku", nto, target_os = "openbsd", target_os = "redox")))]
 pub(crate) fn set_tcp_keepcnt(fd: BorrowedFd<'_>, count: u32) -> io::Result<()> {
     setsockopt(fd, c::IPPROTO_TCP, c::TCP_KEEPCNT, count)
 }
 
 #[inline]
-#[cfg(not(any(
-    target_os = "haiku",
-    target_os = "nto",
-    target_os = "openbsd",
-    target_os = "redox"
-)))]
+#[cfg(not(any(target_os = "haiku", nto, target_os = "openbsd", target_os = "redox")))]
 pub(crate) fn tcp_keepcnt(fd: BorrowedFd<'_>) -> io::Result<u32> {
     getsockopt(fd, c::IPPROTO_TCP, c::TCP_KEEPCNT)
 }
 
 #[inline]
-#[cfg(not(any(target_os = "haiku", target_os = "nto", target_os = "openbsd")))]
+#[cfg(not(any(target_os = "haiku", nto, target_os = "openbsd")))]
 pub(crate) fn set_tcp_keepidle(fd: BorrowedFd<'_>, duration: Duration) -> io::Result<()> {
     let secs: c::c_uint = duration_to_secs(duration)?;
     setsockopt(fd, c::IPPROTO_TCP, TCP_KEEPIDLE, secs)
 }
 
 #[inline]
-#[cfg(not(any(target_os = "haiku", target_os = "nto", target_os = "openbsd")))]
+#[cfg(not(any(target_os = "haiku", nto, target_os = "openbsd")))]
 pub(crate) fn tcp_keepidle(fd: BorrowedFd<'_>) -> io::Result<Duration> {
     let secs: c::c_uint = getsockopt(fd, c::IPPROTO_TCP, TCP_KEEPIDLE)?;
     Ok(Duration::from_secs(secs as u64))
 }
 
 #[inline]
-#[cfg(not(any(
-    target_os = "haiku",
-    target_os = "nto",
-    target_os = "openbsd",
-    target_os = "redox"
-)))]
+#[cfg(not(any(target_os = "haiku", nto, target_os = "openbsd", target_os = "redox")))]
 pub(crate) fn set_tcp_keepintvl(fd: BorrowedFd<'_>, duration: Duration) -> io::Result<()> {
     let secs: c::c_uint = duration_to_secs(duration)?;
     setsockopt(fd, c::IPPROTO_TCP, c::TCP_KEEPINTVL, secs)
 }
 
 #[inline]
-#[cfg(not(any(
-    target_os = "haiku",
-    target_os = "nto",
-    target_os = "openbsd",
-    target_os = "redox"
-)))]
+#[cfg(not(any(target_os = "haiku", nto, target_os = "openbsd", target_os = "redox")))]
 pub(crate) fn tcp_keepintvl(fd: BorrowedFd<'_>) -> io::Result<Duration> {
     let secs: c::c_uint = getsockopt(fd, c::IPPROTO_TCP, c::TCP_KEEPINTVL)?;
     Ok(Duration::from_secs(secs as u64))
