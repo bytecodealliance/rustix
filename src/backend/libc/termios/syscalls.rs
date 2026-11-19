@@ -367,7 +367,7 @@ pub(crate) fn tcgetwinsize(fd: BorrowedFd<'_>) -> io::Result<Winsize> {
     }
 }
 
-#[cfg(not(any(target_os = "espidf", target_os = "nto", target_os = "wasi")))]
+#[cfg(not(any(target_os = "espidf", nto, target_os = "wasi")))]
 #[inline]
 pub(crate) fn set_speed(termios: &mut Termios, arbitrary_speed: u32) -> io::Result<()> {
     #[cfg(bsd)]
@@ -489,7 +489,7 @@ pub(crate) fn set_input_speed(termios: &mut Termios, arbitrary_speed: u32) -> io
     }
 }
 
-#[cfg(not(any(target_os = "espidf", target_os = "nto", target_os = "wasi")))]
+#[cfg(not(any(target_os = "espidf", nto, target_os = "wasi")))]
 #[inline]
 pub(crate) fn cfmakeraw(termios: &mut Termios) {
     unsafe {

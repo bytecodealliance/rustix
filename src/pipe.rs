@@ -104,7 +104,7 @@ pub fn pipe() -> io::Result<(OwnedFd, OwnedFd)> {
     target_os = "espidf",
     target_os = "haiku",
     target_os = "horizon",
-    target_os = "nto"
+    nto
 )))]
 #[inline]
 #[doc(alias = "pipe2")]

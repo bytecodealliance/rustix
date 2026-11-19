@@ -22,7 +22,7 @@ bitflags! {
             target_os = "haiku",
             target_os = "horizon",
             target_os = "hurd",
-            target_os = "nto",
+            nto,
             target_os = "openbsd",
             target_os = "redox",
             target_os = "vita",

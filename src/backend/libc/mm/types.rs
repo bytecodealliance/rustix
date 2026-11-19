@@ -87,7 +87,7 @@ bitflags! {
             target_os = "fuchsia",
             target_os = "haiku",
             target_os = "hurd",
-            target_os = "nto",
+            nto,
             target_os = "redox",
         )))]
         const SHARED_VALIDATE = bitcast!(c::MAP_SHARED_VALIDATE);
@@ -101,7 +101,7 @@ bitflags! {
             target_os = "cygwin",
             target_os = "haiku",
             target_os = "hurd",
-            target_os = "nto",
+            nto,
             target_os = "redox",
         )))]
         const DENYWRITE = bitcast!(c::MAP_DENYWRITE);
@@ -118,7 +118,7 @@ bitflags! {
             target_os = "fuchsia",
             target_os = "haiku",
             target_os = "hurd",
-            target_os = "nto",
+            nto,
             target_os = "redox",
         )))]
         const FIXED_NOREPLACE = bitcast!(c::MAP_FIXED_NOREPLACE);
@@ -130,7 +130,7 @@ bitflags! {
             target_os = "cygwin",
             target_os = "haiku",
             target_os = "hurd",
-            target_os = "nto",
+            nto,
             target_os = "redox",
         )))]
         const GROWSDOWN = bitcast!(c::MAP_GROWSDOWN);
@@ -142,7 +142,7 @@ bitflags! {
             target_os = "cygwin",
             target_os = "haiku",
             target_os = "hurd",
-            target_os = "nto",
+            nto,
             target_os = "redox",
         )))]
         const HUGETLB = bitcast!(c::MAP_HUGETLB);
@@ -157,7 +157,7 @@ bitflags! {
             target_os = "fuchsia",
             target_os = "haiku",
             target_os = "hurd",
-            target_os = "nto",
+            nto,
             target_os = "redox",
         )))]
         const HUGE_2MB = bitcast!(c::MAP_HUGE_2MB);
@@ -172,7 +172,7 @@ bitflags! {
             target_os = "fuchsia",
             target_os = "haiku",
             target_os = "hurd",
-            target_os = "nto",
+            nto,
             target_os = "redox",
         )))]
         const HUGE_1GB = bitcast!(c::MAP_HUGE_1GB);
@@ -184,7 +184,7 @@ bitflags! {
             target_os = "cygwin",
             target_os = "haiku",
             target_os = "hurd",
-            target_os = "nto",
+            nto,
             target_os = "redox",
         )))]
         const LOCKED = bitcast!(c::MAP_LOCKED);
@@ -196,7 +196,7 @@ bitflags! {
             freebsdlike,
             target_os = "aix",
             target_os = "hurd",
-            target_os = "nto",
+            nto,
             target_os = "redox",
         )))]
         const NORESERVE = bitcast!(c::MAP_NORESERVE);
@@ -211,7 +211,7 @@ bitflags! {
             target_os = "cygwin",
             target_os = "haiku",
             target_os = "hurd",
-            target_os = "nto",
+            nto,
             target_os = "redox",
         )))]
         const POPULATE = bitcast!(c::MAP_POPULATE);
@@ -240,7 +240,7 @@ bitflags! {
             target_os = "fuchsia",
             target_os = "haiku",
             target_os = "hurd",
-            target_os = "nto",
+            nto,
             target_os = "redox",
             all(
                 linux_kernel,

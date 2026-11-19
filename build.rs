@@ -150,6 +150,12 @@ fn main() {
     if os == "solaris" || os == "illumos" {
         use_feature("solarish");
     }
+    // QNX Neutrino. QNX 7.x and the QNX SDP 8.0 toolchain targets say `target_os = "nto"`;
+    // upstream Rust's QNX 8.0 targets (`x86_64-pc-qnx`, `aarch64-unknown-qnx`) say
+    // `target_os = "qnx"`. libc puts both in its `nto` module.
+    if os == "nto" || os == "qnx" {
+        use_feature("nto");
+    }
     if apple || freebsdlike || netbsdlike {
         use_feature("bsd");
     }

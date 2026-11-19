@@ -84,7 +84,7 @@ pub(crate) const fn sockaddr_in6_new(
         target_os = "espidf",
         target_os = "haiku",
         target_os = "hurd",
-        target_os = "nto",
+        nto,
         target_os = "vita"
     ))]
     sin6_len: u8,
@@ -101,7 +101,7 @@ pub(crate) const fn sockaddr_in6_new(
             target_os = "espidf",
             target_os = "haiku",
             target_os = "hurd",
-            target_os = "nto",
+            nto,
             target_os = "vita"
         ))]
         sin6_len,

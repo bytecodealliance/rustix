@@ -12,7 +12,7 @@ mod dir;
     target_os = "dragonfly",
     target_os = "espidf",
     target_os = "horizon",
-    target_os = "nto",
+    nto,
     target_os = "redox",
     target_os = "vita",
 )))] // not implemented in libc for NetBSD yet

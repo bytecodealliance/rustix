@@ -24,7 +24,7 @@ pub(crate) struct sockaddr_header {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
-        target_os = "nto",
+        nto,
         target_os = "vita"
     ))]
     sa_len: u8,
@@ -33,7 +33,7 @@ pub(crate) struct sockaddr_header {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
-        target_os = "nto",
+        nto,
         target_os = "vita"
     ))]
     sa_family: u8,
@@ -42,7 +42,7 @@ pub(crate) struct sockaddr_header {
         target_os = "aix",
         target_os = "espidf",
         target_os = "haiku",
-        target_os = "nto",
+        nto,
         target_os = "vita"
     )))]
     sa_family: u16,
@@ -63,7 +63,7 @@ pub(crate) unsafe fn read_sa_family(storage: *const c::sockaddr) -> u16 {
             target_os = "espidf",
             target_os = "haiku",
             target_os = "hurd",
-            target_os = "nto",
+            nto,
             target_os = "vita"
         ))]
         sa_len: 0_u8,
@@ -73,7 +73,7 @@ pub(crate) unsafe fn read_sa_family(storage: *const c::sockaddr) -> u16 {
             target_os = "espidf",
             target_os = "haiku",
             target_os = "hurd",
-            target_os = "nto",
+            nto,
             target_os = "vita"
         ))]
         sa_family: 0_u8,
@@ -83,7 +83,7 @@ pub(crate) unsafe fn read_sa_family(storage: *const c::sockaddr) -> u16 {
             target_os = "espidf",
             target_os = "haiku",
             target_os = "hurd",
-            target_os = "nto",
+            nto,
             target_os = "vita"
         )))]
         sa_family: 0_u16,

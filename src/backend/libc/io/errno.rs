@@ -246,7 +246,7 @@ impl Errno {
         target_os = "horizon",
         target_os = "hurd",
         target_os = "l4re",
-        target_os = "nto",
+        nto,
         target_os = "vita",
         target_os = "wasi",
     )))]
@@ -282,7 +282,7 @@ impl Errno {
         target_os = "horizon",
         target_os = "hurd",
         target_os = "l4re",
-        target_os = "nto",
+        nto,
         target_os = "redox",
         target_os = "vita",
         target_os = "wasi",
@@ -333,7 +333,7 @@ impl Errno {
         target_os = "horizon",
         target_os = "hurd",
         target_os = "l4re",
-        target_os = "nto",
+        nto,
         target_os = "vita",
         target_os = "wasi",
     )))]
@@ -350,7 +350,7 @@ impl Errno {
         target_os = "horizon",
         target_os = "hurd",
         target_os = "l4re",
-        target_os = "nto",
+        nto,
         target_os = "vita",
         target_os = "wasi",
     )))]
@@ -367,7 +367,7 @@ impl Errno {
         target_os = "horizon",
         target_os = "hurd",
         target_os = "l4re",
-        target_os = "nto",
+        nto,
         target_os = "vita",
         target_os = "wasi",
     )))]
@@ -384,7 +384,7 @@ impl Errno {
         target_os = "horizon",
         target_os = "hurd",
         target_os = "l4re",
-        target_os = "nto",
+        nto,
         target_os = "vita",
         target_os = "wasi",
     )))]
@@ -537,7 +537,7 @@ impl Errno {
         target_os = "horizon",
         target_os = "hurd",
         target_os = "l4re",
-        target_os = "nto",
+        nto,
         target_os = "vita",
         target_os = "wasi",
     )))]
@@ -567,7 +567,7 @@ impl Errno {
         target_os = "horizon",
         target_os = "hurd",
         target_os = "l4re",
-        target_os = "nto",
+        nto,
         target_os = "vita",
         target_os = "wasi",
     )))]
@@ -648,7 +648,7 @@ impl Errno {
         target_os = "horizon",
         target_os = "hurd",
         target_os = "l4re",
-        target_os = "nto",
+        nto,
         target_os = "vita",
         target_os = "wasi",
     )))]
@@ -670,7 +670,7 @@ impl Errno {
         target_os = "horizon",
         target_os = "hurd",
         target_os = "l4re",
-        target_os = "nto",
+        nto,
         target_os = "vita",
         target_os = "wasi",
     )))]
@@ -773,7 +773,7 @@ impl Errno {
         target_os = "horizon",
         target_os = "hurd",
         target_os = "l4re",
-        target_os = "nto",
+        nto,
         target_os = "vita",
         target_os = "wasi",
     )))]
@@ -902,7 +902,7 @@ impl Errno {
         target_os = "horizon",
         target_os = "hurd",
         target_os = "l4re",
-        target_os = "nto",
+        nto,
         target_os = "vita",
         target_os = "wasi",
     )))]
@@ -934,7 +934,7 @@ impl Errno {
         target_os = "horizon",
         target_os = "hurd",
         target_os = "l4re",
-        target_os = "nto",
+        nto,
         target_os = "redox",
         target_os = "vita",
         target_os = "wasi",
@@ -1034,7 +1034,7 @@ impl Errno {
         target_os = "horizon",
         target_os = "hurd",
         target_os = "l4re",
-        target_os = "nto",
+        nto,
         target_os = "vita",
         target_os = "wasi",
     )))]

@@ -18,7 +18,7 @@ bitflags! {
             target_os = "aix",
             target_os = "cygwin",
             target_os = "espidf",
-            target_os = "nto",
+            nto,
             target_os = "haiku",
             target_os = "horizon",
             target_os = "hurd",
@@ -43,7 +43,7 @@ bitflags! {
             target_os = "cygwin",
             target_os = "haiku",
             target_os = "hurd",
-            target_os = "nto",
+            nto,
             target_os = "redox",
             target_os = "vita",
         )))]
@@ -77,7 +77,7 @@ bitflags! {
             target_os = "espidf",
             target_os = "haiku",
             target_os = "horizon",
-            target_os = "nto",
+            nto,
             target_os = "redox",
             target_os = "vita",
         )))]
@@ -96,7 +96,7 @@ bitflags! {
             target_os = "haiku",
             target_os = "horizon",
             target_os = "hurd",
-            target_os = "nto",
+            nto,
             target_os = "redox",
             target_os = "vita",
         )))]
