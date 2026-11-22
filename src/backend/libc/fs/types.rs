@@ -554,6 +554,25 @@ bitflags! {
     }
 }
 
+#[cfg(target_os = "freebsd")]
+bitflags! {
+    /// `RENAME_*` constants for use with [`renameat_with`].
+    ///
+    /// [`renameat_with`]: crate::fs::renameat_with
+    #[repr(transparent)]
+    #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+    pub struct RenameFlags: ffi::c_uint {
+        /// `RENAME_EXCHANGE`
+        const EXCHANGE = bitcast!(c::RENAME_EXCHANGE);
+
+        /// `RENAME_NOREPLACE`
+        const NOREPLACE = bitcast!(c::RENAME_NOREPLACE);
+
+        /// <https://docs.rs/bitflags/*/bitflags/#externally-defined-flags>
+        const _ = !0;
+    }
+}
+
 /// `S_IF*` constants for use with [`mknodat`] and [`Stat`]'s `st_mode` field.
 ///
 /// [`mknodat`]: crate::fs::mknodat

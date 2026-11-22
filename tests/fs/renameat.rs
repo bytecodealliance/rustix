@@ -4,7 +4,7 @@ fn same(a: &Stat, b: &Stat) -> bool {
     a.st_ino == b.st_ino && a.st_dev == b.st_dev
 }
 
-#[cfg(any(linux_kernel, target_os = "redox"))]
+#[cfg(any(linux_kernel, target_os = "freebsd", target_os = "redox"))]
 const DIR_OPEN_FLAGS: OFlags = OFlags::RDONLY.union(OFlags::PATH);
 #[cfg(apple)]
 const DIR_OPEN_FLAGS: OFlags = OFlags::RDONLY;
@@ -34,7 +34,7 @@ fn test_rename() {
     access(tmp.path().join("bar"), Access::EXISTS).unwrap();
 }
 
-#[cfg(any(linux_kernel, apple, target_os = "redox"))]
+#[cfg(any(linux_kernel, apple, target_os = "freebsd", target_os = "redox"))]
 #[test]
 fn test_renameat() {
     use rustix::fs::{accessat, openat, renameat, statat, Access, AtFlags, Mode, CWD};
@@ -58,7 +58,7 @@ fn test_renameat() {
 
 /// Like `test_renameat` but the file already exists, so `renameat`
 /// overwrites it.
-#[cfg(any(linux_kernel, apple, target_os = "redox"))]
+#[cfg(any(linux_kernel, apple, target_os = "freebsd", target_os = "redox"))]
 #[test]
 fn test_renameat_overwrite() {
     use rustix::fs::{openat, renameat, statat, AtFlags, Mode, CWD};
@@ -74,7 +74,7 @@ fn test_renameat_overwrite() {
     assert!(same(&before, &renamed));
 }
 
-#[cfg(any(linux_kernel, apple, target_os = "redox"))]
+#[cfg(any(linux_kernel, apple, target_os = "freebsd", target_os = "redox"))]
 #[test]
 fn test_renameat_with() {
     use rustix::fs::{openat, renameat_with, statat, AtFlags, Mode, RenameFlags, CWD};
@@ -102,20 +102,43 @@ fn test_renameat_with() {
     )
     .unwrap();
 
-    #[cfg(any(apple, all(target_os = "linux", target_env = "gnu")))]
+    #[cfg(any(
+        apple,
+        target_os = "freebsd",
+        all(target_os = "linux", target_env = "gnu")
+    ))]
     {
         let green = statat(&dir, "green", AtFlags::empty()).unwrap();
 
-        renameat_with(&dir, "red", &dir, "green", RenameFlags::NOREPLACE).unwrap_err();
+        match renameat_with(&dir, "red", &dir, "green", RenameFlags::NOREPLACE) {
+            Err(rustix::io::Errno::EXIST) => (),
+            #[cfg(target_os = "freebsd")]
+            Err(rustix::io::Errno::NOSYS | rustix::io::Errno::OPNOTSUPP) => return,
+            other => panic!("unexpected result from NOREPLACE collision: {:?}", other),
+        }
         let renamed = statat(&dir, "red", AtFlags::empty()).unwrap();
         assert!(same(&before, &renamed));
         let orig = statat(&dir, "green", AtFlags::empty()).unwrap();
         assert!(same(&green, &orig));
 
-        renameat_with(&dir, "red", &dir, "green", RenameFlags::EXCHANGE).unwrap();
-        let renamed = statat(&dir, "red", AtFlags::empty()).unwrap();
-        assert!(same(&green, &renamed));
-        let orig = statat(&dir, "green", AtFlags::empty()).unwrap();
-        assert!(same(&before, &orig));
+        renameat_with(&dir, "red", &dir, "blue", RenameFlags::NOREPLACE).unwrap();
+        let blue = statat(&dir, "blue", AtFlags::empty()).unwrap();
+        assert!(same(&before, &blue));
+        renameat_with(&dir, "blue", &dir, "red", RenameFlags::NOREPLACE).unwrap();
+
+        match renameat_with(&dir, "red", &dir, "green", RenameFlags::EXCHANGE) {
+            Ok(()) => {
+                let renamed = statat(&dir, "red", AtFlags::empty()).unwrap();
+                assert!(same(&green, &renamed));
+                let orig = statat(&dir, "green", AtFlags::empty()).unwrap();
+                assert!(same(&before, &orig));
+            }
+            // FreeBSD added `AT_RENAME_EXCHANGE` after `AT_RENAME_NOREPLACE`.
+            #[cfg(target_os = "freebsd")]
+            Err(
+                rustix::io::Errno::NOSYS | rustix::io::Errno::INVAL | rustix::io::Errno::OPNOTSUPP,
+            ) => (),
+            Err(err) => panic!("unexpected error from EXCHANGE: {:?}", err),
+        }
     }
 }

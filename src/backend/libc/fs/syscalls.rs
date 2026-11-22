@@ -33,7 +33,7 @@ use crate::fs::FallocateFlags;
 use crate::fs::FlockOperation;
 #[cfg(any(linux_kernel, target_os = "freebsd"))]
 use crate::fs::MemfdFlags;
-#[cfg(any(linux_kernel, apple, target_os = "redox"))]
+#[cfg(any(linux_kernel, apple, target_os = "freebsd", target_os = "redox"))]
 use crate::fs::RenameFlags;
 #[cfg(any(linux_kernel, target_os = "freebsd", target_os = "fuchsia"))]
 use crate::fs::SealFlags;
@@ -616,6 +616,41 @@ pub(crate) fn renameat2(
             return Err(io::Errno::NOSYS);
         }
         ret(c::rename(c_str(old_path), c_str(new_path)))
+    }
+}
+
+#[cfg(target_os = "freebsd")]
+pub(crate) fn renameat2(
+    old_dirfd: BorrowedFd<'_>,
+    old_path: &CStr,
+    new_dirfd: BorrowedFd<'_>,
+    new_path: &CStr,
+    flags: RenameFlags,
+) -> io::Result<()> {
+    // `renameat2` wasn't supported in FreeBSD until 14.3 / 15.1. If no flags
+    // are passed, use `renameat`, which has been available since FreeBSD 8.0.
+    if flags.is_empty() {
+        return renameat(old_dirfd, old_path, new_dirfd, new_path);
+    }
+
+    weakcall! {
+        fn renameat2(
+            olddirfd: c::c_int,
+            oldpath: *const ffi::c_char,
+            newdirfd: c::c_int,
+            newpath: *const ffi::c_char,
+            flags: c::c_uint
+        ) -> c::c_int
+    }
+
+    unsafe {
+        ret(renameat2(
+            borrowed_fd(old_dirfd),
+            c_str(old_path),
+            borrowed_fd(new_dirfd),
+            c_str(new_path),
+            flags.bits(),
+        ))
     }
 }
 

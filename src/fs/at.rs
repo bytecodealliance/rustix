@@ -16,7 +16,7 @@ use crate::fs::Access;
 use crate::fs::AtFlags;
 #[cfg(apple)]
 use crate::fs::CloneFlags;
-#[cfg(any(linux_kernel, apple, target_os = "redox"))]
+#[cfg(any(linux_kernel, apple, target_os = "freebsd", target_os = "redox"))]
 use crate::fs::RenameFlags;
 #[cfg(not(target_os = "espidf"))]
 use crate::fs::Stat;
@@ -279,9 +279,13 @@ pub fn renameat<P: path::Arg, Q: path::Arg, PFd: AsFd, QFd: AsFd>(
 ///
 /// # References
 ///  - [Linux]
+///  - [Apple]
+///  - [FreeBSD]
 ///
 /// [Linux]: https://man7.org/linux/man-pages/man2/renameat2.2.html
-#[cfg(any(apple, linux_kernel, target_os = "redox"))]
+/// [Apple]: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man2/rename.2.html
+/// [FreeBSD]: https://man.freebsd.org/cgi/man.cgi?query=renameat2&sektion=2
+#[cfg(any(apple, linux_kernel, target_os = "freebsd", target_os = "redox"))]
 #[inline]
 #[doc(alias = "renameat2")]
 #[doc(alias = "renameatx_np")]
