@@ -35,7 +35,7 @@ pub(crate) fn shm_open(name: &CStr, oflags: shm::OFlags, mode: Mode) -> io::Resu
     let (path, len) = get_shm_name(name)?;
     open(
         CStr::from_bytes_with_nul(&path[..len]).unwrap(),
-        OFlags::from_bits(oflags.bits()).unwrap() | OFlags::CLOEXEC,
+        OFlags::from_bits(oflags.bits()).unwrap() | OFlags::CLOEXEC | OFlags::NOFOLLOW,
         mode,
     )
 }
