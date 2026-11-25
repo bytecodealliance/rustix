@@ -229,6 +229,10 @@ pub mod io;
 #[cfg_attr(docsrs, doc(cfg(feature = "io_uring")))]
 pub mod io_uring;
 pub mod ioctl;
+#[cfg(linux_kernel)]
+#[cfg(feature = "loop_device")]
+#[cfg_attr(docsrs, doc(cfg(feature = "loop_device")))]
+pub mod loop_device;
 #[cfg(not(any(
     windows,
     target_os = "espidf",
