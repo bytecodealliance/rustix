@@ -44,9 +44,9 @@ bitflags! {
 
 #[cfg(not(target_os = "wasi"))]
 bitflags! {
-    /// `O_*` constants for use with [`dup2`].
+    /// `O_*` constants for use with [`dup3`].
     ///
-    /// [`dup2`]: crate::io::dup2
+    /// [`dup3`]: crate::io::dup3
     #[repr(transparent)]
     #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
     pub struct DupFlags: u32 {
