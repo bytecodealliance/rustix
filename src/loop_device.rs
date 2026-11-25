@@ -238,6 +238,34 @@ pub fn ioctl_loop_configure<Fd: AsFd>(fd: Fd, config: &LoopConfig<'_>) -> io::Re
     }
 }
 
+/// `ioctl(fd, LOOP_CLR_FD)`—Detach the backing file from a loop device.
+///
+/// `fd` must be an open file descriptor for a loop device `/dev/loopN`. On
+/// success, the loop device no longer has a backing file and is free to be
+/// configured again.
+///
+/// If the loop device is still in use, for example because it is open
+/// elsewhere or mounted, the kernel does not detach it immediately. Instead,
+/// it sets [`LoopFlags::AUTOCLEAR`] and returns success, and the backing file
+/// is detached on last close.
+///
+/// Fails with [`io::Errno::NXIO`] if the loop device has no backing file
+/// attached.
+///
+/// # References
+///  - [Linux]
+///
+/// [Linux]: https://man7.org/linux/man-pages/man4/loop.4.html
+#[inline]
+#[doc(alias = "LOOP_CLR_FD")]
+pub fn ioctl_loop_clr_fd<Fd: AsFd>(fd: Fd) -> io::Result<()> {
+    // SAFETY: `LOOP_CLR_FD` is a no-argument opcode.
+    unsafe {
+        let ctl = ioctl::NoArg::<{ lo::LOOP_CLR_FD as ioctl::Opcode }>::new();
+        ioctl::ioctl(fd, ctl)
+    }
+}
+
 struct LoopCtlGetFree;
 
 unsafe impl ioctl::Ioctl for LoopCtlGetFree {
