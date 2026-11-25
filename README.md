@@ -61,6 +61,7 @@ API modules are conditional with cargo feature flags.
 | `event`    | [`rustix::event`]—Polling and event operations.                |
 | `fs`       | [`rustix::fs`]—Filesystem operations.                          |
 | `io_uring` | [`rustix::io_uring`]—Linux io_uring.                           |
+| `loop_device` | [`rustix::loop_device`]—Linux loop devices.                 |
 | `mm`       | [`rustix::mm`]—Memory map operations.                          |
 | `mount`    | [`rustix::mount`]—Linux mount API.                             |
 | `net`      | [`rustix::net`]—Network-related operations.                    |
@@ -92,6 +93,7 @@ API modules are conditional with cargo feature flags.
 [`rustix::event`]: https://docs.rs/rustix/*/rustix/event/index.html
 [`rustix::fs`]: https://docs.rs/rustix/*/rustix/fs/index.html
 [`rustix::io_uring`]: https://docs.rs/rustix/*/rustix/io_uring/index.html
+[`rustix::loop_device`]: https://docs.rs/rustix/*/rustix/loop_device/index.html
 [`rustix::mm`]: https://docs.rs/rustix/*/rustix/mm/index.html
 [`rustix::mount`]: https://docs.rs/rustix/*/rustix/mount/index.html
 [`rustix::net`]: https://docs.rs/rustix/*/rustix/net/index.html

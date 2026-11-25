@@ -128,6 +128,9 @@ fs = []
 # Enable `rustix::io_uring::*` (on platforms that support it).
 io_uring = ["event", "fs", "net", "thread", "linux-raw-sys/io_uring"]
 
+# Enable `rustix::loop_device::*`.
+loop_device = ["linux-raw-sys/loop_device"]
+
 # Enable `rustix::mount::*`.
 mount = []
 
@@ -182,6 +185,7 @@ all-apis = [
     "event",
     "fs",
     "io_uring",
+    "loop_device",
     "mm",
     "mount",
     "net",
